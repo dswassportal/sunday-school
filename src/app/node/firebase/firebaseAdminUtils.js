@@ -1,18 +1,18 @@
 const fireAdmin = require('firebase-admin');
 
-const adminConfJSON = require('./vr-church-app-firebase-adminsdk-9cgnl-4ebbb01507.json');
+const adminConfJSON = require('./dswa-ss-portal-e165b-firebase-adminsdk-gsrzv-8631f8200d.json');
 
 fireAdmin.initializeApp({
     credential: fireAdmin.credential.cert(adminConfJSON),
 });
 
 const  firebaseConfig = {
-    apiKey: "AIzaSyD-WPY3eIi4zKoHzGIqR5gHWKKvaqx5TIw",
-    authDomain: "vr-church-app.firebaseapp.com",
-    projectId: "vr-church-app",
-    storageBucket: "vr-church-app.appspot.com",
-    messagingSenderId: "204451533619",
-    appId: "1:204451533619:web:25b614e247de9f7bc9e446"
+    apiKey: "AIzaSyDlcJ6lOnJsjyDDt4sjls7Lc0sRIcLM_HU",
+    authDomain: "dswa-ss-portal-e165b.firebaseapp.com",
+    projectId: "dswa-ss-portal-e165b",
+    storageBucket: "dswa-ss-portal-e165b.appspot.com",
+    messagingSenderId: "570766487590",
+    appId: "1:570766487590:web:4ddabf0afe31cd0776f6e7"
 };
 
 
