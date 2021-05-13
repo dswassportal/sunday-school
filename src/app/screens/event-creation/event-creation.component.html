@@ -96,16 +96,16 @@
                                     <mat-datepicker #startatpicker></mat-datepicker>
                                     <mat-error
                                         *ngIf="eventsDataFormGroup.controls['startDate'].hasError('invaliddaterange')">
-                                        <strong>Start date cannot be greater than end date</strong>
+                                       Start date cannot be greater than end date
                                     </mat-error>
                                     <mat-error
                                         *ngIf="eventsDataFormGroup.controls['startDate'].hasError('invaliddaterange1')">
-                                        <strong>Event Start date must be greater than registration End date</strong>
+                                        Event Start date must be greater than registration End date
                                     </mat-error>
 
                                     <mat-error
                                         *ngIf="eventsDataFormGroup.controls['startDate'].hasError('invaliddaterange3')">
-                                        <strong>Event Start date must be greater than registration start date</strong>
+                                        Event Start date must be greater than registration start date
                                     </mat-error>
                                 </mat-form-field>
 
@@ -122,7 +122,7 @@
 
                                     <mat-error
                                         *ngIf="eventsDataFormGroup.controls['endDate'].hasError('invaliddaterange')">
-                                        <strong>Event End date cannot be earlier than Event start date</strong>
+                                        Event End date cannot be earlier than Event start date
                                     </mat-error>
 
                                 </mat-form-field>
@@ -146,12 +146,12 @@
 
                                     <mat-error
                                         *ngIf="eventsDataFormGroup.controls['registrationStartDate'].hasError('invaliddaterange')">
-                                        <strong>Start date cannot be greater than end date</strong>
+                                       Start date cannot be greater than end date
                                     </mat-error>
 
                                     <mat-error
                                         *ngIf="eventsDataFormGroup.controls['registrationStartDate'].hasError('invaliddaterange4')">
-                                        <strong>registration Start date cannot be greater than Event start date</strong>
+                                        Registration Start date cannot be greater than Event start date
                                     </mat-error>
 
                                 </mat-form-field>
@@ -168,11 +168,11 @@
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #registrationEndatpicker></mat-datepicker>
                                     <mat-error *ngIf="eventsDataFormGroup.controls['registrationEndDate'].hasError('invaliddaterange')">
-                                        <strong>End date cannot be earlier than start date</strong>
+                                        End date cannot be earlier than start date
                                       </mat-error>
                                       <mat-error
                                         *ngIf="eventsDataFormGroup.controls['registrationEndDate'].hasError('invaliddaterange2')">
-                                        <strong>Registration End date cannot be earlier than Event Start date</strong>
+                                        Registration End date cannot be earlier than Event Start date
                                       </mat-error>
 
                                 </mat-form-field>
