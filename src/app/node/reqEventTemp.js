@@ -35,7 +35,7 @@ async function getEventById(eventId, isParticipant, userId) {
                                     event_venue_id, venue_id, event_venue_name, proctor_id, event_cat_map_id,
                                     event_category_id, category_name, category_type, school_grade_from, school_grade_to,
                                     event_category_id, event_cat_staff_map_id, judge_id,
-                                    question_id, question, answer_type, coordinator_id
+                                    question_id, question, answer_type, coordinator_id, exam_start_date, exam_end_date
                                     from v_event  where is_deleted = false and event_id = ${eventId}
                                     order by event_category_id,venue_id;`
 
@@ -55,6 +55,8 @@ async function getEventById(eventId, isParticipant, userId) {
             event.endDate = result.rows[0].event_end_date;
             event.orgType = result.rows[0].org_type;
             event.eventUrl = result.rows[0].event_url;
+            event.ttcExamStartDate = result.rows[0].exam_start_date;
+            event.ttcExamEndDate = result.rows[0].exam_end_date;
 
             let category = {};
             let venue = {};

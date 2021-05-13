@@ -112,8 +112,8 @@ async function updateEvent(eventsData) {
         const deleteEventCoordinator = `DELETE FROM t_event_coordinator where event_id = ${eventsData.eventId};`
         await client.query(deleteEventCoordinator);
 
-        if(eventsData.eventCoordinator){
-            for(let coordinator of eventsData.eventCoordinator){
+        if (eventsData.eventCoordinator) {
+            for (let coordinator of eventsData.eventCoordinator) {
                 const insertEventCoordinator = `INSERT INTO t_event_coordinator (event_id, user_id, updated_date) VALUES($1, $2, $3);`
                 insertEventCoordinatorValues = [
                     eventsData.eventId,
@@ -126,6 +126,7 @@ async function updateEvent(eventsData) {
 
         ////////////////////////////////////////////  t_event_venue  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        console.log("111");
         let updatedAndInsertedVenues = [];
         if (eventsData.venues) {
             for (let venue of eventsData.venues) {
@@ -290,6 +291,21 @@ async function updateEvent(eventsData) {
             }
         }
 
+
+
+        if (eventsData) {
+            const updateTtcExamDates = `UPDATE t_event_exam_date SET exam_start_date = $1, exam_end_date = $2
+            where event_id = ${eventsData.eventId};`
+            updateTtcExamDatesValues =
+                [
+                    eventsData.ttcExamStartDate,
+                    eventsData.ttcExamEndDate
+                ]
+            if (eventsData.ttcExamStartDate) {
+                await client.query(updateTtcExamDates, updateTtcExamDatesValues);
+            }
+        }
+
         console.log("Before commit");
         await client.query("COMMIT");
 
@@ -405,8 +421,8 @@ async function insertEvents(eventsData) {
                     }
                 }
 
-                if(eventsData.eventCoordinator){
-                    for(let coordinator of eventsData.eventCoordinator){
+                if (eventsData.eventCoordinator) {
+                    for (let coordinator of eventsData.eventCoordinator) {
                         const insertEventCoordinator = `INSERT INTO t_event_coordinator (event_id, user_id, created_date) VALUES($1, $2, $3);`
                         insertEventCoordinatorValues = [
                             this.eventId,
@@ -457,8 +473,11 @@ async function insertEvents(eventsData) {
                                 this.eventId,
                                 category.eventCategoryID
                             ]
-                        let result = await client.query(insertCategory, insertCategory_value);
-                        this.eventCategoryID = result.rows[0].event_cat_map_id;
+                        if (category.eventCategoryID) {
+                            let result = await client.query(insertCategory, insertCategory_value);
+                            this.eventCategoryID = result.rows[0].event_cat_map_id;
+                        }
+
                         //this.venueId = result.rows[0].venue_id;
 
 
@@ -520,6 +539,23 @@ async function insertEvents(eventsData) {
                             ]
                         await client.query(insertQuestionare, insertQuestionareValue);
                     }
+                }
+
+
+                if (eventsData) {
+                    const insertTtcExamDates = `INSERT INTO t_event_exam_date(event_id, exam_start_date, exam_end_date)
+                    VALUES ($1, $2, $3);`
+
+                    insertTtcExamDatesValues = [
+                        this.eventId,
+                        eventsData.ttcExamStartDate,
+                        eventsData.ttcExamEndDate
+                    ]
+
+                    if (eventsData.ttcExamStartDate) {
+                        await client.query(insertTtcExamDates, insertTtcExamDatesValues);
+                    }
+
                 }
 
                 await client.query("COMMIT");
