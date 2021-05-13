@@ -60,11 +60,7 @@ export class ScoreReviewComponent implements OnInit {
       { headerName: 'Event Type', field: 'event_type', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
     ];
 
-    this.scoreApprovalColDef = [
-      { headerName: 'Enrollment ID', field: 'enrollmentId', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
-      { headerName: 'Category', field: 'category', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
-      { headerName: 'Score', field: 'score', flex: 1, width: 50, suppressSizeToFit: true, resizable: true, }
-    ];
+    this.scoreApprovalColDef = this.getParticipantDefArr(false);
 
     let userId = this.uiCommonUtils.getUserMetaDataJson().userId
 
@@ -130,10 +126,14 @@ export class ScoreReviewComponent implements OnInit {
               return;
             } else {
               this.scoreApprovalRowData = respData.data.paticipants
-              if (this.scoreApprovalRowData !==null && this.scoreApprovalRowData[0].isScoreApproved === true)
+              if (this.scoreApprovalRowData !== null && this.scoreApprovalRowData[0].isScoreApproved === true) {
                 this.disableApproveBtn = true;
-              else 
+                this.scoreApprovalColDef = this.getParticipantDefArr(false);
+              }
+              else {
                 this.disableApproveBtn = false;
+                this.scoreApprovalColDef = this.getParticipantDefArr(true);
+              }
             }
           });
 
@@ -153,28 +153,63 @@ export class ScoreReviewComponent implements OnInit {
         return;
       } else {
         this.scoreApprovalRowData = respData.data.paticipants
-        if ( this.scoreApprovalRowData !==null && this.scoreApprovalRowData[0].isScoreApproved === true)
+        if (this.scoreApprovalRowData !== null && this.scoreApprovalRowData[0].isScoreApproved === true) {
           this.disableApproveBtn = true;
-        else
+          this.scoreApprovalColDef = this.getParticipantDefArr(false);
+        }
+        else {
           this.disableApproveBtn = false;
+          this.scoreApprovalColDef = this.getParticipantDefArr(true);
+        }
       }
     });
   }
 
   handleScoreApproveBtnClick() {
 
-    if (this.scoreApprovalRowData === null || this.scoreApprovalRowData.length === 0  ) {
-      this.uiCommonUtils.showSnackBar('Nothing to Approve!', 'error', 3000)
+    let confmMsgSt = `Scores cannot be updated after approval, Please click \'Ok\' to proceed.`;
+    if (confirm(confmMsgSt)) {
+      this.handleSaveApproveBtnClick();
+
+      if (this.scoreApprovalRowData === null || this.scoreApprovalRowData.length === 0) {
+        this.uiCommonUtils.showSnackBar('Nothing to Approve!', 'error', 3000)
+        return;
+      } else {
+
+        let payload = {
+          action: 'approve',
+          eventId: this.selectedEventData.event_Id,
+          judgeId: this.selectedJudge,
+          catId: this.selectedCat,
+          catMapId: this.scoreApprovalRowData[0].catMapId
+        };
+
+        this.apiService.callPostService('postScore', payload).subscribe((response) => {
+
+          if (response.data.status == 'failed') {
+            this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000)
+            return;
+          } else {
+            this.uiCommonUtils.showSnackBar('Score successfully approved!', 'success', 3000)
+          }
+          //$("#imagemodal").modal("hide");
+        })
+        this.onDropdowwnSelChange('');
+      }
+    }
+  }
+
+  handleSaveApproveBtnClick() {
+
+    let scoreArr = this.getParticipantScoreArray();
+    if (scoreArr.length == 0) {
+      this.uiCommonUtils.showSnackBar('Nothing to save!', 'error', 3000)
       return;
     } else {
+      let payload: any = {};
 
-      let payload = {
-        action: 'approve',
-        eventId: this.selectedEventData.event_Id,
-        judgeId: this.selectedJudge,
-        catId: this.selectedCat,
-        catMapId: this.scoreApprovalRowData[0].catMapId
-      };
+      payload.action = 'save';
+      payload.scoreData = scoreArr;
 
       this.apiService.callPostService('postScore', payload).subscribe((response) => {
 
@@ -182,12 +217,59 @@ export class ScoreReviewComponent implements OnInit {
           this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000)
           return;
         } else {
-          this.uiCommonUtils.showSnackBar('Score successfully approved!', 'success', 3000)
-          this.onDropdowwnSelChange('');
+          this.uiCommonUtils.showSnackBar('Score recorded successfully!', 'success', 3000)
         }
       })
-
-
+      this.onDropdowwnSelChange('');
     }
+    //$("#imagemodal").modal("hide");
+    //this.onDropdowwnSelChange('');
   }
+
+  getParticipantDefArr(isEditable: boolean) {
+
+    return ([
+      { headerName: 'Enrollment ID', field: 'enrollmentId', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
+      { headerName: 'Name', field: 'partFullName', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
+      { headerName: 'Category', field: 'category', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
+      {
+        headerName: 'Score', field: 'score', flex: 1, editable: isEditable, suppressSizeToFit: true, resizable: true,
+        valueGetter: function (params: any) {
+          return params.data.score;
+        },
+        valueSetter: function (params: any) {
+
+          try {
+            let score = parseInt(params.newValue);
+            if (score > 0 && score != NaN)
+              params.data.score = score;
+            return true;
+          } catch (error) {
+            return false;
+          };
+        },
+
+
+      },
+      { headerName: 'Parish', field: 'parish', flex: 1, suppressSizeToFit: true, resizable: true, }
+    ]);
+  }
+
+  getParticipantScoreArray(): any[] {
+
+    let scoreData: any = [];
+
+    this.scoreApprovalRowData.forEach((item: any) => {
+      if (item.score) {
+        scoreData.push({
+          scoreRefId: item.scoreRefId,
+          partEveRegCatId: item.partEveRegCatId,
+          score: item.score,
+          catStaffMapId: item.catStaffMapId
+        })
+      }
+    });
+    return scoreData;
+  }
+
 }

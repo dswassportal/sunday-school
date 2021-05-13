@@ -73,6 +73,12 @@
                             <button mat-button class="ml-auto border" style="background: #d68165;" data-dismiss="modal">
                                 Cancel
                             </button>
+
+                            <button mat-button [disabled]="disableApproveBtn" class="ml-auto border"
+                                (click)="handleSaveApproveBtnClick()" style="background: #d68165;">
+                                Save
+                            </button>
+
                             <button mat-button [disabled]="disableApproveBtn" class="ml-auto border"
                                 (click)="handleScoreApproveBtnClick()" style="background: #d68165;">
                                 Approve

@@ -1,9 +1,6 @@
 const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
-const { result } = require('underscore');
-const { json } = require('express');
-const { query } = require('@angular/animations');
 const dbConnections = require(`${__dirname}/dbConnection`);
 
 

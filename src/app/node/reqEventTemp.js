@@ -397,13 +397,21 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                                     'judgeId', res.staff_id,
                                                     'judgeName', res.judge_name,
                                                     'catStaffMapId', res.event_cat_staff_map_id,
-                                                    'catMapId', res.event_cat_map_id
-                                                    ) 
+                                                    'catMapId', res.event_cat_map_id,
+                                                    'partFullName', res.participant_name,
+                                                    'parish', res.parish,
+                                                    'scoreRefId', res.participant_event_score_id,
+                                                    'partEveRegCatId', res.participant_event_reg_cat_id
+                                                     ) 
                                                 ) participants                                  
-                                    from (  select staff_id, event_cat_map_id, enrollment_id, score, event_category_id, event_category_name,
+                                    from (  select distinct staff_id, participant_event_reg_cat_id, event_cat_map_id, enrollment_id, score, event_category_id, event_category_name,
                                         concat(staff_first_name, ' ', staff_last_name ) judge_name,
-                                         is_score_approved, event_cat_staff_map_id 
+                                         is_score_approved, event_cat_staff_map_id, torg."name" parish,
+                                        concat(tu.title ,'. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) participant_name, 
+                                        participant_event_score_id
                                     from v_event_participant vep 
+                                    inner join t_user tu on vep.participant_id = tu.user_id 
+                                    inner join t_organization torg on tu.org_id = torg.org_id 
                                     where event_id = ${eventId} 
                                     and staff_id = ${judgeId}
                                     and event_category_id = ${catId}
