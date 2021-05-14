@@ -492,7 +492,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                     vu.email_id, vu.title, vu.first_name, vu.middle_name, vu.last_name, vu.nick_name, vu.dob,
                                     vu.mobile_no, vu.address_line1, vu.address_line2, vu.address_line3, vu.city, vu.state, 
                                     vu.postal_code, vu.country , vu.home_phone_no, vu.baptismal_name, vu.about_yourself, 
-                                    vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name
+                                    vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name, tepr.ttc_exam_date 
                                 from v_user vu 
                                 left join t_event_participant_registration tepr on vu.user_id = tepr.user_id 
                                 where vu.role_name = 'Teacher' or vu.role_name = 'Principal'
@@ -503,11 +503,12 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                 select vu.user_id, vu.email_id, vu.title, vu.first_name, vu.middle_name, vu.last_name, vu.nick_name, vu.dob,
                                     vu.mobile_no, vu.address_line1, vu.address_line2, vu.address_line3, vu.city, vu.state, 
                                     vu.postal_code, vu.country , vu.home_phone_no, vu.baptismal_name, vu.about_yourself, 
-                                    vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name 
+                                    vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name, tepr.ttc_exam_date  
                                 from v_user vu
+                                left join t_event_participant_registration tepr on vu.user_id = tepr.user_id 
                                 where vu.user_id 
                                 in (select tpr.family_member_id 
-                                    from t_person_relationship tpr where tpr.family_head_id = ${eventId});`
+                                    from t_person_relationship tpr where tpr.family_head_id = ${loggedInUser});`
         }
 
         let res = await client.query(getuserRecords);
@@ -562,6 +563,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     user.memberType = row.membership_type;
                     user.membershipType = row.member_type;
                     user.parish_name = row.parish_name;
+                    user.pickedDate = row.ttc_exam_date
 
                     // if(userid == 0){
                     //     userid = row.user_id;
