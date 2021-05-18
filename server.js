@@ -679,9 +679,9 @@ app.get('/api/getScoreByCategory', function (req, res) {
 
 app.get('/api/getSShools', function (req, res) {
   console.log("getSShools called...");
-  //  let loggedInUser =  decodeUser(req)
+   let loggedInUser =  decodeUser(req)
   try {
-    processSSRequest.getSSchoolData(1072, req.query.role)
+    processSSRequest.getSSchoolData(loggedInUser, req.query.role)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
