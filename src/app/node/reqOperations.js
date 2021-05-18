@@ -282,7 +282,7 @@ async function processGetUserMetaDataRequest(uid) {
                 metaData.isFamilyHead = res.rows[0].is_family_head;
                 metaData.isFamilyMember = isFamilyMemberRes.rows[0].is_family_member;
 
-
+                let roles = []
                 for (let row of res.rows) {
 
                     let index = menus.findIndex((item => item.name == row.menu_name))
@@ -293,7 +293,9 @@ async function processGetUserMetaDataRequest(uid) {
                             icon: row.menu_icon
                         };
                         menus.push(tempJson);
-                    }
+
+                        if(roles.indexOf(row.role_name) < 0)
+                        roles.push(row.role_name)                    }
 
                     // if (menus.indexOf(row.menu_name) < 0)
                     //     menus.push(row.menu_name)
@@ -304,6 +306,7 @@ async function processGetUserMetaDataRequest(uid) {
                 }
                 metaData.permissions = permissions;
                 metaData.menus = menus;
+                metaData.roles = roles;
 
                 console.log("metaData.userId", metaData.userId);
 

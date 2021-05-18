@@ -5,6 +5,7 @@ const processEventTemp = require(`${__dirname}/src/app/node/reqEventTemp`)
 const processEventRequest = require(`./src/app/node/eventReqOperations`)
 const processScoreRequest = require(`./src/app/node/reqScoreOperations`)
 const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions`)
+const processSSRequest = require(`./src/app/node/reqSsOperations`)
 const dbConnections = require(`${__dirname}/src/app/node/dbConnection`);
 express = require('express')
 const cors = require('cors')
@@ -656,6 +657,45 @@ app.post('/api/postAttendance', function (req, res) {
     console.error('Error in postAttendance as : ' + error)
   }
 });
+
+app.get('/api/getScoreByCategory', function (req, res) {
+  console.log("getScoreByCategory called...");
+  // let loggedInUser =  decodeUser(req)
+  try {
+    processScoreRequest.getScoreByCategory(req.query.eventId, req.query.catId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getScoreByCategory as : ' + error)
+  }
+});
+
+app.get('/api/getSShools', function (req, res) {
+  console.log("getSShools called...");
+  //  let loggedInUser =  decodeUser(req)
+  try {
+    processSSRequest.getSSchoolData(1072, req.query.role)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getSShools as : ' + error)
+  }
+});
+
 
 
 //to decode loggedin user Id from the request context.
