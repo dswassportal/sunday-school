@@ -9,7 +9,7 @@ const dbConnections = require(`${__dirname}/dbConnection`);
 async function getSSchoolData(loggedInUserId, role) {
 
     let condition = '';
-    if (role.toLowerCase() === 'vicar' || role.toLowerCase() === 'principal')
+    if (role)
         condition = ` SELECT a.org_id
                             FROM   t_user_role_context a, t_user b
                             WHERE  b.user_id = ${loggedInUserId}
