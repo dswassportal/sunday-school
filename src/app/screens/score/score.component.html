@@ -8,10 +8,9 @@
             </button>
     </div> -->
 
-    <ag-grid-angular style="width: auto; height: 480px;" class="ag-theme-alpine mt-3" [rowData]="eventRowData | filter:term "
-        [columnDefs]="eventColumnDefs " [pagination]="true" 
-        [checkboxSelection]="true"
-        [gridOptions]="eventGridOption" (rowClicked)='onRowClicked($event)'>
+    <ag-grid-angular style="width: auto; height: 480px;" class="ag-theme-alpine mt-3"
+        [rowData]="eventRowData | filter:term " [columnDefs]="eventColumnDefs " [pagination]="true"
+        [checkboxSelection]="true" [gridOptions]="eventGridOption" (rowClicked)='onRowClicked($event)'>
         <!-- (selectionChanged)="onSelectionChanged($event)"
               (gridReady)="onGridReady($event)"
               rowSelection='multiple'
@@ -20,48 +19,70 @@
 
 
 
-<div class="col-md-12">
-    <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-        aria-hidden="true" data-backdrop="false" style="padding-left:5%!important;padding-top:3%!important;margin-left: 5%;">
-        <div class="modal-dialog modal-dialog-scrollable modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Upload Score for <b>{{selectedEventName}}</b></h4>
-                    <button mat-button class="ml-auto" data-dismiss="modal" >  
-                        <mat-icon>clear</mat-icon>
-                    </button>
-                    <!-- (click)="" -->
-                </div>
-                <div class="modal-body border rounded">
-                    <ag-grid-angular style="width: auto; height: 480px;" class="ag-theme-alpine mt-3"
-                        [rowData]="participantRowData | filter:term " [columnDefs]="participantColumnDefs" [pagination]="true"
-                        [checkboxSelection]="true" [gridOptions]="participantGridOptions">
-                         (selectionChanged)="onSelectionChanged($event)" 
-                            (rowClicked)='onRowClicked($event)'
+    <div class="col-md-12">
+        <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+            aria-hidden="true" data-backdrop="false"
+            style="padding-left:5%!important;padding-top:3%!important;margin-left: 5%;">
+            <div class="modal-dialog modal-dialog-scrollable modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="form-group form-inline row m-0 p-0">
+                            <h4 class="modal-title">Upload Score for <b>{{selectedEventName}}</b></h4>
+
+                            <div class = "row d-flex" style="margin-left: 100px;">
+
+                                <button [disabled]="selectedEvtIsScrSubmted" mat-button class="col-2 ml-auto border" (click)="onBtExport()">
+                                    <mat-icon>file_download</mat-icon>
+                                    <!-- <span> Download Template</span> -->
+                                </button>
+    
+                                <input [disabled]="selectedEvtIsScrSubmted" type="file" id="templateUploadId" placeholder="Upload" style="align-self: center;margin-left: 20px;"
+                                (change)="handleUploadScore($event)" multiple>
+    
+
+                            </div>
+
+                        </div>
+
+                        <button mat-button class="ml-auto" data-dismiss="modal">
+                            <mat-icon>clear</mat-icon>
+                        </button>
+
+                    </div>
+                    <div class="modal-body border rounded">
+
+                        <ag-grid-angular style="width: auto; height: 480px;" class="ag-theme-alpine mt-3"
+                            [rowData]="participantRowData | filter:term " [columnDefs]="participantColumnDefs"
+                            [pagination]="true" [checkboxSelection]="true" [gridOptions]="participantGridOptions"
+                            (gridReady)="onGridReady($event)">
+                            <!-- (selectionChanged)="onSelectionChanged($event)" 
+                            (rowClicked)='onRowClicked($event)' -->
 
                             <!-- (gridReady)="onGridReady($event)"  
                              rowSelection='multiple'
                             -->
-                    </ag-grid-angular>
-                    <div style="padding: 9px; text-align-last: center;">
-                        <button mat-button class="ml-auto border" style="background: #d68165;" data-dismiss="modal" >  
-                           Cancel
-                            <!-- <mat-icon>clear</mat-icon> -->
-                        </button>
+                        </ag-grid-angular>
+                        <div style="padding: 9px; text-align-last: center;">
+                            <button mat-button class="ml-auto border" style="background: #d68165;" data-dismiss="modal">
+                                Cancel
+                                <!-- <mat-icon>clear</mat-icon> -->
+                            </button>
 
-                        <button [disabled]="selectedEvtIsScrSubmted" mat-button class="ml-auto border" (click)="handleScoreSaveBtnClick($event)" style="background: #d68165;">  
-                            Save
-                             <!-- <mat-icon>clear</mat-icon> -->
-                         </button>
+                            <button [disabled]="selectedEvtIsScrSubmted" mat-button class="ml-auto border"
+                                (click)="handleScoreSaveBtnClick($event)" style="background: #d68165;">
+                                Save
+                                <!-- <mat-icon>clear</mat-icon> -->
+                            </button>
 
-                         <button mat-button [disabled]="selectedEvtIsScrSubmted" class="ml-auto border" (click)="handleScoreCompleteBtnClick($event)" style="background: #d68165;">  
-                            Submit
-                             <!-- <mat-icon>clear</mat-icon> -->
-                         </button>
+                            <button mat-button [disabled]="selectedEvtIsScrSubmted" class="ml-auto border"
+                                (click)="handleScoreCompleteBtnClick($event)" style="background: #d68165;">
+                                Submit
+                                <!-- <mat-icon>clear</mat-icon> -->
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </div>

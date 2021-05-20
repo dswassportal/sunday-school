@@ -44,9 +44,7 @@
                      
                         <ag-grid-angular style="width: auto; height: 425px;" class="ag-theme-alpine mt-3"
                                 [rowData]="attendanceRowData | filter:term " [columnDefs]="attendanceColDef" [pagination]="true"
-                                [checkboxSelection]="true" [gridOptions]="attendanceGridOption">
-                                (selectionChanged)="onSelectionChanged($event)"
-                                    (rowClicked)='onRowClicked($event)'
+                                 [gridOptions]="attendanceGridOption" (gridReady)="onGridReady($event)">
                         </ag-grid-angular>
 
                         <div style="padding: 9px; text-align-last: center;">

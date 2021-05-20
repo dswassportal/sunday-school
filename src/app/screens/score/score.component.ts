@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { uiCommonUtils } from '../../common/uiCommonUtils'
 import { ApiService } from '../../services/api.service'
 import { ScoreUploadComponent } from '../renderers/score-upload/score-upload.component'
+import * as XLSX from 'xlsx';
 
 declare let $: any;
 
@@ -22,10 +23,13 @@ export class ScoreComponent implements OnInit {
   eventRowData: any;
   term: any;
   eventGridOption: any;
+  isTemplateUpload: boolean = false;
 
   participantRowData: any;
   participantColumnDefs: any;
   participantGridOptions: any;
+  userId = this.uiCommonUtils.getUserMetaDataJson().userId;
+
 
   ngOnInit(): void {
 
@@ -63,9 +67,9 @@ export class ScoreComponent implements OnInit {
 
     this.participantColumnDefs = this.getParticipantDefArr(false)
 
-    let userId = this.uiCommonUtils.getUserMetaDataJson().userId
 
-    this.apiService.callGetService(`getEventData?user=${userId}&&eventType=for_judgement`).subscribe((respData) => {
+
+    this.apiService.callGetService(`getEventData?user=${this.userId}&&eventType=for_judgement`).subscribe((respData) => {
 
       if (respData.data.status == 'failed') {
         this.eventRowData = [];
@@ -167,13 +171,24 @@ export class ScoreComponent implements OnInit {
       return;
     } else {
       let payload: any = {};
-      if (event == 'submit') {
-        payload.action = 'submit';
-        payload.eventId = this.selectedEventId;
-      }
-      else
-        payload.action = 'save';
-      payload.scoreData = scoreData;
+      let scoreArr: any = []
+      let temp:any = {
+        judge: this.userId,
+        eventId: this.selectedEventId,
+        scoreData: scoreData,
+    } 
+    if (event == 'submit') {
+      temp.action = 'submit';
+    }
+    else
+    temp.action = 'save';
+    scoreArr.push(temp)
+    payload.scoreArr = scoreArr; 
+
+      // payload.judge = this.userId;
+      // payload.eventId = this.selectedEventId
+
+      // payload.isTemplateUpload = this.isTemplateUpload;
 
       this.apiService.callPostService('postScore', payload).subscribe((response) => {
 
@@ -190,21 +205,100 @@ export class ScoreComponent implements OnInit {
     this.ngOnInit();
   }
 
+  gridApi: any;
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `${this.selectedEventName.replaceAll(' ', '_')}-${this.uiCommonUtils.getUserMetaDataJson().firstName}`,
+    };
+    this.gridApi.exportDataAsCsv(params);
+  }
+
+  onGridReady(params: any) {
+    this.gridApi = params.api;
+  }
+
   getuserScoreArray(): any[] {
 
     let scoreData: any = [];
 
-    this.participantRowData.forEach((item: any) => {
-      if (item.score) {
-        scoreData.push({
-          scoreRefId: item.scoreRefId,
-          partEveRegCatId: item.partEveRegCatId,
-          score: item.score,
-          catStaffMapId: item.catStaffMapId
-        })
-      }
-    });
+    // if (this.isTemplateUpload)
+    this.gridApi.forEachNode((node: any) =>
+      scoreData.push({
+        'enrollmentid': node.data.enrollmentId,
+        'category': node.data.category,
+        'score': node.data.score
+      }));
+    // else
+    //   this.participantRowData.forEach((item: any) => {
+    //     if (item.score) {
+    //       scoreData.push({
+    //         scoreRefId: item.scoreRefId,
+    //         partEveRegCatId: item.partEveRegCatId,
+    //         score: item.score,
+    //         catStaffMapId: item.catStaffMapId
+    //       })
+    //     }
+    //   });
     return scoreData;
   }
+
+  handleUploadScore(input: any) {
+    this.isTemplateUpload = true;
+    const files = input.target.files;
+    var self = this;
+    if (files && files.length) {
+      const fileToRead = files[0];
+      const fileReader = new FileReader();
+      fileReader.onload = ((fileLoadedEvent: any) => {
+
+        let fileData = fileLoadedEvent.target.result;
+        let data = new Uint8Array(fileData);
+        let arr = new Array();
+        for (var i = 0; i !== data.length; ++i) {
+          arr[i] = String.fromCharCode(data[i]);
+        }
+        var bstr = arr.join("");
+        var workbook = XLSX.read(bstr, { type: "binary" });
+
+        // our data is in the first sheet
+        var firstSheetName = workbook.SheetNames[0];
+        var worksheet = workbook.Sheets[firstSheetName];
+
+        var rowData = [];
+
+        try {
+          // start at the 2nd row - the first row are the headers
+          let rowIndex = 2;
+          while (worksheet['A' + rowIndex]) {
+            rowData.push({
+              'enrollmentId': worksheet['A' + rowIndex].v,
+              'category': worksheet['B' + rowIndex].v,
+              'score': worksheet['C' + rowIndex].v
+            })
+            rowIndex++;
+          }
+          // finally, set the imported rowData into the grid
+          self.setGridDataFromExcel(rowData)
+        } catch (error) {
+          self.uiCommonUtils.showSnackBar('Error while processing uploaded file.', 'error', 4000);
+        }
+
+
+      });
+      fileReader.readAsArrayBuffer(fileToRead);
+      fileReader.onerror = () => {
+        this.uiCommonUtils.showSnackBar('Error while processing uploaded file.', 'error', 4000);
+      }
+    }
+  }
+
+  setGridDataFromExcel(rowData: any) {
+    this.gridApi.setRowData(rowData);
+    this.gridApi.refreshCells(this.params)
+  }
+
 }
 

@@ -48,15 +48,14 @@
                             </mat-form-field>
 
 
-                            <mat-form-field>
+                            <!-- <mat-form-field>
                                 <mat-label>Judge</mat-label>
                                 <mat-select (selectionChange)="onDropdowwnSelChange($event)" [(value)]="selectedJudge">
-                                    <!-- <mat-option selected [value]="'All'"> All </mat-option> -->
                                     <mat-option *ngFor="let judge of judgeNameArr" [value]="judge.judgeId">
                                         {{judge.judgeName}}
                                     </mat-option>
                                 </mat-select>
-                            </mat-form-field>
+                            </mat-form-field> -->
 
                         </div>
 

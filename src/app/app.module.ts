@@ -70,6 +70,7 @@ import { ScoreReviewComponent } from './screens/score-review/score-review.compon
 import { EventAttendanceComponent } from './screens/event-attendance/event-attendance.component';
 import { CheckboxRendererComponent } from './screens/renderers/checkbox-renderer/checkbox-renderer.component';
 import { DatePickerRendererComponent } from './screens/renderers/date-picker-renderer/date-picker-renderer.component';
+import { StaffAssignmentComponent } from './screens/staff-assignment/staff-assignment.component';
 
 
 
@@ -95,7 +96,7 @@ import { DatePickerRendererComponent } from './screens/renderers/date-picker-ren
     EventRegistrationComponent,
      ScoreComponent, 
      ScoreUploadComponent,
-      ScoreUploadInputComponent, ScoreReviewComponent, EventAttendanceComponent, DatePickerRendererComponent
+      ScoreUploadInputComponent, ScoreReviewComponent, EventAttendanceComponent, DatePickerRendererComponent, StaffAssignmentComponent
     //UserProfileComponent,
     //OvbsRegistrationComponent
   ],

@@ -225,7 +225,7 @@ async function eventRegistration(eventData, loggedInUser) {
         VALUES($1, $2, $3, $4, $5, $6, $7) returning event_participant_registration_id;`
 
             if (eventType === 'CWC') {
-
+                console.log('Participant id is :: ' + loggedInUser);
                 let enrollmentId;
                 for (; ;) {
                     let randomNo = Math.floor(Math.random() * (999999 - 100000 + 1) + 100000);
@@ -240,13 +240,9 @@ async function eventRegistration(eventData, loggedInUser) {
                     }
                 }
                 
-    
-                const registerQuery = `INSERT INTO t_event_participant_registration
-                                (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id)
-                                VALUES($1, $2, $3, $4, $5, $6, $7) returning event_participant_registration_id;`
                 let registerQueryValues = [
                 eventData.eventId,
-                eventData.participantId,
+                loggedInUser,
                 eventData.schoolGrade,
                 false,
                 loggedInUser,
@@ -269,9 +265,9 @@ async function eventRegistration(eventData, loggedInUser) {
                 let registerEvtCatQueryValues = [
                     participantRegId,
                     catId,
-                    eventData.participantId,
+                    loggedInUser,
                     false,
-                    eventData.participantId,
+                    loggedInUser,
                     new Date().toUTCString()
                 ];
                 await client.query(registerEvtCatQuery, registerEvtCatQueryValues)

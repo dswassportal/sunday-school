@@ -1,0 +1,167 @@
+<div class="container mt-3" style="overflow: hidden;">
+
+    <div class="form-group form-inline row m-0 p-0">
+        <input type="text" class="form-control col-9 search" placeholder="Search Here" [(ngModel)]="term">
+    </div>
+
+    <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3" 
+                    [rowData]="rowData | filter:term " [columnDefs]="columnDefs"
+                    (gridReady)="onGridReady($event)" (rowClicked)='onRowClicked($event)'
+            [pagination]="true" rowSelection='multiple' [checkboxSelection]="true" [gridOptions]="gridOptions">
+    </ag-grid-angular>
+
+</div>
+    <div class="col-md-12">
+        <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
+            <div class="modal-dialog modal-dialog-scrollable modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2  id="myModalLabel">Sunday School - Staff Assignment</h2>
+                        <button mat-button class="ml-auto" data-dismiss="modal" (click)="resetForm()">
+                                <mat-icon>clear</mat-icon>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4 border m-3 rounded">
+                        <form [formGroup]="staffDataFormGroup">
+                
+                            <div class="row">
+                               
+                                    <mat-form-field class="col-md-6" >
+                                       
+                                    <input readonly matInput id="parish" matInput
+                                                                formControlName="parish"
+                                                                placeholder="Parish Name">
+                                      </mat-form-field> 
+
+                                      <mat-form-field class="col-md-6" >
+                                       
+                                        <input readonly matInput id="name" matInput
+                                        formControlName="name"
+                                        placeholder="Sunday School Name">
+                                          </mat-form-field> 
+                                         
+                            </div>
+                
+                            <div class="row">
+                                       
+                                        
+                                        <mat-form-field class="col-md-6">
+
+                                            <mat-label>Sunday School Year Start Date:</mat-label>
+                                            <input (dateChange)="comparisonEventStartdateValidator()" [min]="minDate"
+                                                matInput id="schoolStartDate" formControlName="schoolStartDate"
+                                                [matDatepicker]="startatpicker">
+                                            <mat-datepicker-toggle matSuffix [for]="startatpicker">
+                                                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                                            </mat-datepicker-toggle>
+                                            <mat-datepicker #startatpicker></mat-datepicker>
+                                            <mat-error
+                                                *ngIf="staffDataFormGroup.controls['schoolStartDate'].hasError('invaliddaterange')">
+                                               Start date cannot be greater than end date
+                                            </mat-error>
+                                        </mat-form-field>
+                                      
+                                    <mat-form-field class="col-md-6">
+
+                                        <mat-label>Sunday School Year End Date:</mat-label>
+                                        <input [min]="minDate" matInput id="schoolEndDate" formControlName="schoolEndDate"
+                                            (dateChange)="comparisonEventEnddateValidator()" [matDatepicker]="endatpicker">
+                                        <mat-datepicker-toggle matSuffix [for]="endatpicker">
+                                            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+                                        </mat-datepicker-toggle>
+                                        <mat-datepicker #endatpicker></mat-datepicker>
+    
+                                        <mat-error
+                                            *ngIf="staffDataFormGroup.controls['schoolEndDate'].hasError('invaliddaterange')">
+                                             End date cannot be earlier than start date
+                                        </mat-error>
+    
+                                    </mat-form-field>
+                                    
+                            </div>
+                
+                            <div class="row">
+                                
+                                        <mat-form-field class="col-md-6" >
+                                            <mat-select  id="principalName" formControlName="principalName" placeholder="Principal">
+                                              <mat-option  *ngFor = "let principal of principalList" [value]=principal.principalId>{{principal.principalName}} </mat-option>
+                                            </mat-select>
+                                          </mat-form-field> 
+                                
+                            
+                                    <mat-form-field class="col-md-6" >
+                                        <mat-select id="vicePrincipalName" formControlName = "vicePrincipalName" placeholder="Vice Principal">
+                                          <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
+                                        </mat-select>
+                                      </mat-form-field> 
+                                </div>
+                        
+                        </form>
+                
+                        <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+                        </mat-divider>
+                        
+                            <h2>Teacher Assignment   </h2>
+                            <form [formGroup]="teacherGradeDataFormGroup">
+                                <div class="form-container">
+                                    <fieldset>
+                                        <div formArrayName="teacherGrades">
+                                            <div class="row"
+                                            *ngFor="let item of teacherGradeDataFormGroup.get('teacherGrades')['controls']; let i = index;">
+                                                    
+                                            <div class="container" style="padding-left: 2%;" [formGroupName]="i">
+                
+                                                <div class="row">
+                                                    
+                                                        <mat-form-field class="col-md-6">
+                                                            <input readonly matInput id="name" matInput
+                                                                formControlName="name"
+                                                                placeholder="School Grade">
+                                                        </mat-form-field>
+                                                    
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <mat-form-field class="col-md-6" >
+                                                        <mat-select id="teacherName" formControlName = "teacherName" placeholder="Teacher Name" >
+                                                          <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
+                                                        </mat-select>
+                                                      </mat-form-field> 
+                                                
+                
+                                                    <mat-form-field class="col-md-6" >
+                                                        <mat-select id="substituteTeacher" formControlName = "substituteTeacher" placeholder="Substitute Teacher Name" >
+                                                          <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
+                                                        </mat-select>
+                                                      </mat-form-field> 
+                                                </div>
+                                                
+                                                <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+                                                </mat-divider>
+                                                &nbsp;
+                                            </div>
+                                            
+                                        </div>
+                                        
+                                        </div>
+                                       
+                                    </fieldset>
+                                   
+                                </div>
+                                
+                                <div class="row" style="padding-top: 1%;">
+                                    <div class="col text-center">
+
+                                            <button mat-button type="submit" mat-button class="mbutton" [disabled]="!staffDataFormGroup.valid" (click)="saveStaffProfile()">
+                                                    Save</button>
+                                    </div>
+                            </div>
+
+                            </form>
+                           
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+    

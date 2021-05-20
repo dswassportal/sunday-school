@@ -26,7 +26,7 @@ export class EventAttendanceComponent implements OnInit {
   attendanceColDef: any;
   attendanceRowData: any;
   attendanceGridOption: any;
-
+  gridApi: any;
   disableSaveSubmitBtn: boolean = false;
 
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils) { }
@@ -70,10 +70,10 @@ export class EventAttendanceComponent implements OnInit {
     this.attendanceColDef = [
       { headerName: 'Enrollment Id', field: 'enrollmentId', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
       { headerName: 'Category', field: 'eventCategoryName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
-      { headerName: 'Mark Here', cellRendererFramework: CheckboxRendererComponent, field: 'hasAttended', editable: false },
+      { headerName: 'Mark Here', headerCheckboxSelection: true, checkboxSelection: true, },
     ];
 
-
+    //cellRendererFramework: CheckboxRendererComponent, field: 'hasAttended', editable: false 
     let userId = this.uiCommonUtils.getUserMetaDataJson().userId
     this.apiService.callGetService(`getEventData?user=${userId}&eventType=attendance`).subscribe((respData) => {
 
@@ -85,7 +85,7 @@ export class EventAttendanceComponent implements OnInit {
       }
 
       if (respData.data.metaData) {
-        this.eventRowData = respData.data.metaData.events
+        this.eventRowData = respData.data.metaData.events        
       } else
         this.eventRowData = [];
 
@@ -163,10 +163,20 @@ export class EventAttendanceComponent implements OnInit {
           else
             this.disableSaveSubmitBtn = false;
         }
+        this.gridApi.forEachNodeAfterFilter((node: any) => {
+          node.setSelected(node.data.hasAttended, node.data.hasAttended);
+          //node.selectThisNode(node.data.hasAttended)
+          console.log('Setting up Node :' + node.data.enrollmentId  )
+          });
       }
     });
 
   }
+
+  onGridReady(params: any) {
+    this.gridApi = params.api;
+  }
+
 
   getParicipantAttendaneArr(): any[] {
 

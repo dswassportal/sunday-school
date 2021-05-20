@@ -18,6 +18,7 @@ import { EventRegistrationComponent } from './screens/event-registration/event-r
 import { ScoreComponent } from './screens/score/score.component';
 import { ScoreReviewComponent } from './screens/score-review/score-review.component';
 import { EventAttendanceComponent } from './screens/event-attendance/event-attendance.component'
+import { StaffAssignmentComponent } from './screens/staff-assignment/staff-assignment.component';
 
 const routes: Routes = [
   { path: 'signup', component: SignUpComponent },
@@ -37,7 +38,8 @@ const routes: Routes = [
     { path : 'eventRegistration', component:EventRegistrationComponent},
     { path : 'score', component:ScoreComponent},
     { path : 'scoreReview', component:ScoreReviewComponent},
-    { path : 'attendance', component:EventAttendanceComponent}
+    { path : 'attendance', component:EventAttendanceComponent},
+    { path : 'staffAssignment', component:StaffAssignmentComponent}
     // { path: 'testEvent',component:UserProfileComponent},
   ]
 },
