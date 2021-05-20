@@ -8,30 +8,48 @@ const dbConnections = require(`${__dirname}/dbConnection`);
 
 async function getSSchoolData(loggedInUserId, role) {
 
-    let condition = '';
-    if (role)
-        condition = ` SELECT a.org_id
-                            FROM   t_user_role_context a, t_user b
-                            WHERE  b.user_id = ${loggedInUserId}
-                            AND    a.user_id = b.user_id  `;
-
-    else
-     condition =  ` SELECT b.org_id from
-                    t_user b
-                    WHERE  b.user_id = ${loggedInUserId} `                            
-
-        let client = await dbConnections.getConnection();
+    let client = await dbConnections.getConnection();
 
     try {
 
-        let query = `select org_id, org_type, "name", parent_org_id, address_line1, address_line2, city from t_organization to2 
+        let query = '';
+        if (role) {
+
+            query = `select distinct to2.org_id, org_type, "name", parent_org_id, address_line1, address_line2, city, turc.user_id principal_id,
+                                    concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) principal_name
+                        from t_organization to2 join  
+                                (WITH recursive child_orgs 
+                                                        AS (
+                                                            SELECT org_id
+                                                            FROM   t_organization parent_org 
+                                                            WHERE  org_id IN
+                                                                    (
+                                                                        SELECT a.org_id
+                                                                    FROM   t_user_role_context a, t_user b
+                                                                    WHERE  b.user_id = ${loggedInUserId}
+                                                                    AND    a.user_id = b.user_id  )                                                    
+                                                            UNION
+                                                            SELECT     child_org.org_id child_id
+                                                            FROM       t_organization child_org
+                                                            INNER JOIN child_orgs c
+                                                            ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                                FROM   child_orgs) hyrq on to2.org_id  = hyrq.org_id
+                          left join t_user_role_context turc on  hyrq.org_id = turc.org_id and turc.role_id = (select role_id from t_role where "name" = 'Principal')  
+                          left join t_user tu on turc.user_id = tu.user_id; `
+
+
+
+        } else {
+            query = `select org_id, org_type, "name", parent_org_id, address_line1, address_line2, city from t_organization to2 
              where org_id in (WITH recursive child_orgs 
                                      AS (
                                          SELECT org_id
                                          FROM   t_organization parent_org 
                                          WHERE  org_id IN
                                                  (
-                                                        ${condition}    
+                                                    SELECT b.org_id from
+                                                    t_user b
+                                                    WHERE  b.user_id = ${loggedInUserId}     
                                                  )                                                    
                                          UNION
                                          SELECT     child_org.org_id child_id
@@ -40,9 +58,8 @@ async function getSSchoolData(loggedInUserId, role) {
                                          ON         c.org_id = child_org.parent_org_id ) SELECT *
                                              FROM   child_orgs)
                  and to2.org_type in ('Sunday School', 'Grade') order by org_id;`
-
+        }
         let result = await client.query(query);
-
         schoolData = [];
 
         for (let row of result.rows) {
@@ -50,20 +67,24 @@ async function getSSchoolData(loggedInUserId, role) {
             if (row.org_type === 'Sunday School') {
                 temp.orgId = row.org_id;
                 temp.name = row.name;
+                temp.principalName = row.principal_name;
+                temp.principalId = row.principal_id;
                 schoolData.push(temp);
             } else if (row.org_type === 'Grade') {
                 let index = schoolData.findIndex((item) => item.org == row.parentOrgId)
                 let temp2 = {};
-                if (schoolData[index].grades === undefined) {
-                    let grade = [];
-                    temp2.orgId = row.org_id;
-                    temp2.name = row.name;
-                    grade.push(temp2)
-                    schoolData[index].grades = grade;
-                } else {
-                    temp2.orgId = row.org_id;
-                    temp2.name = row.name;
-                    schoolData[index].grades.push(temp2);
+                if (index >= 0) {
+                    if (schoolData[index].grades === undefined) {
+                        let grade = [];
+                        temp2.orgId = row.org_id;
+                        temp2.name = row.name;
+                        grade.push(temp2)
+                        schoolData[index].grades = grade;
+                    } else {
+                        temp2.orgId = row.org_id;
+                        temp2.name = row.name;
+                        schoolData[index].grades.push(temp2);
+                    }
                 }
             }
 
