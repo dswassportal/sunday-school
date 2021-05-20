@@ -67,6 +67,7 @@ async function getMembers(fireBaseId) {
                 }
 
                 if (res) {*/
+        console.log(`firebase user UID : ${fireBaseId}  has ${result1.rows[0].member_count} family members.`)
         if (result1.rows[0].member_count > 0) {
 
             let fetchAllMembersData = `select jsonb_agg(
@@ -94,7 +95,15 @@ async function getMembers(fireBaseId) {
                                 return(errorHandling.handleDBError('queryExecutionError'));
                             }
 */
-            if (result2.rows[0].member_list == null)
+            if (result2.rows[0].member_list != null) {
+
+                console.log(`and the member list as follows : ${JSON.stringify({
+                    data: {
+                        status: 'success',
+                        memberCount: result1.rows[0].member_count,
+                        members: result2.rows[0].member_list
+                    }
+                })} `)
 
                 return ({
                     data: {
@@ -103,7 +112,7 @@ async function getMembers(fireBaseId) {
                         members: result2.rows[0].member_list
                     }
                 })
-
+            }
             // });
         } else {
 
@@ -207,9 +216,59 @@ async function handleLogIn_LogOut(reqContextData) {
 
 }
 
+
+async function getLookupMasterData(reqParams) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        let qArry = reqParams.split(',');
+        let query = 'select type, code from t_lookup where '
+        for (let i = 0; i < qArry.length; i++) {
+
+            if (i === 0)
+                query += ` lower(type) = lower('${qArry[i]}') `
+            else
+                query += ` or lower(type) = lower('${qArry[i]}') `
+        }
+        query += ' and is_deleted != true; ';
+
+        let result = await client.query(query);
+        let response = {};
+
+        for (let type of qArry) {
+            let key = type.toLowerCase() + 's'
+            for (let row of result.rows) {
+                if (type.toLowerCase() === row.type.toLowerCase()) {
+                    if (response[key] == undefined)
+                        response[key] = [];
+                    else
+                        response[key].push(row.code)
+                }
+            }
+        }
+
+        return {
+            data: {
+                status: 'success',
+                data: response
+            }
+        };
+
+
+    } catch (error) {
+        console.error(`miscReqOperations.js::getLookupMasterData() --> Error : ${error}`)
+        return(errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release(false);
+    }
+
+}
+
 module.exports = {
     getCountryStates,
     getMembers,
     getUserApprovalStatus,
-    handleLogIn_LogOut
+    handleLogIn_LogOut,
+    getLookupMasterData
 }

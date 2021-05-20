@@ -40,7 +40,7 @@ app.use('*', cors())
 app.use(express.static(path.join(__dirname + "/dist/church")));
 
 app.get('/', function (req, res) {
-   res.sendFile(path.join(__dirname + "/dist/church/index.html"));
+  res.sendFile(path.join(__dirname + "/dist/church/index.html"));
   //res.sendFile('./dist/church/index.html');
 });
 
@@ -679,7 +679,7 @@ app.get('/api/getScoreByCategory', function (req, res) {
 
 app.get('/api/getSShools', function (req, res) {
   console.log("getSShools called...");
-   let loggedInUser =  decodeUser(req)
+  let loggedInUser = decodeUser(req)
   try {
     processSSRequest.getSSchoolData(loggedInUser, req.query.role)
       .then((data) => {
@@ -696,6 +696,24 @@ app.get('/api/getSShools', function (req, res) {
   }
 });
 
+app.get('/api/getLookupMasterData', function (req, res) {
+  console.log("getLookupMasterData called... to fetch " + req.query.types);
+  // let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getLookupMasterData(req.query.types)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getLookupMasterData as : ' + error)
+  }
+});
 
 
 //to decode loggedin user Id from the request context.
