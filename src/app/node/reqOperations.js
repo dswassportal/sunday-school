@@ -294,8 +294,9 @@ async function processGetUserMetaDataRequest(uid) {
                         };
                         menus.push(tempJson);
 
-                        if(roles.indexOf(row.role_name) < 0)
-                        roles.push(row.role_name)                    }
+                        if (roles.indexOf(row.role_name) < 0)
+                            roles.push(row.role_name)
+                    }
 
                     // if (menus.indexOf(row.menu_name) < 0)
                     //     menus.push(row.menu_name)
@@ -488,8 +489,8 @@ async function getuserRecords(userType, loggedInUser, eventId) {
         }
 
         //Get users(Teachers/Principal and members) for TTC event registration by event_id and logged in user_id
-        
-        if(userType == 'ttc_reg_add_participants'){
+
+        if (userType == 'ttc_reg_add_participants') {
 
             getuserRecords = `select distinct vu.user_id,
                                     vu.email_id, vu.title, vu.first_name, vu.middle_name, vu.last_name, vu.nick_name, vu.dob,
@@ -512,6 +513,17 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                 where vu.user_id 
                                 in (select tpr.family_member_id 
                                     from t_person_relationship tpr where tpr.family_head_id = ${loggedInUser});`
+        }
+
+        if (userType === 'principals') {
+
+            getuserRecords = `select distinct 
+                                vu.title,
+                                vu.first_name,
+                                vu.middle_name,
+                                vu.last_name,
+                                vu.user_id  from v_user vu where org_id in ${hierarchicalQry} and role_name = 'Principal' `;
+
         }
 
         let res = await client.query(getuserRecords);
@@ -597,13 +609,13 @@ async function getuserRecords(userType, loggedInUser, eventId) {
             //     }
             // })
         }
-            return ({
-                data: {
-                    status: 'success',
-                    metaData: users
-                }
-            })
-        
+        return ({
+            data: {
+                status: 'success',
+                metaData: users
+            }
+        })
+
     } catch (error) {
         console.error(`reqOperations.js::getuserRecords() --> error executing query as : ${error}`);
         return (errorHandling.handleDBError('connectionError'));
@@ -811,33 +823,46 @@ async function getEventData(userId, eventType) {
 
         if (eventType === 'upcoming_events') {
             condition = ' not in '
-            condition2 = ` and  ve.registration_start_date <= current_date
-            and  ve.registration_end_date >= current_date `
+            // condition2 = ` and  ve.registration_start_date <= current_date
+            // and  ve.registration_end_date >= current_date `
             //console.log("111")
         } else if (eventType === 'registered_events') {
             condition = ' in '
             condition2 = ` and  ve.registration_start_date <= current_date
             and  ve.registration_end_date >= current_date `
             //console.log("222")
-        }else if(eventType === 'completed_events'){
+        } else if (eventType === 'completed_events') {
             condition = ' in '
-            condition2 =  ` and  ve.event_start_date <= current_date `
+            condition2 = ` and  ve.event_start_date <= current_date `
             //console.log("333")
         }
         console.log(`Fetching event data for ${userId} user.`)
         if (eventType === 'for_judgement') {
 
-            getEventData = ` select distinct   event_id,
-                                                event_name "name",
-                                                event_type, 
-                                                to_char(event_start_date, 'DD-MM-YYYY') start_date,
-                                                to_char(event_end_date, 'DD-MM-YYYY') end_date,
-                                                event_end_date
-                                        from v_event  
-                                        where judge_id = ${userId}
-                                        and is_deleted = false
-                                        and is_attendance_submitted  = true
-                                        order by event_end_date desc;`
+            // getEventData = ` select distinct   event_id,
+            //                                     event_name "name",
+            //                                     event_type, 
+            //                                     to_char(event_start_date, 'DD-MM-YYYY') start_date,
+            //                                     to_char(event_end_date, 'DD-MM-YYYY') end_date,
+            //                                     event_end_date
+            //                             from v_event  
+            //                             where judge_id = ${userId}
+            //                             and is_deleted = false
+            //                             and is_attendance_submitted  = true
+            //                             order by event_end_date desc;`
+
+            getEventData = ` select distinct 
+                        te.event_id,
+                        te."name",
+                        te.event_type e, 
+                        to_char(te.start_date , 'DD-MM-YYYY') start_date,
+                        to_char(te.end_date , 'DD-MM-YYYY') end_date
+                from t_event_cat_staff_map tecsm 
+                join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
+                join t_event te on te.event_id = tecsm.event_id 
+                    where user_id = ${userId}
+                    and  tecm.is_attendance_submitted = true
+                    and te.is_deleted = false;`
         }
         if (eventType === 'review_pending') {
 
@@ -891,11 +916,11 @@ async function getEventData(userId, eventType) {
             // and event_start_date >= current_date
 
         }
-        
-        
-         if (eventType === 'upcoming_events' || eventType === 'registered_events' || eventType === 'completed_events'){
-            getEventData = 
-                            `select distinct event_id, event_name "name", event_type, 
+
+
+        if (eventType === 'upcoming_events' || eventType === 'registered_events' || eventType === 'completed_events') {
+            getEventData =
+                `select distinct event_id, event_name "name", event_type, 
                             event_desciption description, event_start_date start_date, event_end_date end_date, 
                             registration_start_date, registration_end_date
                             from v_event ve
@@ -905,8 +930,8 @@ async function getEventData(userId, eventType) {
                                     where tepr.user_id = ${userId}
                                 )
                             ${condition2}
-                            and  ve.is_deleted = false;`;    
-         }
+                            and  ve.is_deleted = false;`;
+        }
 
 
         let res = await client.query(getEventData);
