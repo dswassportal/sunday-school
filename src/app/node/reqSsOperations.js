@@ -1,8 +1,5 @@
-const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
-const { result, constant } = require('underscore');
-const { temporaryAllocator } = require('@angular/compiler/src/render3/view/util');
 const dbConnections = require(`${__dirname}/dbConnection`);
 
 
@@ -16,7 +13,9 @@ async function getSSchoolData(loggedInUserId, role) {
         if (role) {
 
             query = `select distinct to2.org_id, org_type, "name", parent_org_id, address_line1, address_line2, city, turc.user_id principal_id,
-                                    concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) principal_name
+                            (case when tu.title is null then null 
+                                else concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) 
+                                end) principal_name
                         from t_organization to2 join  
                                 (WITH recursive child_orgs 
                                                         AS (

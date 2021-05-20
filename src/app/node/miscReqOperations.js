@@ -258,17 +258,60 @@ async function getLookupMasterData(reqParams) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::getLookupMasterData() --> Error : ${error}`)
-        return(errorHandling.handleDBError('connectionError'));
+        return (errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }
 
 }
 
+
+async function getRolesByUserId(loggedInUser) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        let query = `select distinct role_id, org_id, org_type from v_user vu where user_id = ${loggedInUser} order by role_id;`
+
+        let roleResult = await client.query(query);
+        let roles = [];
+        if (roleResult.rowCount > 0) {
+            for (let roleRow of roleResult.rows) {
+                let role = {}
+                role.roleId = roleRow.role_id;
+                role.orgType = roleRow.org_type;
+                role.orgId = roleRow.org_id;
+
+                if (_.findWhere(roles, role) == null) {
+                    roles.push(role);
+                }
+            } // for loop of roles
+        } // edd of if roles.rowCount > 0
+
+
+        return {
+            data: {
+                status: 'success',
+                roles: roles
+            }
+        }
+
+
+    } catch (error) {
+        console.error(`miscReqOperations.js::getRolesByUserId() --> Error : ${error}`)
+        reject(errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release(false);
+    }
+
+}
+
+
 module.exports = {
     getCountryStates,
     getMembers,
     getUserApprovalStatus,
     handleLogIn_LogOut,
-    getLookupMasterData
+    getLookupMasterData,
+    getRolesByUserId
 }

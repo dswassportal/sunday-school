@@ -715,6 +715,25 @@ app.get('/api/getLookupMasterData', function (req, res) {
   }
 });
 
+app.get('/api/getRolesByUserId', function (req, res) {
+  console.log("getRolesByUserId called... to fetch " + req.query.types);
+   let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getRolesByUserId(loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getRolesByUserId as : ' + error)
+  }
+});
+
 
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {
