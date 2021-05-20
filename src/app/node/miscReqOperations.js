@@ -266,12 +266,12 @@ async function getLookupMasterData(reqParams) {
 }
 
 
-async function getRolesByUserId(loggedInUser) {
+async function getRolesByUserId(userId) {
 
     let client = await dbConnections.getConnection();
     try {
 
-        let query = `select distinct role_id, org_id, org_type from v_user vu where user_id = ${loggedInUser} order by role_id;`
+        let query = `select distinct role_id, org_id, org_type from v_user vu where user_id = ${userId} order by role_id;`
 
         let roleResult = await client.query(query);
         let roles = [];

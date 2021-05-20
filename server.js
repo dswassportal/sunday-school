@@ -716,10 +716,10 @@ app.get('/api/getLookupMasterData', function (req, res) {
 });
 
 app.get('/api/getRolesByUserId', function (req, res) {
-  console.log("getRolesByUserId called... to fetch " + req.query.types);
-   let loggedInUser = decodeUser(req)
+  console.log("getRolesByUserId called... to fetch " + req.query.userId);
+  // let loggedInUser = decodeUser(req)
   try {
-    processMiscRequest.getRolesByUserId(loggedInUser)
+    processMiscRequest.getRolesByUserId(req.query.userId)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
