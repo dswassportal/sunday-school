@@ -464,13 +464,15 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                         vu.date_of_marriage,
                         vu.about_yourself,
                         vu.is_family_head,
-                        vu.role_id,
                         vu.user_org_id org_id,
                         vu.user_org_type org_type,
                         membership_type,
                         vu.user_org parish_name
                     FROM  v_user vu
                     WHERE ${condition} vu.user_org_id IN ${hierarchicalQry} order by user_id desc;`
+
+        /****************Removed from projection by Sudip ********************* */
+        //vu.role_id,
 
         //console.log('Executing query : ' + getuserRecords)
 
@@ -515,22 +517,54 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                     from t_person_relationship tpr where tpr.family_head_id = ${loggedInUser});`
         }
 
-        if (userType === 'principals') {
+        try {
+            if (userType.toLowerCase() === 'principal' || userType.toLowerCase() === 'teacher') {
 
-            getuserRecords = `select distinct 
+                getuserRecords = `select distinct 
                                 vu.title,
                                 vu.first_name,
                                 vu.middle_name,
                                 vu.last_name,
-                                vu.user_id  from v_user vu where org_id in ${hierarchicalQry} and role_name = 'Principal' `;
+                                vu.role_name,
+                                vu.role_id,
+                                vu.user_id  from v_user vu where org_id in ${hierarchicalQry} 
+                                            and lower(role_name) = '${userType.toLowerCase()}' 
+                                            
+                          union
+                                select distinct 
+                                vu.title,
+                                vu.first_name,
+                                vu.middle_name,
+                                vu.last_name,
+                                vu.role_name,
+                                vu.role_id,
+                                vu.user_id  from v_user vu where org_id in  (WITH recursive child_orgs 
+                                    AS (
+                                        SELECT org_id
+                                        FROM   t_organization parent_org 
+                                        WHERE  org_id IN
+                                                (
+                                                     SELECT b.org_id
+                                               FROM   t_user b
+                                               WHERE  user_id = ${loggedInUser} 
+                                               )                                                    
+                                        UNION
+                                        SELECT     child_org.org_id child_id
+                                        FROM       t_organization child_org
+                                        INNER JOIN child_orgs c
+                                        ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                            FROM   child_orgs)  
+                             and role_name = 'Member';`
 
-        }
+            }
+        } catch (error) { }
 
         let res = await client.query(getuserRecords);
 
         let user = {}
         let users = [];
-        let roles = [];
+        /****************Commented by Sudip ********************* */
+        // let roles = [];
         let userid = 0;
 
         if (res && res.rowCount > 0) {
@@ -540,7 +574,8 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                 // console.log("User id" + userid);
                 if (userid != row.user_id && userid != 0) {
                     // console.log("In Pushing user to users" + row.user_id);
-                    user.roles = roles;
+                    /****************Commented by Sudip ********************* */
+                    // user.roles = roles;
                     users.push(user);
                     user = {}
                     roles = []
@@ -573,6 +608,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     user.aboutYourself = row.about_yourself;
                     user.isFamilyHead = row.is_family_head;
                     user.roleId = row.role_id;
+                    user.role = row.role_name;
                     user.orgId = row.org_id;
                     user.orgType = row.org_type;
                     user.memberType = row.membership_type;
@@ -586,21 +622,23 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     userid = row.user_id;
                 }
                 //console.log("In for" + JSON.stringify(user));
-                let role = {}
-                role.roleId = row.role_id;
-                role.orgType = row.org_type;
-                role.orgId = row.org_id;
+                /****************Commented by Sudip ********************* */
+                // let role = {}
+                // role.roleId = row.role_id;
+                // role.orgType = row.org_type;
+                // role.orgId = row.org_id;
                 // console.log("In user" + user);
                 // console.log("In role" + JSON.stringify(role));
                 // console.log("In roles" + JSON.stringify(roles));
-
-                if (_.findWhere(roles, role) == null) {
-                    // console.log("role" + JSON.stringify(role));
-                    roles.push(role);
-                }
+                /****************Commented by Sudip ********************* */
+                // if (_.findWhere(roles, role) == null) {
+                //     // console.log("role" + JSON.stringify(role));
+                //     roles.push(role);
+                // }
 
             }
-            user.roles = roles;
+            // user.roles = roles;
+            /****************Commented by Sudip ********************* */
             users.push(user);
             // return ({
             //     data: {
