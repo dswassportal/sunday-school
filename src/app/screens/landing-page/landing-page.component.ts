@@ -8,14 +8,38 @@ import { AgGridAngular } from "ag-grid-angular";
 import { uiCommonUtils } from '../../common/uiCommonUtils';
 declare let $: any;
 
+import { Moment } from 'moment';
+import * as _moment from 'moment';
+import { default as _rollupMoment } from 'moment';
+import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { ReplaySubject } from 'rxjs';
+import { Router } from '@angular/router';
+
+const moment = _rollupMoment || _moment;
+
+
+class CustomDateAdapter extends NativeDateAdapter {
+  format(date: Date, displayFormat: Object): string {
+    var formatString = 'MMMM DD YYYY';
+    return moment(date).format(formatString);
+  }
+}
+
+
 @Component({
   selector: 'app-landing-page',
   templateUrl: './landing-page.component.html',
-  styleUrls: ['./landing-page.component.css']
+  styleUrls: ['./landing-page.component.css'],
+  providers: [
+    {
+      provide: DateAdapter, useClass: CustomDateAdapter
+    }
+  ]
 })
 
 
-export class LandingPageComponent implements OnInit {
+export class LandingPageComponent implements OnInit{
 
   // @ViewChild('agGrid') agGrid: AgGridAngular;
   gridOptions: any;
@@ -52,18 +76,20 @@ export class LandingPageComponent implements OnInit {
   states!: any[];
   selectedCountry: any;
   mobileNumber: any;
+  rolesData: any;
   homePhoneNumber: any;
   alluserdata: any;
   minDate = new Date();
 
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
-    private http: HttpClient, private formBuilder: FormBuilder) { }
+    private http: HttpClient, private formBuilder: FormBuilder, public router: Router) { }
   // this.gridOptions = <GridOptions>{};
 
   agInit(params: any) {
     this.params = params;
     this.data = params.value;
   }
+
   ngOnInit(): void {
 
     this.userMetaData = this.uiCommonUtils.getUserMetaDataJson();
@@ -75,27 +101,27 @@ export class LandingPageComponent implements OnInit {
     this.updateuserinfo = this.formBuilder.group({
       title: new FormControl('', Validators.required),
       firstName: new FormControl('', Validators.required),
-      middleName: new FormControl('', Validators.required),
+      middleName: new FormControl(''),
       lastName: new FormControl('', Validators.required),
-      nickName: new FormControl('', Validators.required),
-      baptismalName: new FormControl('', Validators.required),
-      dob: new FormControl('', [Validators.required]),
+      nickName: new FormControl(''),
+      baptismalName: new FormControl(''),
+      dob: new FormControl(''),
       mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
-      homePhoneNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
-      emailAddress: new FormControl('',[Validators.required, Validators.email]),
-      addressLine1: new FormControl('', Validators.required),
+      homePhoneNo: new FormControl('', [Validators.pattern('[0-9].{9}')]),
+      emailAddress: new FormControl('', [Validators.email]),
+      addressLine1: new FormControl(''),
       addressLine2: new FormControl(''),
       addressLine3: new FormControl(''),
-      city: new FormControl('', Validators.required),
-      postalCode: new FormControl('', Validators.required),
-      state: new FormControl('', Validators.required),
-      country: new FormControl('', Validators.required),
+      city: new FormControl(''),
+      postalCode: new FormControl(''),
+      state: new FormControl(''),
+      country: new FormControl(''),
       parish: new FormControl(''),
-      maritalStatus: new FormControl('', Validators.required),
+      maritalStatus: new FormControl(''),
       dateofMarriage: new FormControl(''),
       aboutYourself: new FormControl(''),
       isFamilyHead: new FormControl(''),
-      roles: this.formBuilder.array([this.adduserroles()], [Validators.required]),
+      roles: this.formBuilder.array([this.adduserroles()]),
     });
 
     this.columnDefs = [
@@ -137,13 +163,13 @@ export class LandingPageComponent implements OnInit {
     })
 
 
-  //   this.apiService.callGetService('getuserRecords?type=approved').subscribe((res) => {
-  //  this.alluserdata = res.data.metaData;
-  //  });
+    //   this.apiService.callGetService('getuserRecords?type=approved').subscribe((res) => {
+    //  this.alluserdata = res.data.metaData;
+    //  });
 
     this.apiService.callGetService('getCountryStates').subscribe((res: any) => {
       this.countries = res.data.countryState;
-    })
+    });
 
     this.gridOptions = {
       columnDefs: this.columnDefs,
@@ -156,7 +182,13 @@ export class LandingPageComponent implements OnInit {
         filter: 'agTextColumnFilter'
       }
     };
+
   }
+
+  cancel() {
+    this.router.navigate(['/dashboard/']);
+  }
+
 
   isStateDataSet = false;
   keyPress(event: any) {
@@ -197,10 +229,28 @@ export class LandingPageComponent implements OnInit {
 
   onRowClicked(event: any) {
     $("#imagemodal").modal("show");
-
     let rowData = event;
     this.selectedUserData = event.data;
-    console.log(this.selectedUserData);
+
+    this.apiService.callGetService(`getRolesByUserId?userId=${this.selectedUserData.userId}`).subscribe((res) => {
+      this.rolesData = res.data.roles;
+
+      this.rolesArr = [];
+      this.rolesData.forEach((e: any) => {
+        if (this.rolesArr.indexOf(e) <= 0) {
+  
+          for (let i = 0; i < this.orgs.length; i++) {
+            if (this.orgs[i].orgtype == e.orgType) {
+              e.orgDetails = this.orgs[i].details;
+            }
+          }
+          this.rolesArr.push(e);
+        }
+      });
+      this.updateuserinfo.setControl('roles', this.setRoles(this.rolesData));
+    });
+
+
     let i = rowData.rowIndex;
     this.userId = this.selectedUserData.userId;
 
@@ -208,8 +258,7 @@ export class LandingPageComponent implements OnInit {
       for (let i = 0; i < res.data.metaData.Parish.length; i++) {
         this.parishList = res.data.metaData.Parish;
       }
-      console.log(this.parishList);
-    })
+    });
 
 
     this.updateuserinfo.patchValue({
@@ -235,45 +284,30 @@ export class LandingPageComponent implements OnInit {
       dateofMarriage: this.selectedUserData.dateofMarriage,
       aboutYourself: this.selectedUserData.aboutYourself,
       isFamilyHead: this.selectedUserData.isFamilyHead,
-      //  role : selectedUserData.roles[0].roleId,
-      //  accesslvltype : selectedUserData.roles[0].orgType,
-      //  accesslvlid : selectedUserData.roles[0].orgId  
-      // roles: selectedUserData.roles
+    
     })
 
     this.patchCountryState(this.selectedUserData.country);
 
     this.selectedUserRole = this.selectedUserData.roles;
-    console.log("selectedUserRole", this.selectedUserRole)
-
-    this.rolesArr = [];
-    this.selectedUserRole.forEach((e: any) => {
-      if (this.rolesArr.indexOf(e) <= 0) {
-
-        for (let i = 0; i < this.orgs.length; i++) {
-          if (this.orgs[i].orgtype == e.orgType) {
-            e.orgDetails = this.orgs[i].details;
-          }
-        }
-        this.rolesArr.push(e);
-      }
-    });
-
-    this.updateuserinfo.setControl('roles', this.setRoles(this.selectedUserRole));
+   
   }
 
   telInputObject(obj: any) {
     obj.intlTelInput('setNumber', this.selectedUserData.mobileNo);
   }
 
+
   setRoles(selectedUserRole: any): FormArray {
     const formArray = new FormArray([]);
-    this.selectedUserRole.forEach((e: any) => {
+    selectedUserRole.forEach((e: any) => {
 
       formArray.push(this.formBuilder.group({
         roleId: e.roleId,
         role: e.orgType,
-        orgId: e.orgId
+        orgId: e.orgId,
+        roleStartDate: e.roleStartDate,
+        roleEndDate: e.roleEndDate
       }));
 
       this.onOrgSelect({
@@ -337,7 +371,9 @@ export class LandingPageComponent implements OnInit {
     return this.formBuilder.group({
       roleId: [null, Validators.required],
       role: [null, Validators.required],
-      orgId: [null, Validators.required]
+      orgId: [null, Validators.required],
+      roleStartDate: [null, Validators.required],
+      roleEndDate: [null, Validators.required]
     });
   }
 
@@ -355,10 +391,11 @@ export class LandingPageComponent implements OnInit {
 
   updateUserProfile() {
     if (this.updateuserinfo.invalid) {
-      return
+      this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
     }
-    else if (this.updateuserinfo.value.roles.length == 0) {
-      this.uiCommonUtils.showSnackBar('User should have atleast one Role', 'Dismiss', 3000);
+    else 
+    if (this.updateuserinfo.value.roles.length == 0) {
+      this.uiCommonUtils.showSnackBar("User should have atleast one Role!", "error", 3000);
     }
     else {
       this.updateuserinfo.value.userId = this.userId;
@@ -371,7 +408,7 @@ export class LandingPageComponent implements OnInit {
       this.apiService.updateUserProfile({ data: this.updateuserinfo.value }).subscribe((res: any) => {
         console.log("User Profile Updated.")
         if (res.data.status = "success") {
-          this.uiCommonUtils.showSnackBar('User Profile Updated..', 'Dismiss', 3000)
+          this.uiCommonUtils.showSnackBar("User Profile Updated Successfully!", "success", 3000);
         }
         this.getUserData();
       })
@@ -406,7 +443,7 @@ export class LandingPageComponent implements OnInit {
     }
     this.apiService.deleteUser(payload).subscribe((res: any) => {
       if (res.data.status = "success") {
-        this.uiCommonUtils.showSnackBar('User Record Deleted..', 'Dismiss', 3000)
+        this.uiCommonUtils.showSnackBar("User Record Deleted Successfully!", "success", 3000);
       }
     })
     this.getUserData();

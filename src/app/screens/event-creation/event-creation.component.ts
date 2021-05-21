@@ -9,11 +9,33 @@ import { uiCommonUtils } from 'src/app/common/uiCommonUtils';
 import { EventDataService } from '../events/event.dataService';
 import { Router } from '@angular/router';
 
+
+import { Moment } from 'moment';
+import * as _moment from 'moment';
+import { default as _rollupMoment } from 'moment';
+import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
+
+const moment = _rollupMoment || _moment;
+
+
+class CustomDateAdapter extends NativeDateAdapter {
+  format(date: Date, displayFormat: Object): string {
+    var formatString = ' MMMM DD YYYY';
+    return moment(date).format(formatString);
+  }
+}
+
 @Component({
   selector: 'app-event-creation',
   templateUrl: './event-creation.component.html',
-  styleUrls: ['./event-creation.component.css']
+  styleUrls: ['./event-creation.component.css'],
+  providers: [
+    {
+      provide: DateAdapter, useClass: CustomDateAdapter
+    }
+  ]
 })
+
 export class EventCreationComponent implements OnInit {
 
   eventCreationForm: any;
@@ -131,7 +153,7 @@ export class EventCreationComponent implements OnInit {
       endDate: new FormControl('', Validators.required),
       registrationStartDate: new FormControl('', Validators.required),
       registrationEndDate: new FormControl('', Validators.required),
-      eventUrl: new FormControl('', [Validators.required, Validators.pattern(this.myreg)]),
+      eventUrl: new FormControl(''), //, [Validators.required, Validators.pattern(this.myreg)]
       description: new FormControl('', Validators.required),
       eventCoordinator: new FormControl('', Validators.required)
     });//{validator: this.checkDates}); //to compare event registration dates

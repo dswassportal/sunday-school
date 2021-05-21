@@ -1,10 +1,10 @@
 const { Client, Pool } = require('pg');
 
 var pool = new Pool({
-    user: "fjsbrbxppqqvvj",
-    host: "ec2-54-73-68-39.eu-west-1.compute.amazonaws.com",
-    database: "d43i6d6j774qi2",
-    password: "b9fd23c066e268899d1e2062e58a767d0b6a520aeb93e762e4a3e7418efeffe9",
+    user: "oiccrclqexuacu",
+    host: "ec2-54-216-17-9.eu-west-1.compute.amazonaws.com",
+    database: "de92g5782s2hn1",
+    password: "a13fa0f3a0b64d44c63c23c3fe7731556843127809c1360400dc3ae2cf228808",
     port: "5432",
     max: 5,
     idleTimeoutMillis: 3000,

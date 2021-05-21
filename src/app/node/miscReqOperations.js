@@ -305,7 +305,6 @@ async function getRolesByUserId(userId) {
 
 }
 
-
 module.exports = {
     getCountryStates,
     getMembers,

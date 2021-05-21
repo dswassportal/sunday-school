@@ -37,7 +37,7 @@
 
 
                 <div class="form-group text-center">
-                    <button mat-button id="signInBtn" type="submit" class="mbutton" [disabled]="!signInForm.valid" (click)="logIn()">LOG IN</button>
+                    <button mat-button id="signInBtn" type="submit" class="mbutton" [disabled]="!signInForm.dirty" (click)="logIn()">LOG IN</button>
                 </div>
 
 

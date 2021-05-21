@@ -66,7 +66,8 @@ async function processSignInRequest(userInfo) {
 
         let newPersonTblInsQueryValue = [
             newUserId,
-            userInfo.data.dob,
+            //userInfo.data.dob,
+            userInfo.data.dob == '' ? null : userInfo.data.dob,
             userInfo.data.mobileNo,
             newUserId,
             new Date().toISOString()
@@ -467,7 +468,11 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                         vu.user_org_id org_id,
                         vu.user_org_type org_type,
                         membership_type,
-                        vu.user_org parish_name
+                        vu.user_org parish_name,
+                        vu.role_start_date,
+                        vu.role_end_date,
+                        vu.org_id,
+                        vu.org_type
                     FROM  v_user vu
                     WHERE ${condition} vu.user_org_id IN ${hierarchicalQry} order by user_id desc;`
 
@@ -646,6 +651,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
             //         metaData: users
             //     }
             // })
+
         }
         return ({
             data: {
@@ -1603,12 +1609,13 @@ async function processUpdateUserRoles(userData) {
             for (let role of userData.roles) {
 
                 const insertRoleMapping = `INSERT INTO public.t_user_role_mapping(
-                    role_id, user_id, is_deleted)
-                    VALUES ($1, $2, $3);`
+                    role_id, user_id, is_deleted, role_start_date, role_end_date)
+                    VALUES ($1, $2, $3, $4, $5);`
 
                 //t_user_role_context 
                 console.log(`Inserting role ${JSON.stringify(role)} into t_user_role_mapping t_user_role_context and t_user_role_context table.`)
-                insertRoleMapping_value = [role.roleId, userData.userId, false];
+                insertRoleMapping_value = [role.roleId, userData.userId, false, role.roleStartDate, role.roleEndDate];
+                console.log("999", insertRoleMapping_value);
                 await client.query(insertRoleMapping, insertRoleMapping_value);
 
                 const insertRoleContext = `INSERT INTO public.t_user_role_context(

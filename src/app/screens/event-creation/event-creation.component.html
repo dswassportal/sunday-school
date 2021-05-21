@@ -91,7 +91,6 @@
                                         matInput id="startDate" formControlName="startDate"
                                         [matDatepicker]="startatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="startatpicker">
-                                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #startatpicker></mat-datepicker>
                                     <mat-error
@@ -116,7 +115,6 @@
                                     <input [min]="minDate" matInput id="endDate" formControlName="endDate"
                                         (dateChange)="comparisonEventEnddateValidator()" [matDatepicker]="endatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="endatpicker">
-                                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #endatpicker></mat-datepicker>
 
@@ -140,7 +138,6 @@
                                         (dateChange)="comparisontRegiStartdateandEventStarValidator()"
                                         [matDatepicker]="registrationStartatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationStartatpicker">
-                                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #registrationStartatpicker></mat-datepicker>
 
@@ -164,7 +161,6 @@
                                     (dateChange)="comparisonRegiEnddateandEventStartValidator()" [min]="minDate" matInput id="registrationEndDate"
                                         formControlName="registrationEndDate" [matDatepicker]="registrationEndatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationEndatpicker">
-                                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #registrationEndatpicker></mat-datepicker>
                                     <mat-error *ngIf="eventsDataFormGroup.controls['registrationEndDate'].hasError('invaliddaterange')">
@@ -184,15 +180,15 @@
                             <div class="row">
                                 <mat-form-field class="col-md-12">
 
-                                    <input required id="eventUrl" matInput formControlName="eventUrl"
+                                    <input id="eventUrl" matInput formControlName="eventUrl"
                                         placeholder="Enter Event URL" />
-                                    <mat-error
+                                    <!-- <mat-error
                                         *ngIf="eventsDataFormGroup.controls.eventUrl.touched && eventsDataFormGroup.controls.eventUrl.invalid">
                                         <span *ngIf="eventsDataFormGroup.controls.eventUrl.errors.required">This field
                                             is mandatory.</span>
                                         <span *ngIf="eventsDataFormGroup.controls.eventUrl.errors.pattern">Please enter
                                             valid URL.</span>
-                                    </mat-error>
+                                    </mat-error> -->
                                 </mat-form-field>
                             </div>
 
