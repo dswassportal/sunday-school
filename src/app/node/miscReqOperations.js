@@ -1,9 +1,6 @@
 const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
-const { result, reject } = require('underscore');
-const { response } = require('express');
-
 const dbConnections = require(`${__dirname}/dbConnection`);
 
 
@@ -172,7 +169,7 @@ async function getUserApprovalStatus(fbuid) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::getUserApprovalStatus() --> error while fetching results : ${error}`)
-        reject(errorHandling.handleDBError('connectionError'));
+        return(errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }
@@ -209,7 +206,7 @@ async function handleLogIn_LogOut(reqContextData) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::handleLogIn_LogOut() --> Error : ${error}`)
-        reject(errorHandling.handleDBError('connectionError'));
+        return(errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }
@@ -271,7 +268,7 @@ async function getRolesByUserId(userId) {
     let client = await dbConnections.getConnection();
     try {
 
-        let query = `select distinct role_id, org_id, org_type from v_user vu where user_id = ${userId} order by role_id;`
+        let query = `select distinct role_id, org_id, role_start_date, role_end_date, org_type from v_user vu where user_id = ${userId} order by role_id;`
 
         let roleResult = await client.query(query);
         let roles = [];
@@ -281,6 +278,8 @@ async function getRolesByUserId(userId) {
                 role.roleId = roleRow.role_id;
                 role.orgType = roleRow.org_type;
                 role.orgId = roleRow.org_id;
+                role.roleStartDate = roleRow.role_start_date;
+                role.roleEndDate = roleRow.role_end_date;
 
                 if (_.findWhere(roles, role) == null) {
                     roles.push(role);
@@ -299,7 +298,7 @@ async function getRolesByUserId(userId) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::getRolesByUserId() --> Error : ${error}`)
-        reject(errorHandling.handleDBError('connectionError'));
+        return(errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }
