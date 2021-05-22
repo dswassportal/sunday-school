@@ -69,12 +69,11 @@ async function getMembers(fireBaseId) {
 
             let fetchAllMembersData = `select jsonb_agg(
                             jsonb_build_object(
-                            'userId', res.user_id, 'title', res.title, 
-                            'firstName', res.first_name, 'lastName', 
-                            res.last_name,  'role', res.role_name 
+                            'userId', res.user_id, 
+                            'name', concat(res.title, '. ',res.first_name, ' ',res.middle_name, ' ', res.last_name)
                             ) 
                         ) member_list from (
-                    select distinct user_id, title, first_name, last_name, role_name
+                    select distinct user_id, title, middle_name, first_name, last_name
                         from v_user tu2 where user_id in(
                     select distinct family_member_id from t_person_relationship tpr where family_member_id in 
                     (select user_id from t_user tu where email_id =
@@ -82,9 +81,10 @@ async function getMembers(fireBaseId) {
                         and is_deleted != true
                         union 
                 select distinct user_id  from v_user tu3 where firebase_id = '${fireBaseId}' and role_name = 'Family Head'
-                        )
+                        ) order by user_id 
                         ) res`;
 
+                        //, res.last_name,  'role', res.role_name 
             let result2 = await client.query(fetchAllMembersData)/* (err, result) => {
 
                             if (err) {

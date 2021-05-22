@@ -43,9 +43,7 @@ export class LoginAccListComponent implements OnInit {
 
 
     this.columnDefs = [
-      { headerName: 'First Name', field: 'firstName' },
-      { headerName: 'Last Name', field: 'lastName' },
-      { headerName: 'Role', field: 'role' },
+      { headerName: 'Users', field: 'name', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true },
     ];
 
     //   this.rowData = [
