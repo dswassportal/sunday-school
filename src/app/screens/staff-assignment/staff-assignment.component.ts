@@ -13,6 +13,7 @@ export class StaffAssignmentComponent implements OnInit {
   staffDataFormGroup: any;
   parishList!: any[];
   teacherList!: any[];
+  subtituteTeacherList!:any[];
   eventList!: any[];
   teacherGradeDataFormGroup : any;
   eventCategorydData!: any[];
@@ -25,6 +26,7 @@ export class StaffAssignmentComponent implements OnInit {
   gridOptions:any;
   selectedUserData: any;
   userId: any;
+  orgId:any;
   selectedUserRole!: any[];
   loggedInUser: any;
   roles:any;
@@ -65,7 +67,8 @@ export class StaffAssignmentComponent implements OnInit {
       for(let school of this.rowData){
           school.parish = this.orgName;
       }      
-      
+      console.log("School Data : " + this.rowData.orgId);
+
       this.teacherGradeData = this.rowData;
       //this.teacherGradeDataFormGroup.setControl('teacherGrades', this.setTeacherAndGrades(this.teacherGradeData));
       
@@ -115,6 +118,8 @@ export class StaffAssignmentComponent implements OnInit {
       schoolStartDate: new FormControl('', [Validators.required]),
       schoolEndDate : new FormControl('', [Validators.required]),
       principalName : new FormControl(''),
+      //firstName : new FormControl(''),
+      //lastName : new FormControl(''),
       vicePrincipalName : new FormControl('',),
       parish : new FormControl(''),
       roles: this.formBuilder.array([this.adduserroles()], [Validators.required]),
@@ -168,23 +173,39 @@ export class StaffAssignmentComponent implements OnInit {
     this.selectedUserData = event.data;
     
     let i = rowData.rowIndex;
-    this.userId = this.selectedUserData.userId;
-
+    this.orgId = this.selectedUserData.orgId;
+/*
     this.apiService.callGetService(`getSShools?role=vicar`).subscribe((res: any) => {
       //console.log(res.data.schoolData);
       for(let i=0;i<res.data.schoolData.length;i++){
-          if (res.data.schoolData != null) {
+         // if (res.data.schoolData != null) {
           this.principalList = res.data.schoolData;
-        }
+        //}
       }
     });
-    
+    */  
+    this.apiService.callGetService(`getuserRecords?type=principal`).subscribe((res: any) => {
+      //console.log(res.data.metaData);
+      for(let i=0;i<res.data.metaData.length;i++){
+          this.principalList = res.data.metaData;
+      }
+    });
+    this.apiService.callGetService(`getuserRecords?type=teacher`).subscribe((res: any) => {
+      console.log(res.data.metaData);
+      for(let i=0;i<res.data.metaData.length;i++){
+          this.teacherList = res.data.metaData;
+      }
+    });
+    this.apiService.callGetService(`getuserRecords?type=teacher`).subscribe((res: any) => {
+      //console.log(res.data.metaData);
+      for(let i=0;i<res.data.metaData.length;i++){
+          this.subtituteTeacherList = res.data.metaData;
+      }
+    });
     this.staffDataFormGroup.patchValue({
       name: this.selectedUserData.name,
-      //orgId : this.selectedUserData.OrgId,
-      //orgName:this.selectedUserData.orgName,
-      //principalName:this.selectedUserData.principalName,
-      parish : this.selectedUserData.parish
+      parish : this.selectedUserData.parish,
+      
     });
 
     this.selectedUserRole = this.selectedUserData.roles;
@@ -193,15 +214,54 @@ export class StaffAssignmentComponent implements OnInit {
   }
 
   saveStaffProfile(){
-    if (this.staffDataFormGroup.invalid) {
-      return
-    }else if (this.staffDataFormGroup.value.roles.length == 0) {
-      this.uiCommonUtils.showSnackBar('User should have atleast one Role', 'Dismiss', 3000);
+  /*
+    let payLoad = {
+      "orgId": this.orgId,    // school Id
+      "staffId": this.loggedInUser,   //user id of that principal/Teacher.
+      "isPrimary": false,   //its a boolean, true if teacher is primary; false if teacher is subtitute.
+      "roleType": ""    //"Principal"/ "Teacher"
     }
+    */
+   let payLoad = {
+    
+    "ssStartDate" : this.staffDataFormGroup.schoolStartDate,
+    "ssEndDate" : this.staffDataFormGroup.schoolEndDate,
+    "orgId": this.orgId,
+    "staffAssignment": [
+      {
+        
+        "staffId":  this.teacherList[0].userId,
+        "isPrimary": false,
+        "roleType": "Teacher"
+      },
+      {
+        
+        "staffId":  this.subtituteTeacherList[0].userId,
+        "isPrimary": true,
+        "roleType": "Teacher"
+      },
+      {
+        
+        "staffId":  this.principalList[0].userId,
+        "isPrimary": true,
+        "roleType": "Principal"
+      }
+    ]
+  }
+    console.log("payLoad is " + payLoad);
 
+    /*
+    this.apiService.callPostService('',payLoad ).subscribe((res: any) => {
+      if (res.data.status == "success") {
+        this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
+      }
+      else
+        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+    });
+    */
   }
 
-  comparisonEventStartdateValidator(): any {
+  comparisonSchoolStartdateValidator(): any {
 
     let schoolStartDate = this.staffDataFormGroup.value['schoolStartDate'];
     let schoolEndDate = this.staffDataFormGroup.value['schoolEndDate'];
@@ -214,13 +274,13 @@ export class StaffAssignmentComponent implements OnInit {
 
   }
 
-  comparisonEventEnddateValidator(): any {
+  comparisonSchoolEnddateValidator(): any {
 
     let schoolStartDate = this.staffDataFormGroup.value['schoolStartDate'];
     let schoolEndDate = this.staffDataFormGroup.value['schoolEndDate'];
 
     if (schoolStartDate > schoolEndDate) {
-      return this.staffDataFormGroup.controls['schoolEndDate'].setErrors({ 'invaliddaterange': true });
+      return this.staffDataFormGroup.controls['schoolEndDate'].setErrors({ 'invaliddaterange1': true });
     }
   
 
