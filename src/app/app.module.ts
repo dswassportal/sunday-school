@@ -71,6 +71,7 @@ import { EventAttendanceComponent } from './screens/event-attendance/event-atten
 import { CheckboxRendererComponent } from './screens/renderers/checkbox-renderer/checkbox-renderer.component';
 import { DatePickerRendererComponent } from './screens/renderers/date-picker-renderer/date-picker-renderer.component';
 import { StaffAssignmentComponent } from './screens/staff-assignment/staff-assignment.component';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 
 
@@ -144,7 +145,7 @@ import { StaffAssignmentComponent } from './screens/staff-assignment/staff-assig
     MatStepperModule,
     NgxDaterangepickerMd.forRoot()
   ],
-  providers: [AuthService,  { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true },EventDataService],
+  providers: [AuthService,  { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true },EventDataService, {provide: LocationStrategy, useClass: HashLocationStrategy}],
   bootstrap: [AppComponent],
   entryComponents: [CheckboxRendererComponent],
   schemas:[CUSTOM_ELEMENTS_SCHEMA ]
