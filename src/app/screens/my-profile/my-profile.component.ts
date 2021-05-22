@@ -40,15 +40,15 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   orgs: any;
   name: any;
   acadmicGradeSelection = 'Grade1';
-  sundaySchoolGradeSelect= 'Grade1';
+  sundaySchoolGradeSelect = 'Grade1';
   sundaySchoolNameSelect = '';
   temp: any;
   schoolData: any;
   schoolDataList!: any[];
-  areDatesDisabled: boolean=false;
+  areDatesDisabled: boolean = false;
   schoolGrade: any;
   parishDataList!: any[];
-  
+
   /*MarrirdOptions: any[] = [
     { value: "unmarried", viewValue: "unmarried" },
     { value: "married", viewValue: "married" }
@@ -62,7 +62,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   }
 
   myprofileform: any;
-  studentDetailsForm:any;
+  studentDetailsForm: any;
   members: any;
   isDirty: boolean = false;
   hasAddMemPerm: boolean = false;
@@ -86,10 +86,10 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   max_date!: any;
   maxDate = new Date();
   minDate = new Date();
-  ishidden:boolean = false;
-  isStudent:any;
-//, Validators.required
-//[Validators.required, Validators.email]
+  ishidden: boolean = false;
+  isStudent: any;
+  //, Validators.required
+  //[Validators.required, Validators.email]
   ngOnInit(): void {
     this.myprofileform = this.formBuilder.group({
       title: new FormControl('', Validators.required),
@@ -117,7 +117,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       userId: new FormControl(''),
       isFamilyHead: new FormControl(''),
       orgId: new FormControl(''),
-      isStudent:new FormControl('')
+      isStudent: new FormControl('')
     });
 
 
@@ -142,20 +142,20 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       sunSchoolStudentAcaDtlId: new FormControl('', Validators.required),
       sunSchoolStudentId: new FormControl('', Validators.required),
       sunSchoolId: new FormControl('', Validators.required),
-      sunSchoolGrade:  new FormControl('', Validators.required),
+      sunSchoolGrade: new FormControl('', Validators.required),
       sunSchoolAcaYrStrtDate: new FormControl('', Validators.required),
       sunSchoolAcaYrEndDate: new FormControl('', Validators.required)
     });
 
 
-  
-    this.myprofileform.valueChanges.subscribe((res: any)=>{
-      if(res.isStudent=='yes'){
-        this.ishidden= true;
-      }else{
+
+    this.myprofileform.valueChanges.subscribe((res: any) => {
+      if (res.isStudent == 'yes') {
+        this.ishidden = true;
+      } else {
         this.ishidden = false;
       }
-   });
+    });
 
 
     if (this.isApprovedUserLoggedIn == true) {
@@ -179,22 +179,22 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       //   // console.log(res.data.metaData);
       //    this.alluserdata = res.data.metaData;
       //  });
-      
+
 
       this.apiService.callGetService('getParishData').subscribe((res: any) => {
         this.parishDataList = res.data.metaData.Parish;
       })
 
-    
 
-      this.apiService.callGetService(`getSShools`).subscribe((res: any) => {
-       
-          this.schoolDataList = res.data.schoolData;
-          //to default the dropdrown value
-          this.sundaySchoolNameSelect = this.schoolDataList[0].orgId;
-          this.sundaySchoolGradeSelect = this.schoolDataList[0].orgId;
 
-       // console.log(this.schoolDataList);
+      this.apiService.callGetService(`getSSchools`).subscribe((res: any) => {
+
+        this.schoolDataList = res.data.schoolData;
+        //to default the dropdrown value
+        this.sundaySchoolNameSelect = this.schoolDataList[0].orgId;
+        this.sundaySchoolGradeSelect = this.schoolDataList[0].orgId;
+
+        // console.log(this.schoolDataList);
       });
 
       // this.apiService.callGetService('getCountryStates').subscribe((res: any) => {
@@ -205,10 +205,10 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         for (let i = 0; i < res.data.metaData.Parish.length; i++) {
           this.parishList = res.data.metaData.Parish;
         }
-       
+
         //console.log(this.parishList);
       });
-      
+
 
       this.apiService.getCountryStates().subscribe((res: any) => {
         this.countries = res.data.countryState;
@@ -220,7 +220,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       this.myprofileform.patchValue({
         country: this.alluserdata.country,
-       
+
         title: this.alluserdata.title,
         firstName: this.alluserdata.firstName,
         middleName: this.alluserdata.middleName,
@@ -246,52 +246,52 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         userId: this.alluserdata.userId,
       });
 
-  this.studentDetailsForm.patchValue({
+      this.studentDetailsForm.patchValue({
         studentAcaDtlId: this.alluserdata.studentAcademicdetails[0].studentAcademicDetailId,
-         studentId: this.alluserdata.studentAcademicdetails[0].studentId,
-   
-         schoolName: this.alluserdata.studentAcademicdetails[0].schoolName,
-         schoolGrade: this.alluserdata.studentAcademicdetails[0].schoolGrade,
-         studntAcaYrStrtDate: this.alluserdata.studentAcademicdetails[0].academicYearStartDate,
-         studntAcaYrEndDate: this.alluserdata.studentAcademicdetails[0].academicYearEndDate,
-         schoolAddrLine1: this.alluserdata.studentAcademicdetails[0].schoolAddressline1,
-         schoolAddrLine2: this.alluserdata.studentAcademicdetails[0].schoolAddressline2,
-         schoolAddrLine3: this.alluserdata.studentAcademicdetails[0].schoolAddressline3,
-         schoolCountry: this.alluserdata.studentAcademicdetails[0].schoolCity,
-         schoolState: this.alluserdata.studentAcademicdetails[0].schoolState,
-         schoolCity: this.alluserdata.studentAcademicdetails[0].schoolPostalCode,
-         schoolPostalCode: this.alluserdata.studentAcademicdetails[0].schoolCountry,
-         //sunday school
-         sunSchoolStudentAcaDtlId: this.alluserdata.sundaySchoolDetails[0].studentSundaySchooldtlId,
-         sunSchoolStudentId: this.alluserdata.sundaySchoolDetails[0].studentId,
-         sunSchoolId: this.alluserdata.sundaySchoolDetails[0].schoolId,
-         sunSchoolGrade: this.alluserdata.sundaySchoolDetails[0].schoolGrade,
-         sunSchoolAcaYrStrtDate: this.alluserdata.sundaySchoolDetails[0].schoolYearStartDate,
-         sunSchoolAcaYrEndDate: this.alluserdata.sundaySchoolDetails[0].schoolYearEndDate,
-       });
-      
-       if (this.studentDetailsForm.sunSchoolId != null) {
+        studentId: this.alluserdata.studentAcademicdetails[0].studentId,
+
+        schoolName: this.alluserdata.studentAcademicdetails[0].schoolName,
+        schoolGrade: this.alluserdata.studentAcademicdetails[0].schoolGrade,
+        studntAcaYrStrtDate: this.alluserdata.studentAcademicdetails[0].academicYearStartDate,
+        studntAcaYrEndDate: this.alluserdata.studentAcademicdetails[0].academicYearEndDate,
+        schoolAddrLine1: this.alluserdata.studentAcademicdetails[0].schoolAddressline1,
+        schoolAddrLine2: this.alluserdata.studentAcademicdetails[0].schoolAddressline2,
+        schoolAddrLine3: this.alluserdata.studentAcademicdetails[0].schoolAddressline3,
+        schoolCountry: this.alluserdata.studentAcademicdetails[0].schoolCity,
+        schoolState: this.alluserdata.studentAcademicdetails[0].schoolState,
+        schoolCity: this.alluserdata.studentAcademicdetails[0].schoolPostalCode,
+        schoolPostalCode: this.alluserdata.studentAcademicdetails[0].schoolCountry,
+        //sunday school
+        sunSchoolStudentAcaDtlId: this.alluserdata.sundaySchoolDetails[0].studentSundaySchooldtlId,
+        sunSchoolStudentId: this.alluserdata.sundaySchoolDetails[0].studentId,
+        sunSchoolId: this.alluserdata.sundaySchoolDetails[0].schoolId,
+        sunSchoolGrade: this.alluserdata.sundaySchoolDetails[0].schoolGrade,
+        sunSchoolAcaYrStrtDate: this.alluserdata.sundaySchoolDetails[0].schoolYearStartDate,
+        sunSchoolAcaYrEndDate: this.alluserdata.sundaySchoolDetails[0].schoolYearEndDate,
+      });
+
+      if (this.studentDetailsForm.sunSchoolId != null) {
         this.studentDetailsForm.patchValue({
           sunSchoolId: this.alluserdata.sundaySchoolDetails[0].sunSchoolId // array
         });
       }
-  
+
       if (this.studentDetailsForm.sunSchoolGrade != null) {
         this.studentDetailsForm.patchValue({
           sunSchoolGrade: this.alluserdata.sunSchoolGrade // array
         });
       }
-  
+
       if (this.studentDetailsForm.schoolGrade != null) {
         this.studentDetailsForm.patchValue({
           schoolGrade: this.alluserdata.schoolGrade // array
         });
       }
 
-     }
+    }
 
 
-    
+
     if (this.isApprovedUserLoggedIn == false) {
 
       this.signUpForm = this.formBuilder.group({
@@ -332,11 +332,11 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     }
   }
 
-  isStudentFn(event:any){
-    if(event.value == "true"){
+  isStudentFn(event: any) {
+    if (event.value == "true") {
       this.isStudentvar = true;
     }
-    if(event.value == "false"){
+    if (event.value == "false") {
       this.isStudentvar = false;
     }
     //this.isStudentvar = !this.isStudentvar;
@@ -349,10 +349,10 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   //   this.picker.close();
   // }
 
-  
-    
-    
-  
+
+
+
+
 
   setMemberDetails(memberDetailsData: any): FormArray {
     const formArray = new FormArray([]);
@@ -374,20 +374,20 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
   //to change value of sundayschool grade dropdrown based on based
   // on acadmic grade dropdown
-  onAcadmicGradeChange(event:any){
-  this.sundaySchoolGradeSelect=event;
+  onAcadmicGradeChange(event: any) {
+    this.sundaySchoolGradeSelect = event;
   }
-  
-  
 
-  eventStartDateChange(){
+
+
+  eventStartDateChange() {
     this.studentDetailsForm.patchValue({
       sunSchoolAcaYrEndDate: this.studentDetailsForm.value.sunSchoolAcaYrStrtDate
     });
     this.areDatesDisabled = false;
   }
 
-  gradeChange(){
+  gradeChange() {
     this.studentDetailsForm.patchValue({
       sunSchoolGrade: this.studentDetailsForm.value.schoolGrade
     });
@@ -407,25 +407,25 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       relationship: new FormControl('', Validators.required),
       baptismalName: new FormControl(''),
       dob: new FormControl('',),
-      mobileNo: new FormControl('', [ Validators.required,Validators.pattern('[0-9].{9}')]),
+      mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
       emailId: new FormControl('', [Validators.required, Validators.email]),
     });
   }
- //event handler for the select element's change event
- selectChangeHandler (event: any) {
-  //update the ui
-  this.selectedGrade = event.target.value;
-}
+  //event handler for the select element's change event
+  selectChangeHandler(event: any) {
+    //update the ui
+    this.selectedGrade = event.target.value;
+  }
   onremovebtnclick(index: any) {
     (<FormArray>this.myprofileform.get('memberDetails').removeAt(index));
   }
 
   updateUserProfile() {
     // if (this.myprofileform.invalid) {
+    //   this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
     //   return
     // }
     // else {
-    //    console.log("this.userId", this.userId);
     if (this.isApprovedUserLoggedIn == true) {
       this.myprofileform.value.userId = this.userId;
       this.myprofileform.value.updatedBy = this.userId;
@@ -446,7 +446,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         this.myprofileform.value.isFamilyHead = this.alluserdata.isFamilyHead
 
 
-        let currisStudentValue = this.myprofileform.value.isStudent;
+      let currisStudentValue = this.myprofileform.value.isStudent;
       if (currisStudentValue === true || currisStudentValue == 'true')
         this.myprofileform.value.isStudent = true;
       else if (currisStudentValue === false || currisStudentValue == 'false')
@@ -454,8 +454,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       else if (currisStudentValue === '')
         this.myprofileform.value.isStudent = this.alluserdata.isStudent
 
-      this.apiService.updateUserProfile({data:{
- ...this.myprofileform.value, ...this.studentDetailsForm.value }}).subscribe((res: any) => {
+      this.apiService.callPostService(`updateUserRoles`, {...this.myprofileform.value, ...this.studentDetailsForm.value
+      }).subscribe((res: any) => {
         if (res.data.status == "success") {
           this.uiCommonUtils.showSnackBar("Profile updated successfully!", "success", 3000);
           this.getAndSetMetdata(this.userId)
@@ -463,8 +463,9 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         else
           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
       });
+    }
 
-    } if (this.isApprovedUserLoggedIn == false) {
+    if (this.isApprovedUserLoggedIn == false) {
 
       this.signUpForm.value.userId = this.alluserdata.userId;
       this.signUpForm.value.updatedBy = this.alluserdata.userId;
@@ -482,36 +483,37 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
 
     }
+   
   }
 
 
-//SunSchool End Date Validator that is SunSchoolEndDate>SunSchoolStartDate
-comparisonSunSchoolEndDateValidator(): any {
-  let sunSchoolStartDate = this.studentDetailsForm.value['sunSchoolAcaYrStrtDate'];
-  let sunSchoolEndDate = this.studentDetailsForm.value['sunSchoolAcaYrEndDate'];
+  //SunSchool End Date Validator that is SunSchoolEndDate>SunSchoolStartDate
+  comparisonSunSchoolEndDateValidator(): any {
+    let sunSchoolStartDate = this.studentDetailsForm.value['sunSchoolAcaYrStrtDate'];
+    let sunSchoolEndDate = this.studentDetailsForm.value['sunSchoolAcaYrEndDate'];
 
-  let startnew = new Date(sunSchoolStartDate);
-  let endnew = new Date(sunSchoolEndDate);
+    let startnew = new Date(sunSchoolStartDate);
+    let endnew = new Date(sunSchoolEndDate);
 
-  if (startnew > endnew) {
-    return this.studentDetailsForm.controls['sunSchoolAcaYrEndDate'].setErrors({ 'invaliddaterange': true });
+    if (startnew > endnew) {
+      return this.studentDetailsForm.controls['sunSchoolAcaYrEndDate'].setErrors({ 'invaliddaterange': true });
+    }
+
   }
 
-}
+  //SunSchool Start Date Validator that is SunSchoolStartDate < SunSchoolEndDate
+  comparisonSunSchoolStartDateValidator(): any {
+    let sunSchoolStartDate = this.studentDetailsForm.value['sunSchoolAcaYrStrtDate'];
+    let sunSchoolEndDate = this.studentDetailsForm.value['sunSchoolAcaYrEndDate'];
 
-//SunSchool Start Date Validator that is SunSchoolStartDate < SunSchoolEndDate
-comparisonSunSchoolStartDateValidator(): any {
-  let sunSchoolStartDate = this.studentDetailsForm.value['sunSchoolAcaYrStrtDate'];
-  let sunSchoolEndDate = this.studentDetailsForm.value['sunSchoolAcaYrEndDate'];
+    let startnew = new Date(sunSchoolStartDate);
+    let endnew = new Date(sunSchoolEndDate);
+    if (startnew > endnew) {
+      return this.studentDetailsForm.controls['sunSchoolAcaYrStrtDate'].setErrors({ 'invaliddaterange': true });
+    }
 
-  let startnew = new Date(sunSchoolStartDate);
-  let endnew = new Date(sunSchoolEndDate);
-  if (startnew > endnew) {
-    return this.studentDetailsForm.controls['sunSchoolAcaYrStrtDate'].setErrors({ 'invaliddaterange': true });
+
   }
-
-  
-}
 
   getAndSetMetdata(userId: number) {
     this.apiService.callGetService(`getUserMetaData?uid=${userId}`).subscribe((data) => {
@@ -551,7 +553,7 @@ comparisonSunSchoolStartDateValidator(): any {
       }
     }
   }
- 
+
   cancel() {
     this.router.navigate(['/dashboard/']);
   }

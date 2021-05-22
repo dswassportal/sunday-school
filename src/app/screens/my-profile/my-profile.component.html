@@ -1,112 +1,13 @@
 <div class="container mt-4">
   <mat-card class="shadow">
+      
       <div class="row">
 
           <h1 class="col-md-12">My Profile</h1>
         </div>
-
-        <!-- ****************************************  Basic edit profile Sign up form Code ****************************************** -->
-
-     <form *ngIf="!isApprovedUserLoggedIn"  [formGroup]="signUpForm" class="p-2">
-
-        <div class="row form-group">
-            <mat-form-field class="form-field col-2">
-                    <mat-select required formControlName="title" id="title" placeholder="Title">
-                            <mat-option value="His Grace">His Grace</mat-option>
-                            <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
-                            <mat-option value="Very Rev">Very Rev</mat-option>
-                            <mat-option value="Fr">Fr</mat-option>
-                            <mat-option value="Rev Fr. Dr">Rev Fr. Dr</mat-option>
-                            <mat-option value="Rev Fr.">Rev Fr.</mat-option>
-                            <mat-option value="Mr">Mr</mat-option>
-                            <mat-option value="Ms">Ms</mat-option>
-                            <mat-option value="Mrs">Mrs</mat-option>
-                            <mat-option value="Dr">Dr</mat-option>
-                    </mat-select>
-            </mat-form-field>
-            <mat-form-field class="form-field col-md-5">
-                <input matInput formControlName="firstName" id="firstName" placeholder="First Name" maxlength="25" required>
-                <mat-error *ngIf="signUpForm.controls.firstName.touched && signUpForm.controls.firstName.invalid">
-                    <span *ngIf="signUpForm.controls.firstName.errors.required">This field is mandatory.</span>
-                    <span *ngIf="signUpForm.controls.firstName.errors.pattern">This field is invalid.</span>
-                </mat-error>
-            </mat-form-field>
-
-            <mat-form-field class="form-field col-md-5">
-                <input type="text" matInput formControlName="lastName" id="lastName" placeholder="Last Name" maxlength="25" required>
-                <mat-error *ngIf="signUpForm.controls.lastName.touched && signUpForm.controls.lastName.invalid">
-                    <span *ngIf="signUpForm.controls.lastName.errors.required">This field is mandatory.</span>
-                    <span *ngIf="signUpForm.controls.lastName.errors.pattern">This field is invalid.</span>
-                </mat-error>
-            </mat-form-field>
-        </div>
-
-        <div class="form-group row justify-content-center">
-            <mat-form-field class="form-field col-md">
-                <input [readonly]=true type="text" matInput formControlName="email" id="email" placeholder="Email" required>
-                <mat-error *ngIf="signUpForm.controls.email.touched && signUpForm.controls.email.invalid">
-                    <span *ngIf="signUpForm.controls.email.errors.required">This field is mandatory.</span>
-                    <span *ngIf="signUpForm.controls.email.errors.pattern">This field is invalid.</span>
-                </mat-error>
-            </mat-form-field>
-        </div>
-        <div class="row">
-
-            <mat-form-field class="form-field col col-md">
-                <mat-label style="padding-left: 23%;">Mobile Number</mat-label>
-                <input matInput type="text" ng2TelInput (ng2TelOutput)="getNumber($event)" formControlName="mobileNo" id="mobileNo" maxlength="12" (keypress)="keyPress($event)" required style="width: fit-content;"/>
-                <mat-error *ngIf="signUpForm.controls.mobileNo.touched && signUpForm.controls.mobileNo.invalid">
-                    <span *ngIf="signUpForm.controls.mobileNo.errors.required">This field is mandatory.</span>
-                    <span *ngIf="signUpForm.controls.mobileNo.errors.pattern">Enter 10 digit number.</span>
-                </mat-error>
-            </mat-form-field>
-           
-
-            <mat-form-field class="form-field col-12 col-md-6">
-              
-                <input matInput type="input" [matDatepicker]="picker" [max]="maxDate" formControlName="dob" id="dob" placeholder="DoB" >
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-                <mat-error *ngIf="signUpForm.controls.dob.touched && signUpForm.controls.dob.invalid">
-                    <span *ngIf="signUpForm.controls.dob.errors.required">This field is mandatory.</span>
-                    <span *ngIf="signUpForm.controls.dob.errors.pattern">This field is invalid.</span>
-                </mat-error>
-            </mat-form-field>
-                           </div>
-
-        <div class="form-group row">
-                <mat-form-field class="form-field col-md">
-                        <mat-select required formControlName="memberType" id="memberType" placeholder="Member Type">
-                                <mat-option value="member">Member</mat-option>
-                                <mat-option value="non-member">Non-member</mat-option>
-                                <mat-option value="guest">Guest</mat-option>
-                        </mat-select>
-                </mat-form-field>
-                <mat-form-field class="form-field col-md" >
-                  
-                        <mat-select id="orgId" formControlName = "orgId" placeholder="Parish" >
-                          <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
-                        </mat-select>
-                      </mat-form-field>
-        </div>
-
-        <div class="form-group row justify-content-center">
-            <mat-form-field class="form-field col-md">
-                <textarea type="text" matInput formControlName="abtyrslf" id="abtyrslf" placeholder="About Yourself"></textarea>
-            </mat-form-field>
-        </div>
       
-
-        <!-- <div class="form-group text-right">
-            <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="unpproveCancel()">Cancel</button>
-            <button [disabled]="!signUpForm.dirty" mat-button id="signInBtn" type="submit" routerLinkActive="active" class="mbutton" (click)="updateUserProfile()">Update</button>
-        </div> -->
-        
-    </form>
-   
-
     <form *ngIf="isApprovedUserLoggedIn" (change)="isDirty = true" [formGroup]="myprofileform">
-      
+        
       <div class="row" style="padding-left: 1.6%;">
 
         <mat-form-field style="width:10%;">
@@ -134,7 +35,8 @@
 
         <mat-form-field style="width:30%;padding-left: 1%;">
           <mat-label>Middle Name</mat-label>
-          <input style="text-transform: capitalize;" id="middleName" matInput formControlName="middleName" placeholder="Enter Middle Name" />
+          <!--required-->
+          <input style="text-transform: capitalize;"  id="middleName" matInput formControlName="middleName" placeholder="Enter Middle Name" />
         </mat-form-field>
 
         <mat-form-field style="width:30%;padding-left: 1%;padding-right: 1.4%;">
@@ -160,7 +62,8 @@
 
         <mat-form-field class="col-md">
           <mat-label>Date of Birth</mat-label>
-          <input [max]="maxDate" matInput type="input" [matDatepicker]="picker" id="dob" formControlName="dob">
+           <!--required-->
+          <input [max]="maxDate" matInput type="input" [matDatepicker]="picker"  id="dob" formControlName="dob">
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
@@ -189,7 +92,7 @@
 
         <mat-form-field class="col-md-4">
           <mat-label>Email Address</mat-label>
-          <input id="emailId" readonly matInput formControlName="emailId" placeholder="Enter Email Address" />
+          <input id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address" readonly />
           <mat-error *ngIf="myprofileform.controls.emailId.touched && myprofileform.controls.emailId.invalid">
             <span *ngIf="myprofileform.controls.emailId.errors.required">This field is mandatory.</span>
             <span *ngIf="myprofileform.controls.emailId.errors.pattern">Enter valid email id.</span>
@@ -461,12 +364,20 @@
         </fieldset>
         <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
         </mat-divider>
-
+        <div class="row" style="padding-top: 1%;" >
+            <div class="col text-center"  >
+              <!--[disabled]="!myprofileform.dirty"-->
+                <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
+              <button [disabled]="!myprofileform.dirty" mat-button type="submit" mat-button class="mbutton" (change)="isDirty = false"
+               (click)="updateUserProfile()">
+                Update</button>
+            </div>
+          </div>
       </div>
-
+      
      
     </form>
-
+<div ></div>
     <div *ngIf="!isFamilyHead">
       <form [formGroup]="studentDetailsForm">
         <div *ngIf = "isStudentvar" >
@@ -711,9 +622,9 @@
                   </mat-form-field>
             
                 </div>
-    
+               
         </div>
-         
+        
       </form>
      
 
@@ -721,10 +632,12 @@
     </mat-divider>
  
     
+  </div>
+    
 
     <!-- ****************************************  Basic edit profile Sign up form Code ****************************************** -->
 
-      <!-- <form *ngIf="!isApprovedUserLoggedIn"  [formGroup]="signUpForm" class="p-2">
+      <form *ngIf="!isApprovedUserLoggedIn"  [formGroup]="signUpForm" class="p-2">
 
         <div class="row form-group">
             <mat-form-field class="form-field col-2">
@@ -801,7 +714,7 @@
                 </mat-form-field>
                 <mat-form-field class="form-field col-md" >
                   
-                        <mat-select id="orgId" formControlName = "orgId" placeholder="Parish" >
+                        <mat-select  id="orgId" formControlName = "orgId" placeholder="Parish" >
                           <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
                         </mat-select>
                       </mat-form-field>
@@ -814,22 +727,20 @@
         </div>
       
 
-        <div class="form-group text-right">
+        <!-- <div class="form-group text-right">
             <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="unpproveCancel()">Cancel</button>
             <button [disabled]="!signUpForm.dirty" mat-button id="signInBtn" type="submit" routerLinkActive="active" class="mbutton" (click)="updateUserProfile()">Update</button>
-        </div>
+        </div>  -->
         
     </form>
-   -->
-    <div class="row" style="padding-top: 1%;">
+    <div class="row" style="padding-top: 1%;" *ngIf="!isFamilyHead">
         <div class="col text-center">
-          <!-- [disabled]="!myprofileform.dirty"  [disabled]="!myprofileform.dirty" -->
+          <!--[disabled]="!myprofileform.dirty"-->
             <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
-          <button   mat-button type="submit" mat-button class="mbutton" (change)="isDirty = false"
-            (click)="updateUserProfile()">
+          <button mat-button type="submit" mat-button class="mbutton" (change)="isDirty = false"
+           (click)="updateUserProfile()">
             Update</button>
         </div>
-      </div>
-  </div>
+      </div>  
   </mat-card>
 </div>

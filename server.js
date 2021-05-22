@@ -214,7 +214,8 @@ app.post('/api/insertEvents', function (req, res) {
 app.post('/api/updateUserRoles', function (req, res) {
   console.log("updateUserRoles called with : " + JSON.stringify(req.body));
   try {
-    processRequest.processUpdateUserRoles(req.body.data)
+    let loggedInUser = decodeUser(req);
+    processRequest.processUpdateUserRoles(req.body.data, loggedInUser)
       .then((data) => {
         /// console.log(`Returning with resonse : ${data}`)
         res.send(data);
@@ -677,8 +678,8 @@ app.get('/api/getScoreByCategory', function (req, res) {
   }
 });
 
-app.get('/api/getSShools', function (req, res) {
-  console.log("getSShools called...");
+app.get('/api/getSSchools', function (req, res) {
+  console.log("getSSchools called...");
   let loggedInUser = decodeUser(req)
   try {
     processSSRequest.getSSchoolData(loggedInUser, req.query.role)
@@ -692,7 +693,7 @@ app.get('/api/getSShools', function (req, res) {
         res.end();
       })
   } catch (error) {
-    console.error('Error in getSShools as : ' + error)
+    console.error('Error in getSSchools as : ' + error)
   }
 });
 

@@ -79,6 +79,7 @@ export class LandingPageComponent implements OnInit{
   rolesData: any;
   homePhoneNumber: any;
   alluserdata: any;
+  roleEndDateErrorFlag: any;
   minDate = new Date();
 
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
@@ -189,7 +190,6 @@ export class LandingPageComponent implements OnInit{
     this.router.navigate(['/dashboard/']);
   }
 
-
   isStateDataSet = false;
   keyPress(event: any) {
     this.isStateDataSet = false;
@@ -204,6 +204,21 @@ export class LandingPageComponent implements OnInit{
       }
     }
   }
+
+
+   //Role End Date Validator that is roleEndDate>roleStartDate
+   comparisonRegiEnddateValidator(): any {
+    let regiStartDate = this.updateuserinfo.value.roles['roleStartDate'];
+    let regiEndDate = this.updateuserinfo.value.roles['roleEndDate'];
+
+    let startnew = new Date(regiStartDate);
+    let endnew = new Date(regiEndDate);
+
+    if (startnew > endnew) {
+      return this.updateuserinfo.controls['roles'].setErrors({ 'invaliddaterange': true });
+    }
+  }
+
 
   onSearchChange(event: any) {
     this.gridApi.setQuickFilter(this.term);
@@ -404,9 +419,7 @@ export class LandingPageComponent implements OnInit{
       this.updateuserinfo.value.mobileNo = this.mobileNumber;
       this.updateuserinfo.value.homePhoneNo = this.homePhoneNumber;
       let dob = this.updateuserinfo.value.dob;
-      console.log(dob);
-      this.apiService.updateUserProfile({ data: this.updateuserinfo.value }).subscribe((res: any) => {
-        console.log("User Profile Updated.")
+      this.apiService.callPostService(`updateUserRoles`, this.updateuserinfo.value ).subscribe((res: any) => {
         if (res.data.status = "success") {
           this.uiCommonUtils.showSnackBar("User Profile Updated Successfully!", "success", 3000);
         }

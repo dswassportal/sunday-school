@@ -374,15 +374,15 @@
                                                                                         </mat-form-field>
 
 
-                                                                                        <mat-form-field
-                                                                                                class="col-md-6">
+                                                                                        <mat-form-field class="col-md-6">
 
                                                                                                 <mat-label>Role End Date
                                                                                                 </mat-label>
                                                                                                 <input matInput
-                                                                                                        id="roleEndDate"
+                                                                                                        id="roleEndDate" [min]="minDate"
                                                                                                         formControlName="roleEndDate"
-                                                                                                        [matDatepicker]="roleEndDate">
+                                                                                                        [matDatepicker]="roleEndDate"
+                                                                                                        (dateChange) = "comparisonRegiEnddateValidator()">
                                                                                                 <mat-datepicker-toggle
                                                                                                         matSuffix
                                                                                                         [for]="roleEndDate">
@@ -390,6 +390,15 @@
                                                                                                 <mat-datepicker
                                                                                                         #roleEndDate>
                                                                                                 </mat-datepicker>
+
+                                                                                                <!-- <div *ngIf="i.controls.roleEndDate.roleEndDateErrorFlag">
+                                                                                                        <div *ngIf="p.hasError('required', 'name')">Required</div>  
+                                                                                                </div> -->
+
+                                                                                                <mat-error *ngIf="item.controls.roleEndDate.hasError('invaliddaterange')">
+                                                                                                        Role end date cannot be earlier than role start date
+                                                                                                </mat-error>
+
                                                                                         </mat-form-field>
                                                                                 </div>
 

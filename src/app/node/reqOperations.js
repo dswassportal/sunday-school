@@ -213,7 +213,8 @@ async function processGetUserMetaDataRequest(uid) {
                  vu.is_family_head,
                  vu.is_approved,
                  vu.membership_type   
-                from v_user vu where user_id = '${uid}';`
+                from v_user vu where user_id = '${uid}' and coalesce(role_start_date, current_date) <= current_date 
+                and coalesce(role_end_date , current_date) >= current_date;`
 
         let lastLoggedIn = `select 
                                     action_timestamp as last_logged_in
@@ -465,19 +466,20 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                         vu.date_of_marriage,
                         vu.about_yourself,
                         vu.is_family_head,
-                        vu.user_org_id org_id,
-                        vu.user_org_type org_type,
+                        vu.user_org_id user_org_id,
+                        vu.user_org_type user_org_type,
                         membership_type,
-                        vu.user_org parish_name,
-                        vu.role_start_date,
-                        vu.role_end_date,
-                        vu.org_id,
-                        vu.org_type
+                        vu.user_org parish_name
                     FROM  v_user vu
                     WHERE ${condition} vu.user_org_id IN ${hierarchicalQry} order by user_id desc;`
 
         /****************Removed from projection by Sudip ********************* */
         //vu.role_id,
+        /****************Removed from projection by vishwesh ********************* */  
+        // vu.role_start_date,
+        // vu.role_end_date                    
+        // vu.org_id,
+        // vu.org_type
 
         //console.log('Executing query : ' + getuserRecords)
 
@@ -614,8 +616,8 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     user.isFamilyHead = row.is_family_head;
                     user.roleId = row.role_id;
                     user.role = row.role_name;
-                    user.orgId = row.org_id;
-                    user.orgType = row.org_type;
+                    user.orgId = row.user_org_id;
+                    user.orgType = row.user_org_type;
                     user.memberType = row.membership_type;
                     user.membershipType = row.member_type;
                     user.parish_name = row.parish_name;
@@ -1047,7 +1049,7 @@ async function getEventData(userId, eventType) {
     }
 }
 
-async function processUpdateUserRoles(userData) {
+async function processUpdateUserRoles(userData, loggedInUser) {
     let client = await dbConnections.getConnection();
     //  console.log("User Data" + JSON.stringify(userData));
     try {
@@ -1070,8 +1072,17 @@ async function processUpdateUserRoles(userData) {
 
             await client.query(deleteRole)
 
-            let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
-                select ${userData.userId}, role_id from t_role where name = 'Member';`
+            //let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
+                //select ${userData.userId}, role_id from t_role where name = 'Member';`
+
+                let insertRoleMappingmember = `INSERT INTO t_user_role_mapping (user_id, role_id)
+                select ${userData.userId}, (select role_id from t_role where name = 'Member') role_id  
+                WHERE NOT EXISTS (
+                SELECT 1 FROM t_user_role_mapping turm 
+                                    WHERE user_id = ${userData.userId} 
+                                    and role_id = (select role_id from t_role where name = 'Member')
+                                    and is_deleted = false
+                            );`
 
             await client.query(insertRoleMappingmember)
         }
@@ -1481,7 +1492,7 @@ async function processUpdateUserRoles(userData) {
                         insertPersonValues =
                             [
                                 newUserId,
-                                details.dob,
+                                details.dob == '' ? null : details.dob,
                                 details.mobileNo,
                                 userData.updatedBy,
                                 new Date().toISOString(),
@@ -1636,19 +1647,22 @@ async function processUpdateUserRoles(userData) {
             }
 
 
-            if (userData.isFamilyHead == true || userData.isFamilyHead == "true") {
+            if (loggedInUser == userData.userId) {
+                if (userData.isFamilyHead == true || userData.isFamilyHead == "true") {
 
-                let insertRoleMapping = `insert into t_user_role_mapping (user_id, role_id)
+                    let insertRoleMapping = `insert into t_user_role_mapping (user_id, role_id)
                 (select ${userData.userId}, role_id from t_role where name = 'Family Head');`
-                await client.query(insertRoleMapping)
-                console.log('User is family head gave him add member permission');
-            }
-            if (userData.isFamilyHead == false || userData.isFamilyHead == "false") {
+                    await client.query(insertRoleMapping)
+                    console.log('User is family head gave him add member permission');
+                }
+                if (userData.isFamilyHead == false || userData.isFamilyHead == "false") {
 
-                let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
-                select ${userData.userId}, role_id from t_role where name = 'Member';`
+                    let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
+               select ${userData.userId}, role_id from t_role where name = 'Member';`
+                  
 
-                await client.query(insertRoleMappingmember)
+                    await client.query(insertRoleMappingmember);
+                }
             }
 
         }

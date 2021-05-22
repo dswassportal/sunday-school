@@ -56,7 +56,7 @@ export class StaffAssignmentComponent implements OnInit {
     }
     
     
-    this.apiService.callGetService(`getSShools?role=vicar`).subscribe((res: any) => {
+    this.apiService.callGetService(`getSSchools?role=vicar`).subscribe((res: any) => {
       //this.rowData = res.data.schoolData;
       //this.gridOptions.rowData.push(this.orgName)
      
@@ -175,7 +175,7 @@ export class StaffAssignmentComponent implements OnInit {
     let i = rowData.rowIndex;
     this.orgId = this.selectedUserData.orgId;
 /*
-    this.apiService.callGetService(`getSShools?role=vicar`).subscribe((res: any) => {
+    this.apiService.callGetService(`getSSchools?role=vicar`).subscribe((res: any) => {
       //console.log(res.data.schoolData);
       for(let i=0;i<res.data.schoolData.length;i++){
          // if (res.data.schoolData != null) {
