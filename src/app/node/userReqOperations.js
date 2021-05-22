@@ -1,7 +1,6 @@
 const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
-const { result } = require('underscore');
 const dbConnections = require(`${__dirname}/dbConnection`);
 
 async function setUserApprovalState(userData) {
@@ -112,15 +111,15 @@ async function setUserApprovalState(userData) {
 
             let deleteFromUsrTbl = `delete from t_user where user_id = ${userData.userId};`;
 
-            let deleteFromPrsonTbl = `delete from t_person where user_id = ${userData.userId};`; 
-            
+            let deleteFromPrsonTbl = `delete from t_person where user_id = ${userData.userId};`;
+
             await client.query(moveUsrTblRowtoUsrHistyTbl);
-            console.log('Copied row form t_user to t_user_history table for user id : ' +  userData.userId);
+            console.log('Copied row form t_user to t_user_history table for user id : ' + userData.userId);
             await client.query(deleteFromUsrTbl);
             console.log('Deleted row from t_user table! for user id : ' + userData.userId);
             await client.query(deleteFromPrsonTbl);
             console.log('deleted row from t_person table for user id : ' + userData.userId);
-    
+
             // let upUserTbl = `UPDATE t_user SET is_approved = false, is_deleted = true where user_id = ${userData.userId} ;`
 
             // await client.query(upUserTbl, (err, res) => {
@@ -152,7 +151,7 @@ async function setUserApprovalState(userData) {
     } catch (error) {
         console.error(`userReqOperations.js::setUserApprovalState() --> error executing query as : ${error}`);
         return (errorHandling.handleDBError('connectionError'));
-    }finally{
+    } finally {
         client.release()
     }
 }
@@ -161,57 +160,154 @@ async function updateUnApprovedUser(userData) {
     console.log("userReqOperations.js::updateUnApprovedUser called. Updating unapproved user's data...");
 
     let client = await dbConnections.getConnection();
-    try{
+    try {
 
-    let updateUserTableStmt = `UPDATE t_user
+        let updateUserTableStmt = `UPDATE t_user
                                 SET org_id=$1, title=$2, first_name=$3, last_name=$4, about_yourself=$5, 
                                 updated_by=$6, updated_date=$7, member_type=$8
                                 WHERE user_id=$9;`;
 
-    let updateUserTableValues = [
-        userData.orgId,
-        userData.title,
-        userData.firstName,
-        userData.lastName,
-        userData.abtyrslf,
-        userData.userId,
-        new Date().toISOString(),
-        userData.memberType,
-        userData.userId
-    ];
-    console.log('t_user updated!');
+        let updateUserTableValues = [
+            userData.orgId,
+            userData.title,
+            userData.firstName,
+            userData.lastName,
+            userData.abtyrslf,
+            userData.userId,
+            new Date().toISOString(),
+            userData.memberType,
+            userData.userId
+        ];
+        console.log('t_user updated!');
 
-    await client.query(updateUserTableStmt, updateUserTableValues);
+        await client.query(updateUserTableStmt, updateUserTableValues);
 
 
-    let updatePersonTableStmt = `UPDATE t_person
-                              SET dob=$1, updated_by=$2, updated_date=$3, membership_type=$4, mobile_no=$5
-                              WHERE user_id=$6;`;
+        let updatePersonTableStmt = `UPDATE t_person
+                              SET dob=$1, updated_by=$2, updated_date=$3, mobile_no=$4
+                              WHERE user_id=$5;`;
 
-    let updatePersonTableValues = [
-        userData.dob,
-        userData.userId,
-        new Date().toISOString(),
-        userData.memberType,
-        userData.mobileNo,
-        userData.userId
-    ]
+        let updatePersonTableValues = [
+            userData.dob,
+            userData.userId,
+            new Date().toUTCString(),
+            userData.mobileNo,
+            userData.userId
+        ]
 
-    await client.query(updatePersonTableStmt, updatePersonTableValues);
-    console.log('t_person updated!');
+        await client.query(updatePersonTableStmt, updatePersonTableValues);
+        console.log('t_person updated!');
 
-    return {
-        data : {
-            status:"success"
+        return {
+            data: {
+                status: "success"
+            }
         }
+
+    } catch (error) {
+        console.error(`userReqOperations.js::updateUnApprovedUser() --> error executing query as : ${error}`);
+        return (errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release();
     }
-       
-}catch(error){
-    console.error(`userReqOperations.js::updateUnApprovedUser() --> error executing query as : ${error}`);
-    return (errorHandling.handleDBError('connectionError'));
-}finally{
-    client.release();
 }
+
+async function setStaffAssignment(staffData, loggedInUser) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        // Preparing roles json so we dont need to query it again and again
+        let roles = {};
+        let getRoleIds = `select tr."name" role_name , tr.role_id from t_role tr where name = 'Teacher' or name = 'Principal';`
+        let result = client.query(getRoleIds);
+        for (let row of result.rows)
+            roles[row.role_name] = row.role_id;
+
+        let ssStartDate = staffData.ssStartDate;
+        let ssEndDate = staffData.ssEndDate;
+        let orgId = staffData.orgId;
+
+        for (let staffMember of staffData.staffAssignment) {
+
+
+            /****************************** Upsert t_user_role_mapping ************************************/
+            let updateRoleMappingQuery = `UPDATE t_user_role_mapping
+                                            SET role_id=$1, user_id=$2, role_start_date=$3, role_end_date=$4 
+                                            WHERE role_id=$1 and user_id=$2 and is_deleted = false`;
+
+            let updateRoleMappingValues = [roles[staffMember.roleType], staffMember.staffId, ssStartDate, ssEndDate]
+
+            let result = await client.query(updateRoleMappingQuery, updateRoleMappingValues);
+            console.log(' Rows updated of t_user_role_mapping : ' + result.rowCount);
+
+            let insertRoleMappingQuery = ` INSERT INTO t_user_role_mapping (user_id, role_id, role_start_date, role_end_data)
+                                            select $1, $2, $3, $4  
+                                            WHERE NOT EXISTS (
+                                            SELECT 1 FROM t_user_role_mapping turm 
+                                                                WHERE user_id = $1 
+                                                                and role_id = $2
+                                                                and is_deleted = false
+                                                        ) returning user_role_map_id;`
+
+            let insertRoleMappingValues = [staffMember.staffId, roles[staffMember.roleType], ssStartDate, ssEndDate]
+
+            // and role_start_date = ${ssStartDate}
+            // and role_end_data = ${ssEndDate}
+            result = await client.query(insertRoleMappingQuery, insertRoleMappingValues);
+            let userRoleMapId = result.rows[0].user_role_map_id;
+            console.log(' Rows inserted into t_user_role_mapping  : ' + result.rowCount + ' and newly generated user_role_map_id is : ' + userRoleMapId);
+
+            /******************************  Upsert t_user_role_context ****************************************/
+            // let updateRoleContext = `UPDATE t_user_role_context
+            //                                 SET org_id = $1 
+            //                                     updated_by = $2, 
+            //                                     updated_date = $3
+            //                                 where  role_id = $4, user_id = $5, is_deleted = false;`;                                              
+
+            let insertRoleContext = ` INSERT INTO t_user_role_context (user_id, role_id, org_id, created_by, created_date, user_role_map_id)
+                                            select $1, $2, $3, $4, $5, $6  
+                                            WHERE NOT EXISTS (
+                                            SELECT 1 FROM t_user_role_mapping turm 
+                                                                WHERE user_id = $1 
+                                                                and role_id = $2
+                                                                and org_id = $3
+                                                                and is_deleted = false
+                                                        ) returning staff_school_assignment_id;`
+
+            let insertRoleContextvValues = [staffMember.staffId, roles[staffMember.roleType], orgId, loggedInUser, new Date().toUTCString(), userRoleMapId]
+            result = await client.query(insertRoleContext, insertRoleContextvValues);
+            console.log('Rows inserted into t_user_role_context  : ' + result.rowCount + ' and newly generated staff_school_assignment_id : ' + result.rows[0].staff_school_assignment_id);
+
+             /******************************  Upsert t_staff_school_assignment ****************************************/
+
+             let updateStaffSchool = ` UPDATE t_staff_school_assignment
+                                    SET user_id=0, role_id=0, role_type='', is_primary=false, is_deleted=false, created_by=0, created_date='', updated_by=0, updated_date=''
+                                    WHERE school_id = 0 `;
+
+             let insertStaffSchool = ` INSERT INTO t_user_role_context (user_id, role_id, org_id, created_by, created_date, user_role_map_id)
+                                            select $1, $2, $3, $4, $5, $6  
+                                            WHERE NOT EXISTS (
+                                            SELECT 1 FROM t_user_role_mapping turm 
+                                                                WHERE user_id = $1 
+                                                                and role_id = $2
+                                                                and org_id = $3
+                                                                and is_deleted = false
+                                                        ) returning staff_school_assignment_id;`
+
+                                                                     
+
+        }
+
+
+
+    } catch (error) {
+
+    } finally {
+        console.error(`userReqOperations.js::setStaffAssignment() --> error : ${error}`);
+        return (errorHandling.handleDBError('connectionError'));
+    }
+    client.release();
 }
 
 module.exports = {

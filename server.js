@@ -734,6 +734,25 @@ app.get('/api/getRolesByUserId', function (req, res) {
   }
 });
 
+app.post('/api/setStaffAssignment', function (req, res) {
+  console.log("setStaffAssignment called...");
+  // let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.setStaffAssignment(req.body.data)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in setStaffAssignment as : ' + error)
+  }
+});
+
 
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {

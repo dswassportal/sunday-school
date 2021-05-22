@@ -45,6 +45,7 @@
     "ngx-spinner": "^11.0.1",
     "npm": "^7.13.0",
     "pg": "^8.5.1",
+    "pg-connection-string": "^2.5.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",
     "underscore": "^1.13.1",
