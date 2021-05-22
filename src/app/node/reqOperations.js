@@ -66,7 +66,8 @@ async function processSignInRequest(userInfo) {
 
         let newPersonTblInsQueryValue = [
             newUserId,
-            userInfo.data.dob,
+            //userInfo.data.dob,
+            userInfo.data.dob == '' ? null : userInfo.data.dob,
             userInfo.data.mobileNo,
             newUserId,
             new Date().toISOString()
@@ -212,7 +213,8 @@ async function processGetUserMetaDataRequest(uid) {
                  vu.is_family_head,
                  vu.is_approved,
                  vu.membership_type   
-                from v_user vu where user_id = '${uid}';`
+                from v_user vu where user_id = '${uid}' and coalesce(role_start_date, current_date) <= current_date 
+                and coalesce(role_end_date , current_date) >= current_date;`
 
         let lastLoggedIn = `select 
                                     action_timestamp as last_logged_in
@@ -282,7 +284,7 @@ async function processGetUserMetaDataRequest(uid) {
                 metaData.isFamilyHead = res.rows[0].is_family_head;
                 metaData.isFamilyMember = isFamilyMemberRes.rows[0].is_family_member;
 
-
+                let roles = []
                 for (let row of res.rows) {
 
                     let index = menus.findIndex((item => item.name == row.menu_name))
@@ -293,6 +295,9 @@ async function processGetUserMetaDataRequest(uid) {
                             icon: row.menu_icon
                         };
                         menus.push(tempJson);
+
+                        if (roles.indexOf(row.role_name) < 0)
+                            roles.push(row.role_name)
                     }
 
                     // if (menus.indexOf(row.menu_name) < 0)
@@ -304,6 +309,7 @@ async function processGetUserMetaDataRequest(uid) {
                 }
                 metaData.permissions = permissions;
                 metaData.menus = menus;
+                metaData.roles = roles;
 
                 console.log("metaData.userId", metaData.userId);
 
@@ -460,13 +466,20 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                         vu.date_of_marriage,
                         vu.about_yourself,
                         vu.is_family_head,
-                        vu.role_id,
-                        vu.user_org_id org_id,
-                        vu.user_org_type org_type,
+                        vu.user_org_id user_org_id,
+                        vu.user_org_type user_org_type,
                         membership_type,
                         vu.user_org parish_name
                     FROM  v_user vu
                     WHERE ${condition} vu.user_org_id IN ${hierarchicalQry} order by user_id desc;`
+
+        /****************Removed from projection by Sudip ********************* */
+        //vu.role_id,
+        /****************Removed from projection by vishwesh ********************* */  
+        // vu.role_start_date,
+        // vu.role_end_date                    
+        // vu.org_id,
+        // vu.org_type
 
         //console.log('Executing query : ' + getuserRecords)
 
@@ -485,14 +498,14 @@ async function getuserRecords(userType, loggedInUser, eventId) {
         }
 
         //Get users(Teachers/Principal and members) for TTC event registration by event_id and logged in user_id
-        
-        if(userType == 'ttc_reg_add_participants'){
+
+        if (userType == 'ttc_reg_add_participants') {
 
             getuserRecords = `select distinct vu.user_id,
                                     vu.email_id, vu.title, vu.first_name, vu.middle_name, vu.last_name, vu.nick_name, vu.dob,
                                     vu.mobile_no, vu.address_line1, vu.address_line2, vu.address_line3, vu.city, vu.state, 
                                     vu.postal_code, vu.country , vu.home_phone_no, vu.baptismal_name, vu.about_yourself, 
-                                    vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name
+                                    vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name, tepr.ttc_exam_date 
                                 from v_user vu 
                                 left join t_event_participant_registration tepr on vu.user_id = tepr.user_id 
                                 where vu.role_name = 'Teacher' or vu.role_name = 'Principal'
@@ -503,18 +516,62 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                 select vu.user_id, vu.email_id, vu.title, vu.first_name, vu.middle_name, vu.last_name, vu.nick_name, vu.dob,
                                     vu.mobile_no, vu.address_line1, vu.address_line2, vu.address_line3, vu.city, vu.state, 
                                     vu.postal_code, vu.country , vu.home_phone_no, vu.baptismal_name, vu.about_yourself, 
-                                    vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name 
+                                    vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name, tepr.ttc_exam_date  
                                 from v_user vu
+                                left join t_event_participant_registration tepr on vu.user_id = tepr.user_id 
                                 where vu.user_id 
                                 in (select tpr.family_member_id 
-                                    from t_person_relationship tpr where tpr.family_head_id = ${eventId});`
+                                    from t_person_relationship tpr where tpr.family_head_id = ${loggedInUser});`
         }
+
+        try {
+            if (userType.toLowerCase() === 'principal' || userType.toLowerCase() === 'teacher') {
+
+                getuserRecords = `select distinct 
+                                vu.title,
+                                vu.first_name,
+                                vu.middle_name,
+                                vu.last_name,
+                                vu.role_name,
+                                vu.role_id,
+                                vu.user_id  from v_user vu where org_id in ${hierarchicalQry} 
+                                            and lower(role_name) = '${userType.toLowerCase()}' 
+                                            
+                          union
+                                select distinct 
+                                vu.title,
+                                vu.first_name,
+                                vu.middle_name,
+                                vu.last_name,
+                                vu.role_name,
+                                vu.role_id,
+                                vu.user_id  from v_user vu where org_id in  (WITH recursive child_orgs 
+                                    AS (
+                                        SELECT org_id
+                                        FROM   t_organization parent_org 
+                                        WHERE  org_id IN
+                                                (
+                                                     SELECT b.org_id
+                                               FROM   t_user b
+                                               WHERE  user_id = ${loggedInUser} 
+                                               )                                                    
+                                        UNION
+                                        SELECT     child_org.org_id child_id
+                                        FROM       t_organization child_org
+                                        INNER JOIN child_orgs c
+                                        ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                            FROM   child_orgs)  
+                             and role_name = 'Member';`
+
+            }
+        } catch (error) { }
 
         let res = await client.query(getuserRecords);
 
         let user = {}
         let users = [];
-        let roles = [];
+        /****************Commented by Sudip ********************* */
+        // let roles = [];
         let userid = 0;
 
         if (res && res.rowCount > 0) {
@@ -524,7 +581,8 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                 // console.log("User id" + userid);
                 if (userid != row.user_id && userid != 0) {
                     // console.log("In Pushing user to users" + row.user_id);
-                    user.roles = roles;
+                    /****************Commented by Sudip ********************* */
+                    // user.roles = roles;
                     users.push(user);
                     user = {}
                     roles = []
@@ -557,11 +615,13 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     user.aboutYourself = row.about_yourself;
                     user.isFamilyHead = row.is_family_head;
                     user.roleId = row.role_id;
-                    user.orgId = row.org_id;
-                    user.orgType = row.org_type;
+                    user.role = row.role_name;
+                    user.orgId = row.user_org_id;
+                    user.orgType = row.user_org_type;
                     user.memberType = row.membership_type;
                     user.membershipType = row.member_type;
                     user.parish_name = row.parish_name;
+                    user.pickedDate = row.ttc_exam_date
 
                     // if(userid == 0){
                     //     userid = row.user_id;
@@ -569,21 +629,23 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     userid = row.user_id;
                 }
                 //console.log("In for" + JSON.stringify(user));
-                let role = {}
-                role.roleId = row.role_id;
-                role.orgType = row.org_type;
-                role.orgId = row.org_id;
+                /****************Commented by Sudip ********************* */
+                // let role = {}
+                // role.roleId = row.role_id;
+                // role.orgType = row.org_type;
+                // role.orgId = row.org_id;
                 // console.log("In user" + user);
                 // console.log("In role" + JSON.stringify(role));
                 // console.log("In roles" + JSON.stringify(roles));
-
-                if (_.findWhere(roles, role) == null) {
-                    // console.log("role" + JSON.stringify(role));
-                    roles.push(role);
-                }
+                /****************Commented by Sudip ********************* */
+                // if (_.findWhere(roles, role) == null) {
+                //     // console.log("role" + JSON.stringify(role));
+                //     roles.push(role);
+                // }
 
             }
-            user.roles = roles;
+            // user.roles = roles;
+            /****************Commented by Sudip ********************* */
             users.push(user);
             // return ({
             //     data: {
@@ -591,14 +653,15 @@ async function getuserRecords(userType, loggedInUser, eventId) {
             //         metaData: users
             //     }
             // })
+
         }
-            return ({
-                data: {
-                    status: 'success',
-                    metaData: users
-                }
-            })
-        
+        return ({
+            data: {
+                status: 'success',
+                metaData: users
+            }
+        })
+
     } catch (error) {
         console.error(`reqOperations.js::getuserRecords() --> error executing query as : ${error}`);
         return (errorHandling.handleDBError('connectionError'));
@@ -806,33 +869,46 @@ async function getEventData(userId, eventType) {
 
         if (eventType === 'upcoming_events') {
             condition = ' not in '
-            condition2 = ` and  ve.registration_start_date <= current_date
-            and  ve.registration_end_date >= current_date `
+            // condition2 = ` and  ve.registration_start_date <= current_date
+            // and  ve.registration_end_date >= current_date `
             //console.log("111")
         } else if (eventType === 'registered_events') {
             condition = ' in '
             condition2 = ` and  ve.registration_start_date <= current_date
             and  ve.registration_end_date >= current_date `
             //console.log("222")
-        }else if(eventType === 'completed_events'){
+        } else if (eventType === 'completed_events') {
             condition = ' in '
-            condition2 =  ` and  ve.event_start_date <= current_date `
+            condition2 = ` and  ve.event_start_date <= current_date `
             //console.log("333")
         }
         console.log(`Fetching event data for ${userId} user.`)
         if (eventType === 'for_judgement') {
 
-            getEventData = ` select distinct   event_id,
-                                                event_name "name",
-                                                event_type, 
-                                                to_char(event_start_date, 'DD-MM-YYYY') start_date,
-                                                to_char(event_end_date, 'DD-MM-YYYY') end_date,
-                                                event_end_date
-                                        from v_event  
-                                        where judge_id = ${userId}
-                                        and is_deleted = false
-                                        and is_attendance_submitted  = true
-                                        order by event_end_date desc;`
+            // getEventData = ` select distinct   event_id,
+            //                                     event_name "name",
+            //                                     event_type, 
+            //                                     to_char(event_start_date, 'DD-MM-YYYY') start_date,
+            //                                     to_char(event_end_date, 'DD-MM-YYYY') end_date,
+            //                                     event_end_date
+            //                             from v_event  
+            //                             where judge_id = ${userId}
+            //                             and is_deleted = false
+            //                             and is_attendance_submitted  = true
+            //                             order by event_end_date desc;`
+
+            getEventData = ` select distinct 
+                        te.event_id,
+                        te."name",
+                        te.event_type e, 
+                        to_char(te.start_date , 'DD-MM-YYYY') start_date,
+                        to_char(te.end_date , 'DD-MM-YYYY') end_date
+                from t_event_cat_staff_map tecsm 
+                join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
+                join t_event te on te.event_id = tecsm.event_id 
+                    where user_id = ${userId}
+                    and  tecm.is_attendance_submitted = true
+                    and te.is_deleted = false;`
         }
         if (eventType === 'review_pending') {
 
@@ -886,11 +962,11 @@ async function getEventData(userId, eventType) {
             // and event_start_date >= current_date
 
         }
-        
-        
-         if (eventType === 'upcoming_events' || eventType === 'registered_events' || eventType === 'completed_events'){
-            getEventData = 
-                            `select distinct event_id, event_name "name", event_type, 
+
+
+        if (eventType === 'upcoming_events' || eventType === 'registered_events' || eventType === 'completed_events') {
+            getEventData =
+                `select distinct event_id, event_name "name", event_type, 
                             event_desciption description, event_start_date start_date, event_end_date end_date, 
                             registration_start_date, registration_end_date
                             from v_event ve
@@ -900,8 +976,8 @@ async function getEventData(userId, eventType) {
                                     where tepr.user_id = ${userId}
                                 )
                             ${condition2}
-                            and  ve.is_deleted = false;`;    
-         }
+                            and  ve.is_deleted = false;`;
+        }
 
 
         let res = await client.query(getEventData);
@@ -973,7 +1049,7 @@ async function getEventData(userId, eventType) {
     }
 }
 
-async function processUpdateUserRoles(userData) {
+async function processUpdateUserRoles(userData, loggedInUser) {
     let client = await dbConnections.getConnection();
     //  console.log("User Data" + JSON.stringify(userData));
     try {
@@ -996,8 +1072,17 @@ async function processUpdateUserRoles(userData) {
 
             await client.query(deleteRole)
 
-            let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
-                select ${userData.userId}, role_id from t_role where name = 'Member';`
+            //let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
+                //select ${userData.userId}, role_id from t_role where name = 'Member';`
+
+                let insertRoleMappingmember = `INSERT INTO t_user_role_mapping (user_id, role_id)
+                select ${userData.userId}, (select role_id from t_role where name = 'Member') role_id  
+                WHERE NOT EXISTS (
+                SELECT 1 FROM t_user_role_mapping turm 
+                                    WHERE user_id = ${userData.userId} 
+                                    and role_id = (select role_id from t_role where name = 'Member')
+                                    and is_deleted = false
+                            );`
 
             await client.query(insertRoleMappingmember)
         }
@@ -1407,7 +1492,7 @@ async function processUpdateUserRoles(userData) {
                         insertPersonValues =
                             [
                                 newUserId,
-                                details.dob,
+                                details.dob == '' ? null : details.dob,
                                 details.mobileNo,
                                 userData.updatedBy,
                                 new Date().toISOString(),
@@ -1535,12 +1620,13 @@ async function processUpdateUserRoles(userData) {
             for (let role of userData.roles) {
 
                 const insertRoleMapping = `INSERT INTO public.t_user_role_mapping(
-                    role_id, user_id, is_deleted)
-                    VALUES ($1, $2, $3);`
+                    role_id, user_id, is_deleted, role_start_date, role_end_date)
+                    VALUES ($1, $2, $3, $4, $5);`
 
                 //t_user_role_context 
                 console.log(`Inserting role ${JSON.stringify(role)} into t_user_role_mapping t_user_role_context and t_user_role_context table.`)
-                insertRoleMapping_value = [role.roleId, userData.userId, false];
+                insertRoleMapping_value = [role.roleId, userData.userId, false, role.roleStartDate, role.roleEndDate];
+                console.log("999", insertRoleMapping_value);
                 await client.query(insertRoleMapping, insertRoleMapping_value);
 
                 const insertRoleContext = `INSERT INTO public.t_user_role_context(
@@ -1561,19 +1647,22 @@ async function processUpdateUserRoles(userData) {
             }
 
 
-            if (userData.isFamilyHead == true || userData.isFamilyHead == "true") {
+            if (loggedInUser == userData.userId) {
+                if (userData.isFamilyHead == true || userData.isFamilyHead == "true") {
 
-                let insertRoleMapping = `insert into t_user_role_mapping (user_id, role_id)
+                    let insertRoleMapping = `insert into t_user_role_mapping (user_id, role_id)
                 (select ${userData.userId}, role_id from t_role where name = 'Family Head');`
-                await client.query(insertRoleMapping)
-                console.log('User is family head gave him add member permission');
-            }
-            if (userData.isFamilyHead == false || userData.isFamilyHead == "false") {
+                    await client.query(insertRoleMapping)
+                    console.log('User is family head gave him add member permission');
+                }
+                if (userData.isFamilyHead == false || userData.isFamilyHead == "false") {
 
-                let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
-                select ${userData.userId}, role_id from t_role where name = 'Member';`
+                    let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
+               select ${userData.userId}, role_id from t_role where name = 'Member';`
+                  
 
-                await client.query(insertRoleMappingmember)
+                    await client.query(insertRoleMappingmember);
+                }
             }
 
         }

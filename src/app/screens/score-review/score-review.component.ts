@@ -60,11 +60,7 @@ export class ScoreReviewComponent implements OnInit {
       { headerName: 'Event Type', field: 'event_type', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
     ];
 
-    this.scoreApprovalColDef = [
-      { headerName: 'Enrollment ID', field: 'enrollmentId', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
-      { headerName: 'Category', field: 'category', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
-      { headerName: 'Score', field: 'score', flex: 1, width: 50, suppressSizeToFit: true, resizable: true, }
-    ];
+    this.scoreApprovalColDef = this.getParticipantDefArr(false);
 
     let userId = this.uiCommonUtils.getUserMetaDataJson().userId
 
@@ -119,21 +115,26 @@ export class ScoreReviewComponent implements OnInit {
           this.catNameArr = respData.data.eventData.catarr;
           this.judgeNameArr = respData.data.eventData.judgearr;
           this.selectedCat = this.catNameArr[0].categoryId;
-          this.selectedJudge = this.judgeNameArr[0].judgeId;
+          // this.selectedJudge = this.judgeNameArr[0].judgeId;
 
-          let urlString = `to=approve&event=${event.data.event_Id}&judge=${this.selectedJudge}&category=${this.selectedCat}`
+          // let urlString = `to=approve&event=${event.data.event_Id}&judge=${this.selectedJudge}&category=${this.selectedCat}`
+          let urlString = `getScoreByCategory?eventId=${event.data.event_Id}&catId=${this.selectedCat}`
 
-          this.apiService.callGetService('getParticipants?' + urlString).subscribe((respData) => {
+          this.apiService.callGetService(urlString).subscribe((respData) => {
             if (respData.data.status == 'failed') {
               this.scoreApprovalRowData = [];
               this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
               return;
             } else {
-              this.scoreApprovalRowData = respData.data.paticipants
-              if (this.scoreApprovalRowData !==null && this.scoreApprovalRowData[0].isScoreApproved === true)
+              this.scoreApprovalRowData = respData.data.scoreData
+              if (this.scoreApprovalRowData !== null && this.scoreApprovalRowData[0].isScoreApproved === true) {
                 this.disableApproveBtn = true;
-              else 
+                this.scoreApprovalColDef = this.getParticipantDefArr(false);
+              }
+              else {
                 this.disableApproveBtn = false;
+                this.scoreApprovalColDef = this.getParticipantDefArr(true);
+              }
             }
           });
 
@@ -144,50 +145,202 @@ export class ScoreReviewComponent implements OnInit {
 
   onDropdowwnSelChange(event: any) {
 
-    let urlString = `to=approve&event=${this.selectedEventData.event_Id}&judge=${this.selectedJudge}&category=${this.selectedCat}`
-
-    this.apiService.callGetService('getParticipants?' + urlString).subscribe((respData) => {
+    // let urlString = `to=approve&event=${this.selectedEventData.event_Id}&judge=${this.selectedJudge}&category=${this.selectedCat}`
+    let urlString = `getScoreByCategory?eventId=${this.selectedEventData.event_Id}&catId=${this.selectedCat}`
+    this.apiService.callGetService(urlString).subscribe((respData) => {
       if (respData.data.status == 'failed') {
         this.scoreApprovalRowData = [];
         this.uiCommonUtils.showSnackBar('Something  went wrong!', 'error', 3000);
         return;
       } else {
-        this.scoreApprovalRowData = respData.data.paticipants
-        if ( this.scoreApprovalRowData !==null && this.scoreApprovalRowData[0].isScoreApproved === true)
+        this.scoreApprovalRowData = respData.data.scoreData
+        if (this.scoreApprovalRowData !== null && this.scoreApprovalRowData[0].isScoreApproved === true) {
           this.disableApproveBtn = true;
-        else
+          this.scoreApprovalColDef = this.getParticipantDefArr(false);
+        }
+        else {
           this.disableApproveBtn = false;
+          this.scoreApprovalColDef = this.getParticipantDefArr(true);
+        }
       }
     });
   }
 
   handleScoreApproveBtnClick() {
 
-    if (this.scoreApprovalRowData === null || this.scoreApprovalRowData.length === 0  ) {
-      this.uiCommonUtils.showSnackBar('Nothing to Approve!', 'error', 3000)
+    let confmMsgSt = `Scores cannot be updated after approval, Please click \'Ok\' to proceed.`;
+    if (confirm(confmMsgSt)) {
+      this.handleSaveApproveBtnClick();
+
+      if (this.scoreApprovalRowData === null || this.scoreApprovalRowData.length === 0) {
+        this.uiCommonUtils.showSnackBar('Nothing to Approve!', 'error', 3000)
+        return;
+      } else {
+
+        let payload = {
+          action: 'approve',
+          eventId: this.selectedEventData.event_Id,
+          judgeId: this.selectedJudge,
+          catId: this.selectedCat,
+          catMapId: this.scoreApprovalRowData[0].catMapId
+        };
+
+        this.apiService.callPostService('postScore', payload).subscribe((response) => {
+
+          if (response.data.status == 'failed') {
+            this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000)
+            return;
+          } else {
+            this.uiCommonUtils.showSnackBar('Score successfully approved!', 'success', 3000)
+          }
+          //$("#imagemodal").modal("hide");
+        })
+        this.onDropdowwnSelChange('');
+      }
+    }
+  }
+
+  handleSaveApproveBtnClick() {
+
+    let scoreData = this.getParticipantScoreArray();
+    if (scoreData.length == 0) {
+      this.uiCommonUtils.showSnackBar('Nothing to save!', 'error', 3000)
       return;
     } else {
+      let payload: any = {};
 
-      let payload = {
-        action: 'approve',
-        eventId: this.selectedEventData.event_Id,
-        judgeId: this.selectedJudge,
-        catId: this.selectedCat,
-        catMapId: this.scoreApprovalRowData[0].catMapId
-      };
-
+      payload.action = 'review_save';
+      let scoreArr: any = []
+      scoreData.forEach(element => {
+        scoreArr.push(element)
+      });
+      payload.scoreArr = scoreArr;
+      
       this.apiService.callPostService('postScore', payload).subscribe((response) => {
 
         if (response.data.status == 'failed') {
           this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000)
           return;
         } else {
-          this.uiCommonUtils.showSnackBar('Score successfully approved!', 'success', 3000)
-          this.onDropdowwnSelChange('');
+          this.uiCommonUtils.showSnackBar('Score recorded successfully!', 'success', 3000)
+        }
+      })
+      this.onDropdowwnSelChange('');
+    }
+    $("#imagemodal").modal("hide");
+    //this.onDropdowwnSelChange('');
+  }
+
+  getParticipantDefArr(isEditable: boolean) {
+
+    let colArr: any = [
+      { headerName: 'Enrollment ID', field: 'enrollmentId', resizable: true, width: 150, sortable: true, filter: true },
+      { headerName: 'Name', field: 'participantName', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true },
+      { headerName: 'Parish', field: 'org', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true }
+    ]
+    let tempElement: any = {};
+    if (this.scoreApprovalRowData)
+      tempElement = this.scoreApprovalRowData[0];
+
+    var keys = Object.keys(tempElement);
+
+    for (let judge of this.judgeNameArr) {
+
+      if (keys.indexOf(judge.judgeId + "") >= 0) {
+
+        let column = {
+          headerName: judge.judgeName, field: `${judge.judgeId}`, flex: 1, editable: isEditable, suppressSizeToFit: true, resizable: true,
+          valueGetter: function (params: any) {
+            return params.data[judge.judgeId];
+          },
+          valueSetter: function (params: any) {
+
+            try {
+              let score = parseInt(params.newValue);
+              if (score > 0 && score != NaN)
+                params.data[judge.judgeId] = score;
+              return true;
+            } catch (error) {
+              return false;
+            };
+          },
+        }
+
+        colArr.push(column)
+      }
+    }
+
+    colArr.push(
+      {
+        headerName: 'Average Score',
+        aggFunc: 'sum',
+        flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true,
+        valueGetter: this.AvgValueGetter,
+        valueSetter: function (params: any) {
+          params.data.avgScore = params.newValue;
+          return true;
         }
       })
 
-
-    }
+    return colArr;
   }
+
+  AvgValueGetter = (params: any): Number => {
+
+    let sum = 0
+    let jCount = 0;
+    let avgScore = 0;
+    let tempElement = {};
+    if (this.scoreApprovalRowData)
+      tempElement = this.scoreApprovalRowData[0];
+    var keys = Object.keys(tempElement);
+    for (let judge of this.judgeNameArr) {
+      if (keys.indexOf(judge.judgeId + "") >= 0) {
+        sum += params.data[judge.judgeId]
+        jCount++;
+      }
+    }
+    avgScore = Math.round((sum / jCount))
+    params.data.avgScore = avgScore;
+    return avgScore;
+
+  };
+
+  getParticipantScoreArray(): any[] {
+
+    let scoreData: any = [];
+    let consolidatedArr: any = []
+    let judges: any = [];
+
+    let catIndex = this.catNameArr.findIndex((catItem:any) => catItem.categoryId == this.selectedCat)
+
+    this.judgeNameArr.forEach((element: any) => {
+      judges.push(element.judgeId + '')
+    });
+
+    this.scoreApprovalRowData.forEach((item: any) => {
+
+      Object.keys(item).forEach(element => {
+        if (judges.indexOf(element) >= 0) {
+          scoreData.push({
+            enrollmentid: item.enrollmentId,
+            score: item[element],
+            judge: element,
+            category: this.catNameArr[catIndex].categoryName
+          })
+        }
+      });
+    });
+
+    for (let judge of judges) {
+      let temp: any = {};
+      temp.scoreData = scoreData.filter((item: any) => item.judge == judge);
+      temp.judge = parseInt(judge);
+      temp.eventId = this.selectedEventData.event_Id;
+      consolidatedArr.push(temp);
+    }
+
+    return consolidatedArr;
+  }
+
 }

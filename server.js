@@ -5,6 +5,7 @@ const processEventTemp = require(`${__dirname}/src/app/node/reqEventTemp`)
 const processEventRequest = require(`./src/app/node/eventReqOperations`)
 const processScoreRequest = require(`./src/app/node/reqScoreOperations`)
 const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions`)
+const processSSRequest = require(`./src/app/node/reqSsOperations`)
 const dbConnections = require(`${__dirname}/src/app/node/dbConnection`);
 express = require('express')
 const cors = require('cors')
@@ -213,7 +214,8 @@ app.post('/api/insertEvents', function (req, res) {
 app.post('/api/updateUserRoles', function (req, res) {
   console.log("updateUserRoles called with : " + JSON.stringify(req.body));
   try {
-    processRequest.processUpdateUserRoles(req.body.data)
+    let loggedInUser = decodeUser(req);
+    processRequest.processUpdateUserRoles(req.body.data, loggedInUser)
       .then((data) => {
         /// console.log(`Returning with resonse : ${data}`)
         res.send(data);
@@ -654,6 +656,101 @@ app.post('/api/postAttendance', function (req, res) {
       })
   } catch (error) {
     console.error('Error in postAttendance as : ' + error)
+  }
+});
+
+app.get('/api/getScoreByCategory', function (req, res) {
+  console.log("getScoreByCategory called...");
+  // let loggedInUser =  decodeUser(req)
+  try {
+    processScoreRequest.getScoreByCategory(req.query.eventId, req.query.catId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getScoreByCategory as : ' + error)
+  }
+});
+
+app.get('/api/getSSchools', function (req, res) {
+  console.log("getSSchools called...");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getSSchoolData(loggedInUser, req.query.role)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getSSchools as : ' + error)
+  }
+});
+
+app.get('/api/getLookupMasterData', function (req, res) {
+  console.log("getLookupMasterData called... to fetch " + req.query.types);
+  // let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getLookupMasterData(req.query.types)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getLookupMasterData as : ' + error)
+  }
+});
+
+app.get('/api/getRolesByUserId', function (req, res) {
+  console.log("getRolesByUserId called... to fetch " + req.query.userId);
+  // let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getRolesByUserId(req.query.userId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getRolesByUserId as : ' + error)
+  }
+});
+
+app.post('/api/setStaffAssignment', function (req, res) {
+  console.log("setStaffAssignment called...");
+  // let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.setStaffAssignment(req.body.data)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in setStaffAssignment as : ' + error)
   }
 });
 

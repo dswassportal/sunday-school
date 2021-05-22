@@ -1,0 +1,17 @@
+<!-- <input type="checkbox" [checked]="params.value" (change)="refresh({params: params, event : $event})"/> -->
+
+<mat-form-field style="width: 50%;">
+    <!-- <mat-label>Choose a date</mat-label> -->
+    <input matInput
+         [matDatepicker]="picker"
+         [min]="minDate" 
+         [max]="maxDate"
+         disabled 
+         (dateChange)="refresh({params: params, event : $event})">
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker disabled="false"></mat-datepicker>
+  </mat-form-field>
+
+  <!-- [matDatepickerFilter]="myFilter" -->
+
+

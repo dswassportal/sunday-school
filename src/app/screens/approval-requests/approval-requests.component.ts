@@ -6,12 +6,32 @@ import { ReqRendererComponent } from '../../screens/renderers/req-renderer/req-r
 import { uiCommonUtils } from '../../common/uiCommonUtils';
 declare let $: any;
 
+import { Moment } from 'moment';
+import * as _moment from 'moment';
+import { default as _rollupMoment } from 'moment';
+import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
+
+const moment = _rollupMoment || _moment;
+
+
+class CustomDateAdapter extends NativeDateAdapter {
+  format(date: Date, displayFormat: Object): string {
+    var formatString = ' MMMM DD YYYY';
+    return moment(date).format(formatString);
+  }
+}
+
 
 @Component({
   selector: 'app-approval-requests',
   templateUrl: './approval-requests.component.html',
-  styleUrls: ['./approval-requests.component.css']
-})
+  styleUrls: ['./approval-requests.component.css'],
+  providers: [
+    {
+      provide: DateAdapter, useClass: CustomDateAdapter
+    }
+  ]
+  })
 export class ApprovalRequestsComponent implements OnInit {
 
   data: any;
@@ -51,7 +71,7 @@ export class ApprovalRequestsComponent implements OnInit {
       dob: new FormControl('', [Validators.required]),
       mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
       homePhoneNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
-      emailAddress: new FormControl('',[Validators.required, Validators.email]),
+      emailAddress: new FormControl('', [Validators.required, Validators.email]),
       addressLine1: new FormControl('', Validators.required),
       addressLine2: new FormControl(''),
       addressLine3: new FormControl(''),
@@ -88,34 +108,34 @@ export class ApprovalRequestsComponent implements OnInit {
     this.getUnapprovedUserData(event.value);
 
   }
-  getUnapprovedUserData(usertype:string) {
-    this.apiService.callGetService('getuserRecords?type='+usertype).subscribe((res) => {
+  getUnapprovedUserData(usertype: string) {
+    this.apiService.callGetService('getuserRecords?type=' + usertype).subscribe((res) => {
 
 
-      if(usertype == 'approval_requests'){
+      if (usertype == 'approval_requests') {
         this.columnDefs = [
           { headerName: 'First Name', field: 'firstName', sortable: true, filter: true, width: 170, checkboxSelection: true },
           { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true, width: 170 },
           { headerName: 'Member Type', field: 'memberType', sortable: true, filter: true, width: 150 },
           { headerName: 'Parish', field: 'parish_name', sortable: true, filter: true, width: 450 },
-         // { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
+          // { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
           //{ headerName: 'State', field: 'state', sortable: true, filter: true, width: 150 },
           //{ headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 150 },
           { headerName: 'Actions', field: 'action', cellRendererFramework: ReqRendererComponent, width: 170 }
         ]
-      }else if(usertype == 'rejected'){
+      } else if (usertype == 'rejected') {
         this.columnDefs = [
           { headerName: 'First Name', field: 'firstName', sortable: true, filter: true, width: 170, checkboxSelection: true },
           { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true, width: 170 },
           { headerName: 'Member Type', field: 'memberTypeForRejected', sortable: true, filter: true, width: 150 },
           { headerName: 'Parish', field: 'parish_name', sortable: true, filter: true, width: 450 },
-         // { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
+          // { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
           //{ headerName: 'State', field: 'state', sortable: true, filter: true, width: 150 },
           //{ headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 150 },
-          { headerName: 'Reason', field:'reason', sortable:true, filter:true, width:180}
-          ]
+          { headerName: 'Reason', field: 'reason', sortable: true, filter: true, width: 180 }
+        ]
       }
-      
+
       //console.log(res.data.metaData);
       this.rowData = res.data.metaData;
     });

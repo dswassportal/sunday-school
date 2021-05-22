@@ -4,11 +4,31 @@ import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms'
 import { AuthService } from '../../services/auth.service'
 import { ApiService } from '../../services/api.service';
 
+import { Moment } from 'moment';
+import * as _moment from 'moment';
+import { default as _rollupMoment } from 'moment';
+import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
+
+const moment = _rollupMoment || _moment;
+
+
+class CustomDateAdapter extends NativeDateAdapter {
+  format(date: Date, displayFormat: Object): string {
+    var formatString = ' MMMM DD YYYY';
+    return moment(date).format(formatString);
+  }
+}
+
 
 @Component({
   selector: 'app-sign-up',
   templateUrl: './sign-up.component.html',
-  styleUrls: ['./sign-up.component.css']
+  styleUrls: ['./sign-up.component.css'],
+  providers: [
+    {
+      provide: DateAdapter, useClass: CustomDateAdapter
+    }
+  ]
 })
 export class SignUpComponent implements OnInit {
   signUpForm: any;
@@ -33,9 +53,9 @@ export class SignUpComponent implements OnInit {
       firstName: new FormControl('', Validators.required),
       lastName: new FormControl('', Validators.required),
       email: new FormControl('', [Validators.required, Validators.email]),
-      dob: new FormControl('', Validators.required),
-      password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@])(?=.*?[0-9]).{8,}$')]),
-      cnfmpwd: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@])(?=.*?[0-9]).{8,}$')]),
+      dob: new FormControl(''),
+      password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
+      cnfmpwd: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
       mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
       memberType : new FormControl('',Validators.required),
       orgId: new FormControl('',Validators.required),

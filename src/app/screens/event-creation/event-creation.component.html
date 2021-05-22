@@ -2,15 +2,16 @@
     <mat-card class="shadow">
         <div class="row" style="padding-top: 0.6%;">
             <div class="col-md-6">
-                <h1 style="margin-top:1%; margin-bottom: 2%; padding-left: 2%;" *ngIf="!eventFormLabel">Create Event</h1>
+                <h1 style="margin-top:1%; margin-bottom: 2%; padding-left: 2%;" *ngIf="!eventFormLabel">Create Event
+                </h1>
                 <h1 style="margin-top:1%; margin-bottom: 2%; padding-left: 2%;" *ngIf="eventFormLabel">Update Event</h1>
-                </div>
+            </div>
             <div class="col-md-6" style="text-align: right;">
-            <button mat-button class="ml-auto" data-dismiss="modal" >  
-                <mat-icon (click)="onCloseBtnClick()">clear</mat-icon>
-            </button>
-            </div>   
-    </div>
+                <button mat-button class="ml-auto" data-dismiss="modal">
+                    <mat-icon (click)="onCloseBtnClick()">clear</mat-icon>
+                </button>
+            </div>
+        </div>
         <mat-vertical-stepper [linear]="true" #stepper>
 
             <mat-step [stepControl]="eventsDataFormGroup">
@@ -21,7 +22,7 @@
                     <form [formGroup]="eventsDataFormGroup">
                         <ng-template matStepLabel>Events</ng-template>
                         <div class="form-container">
-                         
+
 
                             <div class="row" style="margin-top: 3%;">
                                 <mat-form-field class="col-md-12">
@@ -33,24 +34,25 @@
 
                             <div class="row">
 
-                            <mat-form-field class="col-md-6">
-                                <mat-select required id="eventType" (selectionChange)="eventTypeSelChange()" formControlName="eventType"
-                                    placeholder="Event Type">
-                                    <mat-option [disabled]= "evntTypedisabled" *ngFor="let event of eventList" [value]="event.eventType">
-                                        {{event.eventType}}</mat-option>
-                                </mat-select>
-                            </mat-form-field>
+                                <mat-form-field class="col-md-6">
+                                    <mat-select required id="eventType" (selectionChange)="eventTypeSelChange()"
+                                        formControlName="eventType" placeholder="Event Type">
+                                        <mat-option [disabled]="evntTypedisabled" *ngFor="let event of eventList"
+                                            [value]="event.eventType">
+                                            {{event.eventType}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
 
-                            <mat-form-field class="col-md-6">
-                                <mat-select required multiple id="eventCoordinator" formControlName="eventCoordinator"
-                                    placeholder="Event Co-ordinator">
-                                    <mat-option *ngFor="let proctor of proctorData"
-                                    [value]="proctor.userId">{{proctor.name}}</mat-option>
-                                </mat-select>
-                            </mat-form-field>
+                                <mat-form-field class="col-md-6">
+                                    <mat-select required multiple id="eventCoordinator"
+                                        formControlName="eventCoordinator" placeholder="Event Co-ordinator">
+                                        <mat-option *ngFor="let proctor of proctorData" [value]="proctor.userId">
+                                            {{proctor.name}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
 
 
-                        </div>
+                            </div>
 
 
 
@@ -82,32 +84,47 @@
 
                                 <mat-form-field class="col-md-6">
 
-                                    <!-- <input matInput type="date" required  id="start_date" formControlName="start_date" placeholder="Event Start Date">-->
                                     <mat-label>Event Start Date</mat-label>
-                                    <input [min]="minDate" matInput id="startDate" formControlName="startDate"
+                                    <input (dateChange)="comparisonEventStartdateValidator()"
+                                        (dateChange)="comparisonEventStartandRegiStartdateValidator()"
+                                        (dateChange)="comparisonEventStartandRegiEnddateValidator()" [min]="minDate"
+                                        matInput id="startDate" formControlName="startDate"
                                         [matDatepicker]="startatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="startatpicker">
-                                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #startatpicker></mat-datepicker>
+                                    <mat-error
+                                        *ngIf="eventsDataFormGroup.controls['startDate'].hasError('invaliddaterange')">
+                                       Start date cannot be greater than end date
+                                    </mat-error>
+                                    <mat-error
+                                        *ngIf="eventsDataFormGroup.controls['startDate'].hasError('invaliddaterange1')">
+                                        Event Start date must be greater than registration End date
+                                    </mat-error>
+
+                                    <mat-error
+                                        *ngIf="eventsDataFormGroup.controls['startDate'].hasError('invaliddaterange3')">
+                                        Event Start date must be greater than registration start date
+                                    </mat-error>
                                 </mat-form-field>
-                                <!-- <small class="text-danger" *ngIf="eventCreationForm.hasError('notValid1')">
-                                        Event start date Must Be Heigher Than registration End Date</small> -->
+
 
                                 <mat-form-field class="col-md-6">
 
-                                    <!-- <input matInput type="date" required  id="end_date" formControlName="end_date" placeholder="Event End Date">-->
                                     <mat-label>Event End Date</mat-label>
                                     <input [min]="minDate" matInput id="endDate" formControlName="endDate"
-                                        [matDatepicker]="endatpicker">
+                                        (dateChange)="comparisonEventEnddateValidator()" [matDatepicker]="endatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="endatpicker">
-                                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #endatpicker></mat-datepicker>
 
+                                    <mat-error
+                                        *ngIf="eventsDataFormGroup.controls['endDate'].hasError('invaliddaterange')">
+                                        Event End date cannot be earlier than Event start date
+                                    </mat-error>
+
                                 </mat-form-field>
-                                <!-- <small class="text-danger" *ngIf="eventCreationForm.hasError('notValid2')">
-                                    Event End Date Must Be Heigher Than Event start date</small> -->
+
 
                             </div>
 
@@ -115,56 +132,72 @@
 
                                 <mat-form-field class="col-md-6">
 
-                                    <!-- <input matInput type="date" required  id="registration_start_date" formControlName="registration_start_date" placeholder="Regisrtation Start Date">-->
                                     <mat-label>Registration Start Date</mat-label>
-                                    <input [min]="minDate" matInput id="registrationStartDate" formControlName="registrationStartDate"
+                                    <input matInput id="registrationStartDate" formControlName="registrationStartDate"
+                                        (dateChange)="comparisonRegiStartdatedateValidator()"
+                                        (dateChange)="comparisontRegiStartdateandEventStarValidator()"
                                         [matDatepicker]="registrationStartatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationStartatpicker">
-                                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #registrationStartatpicker></mat-datepicker>
 
+                                    <mat-error
+                                        *ngIf="eventsDataFormGroup.controls['registrationStartDate'].hasError('invaliddaterange')">
+                                       Start date cannot be greater than end date
+                                    </mat-error>
+
+                                    <mat-error
+                                        *ngIf="eventsDataFormGroup.controls['registrationStartDate'].hasError('invaliddaterange4')">
+                                        Registration Start date cannot be greater than Event start date
+                                    </mat-error>
+
                                 </mat-form-field>
 
 
                                 <mat-form-field class="col-md-6">
-
-                                    <!-- <input matInput type="date" required  id="registration_end_date" formControlName="registration_end_date" placeholder="Regisrtation End Date"> -->
+                                   
                                     <mat-label>Registration End Date</mat-label>
-                                    <input [min]="minDate" matInput id="registrationEndDate" formControlName="registrationEndDate"
-                                        [matDatepicker]="registrationEndatpicker">
+                                    <input  (dateChange)="comparisonRegiEnddateValidator()" 
+                                    (dateChange)="comparisonRegiEnddateandEventStartValidator()" [min]="minDate" matInput id="registrationEndDate"
+                                        formControlName="registrationEndDate" [matDatepicker]="registrationEndatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationEndatpicker">
-                                        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #registrationEndatpicker></mat-datepicker>
+                                    <mat-error *ngIf="eventsDataFormGroup.controls['registrationEndDate'].hasError('invaliddaterange')">
+                                        End date cannot be earlier than start date
+                                      </mat-error>
+                                      <mat-error
+                                        *ngIf="eventsDataFormGroup.controls['registrationEndDate'].hasError('invaliddaterange2')">
+                                        Registration End date cannot be earlier than Event Start date
+                                      </mat-error>
 
                                 </mat-form-field>
-                                <!-- <small class="text-danger" *ngIf="eventCreationForm.hasError('notValid')">
-                                Registration End Date Must Be Heigher Than Registration start date</small>    -->
+
 
                             </div>
 
 
                             <div class="row">
-                            <mat-form-field class="col-md-12">
+                                <mat-form-field class="col-md-12">
 
-                                <input required id="eventUrl" matInput formControlName="eventUrl"
-                                    placeholder="Enter Event URL" />
-                                    <mat-error *ngIf="eventsDataFormGroup.controls.eventUrl.touched && eventsDataFormGroup.controls.eventUrl.invalid">
-                                        <span *ngIf="eventsDataFormGroup.controls.eventUrl.errors.required">This field is mandatory.</span>
-                                        <span *ngIf="eventsDataFormGroup.controls.eventUrl.errors.pattern">Please enter valid URL.</span>
-                                    </mat-error>
-                            </mat-form-field>
-                        </div>
+                                    <input id="eventUrl" matInput formControlName="eventUrl"
+                                        placeholder="Enter Event URL" />
+                                    <!-- <mat-error
+                                        *ngIf="eventsDataFormGroup.controls.eventUrl.touched && eventsDataFormGroup.controls.eventUrl.invalid">
+                                        <span *ngIf="eventsDataFormGroup.controls.eventUrl.errors.required">This field
+                                            is mandatory.</span>
+                                        <span *ngIf="eventsDataFormGroup.controls.eventUrl.errors.pattern">Please enter
+                                            valid URL.</span>
+                                    </mat-error> -->
+                                </mat-form-field>
+                            </div>
 
-                        <div class="row col-md-12" style="justify-content: space-between;">
-                            <label for="file">Upload Flyer/Poster:</label>
-                            <input style="margin-bottom: 15px!important;"
-                                   type="file"
-                                   placeholder="Upload Flyer/Poster" 
-                                   id="file"
-                                   (change)="handleEventFlyerFileInput($event)" multiple>
-                        </div>
+                            <div class="row col-md-12" style="justify-content: space-between;">
+                                <label for="file">Upload Flyer/Poster:</label>
+                                <input style="margin-bottom: 15px!important;" type="file"
+                                    placeholder="Upload Flyer/Poster" id="file"
+                                    (change)="handleEventFlyerFileInput($event)" multiple>
+                            </div>
 
                             <div class="row">
                                 <mat-form-field class="col-md-12">
@@ -186,8 +219,7 @@
 
             </mat-step>
 
-            
-            <mat-step *ngIf= "isVenueRequired" [stepControl]="venuesDataFormGroup">
+            <mat-step *ngIf="isVenueRequired" [stepControl]="venuesDataFormGroup">
                 <div class="container">
 
                     <form [formGroup]="venuesDataFormGroup">
@@ -283,12 +315,12 @@
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <mat-form-field class="col-md-12">
-                                                        <input readonly matInput id="name" matInput formControlName="name"
-                                                            placeholder="Name">
+                                                        <input readonly matInput id="name" matInput
+                                                            formControlName="name" placeholder="Name">
                                                     </mat-form-field>
                                                 </div>
 
-                                                <div *ngIf= "isSchoolGradeRequired" class="col-md-4">
+                                                <div *ngIf="isSchoolGradeRequired" class="col-md-4">
                                                     <mat-form-field class="col-md-12">
                                                         <input readonly matInput id="schoolGradeFrom" matInput
                                                             formControlName="schoolGradeFrom"
@@ -296,7 +328,7 @@
                                                     </mat-form-field>
                                                 </div>
 
-                                                <div *ngIf= "isSchoolGradeRequired" class="col-md-4">
+                                                <div *ngIf="isSchoolGradeRequired" class="col-md-4">
                                                     <mat-form-field class="col-md-12">
                                                         <input readonly matInput id="schoolGradeTo" matInput
                                                             formControlName="schoolGradeTo"
@@ -308,7 +340,7 @@
 
 
 
-                                        <div class="row">
+                                            <div class="row">
                                                 <div *ngIf="isVenueRequired" class="col-md-6">
                                                     <mat-form-field class="col-md-12">
                                                         <mat-select required multiple id="eventCategoryVenue"
@@ -319,7 +351,7 @@
                                                     </mat-form-field>
                                                 </div>
 
-                                                <div *ngIf= "isJudgeRequired" class="col-md-6">
+                                                <div *ngIf="isJudgeRequired" class="col-md-6">
                                                     <mat-form-field class="col-md-12">
                                                         <mat-select multiple id="judges" formControlName="judges"
                                                             placeholder="Select Judges">
@@ -327,9 +359,9 @@
                                                                 [value]="proctor.userId">{{proctor.name}}</mat-option>
                                                         </mat-select>
                                                     </mat-form-field>
-                                            </div>
+                                                </div>
 
-                                        </div>
+                                            </div>
 
 
 
@@ -354,7 +386,7 @@
                 </div>
             </mat-step>
 
-            <mat-step [stepControl]="questionnaireDataFormGroup">
+            <mat-step *ngIf="isQuestionnariesRequired" [stepControl]="questionnaireDataFormGroup">
                 <div class="container">
                     <form [formGroup]="questionnaireDataFormGroup">
                         <ng-template matStepLabel>Questionaries</ng-template>
@@ -423,6 +455,55 @@
                             </div>
                         </div>
 
+                    </form>
+                </div>
+            </mat-step>
+
+            <mat-step *ngIf="isttcExamDataFormGroupRequired" [stepControl]="ttcExamDataFormGroup">
+                <div class="container">
+                    <form [formGroup]="ttcExamDataFormGroup">
+                        <ng-template matStepLabel>TTC Examination Dates</ng-template>
+                        <div class="form-container">
+                            <div class="row" style="padding-top: 4%;">
+                                <mat-form-field appearance="fill" class="example-form-field col-md-6">
+                                    <mat-label>Enter a date range</mat-label>
+                                    <mat-date-range-input [rangePicker]="rangePicker" [min]="eventStartDateMin"
+                                        [max]="eventEndDateMax">
+                                        <input matStartDate placeholder="Start date" formControlName="ttcExamStartDate">
+                                        <input matEndDate placeholder="End date" formControlName="ttcExamEndDate">
+                                    </mat-date-range-input>
+                                    <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
+                                    <mat-date-range-picker #rangePicker>
+                                        <mat-date-range-picker-actions>
+                                            <button mat-button matDateRangePickerCancel>Cancel</button>
+                                            <button mat-raised-button color="primary"
+                                                matDateRangePickerApply>Apply</button>
+                                        </mat-date-range-picker-actions>
+                                    </mat-date-range-picker>
+                                </mat-form-field>
+                            </div>
+
+
+                            <mat-divider
+                                style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 4%;margin-bottom: 3%;">
+                            </mat-divider>
+
+
+                            <div *ngIf="!eventFormLabel" class="row" style="padding-top: 1%; padding-bottom: -2%;">
+                                <div class="col text-center">
+                                    <button mat-raised-button type="submit" class="mbutton" (click)="createTtcEvent()">
+                                        Create Event</button>
+                                </div>
+                            </div>
+
+                            <div *ngIf="eventFormLabel" class="row" style="padding-top: 1%;">
+                                <div class="col text-center">
+                                    <button mat-raised-button type="submit" class="mbutton" (click)="updateTtcEvent()">
+                                        Update Event</button>
+                                </div>
+                            </div>
+
+                        </div>
                     </form>
                 </div>
             </mat-step>

@@ -50,10 +50,10 @@ export class AuthService {
     console.log(`Attempting to sign in with email: ${data.data.username} and password: ${data.data.password}`)
     this.afAuth.auth.signInWithEmailAndPassword(data.data.username, data.data.password)
       .then((result: any) => {
-        if (result.user?.emailVerified == false) {
-        this.uiCommonUtils.showSnackBar('Please verify your email.', 'error', 3000)
-        return;
-        } else {
+        // if (result.user?.emailVerified == false) {
+        // this.uiCommonUtils.showSnackBar('Please verify your email.', 'error', 3000)
+        // return;
+        //} else {
         this.signedInUser = result.user;
         this.ngZone.run(() => {
           result.user?.getIdToken().then((token: string) => {
@@ -105,7 +105,7 @@ export class AuthService {
           //   }
           // })
         });
-        }
+        // }
         this.SetUserData(result.user);
       }).catch((error: any) => {
         this.uiCommonUtils.showSnackBar(error.message, 'Dismiss', 4000)
@@ -128,7 +128,7 @@ export class AuthService {
             }).catch((error: any) => {
               console.log(`Error while updating the username as : ${error}`);
             }).then((res: any) => {
-               result.user?.sendEmailVerification();
+              // result.user?.sendEmailVerification();
             })
             this.router.navigate(['/signin']);
             this.uiCommonUtils.showSnackBar('Sign up complete, Please check your inbox to verify your email address', 'Dismiss', 5000);

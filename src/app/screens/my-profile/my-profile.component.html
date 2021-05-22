@@ -1,10 +1,13 @@
 <div class="container mt-4">
   <mat-card class="shadow">
-    <form *ngIf="isApprovedUserLoggedIn" (change)="isDirty = true" [formGroup]="myprofileform">
+      
       <div class="row">
 
-        <h1 class="col-md-12">My Profile</h1>
-      </div>
+          <h1 class="col-md-12">My Profile</h1>
+        </div>
+      
+    <form *ngIf="isApprovedUserLoggedIn" (change)="isDirty = true" [formGroup]="myprofileform">
+        
       <div class="row" style="padding-left: 1.6%;">
 
         <mat-form-field style="width:10%;">
@@ -32,7 +35,8 @@
 
         <mat-form-field style="width:30%;padding-left: 1%;">
           <mat-label>Middle Name</mat-label>
-          <input style="text-transform: capitalize;" required id="middleName" matInput formControlName="middleName" placeholder="Enter Middle Name" />
+          <!--required-->
+          <input style="text-transform: capitalize;"  id="middleName" matInput formControlName="middleName" placeholder="Enter Middle Name" />
         </mat-form-field>
 
         <mat-form-field style="width:30%;padding-left: 1%;padding-right: 1.4%;">
@@ -58,7 +62,8 @@
 
         <mat-form-field class="col-md">
           <mat-label>Date of Birth</mat-label>
-          <input [max]="maxDate" matInput type="input" [matDatepicker]="picker" required id="dob" formControlName="dob">
+           <!--required-->
+          <input [max]="maxDate" matInput type="input" [matDatepicker]="picker"  id="dob" formControlName="dob">
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
@@ -67,7 +72,7 @@
       <div class="row">
         <mat-form-field class="col-md-4">
           <mat-label style="padding-left: 15%;">Mobile Number</mat-label>
-          <input id="mobileNo" matInput formControlName="mobileNo" ng2TelInput  length="10" (keypress)="keyPress($event)"
+          <input required id="mobileNo" matInput formControlName="mobileNo" ng2TelInput maxlength="10" (keypress)="keyPress($event)"
             placeholder="Enter Mobile Number" />
             <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
               <span *ngIf="myprofileform.controls.mobileNo.errors.required">This field is mandatory.</span>
@@ -77,7 +82,7 @@
 
         <mat-form-field class="col-md-4">
           <mat-label style="padding-left: 15%;">Home Phone Number</mat-label>
-          <input id="homePhoneNo" matInput formControlName="homePhoneNo" ng2TelInput  length="10" (keypress)="keyPress($event)"
+          <input id="homePhoneNo" matInput formControlName="homePhoneNo" ng2TelInput  maxlength="10" (keypress)="keyPress($event)"
             placeholder="Enter Home Phone Number" />
             <mat-error *ngIf="myprofileform.controls.homePhoneNo.touched && myprofileform.controls.homePhoneNo.invalid">
               <span *ngIf="myprofileform.controls.homePhoneNo.errors.required">This field is mandatory.</span>
@@ -87,7 +92,7 @@
 
         <mat-form-field class="col-md-4">
           <mat-label>Email Address</mat-label>
-          <input id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address" />
+          <input id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address" readonly />
           <mat-error *ngIf="myprofileform.controls.emailId.touched && myprofileform.controls.emailId.invalid">
             <span *ngIf="myprofileform.controls.emailId.errors.required">This field is mandatory.</span>
             <span *ngIf="myprofileform.controls.emailId.errors.pattern">Enter valid email id.</span>
@@ -115,30 +120,38 @@
       <div class="row">
         <mat-form-field class="col-md">
           <mat-label>City</mat-label>
-          <input required id="city" matInput formControlName="city" placeholder="Enter Address" />
+          <!--required-->
+          <input  id="city" matInput formControlName="city" placeholder="Enter Address" />
         </mat-form-field>
 
         <mat-form-field class="col-md">
           <mat-label>Postal Code</mat-label>
-          <input required id="postalCode" matInput formControlName="postalCode" placeholder="Enter Address" />
+          <!--required-->
+          <input  id="postalCode" matInput formControlName="postalCode" placeholder="Enter Address" />
         </mat-form-field>
 
         <mat-form-field class="col-md">
           <mat-label>Parish</mat-label>
           <input id="parish" matInput formControlName="parish" readonly />
+         <!-- readonly
+          <mat-select id="parish" formControlName = "parish" placeholder="Parish">
+            <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
+          </mat-select>-->
         </mat-form-field>
       </div>
       <div class="row">
 
           <mat-form-field class="col-md-6">
               <mat-label>Country</mat-label>
-              <select matNativeControl required id="country" formControlName="country" placeholder="Select Country" [(ngModel)]="selectedCountry" (change)="changeCountry($event)">
+              <!--required-->
+              <select matNativeControl  id="country" formControlName="country" placeholder="Select Country" [(ngModel)]="selectedCountry" (change)="changeCountry($event)">
                       <option *ngFor="let country of countries" [value]="country.countryName">{{country.countryName}}</option>
               </select>
       </mat-form-field>
         <mat-form-field class="col-md-6">
             <mat-label>State/Province</mat-label>
-            <select matNativeControl required id="state" formControlName="state" placeholder="Select State/Province">
+             <!--required-->
+            <select  matNativeControl  id="state" formControlName="state" placeholder="Select State/Province">
               <option *ngFor="let state of states" [value]="state">{{state}}</option>
             </select>
           </mat-form-field>
@@ -147,7 +160,8 @@
       <div class="row">
         <mat-form-field class="col-md">
           <mat-label>Marital Status</mat-label>
-          <select matNativeControl required id="maritalStatus" formControlName="maritalStatus"
+           <!--required-->
+          <select matNativeControl  id="maritalStatus" formControlName="maritalStatus"
            placeholder="Enter Country">
             <option value="married">Married</option>
             <option value="unmarried">Unmarried</option>
@@ -160,7 +174,8 @@
         </mat-form-field>
         <mat-form-field class="col-md">
             <mat-label>Date of Marriage</mat-label>
-            <input [max]="maxDate" matInput type="input" [matDatepicker]="marriageDatepicker" required id="dateofMarriage"
+             <!--required-->
+            <input [disabled]="myprofileform.value.maritalStatus=='unmarried'" [max]="maxDate" matInput type="input" [matDatepicker]="marriageDatepicker"  id="dateofMarriage"
             formControlName="dateofMarriage">
             <mat-datepicker-toggle matSuffix [for]="marriageDatepicker"></mat-datepicker-toggle>
             <mat-datepicker #marriageDatepicker></mat-datepicker>
@@ -189,26 +204,28 @@
       </div>
 -->
 <div *ngIf="showFamilyHeadQuestion" class="row" >
-  <div class="col-md-3">
+  <!--<div class="col-md-3">
     <h3>Are you a family head ?</h3>
-  </div>
+  </div>-->
   <div class="col-md-9" style="padding-top: 0.4%;margin-left: -4%;">
     <mat-radio-group formControlName="isFamilyHead" aria-label="Select an option">
+      <label style="margin-right: 1%;" id="example-radio-group-label" class="ml-5">Are you a family head ? </label>
       <mat-radio-button [checked]=isFamilyHead value=true>Yes</mat-radio-button>&nbsp;
       <mat-radio-button [checked]=!isFamilyHead value=false>No</mat-radio-button>
     </mat-radio-group>
   </div>  
 </div>
 
-<div class="row" *ngIf ="!isFamilyHead">
-<div class="col-md-3">
+<div class="row" *ngIf ="!isFamilyHead || showStudentQuestion ">
+<!--<div class="col-md-3">
   <h3>Are you a student ? &nbsp;</h3>
-</div>
+</div>-->
 
-<div class="col-md-9" style="padding-top: 0.4%;margin-left: -4%;">
+<div  class="col-md-9" style="padding-top: 0.4%;margin-left: -4%;">
   <mat-radio-group formControlName="isStudent" (change)= "isStudentFn($event)" aria-label="Select an option">
-    <mat-radio-button value=true>Yes</mat-radio-button>&nbsp;
-    <mat-radio-button value=false>No</mat-radio-button>
+    <label style="margin-right: 1%;" id="example-radio-group-label" class="ml-5">Do you wish to join Sunday School ? </label>
+    <mat-radio-button [checked]=isStudent value=true>Yes</mat-radio-button>&nbsp;
+    <mat-radio-button [checked]=!isStudent value=false>No</mat-radio-button>
   </mat-radio-group>
 </div>
 
@@ -255,7 +272,7 @@
                 <div class="col-md-6">
                   <mat-form-field class="col-md-12">
                     <mat-label>Baptismal Name</mat-label>
-                    <input style="text-transform: capitalize;" required id="baptismalName" matInput formControlName="baptismalName" placeholder="Enter Baptismal Name" />
+                    <input style="text-transform: capitalize;" id="baptismalName" matInput formControlName="baptismalName" placeholder="Enter Baptismal Name" />
                   </mat-form-field>
                 </div>
 
@@ -297,7 +314,8 @@
 
                 <mat-form-field style="width:30%;padding-left: 1%;">
                   <mat-label>Middle Name</mat-label>
-                  <input style="text-transform: capitalize;" required id="middleName" matInput formControlName="middleName"
+                  <!--required-->
+                  <input style="text-transform: capitalize;" id="middleName" matInput formControlName="middleName"
                     placeholder="Enter Middle Name" />
 
                 </mat-form-field>
@@ -314,7 +332,8 @@
               <div class="row" style="padding-left: 1%;">
                 <mat-form-field class="col-md-4">
                   <mat-label>Date of Birth</mat-label>
-                  <input [max]="maxDate" matInput type="input" [matDatepicker]="picker" required id="dob" formControlName="dob">
+                  <!--required-->
+                  <input [max]="maxDate" matInput type="input" [matDatepicker]="picker"  id="dob" formControlName="dob">
                   <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
 
@@ -345,12 +364,20 @@
         </fieldset>
         <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
         </mat-divider>
-
+        <div class="row" style="padding-top: 1%;" >
+            <div class="col text-center"  >
+              <!--[disabled]="!myprofileform.dirty"-->
+                <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
+              <button [disabled]="!myprofileform.dirty" mat-button type="submit" mat-button class="mbutton" (change)="isDirty = false"
+               (click)="updateUserProfile()">
+                Update</button>
+            </div>
+          </div>
       </div>
-
+      
      
     </form>
-
+<div ></div>
     <div *ngIf="!isFamilyHead">
       <form [formGroup]="studentDetailsForm">
         <div *ngIf = "isStudentvar" >
@@ -388,19 +415,40 @@
     
           <div class="row">
            
-            <mat-form-field class= "col-md-6">
+            <mat-form-field class= "col-md-9">
               <mat-label>School Name</mat-label>
-              <input required id="schoolName" formControlName ="schoolName" matInput placeholder="Enter School Name" />
+              <input id="schoolName" formControlName ="schoolName" matInput placeholder="Enter School Name" />
             </mat-form-field>
-    
+            <!--
             <mat-form-field class= "col-md-6">
               <mat-label>School Grade</mat-label>
               <input required id="schoolGrade" formControlName ="schoolGrade" matInput placeholder="Enter School Grade" />
             </mat-form-field>
-    
+            -->
+
+            
+            <mat-form-field class= "col-md-3">
+                <mat-label>School Grade</mat-label>
+                <!--[(ngModel)]="acadmicGradeSelection" (ngModelChange)="onAcadmicGradeChange($event)"-->
+                <mat-select required matNativeControl 
+                (selectionChange)="gradeChange()" [value]="schoolGrade" id="schoolGrade" formControlName="schoolGrade">
+                  <mat-option value="Grade1">Grade 1</mat-option>
+                  <mat-option value="Grade2">Grade 2</mat-option>
+                  <mat-option value="Grade3">Grade 3</mat-option>
+                  <mat-option value="Grade4">Grade 4</mat-option>
+                  <mat-option value="Grade5">Grade 5</mat-option>
+                  <mat-option value="Grade6">Grade 6</mat-option>
+                  <mat-option value="Grade7">Grade 7</mat-option>
+                  <mat-option value="Grade8">Grade 8</mat-option>
+                  <mat-option value="Grade9">Grade 9</mat-option>
+                  <mat-option value="Grade10">Grade 10</mat-option>
+                  <mat-option value="Grade11">Grade 11</mat-option>
+                  <mat-option value="Grade12">Grade 12</mat-option>
+                </mat-select>
+              </mat-form-field>
           </div>
     
-          <div class="row">
+          <div class="row" *ngIf="ishidden ">
   
             <mat-form-field class= "col-md-6">
               <mat-label>Academic Year Start Date</mat-label>
@@ -422,7 +470,7 @@
           
           </div>
     
-          <div class="row">
+          <div class="row" *ngIf="ishidden ">
     
             <mat-form-field class= "col-md-4">
               <mat-label>Address Line 1</mat-label>
@@ -441,7 +489,7 @@
           
           </div>
     
-          <div class="row">
+          <div class="row" *ngIf="ishidden ">
     
     
             <mat-form-field class= "col-md-6">
@@ -456,7 +504,7 @@
     
           </div>
     
-          <div class="row">
+          <div class="row" *ngIf="ishidden ">
             
             <mat-form-field class= "col-md-6">
               <mat-label>School City</mat-label>
@@ -498,60 +546,102 @@
         </div> -->
   
         <div class="row">
-  
-        <mat-form-field class= "col-md-6">
-          <mat-label>School Id</mat-label>
-          <input required id="sunSchoolId" formControlName ="sunSchoolId" matInput placeholder="Enter School Id" />
-        </mat-form-field>
-  
-        <mat-form-field class= "col-md-6">
-          <mat-label>School Grade</mat-label>
-          <input required id="sunSchoolGrade" formControlName ="sunSchoolGrade" matInput placeholder="Enter School Grade"/>
-        </mat-form-field>
-      </div>
-  
-    
-        <div class="row">
-  
-          <mat-form-field class= "col-md-6">
-            <mat-label>Academic Year Start Date</mat-label>
-            <input matInput [matDatepicker]="sunSchoolAcaYrStrtDatepicker" id="sunSchoolAcaYrStrtDate"  formControlName ="sunSchoolAcaYrStrtDate" placeholder="Enter Academic Year Start Date">
-            <mat-datepicker-toggle matSuffix [for]="sunSchoolAcaYrStrtDatepicker"></mat-datepicker-toggle>
-            <mat-datepicker startView="multi-year" #sunSchoolAcaYrStrtDatepicker></mat-datepicker>
-          </mat-form-field>
-  
-  
-          <mat-form-field class= "col-md-6">
-            <mat-label>Academic Year End Date</mat-label>
-            <input matInput [matDatepicker]="sunSchoolAcaYrEndDatepicker" id="sunSchoolAcaYrEndDate" formControlName ="sunSchoolAcaYrEndDate" placeholder="Enter Academic Year End Date">
-            <mat-datepicker-toggle  matSuffix [for]="sunSchoolAcaYrEndDatepicker"></mat-datepicker-toggle>
-            <mat-datepicker startView="multi-year" #sunSchoolAcaYrEndDatepicker></mat-datepicker>
-          </mat-form-field>
-    
+          <!--
+                <mat-form-field class= "col-md-6">
+                  <mat-label>School Id</mat-label>
+                  <input required id="sunSchoolId" formControlName ="sunSchoolId" matInput placeholder="Enter School Id" />
+                </mat-form-field>
+          
+                <mat-form-field class= "col-md-6">
+                  <mat-label>School Grade</mat-label>
+                  <input required id="sunSchoolGrade" formControlName ="sunSchoolGrade" matInput placeholder="Enter School Grade"/>
+                </mat-form-field>
+                -->
+                <mat-form-field class="form-field col-md-9">
+                    <mat-label>Sunday School Name</mat-label>
+                    <!--required [(ngModel)]="sundaySchoolNameSelect"-->
+                    <select required matNativeControl  id="sunSchoolId" formControlName="sunSchoolId">
+                    <!-- <option value="school1">school1</option>
+                      <option value="school2">school2</option>
+                       <option *ngFor="let orgIds of orgIds " [value]="orgIds.name">
+                        {{orgIds.name}}</option>-->
+                        <option *ngFor = "let schoolData of schoolDataList" [value]=schoolData.orgId>{{schoolData.name}} </option>
+                    </select>
+                   
+                  </mat-form-field>
+          
+                  <mat-form-field class= "col-md-3">
+                    <mat-label>Sunday School Grade</mat-label>
+                    <!--[(ngModel)]="sundaySchoolGradeSelect"-->
+                    <mat-select required  matNativeControl 
+                    id="sunSchoolGrade" formControlName="sunSchoolGrade">
+                    <mat-option value="Grade1">Grade 1</mat-option>
+                      <mat-option value="Grade2">Grade 2</mat-option>
+                      <mat-option value="Grade3">Grade 3</mat-option>
+                      <mat-option value="Grade4">Grade 4</mat-option>
+                      <mat-option value="Grade5">Grade 5</mat-option>
+                      <mat-option value="Grade6">Grade 6</mat-option>
+                      <mat-option value="Grade7">Grade 7</mat-option>
+                      <mat-option value="Grade8">Grade 8</mat-option>
+                      <mat-option value="Grade9">Grade 9</mat-option>
+                      <mat-option value="Grade10">Grade 10</mat-option>
+                      <mat-option value="Grade11">Grade 11</mat-option>
+                      <mat-option value="Grade12">Grade 12</mat-option>
+                     <!--  <option *ngFor = "let schoolGrade of schoolDataList[0].grades"
+                       [value]=schoolGrade.orgId>{{schoolGrade.name}} </option>-->
+                    </mat-select>
+                    
+                  </mat-form-field>
+              </div>
+          
+          
+            
+                <div class="row">
+                  
+                  <mat-form-field class= "col-md-6">
+                    <mat-label>Sunday School Year Start Date</mat-label>
+                    <input [min]="minDate" (dateChange)="comparisonSunSchoolStartDateValidator()"
+                    (dateChange)="eventStartDateChange()" required matInput [matDatepicker]="sunSchoolAcaYrStrtDatepicker" id="sunSchoolAcaYrStrtDate"  formControlName ="sunSchoolAcaYrStrtDate" placeholder="Enter Academic Year Start Date">
+                    <mat-datepicker-toggle matSuffix [for]="sunSchoolAcaYrStrtDatepicker"></mat-datepicker-toggle>
+                    <mat-datepicker startView="multi-year" #sunSchoolAcaYrStrtDatepicker></mat-datepicker>
+                    <mat-error
+                    *ngIf="studentDetailsForm.controls['sunSchoolAcaYrStrtDate'].hasError('invaliddaterange')">
+                   Start date cannot be greater than end date
+                </mat-error>
+                  </mat-form-field>
+          
+          
+                  <mat-form-field class= "col-md-6">
+                    <mat-label>Sunday School Year End Date</mat-label>
+                    <input [min]="minDate" (dateChange)="comparisonSunSchoolEndDateValidator()"   required matInput [matDatepicker]="sunSchoolAcaYrEndDatepicker" id="sunSchoolAcaYrEndDate" formControlName ="sunSchoolAcaYrEndDate" placeholder="Enter Academic Year End Date">
+                    <mat-datepicker-toggle  matSuffix [for]="sunSchoolAcaYrEndDatepicker"></mat-datepicker-toggle>
+                    <mat-datepicker startView="multi-year" #sunSchoolAcaYrEndDatepicker></mat-datepicker>
+                    <mat-error *ngIf="studentDetailsForm.controls['sunSchoolAcaYrEndDate'].hasError('invaliddaterange')">
+                        End date cannot be earlier than start date
+                      </mat-error>
+                  </mat-form-field>
+            
+                </div>
+               
         </div>
-    
-        </div>
+        
       </form>
-    </div>
+     
 
-    <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
+    <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 10px; margin-bottom: 12px;">
     </mat-divider>
-
-    <div class="row" style="padding-top: 1%;">
-      <div class="col text-center">
-        <button mat-button type="submit" mat-button class="mbutton" (change)="isDirty = false"
-          (click)="updateUserProfile()">
-          Update</button>
-      </div>
-    </div>
+ 
+    
+  </div>
+    
 
     <!-- ****************************************  Basic edit profile Sign up form Code ****************************************** -->
 
-      <form *ngIf="!isApprovedUserLoggedIn" [formGroup]="signUpForm" class="p-2">
+      <form *ngIf="!isApprovedUserLoggedIn"  [formGroup]="signUpForm" class="p-2">
 
         <div class="row form-group">
             <mat-form-field class="form-field col-2">
-                    <mat-select formControlName="title" id="title" placeholder="Title">
+                    <mat-select required formControlName="title" id="title" placeholder="Title">
                             <mat-option value="His Grace">His Grace</mat-option>
                             <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
                             <mat-option value="Very Rev">Very Rev</mat-option>
@@ -565,7 +655,7 @@
                     </mat-select>
             </mat-form-field>
             <mat-form-field class="form-field col-md-5">
-                <input matInput formControlName="firstName" id="firstname" placeholder="First Name" maxlength="25" required>
+                <input matInput formControlName="firstName" id="firstName" placeholder="First Name" maxlength="25" required>
                 <mat-error *ngIf="signUpForm.controls.firstName.touched && signUpForm.controls.firstName.invalid">
                     <span *ngIf="signUpForm.controls.firstName.errors.required">This field is mandatory.</span>
                     <span *ngIf="signUpForm.controls.firstName.errors.pattern">This field is invalid.</span>
@@ -573,7 +663,7 @@
             </mat-form-field>
 
             <mat-form-field class="form-field col-md-5">
-                <input type="text" matInput formControlName="lastName" id="lastname" placeholder="Last Name" maxlength="25" required>
+                <input type="text" matInput formControlName="lastName" id="lastName" placeholder="Last Name" maxlength="25" required>
                 <mat-error *ngIf="signUpForm.controls.lastName.touched && signUpForm.controls.lastName.invalid">
                     <span *ngIf="signUpForm.controls.lastName.errors.required">This field is mandatory.</span>
                     <span *ngIf="signUpForm.controls.lastName.errors.pattern">This field is invalid.</span>
@@ -594,7 +684,7 @@
 
             <mat-form-field class="form-field col col-md">
                 <mat-label style="padding-left: 23%;">Mobile Number</mat-label>
-                <input matInput type="text" ng2TelInput (ng2TelOutput)="getNumber($event)" formControlName="mobileNo" id="mobileNo" length="10" (keypress)="keyPress($event)" required style="width: fit-content;"/>
+                <input matInput type="text" ng2TelInput (ng2TelOutput)="getNumber($event)" formControlName="mobileNo" id="mobileNo" maxlength="12" (keypress)="keyPress($event)" required style="width: fit-content;"/>
                 <mat-error *ngIf="signUpForm.controls.mobileNo.touched && signUpForm.controls.mobileNo.invalid">
                     <span *ngIf="signUpForm.controls.mobileNo.errors.required">This field is mandatory.</span>
                     <span *ngIf="signUpForm.controls.mobileNo.errors.pattern">Enter 10 digit number.</span>
@@ -603,7 +693,8 @@
            
 
             <mat-form-field class="form-field col-12 col-md-6">
-                <input matInput type="input" [matDatepicker]="picker" [max]="maxDate" formControlName="dob" id="dob" placeholder="DoB" required>
+              
+                <input matInput type="input" [matDatepicker]="picker" [max]="maxDate" formControlName="dob" id="dob" placeholder="DoB" >
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
                 <mat-error *ngIf="signUpForm.controls.dob.touched && signUpForm.controls.dob.invalid">
@@ -612,42 +703,18 @@
                 </mat-error>
             </mat-form-field>
                            </div>
-<!-- 
-        <div class="form-group row justify-content-center">
-            <mat-form-field class="form-field col-md">
-                <input type="text" matInput formControlName="username" id="username" placeholder="Username" required>
-                <mat-error *ngIf="signUpForm.controls.username.touched && signUpForm.controls.username.invalid">
-                    <span *ngIf="signUpForm.controls.username.errors.required">This field is mandatory.</span>
-                    <span *ngIf="signUpForm.controls.username.errors.pattern">This field is invalid.</span>
-                </mat-error>
-            </mat-form-field>
-        </div> -->
-        <!-- <div class="row justify-content-center">
-            <mat-form-field class="form-field col-md">
-                <input type="password" matInput formControlName="password" id="password" placeholder="Password" minlength="8" required>
-                <mat-error *ngIf="signUpForm.controls.password.touched && signUpForm.controls.password.invalid">
-                    <span *ngIf="signUpForm.controls.password.errors.required">This field is mandatory.</span>
-                    <span *ngIf="signUpForm.controls.password.errors.pattern">Enter strong password.</span>
-                </mat-error>
-            </mat-form-field>
-            <mat-form-field class="form-field col-md">
-                <input type="password" matInput formControlName="cnfmpwd" id="cnfmpwd" placeholder="Confirm Password" required>
-                <mat-error *ngIf="signUpForm.controls.cnfmpwd.touched && signUpForm.controls.cnfmpwd.invalid">
-                    <span *ngIf="signUpForm.controls.cnfmpwd.errors.required">This field is mandatory.</span>
-                    <span *ngIf="signUpForm.controls.cnfmpwd.errors.pattern">This field is invalid.</span>
-                </mat-error>
-            </mat-form-field>
-        </div> -->
+
         <div class="form-group row">
                 <mat-form-field class="form-field col-md">
-                        <mat-select formControlName="memberType" id="memberType" placeholder="Member Type">
+                        <mat-select required formControlName="memberType" id="memberType" placeholder="Member Type">
                                 <mat-option value="member">Member</mat-option>
                                 <mat-option value="non-member">Non-member</mat-option>
                                 <mat-option value="guest">Guest</mat-option>
                         </mat-select>
                 </mat-form-field>
                 <mat-form-field class="form-field col-md" >
-                        <mat-select id="orgId" formControlName = "orgId" placeholder="Parish" required>
+                  
+                        <mat-select  id="orgId" formControlName = "orgId" placeholder="Parish" >
                           <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
                         </mat-select>
                       </mat-form-field>
@@ -660,11 +727,20 @@
         </div>
       
 
-        <div class="form-group text-right">
-            <button mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
-            <button mat-button id="signInBtn" type="submit" routerLinkActive="active" class="mbutton" (click)="updateUserProfile()">Update</button>
-        </div>
+        <!-- <div class="form-group text-right">
+            <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="unpproveCancel()">Cancel</button>
+            <button [disabled]="!signUpForm.dirty" mat-button id="signInBtn" type="submit" routerLinkActive="active" class="mbutton" (click)="updateUserProfile()">Update</button>
+        </div>  -->
+        
     </form>
-
+    <div class="row" style="padding-top: 1%;" *ngIf="!isFamilyHead">
+        <div class="col text-center">
+          <!--[disabled]="!myprofileform.dirty"-->
+            <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
+          <button mat-button type="submit" mat-button class="mbutton" (change)="isDirty = false"
+           (click)="updateUserProfile()">
+            Update</button>
+        </div>
+      </div>  
   </mat-card>
 </div>

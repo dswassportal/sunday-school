@@ -35,7 +35,7 @@ async function getEventById(eventId, isParticipant, userId) {
                                     event_venue_id, venue_id, event_venue_name, proctor_id, event_cat_map_id,
                                     event_category_id, category_name, category_type, school_grade_from, school_grade_to,
                                     event_category_id, event_cat_staff_map_id, judge_id,
-                                    question_id, question, answer_type, coordinator_id
+                                    question_id, question, answer_type, coordinator_id, exam_start_date, exam_end_date
                                     from v_event  where is_deleted = false and event_id = ${eventId}
                                     order by event_category_id,venue_id;`
 
@@ -55,6 +55,8 @@ async function getEventById(eventId, isParticipant, userId) {
             event.endDate = result.rows[0].event_end_date;
             event.orgType = result.rows[0].org_type;
             event.eventUrl = result.rows[0].event_url;
+            event.ttcExamStartDate = result.rows[0].exam_start_date;
+            event.ttcExamEndDate = result.rows[0].exam_end_date;
 
             let category = {};
             let venue = {};
@@ -223,7 +225,7 @@ async function eventRegistration(eventData, loggedInUser) {
         VALUES($1, $2, $3, $4, $5, $6, $7) returning event_participant_registration_id;`
 
             if (eventType === 'CWC') {
-
+                console.log('Participant id is :: ' + loggedInUser);
                 let enrollmentId;
                 for (; ;) {
                     let randomNo = Math.floor(Math.random() * (999999 - 100000 + 1) + 100000);
@@ -238,13 +240,9 @@ async function eventRegistration(eventData, loggedInUser) {
                     }
                 }
                 
-    
-                const registerQuery = `INSERT INTO t_event_participant_registration
-                                (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id)
-                                VALUES($1, $2, $3, $4, $5, $6, $7) returning event_participant_registration_id;`
                 let registerQueryValues = [
                 eventData.eventId,
-                eventData.participantId,
+                loggedInUser,
                 eventData.schoolGrade,
                 false,
                 loggedInUser,
@@ -267,9 +265,9 @@ async function eventRegistration(eventData, loggedInUser) {
                 let registerEvtCatQueryValues = [
                     participantRegId,
                     catId,
-                    eventData.participantId,
+                    loggedInUser,
                     false,
-                    eventData.participantId,
+                    loggedInUser,
                     new Date().toUTCString()
                 ];
                 await client.query(registerEvtCatQuery, registerEvtCatQueryValues)
@@ -397,13 +395,21 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                                     'judgeId', res.staff_id,
                                                     'judgeName', res.judge_name,
                                                     'catStaffMapId', res.event_cat_staff_map_id,
-                                                    'catMapId', res.event_cat_map_id
-                                                    ) 
+                                                    'catMapId', res.event_cat_map_id,
+                                                    'partFullName', res.participant_name,
+                                                    'parish', res.parish,
+                                                    'scoreRefId', res.participant_event_score_id,
+                                                    'partEveRegCatId', res.participant_event_reg_cat_id
+                                                     ) 
                                                 ) participants                                  
-                                    from (  select staff_id, event_cat_map_id, enrollment_id, score, event_category_id, event_category_name,
+                                    from (  select distinct staff_id, participant_event_reg_cat_id, event_cat_map_id, enrollment_id, score, event_category_id, event_category_name,
                                         concat(staff_first_name, ' ', staff_last_name ) judge_name,
-                                         is_score_approved, event_cat_staff_map_id 
+                                         is_score_approved, event_cat_staff_map_id, torg."name" parish,
+                                        concat(tu.title ,'. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) participant_name, 
+                                        participant_event_score_id
                                     from v_event_participant vep 
+                                    inner join t_user tu on vep.participant_id = tu.user_id 
+                                    inner join t_organization torg on tu.org_id = torg.org_id 
                                     where event_id = ${eventId} 
                                     and staff_id = ${judgeId}
                                     and event_category_id = ${catId}

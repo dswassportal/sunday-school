@@ -1,9 +1,6 @@
 const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
-const { result, reject } = require('underscore');
-const { response } = require('express');
-
 const dbConnections = require(`${__dirname}/dbConnection`);
 
 
@@ -67,16 +64,16 @@ async function getMembers(fireBaseId) {
                 }
 
                 if (res) {*/
+        console.log(`firebase user UID : ${fireBaseId}  has ${result1.rows[0].member_count} family members.`)
         if (result1.rows[0].member_count > 0) {
 
             let fetchAllMembersData = `select jsonb_agg(
                             jsonb_build_object(
-                            'userId', res.user_id, 'title', res.title, 
-                            'firstName', res.first_name, 'lastName', 
-                            res.last_name,  'role', res.role_name 
+                            'userId', res.user_id, 
+                            'name', concat(res.title, '. ',res.first_name, ' ',res.middle_name, ' ', res.last_name)
                             ) 
                         ) member_list from (
-                    select distinct user_id, title, first_name, last_name, role_name
+                    select distinct user_id, title, middle_name, first_name, last_name
                         from v_user tu2 where user_id in(
                     select distinct family_member_id from t_person_relationship tpr where family_member_id in 
                     (select user_id from t_user tu where email_id =
@@ -84,9 +81,10 @@ async function getMembers(fireBaseId) {
                         and is_deleted != true
                         union 
                 select distinct user_id  from v_user tu3 where firebase_id = '${fireBaseId}' and role_name = 'Family Head'
-                        )
+                        ) order by user_id 
                         ) res`;
 
+                        //, res.last_name,  'role', res.role_name 
             let result2 = await client.query(fetchAllMembersData)/* (err, result) => {
 
                             if (err) {
@@ -94,7 +92,15 @@ async function getMembers(fireBaseId) {
                                 return(errorHandling.handleDBError('queryExecutionError'));
                             }
 */
-            if (result2.rows[0].member_list == null)
+            if (result2.rows[0].member_list != null) {
+
+                console.log(`and the member list as follows : ${JSON.stringify({
+                    data: {
+                        status: 'success',
+                        memberCount: result1.rows[0].member_count,
+                        members: result2.rows[0].member_list
+                    }
+                })} `)
 
                 return ({
                     data: {
@@ -103,7 +109,7 @@ async function getMembers(fireBaseId) {
                         members: result2.rows[0].member_list
                     }
                 })
-
+            }
             // });
         } else {
 
@@ -163,7 +169,7 @@ async function getUserApprovalStatus(fbuid) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::getUserApprovalStatus() --> error while fetching results : ${error}`)
-        reject(errorHandling.handleDBError('connectionError'));
+        return(errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }
@@ -200,7 +206,99 @@ async function handleLogIn_LogOut(reqContextData) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::handleLogIn_LogOut() --> Error : ${error}`)
-        reject(errorHandling.handleDBError('connectionError'));
+        return(errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release(false);
+    }
+
+}
+
+
+async function getLookupMasterData(reqParams) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        let qArry = reqParams.split(',');
+        let query = 'select type, code from t_lookup where '
+        for (let i = 0; i < qArry.length; i++) {
+
+            if (i === 0)
+                query += ` lower(type) = lower('${qArry[i]}') `
+            else
+                query += ` or lower(type) = lower('${qArry[i]}') `
+        }
+        query += ' and is_deleted != true; ';
+
+        let result = await client.query(query);
+        let response = {};
+
+        for (let type of qArry) {
+            let key = type.toLowerCase() + 's'
+            for (let row of result.rows) {
+                if (type.toLowerCase() === row.type.toLowerCase()) {
+                    if (response[key] == undefined)
+                        response[key] = [];
+                    else
+                        response[key].push(row.code)
+                }
+            }
+        }
+
+        return {
+            data: {
+                status: 'success',
+                data: response
+            }
+        };
+
+
+    } catch (error) {
+        console.error(`miscReqOperations.js::getLookupMasterData() --> Error : ${error}`)
+        return (errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release(false);
+    }
+
+}
+
+
+async function getRolesByUserId(userId) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        let query = `select distinct role_id, org_id, role_start_date, role_end_date, org_type from v_user vu where user_id = ${userId} order by role_id;`
+
+        let roleResult = await client.query(query);
+        let roles = [];
+        if (roleResult.rowCount > 0) {
+            for (let roleRow of roleResult.rows) {
+                let role = {}
+                role.roleId = roleRow.role_id;
+                role.orgType = roleRow.org_type;
+                role.orgId = roleRow.org_id;
+                role.roleStartDate = roleRow.role_start_date;
+                role.roleEndDate = roleRow.role_end_date;
+
+                if (_.findWhere(roles, role) == null) {
+                    roles.push(role);
+                }
+            } // for loop of roles
+        } // edd of if roles.rowCount > 0
+
+
+        return {
+            data: {
+                status: 'success',
+                roles: roles
+            }
+        }
+
+
+    } catch (error) {
+        console.error(`miscReqOperations.js::getRolesByUserId() --> Error : ${error}`)
+        return(errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }
@@ -211,5 +309,7 @@ module.exports = {
     getCountryStates,
     getMembers,
     getUserApprovalStatus,
-    handleLogIn_LogOut
+    handleLogIn_LogOut,
+    getLookupMasterData,
+    getRolesByUserId
 }

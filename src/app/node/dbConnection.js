@@ -1,15 +1,27 @@
 const { Client, Pool } = require('pg');
+var parse = require('pg-connection-string').parse;
 
+let devDB = 'postgres://oiccrclqexuacu:a13fa0f3a0b64d44c63c23c3fe7731556843127809c1360400dc3ae2cf228808@ec2-54-216-17-9.eu-west-1.compute.amazonaws.com:5432/de92g5782s2hn1' ;
 
-if (process.env.DB_USER == undefined || process.env.DB_USER == '' || process.env.DB_USER == '')
-    console.error('Envionment variables are not set!');
+if (process.env.DATABASE_URL == undefined) {
+    console.error(`DB connection string not found DATABASE_URL environment variable.`);
+}
+var config = parse( process.env.DATABASE_URL || devDB )
+
+// console.log(`
+//         Host: ${config.host}
+//         DB : ${config.database}
+//         User : ${config.user}
+//         Password: ${config.password}
+//         Port: ${config.port}
+// `)
 
 var pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWD,
-    port: process.env.DB_PORT,
+    user: config.user,
+    host: config.host,
+    database: config.database,
+    password: config.password,
+    port: config.port,
     max: 10,
     idleTimeoutMillis: 3000,
     connectionTimeoutMillis: 10000,

@@ -9,11 +9,33 @@ import { uiCommonUtils } from 'src/app/common/uiCommonUtils';
 import { EventDataService } from '../events/event.dataService';
 import { Router } from '@angular/router';
 
+
+import { Moment } from 'moment';
+import * as _moment from 'moment';
+import { default as _rollupMoment } from 'moment';
+import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
+
+const moment = _rollupMoment || _moment;
+
+
+class CustomDateAdapter extends NativeDateAdapter {
+  format(date: Date, displayFormat: Object): string {
+    var formatString = ' MMMM DD YYYY';
+    return moment(date).format(formatString);
+  }
+}
+
 @Component({
   selector: 'app-event-creation',
   templateUrl: './event-creation.component.html',
-  styleUrls: ['./event-creation.component.css']
+  styleUrls: ['./event-creation.component.css'],
+  providers: [
+    {
+      provide: DateAdapter, useClass: CustomDateAdapter
+    }
+  ]
 })
+
 export class EventCreationComponent implements OnInit {
 
   eventCreationForm: any;
@@ -21,6 +43,7 @@ export class EventCreationComponent implements OnInit {
   venuesDataFormGroup: any;
   categoriesDataFormGroup: any;
   questionnaireDataFormGroup: any;
+  ttcExamDataFormGroup: any;
   eventId: any;
   rowData: any;
   selectedRegion: any;
@@ -55,7 +78,11 @@ export class EventCreationComponent implements OnInit {
   isVenueRequired: any;
   isProctorRequired: any;
   isJudgeRequired: any;
+  eventStartDateMin: any;
+  eventEndDateMax: any;
   isSchoolGradeRequired: any;
+  isQuestionnariesRequired!: boolean;
+  isttcExamDataFormGroupRequired!: boolean;
   public myreg = /(^|\s)((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gi
   minDate = new Date();
   selectedRowJson: any = {};
@@ -104,6 +131,11 @@ export class EventCreationComponent implements OnInit {
       questionnaire: this.formBuilder.array([this.adduserquestionary()])
     });
 
+    this.ttcExamDataFormGroup = this.formBuilder.group({
+      ttcExamStartDate: new FormControl('', Validators.required),
+      ttcExamEndDate: new FormControl('', Validators.required),
+    });
+
 
 
     this.alluserdata = this.uiCommonUtils.getUserMetaDataJson();
@@ -121,7 +153,7 @@ export class EventCreationComponent implements OnInit {
       endDate: new FormControl('', Validators.required),
       registrationStartDate: new FormControl('', Validators.required),
       registrationEndDate: new FormControl('', Validators.required),
-      eventUrl: new FormControl('', [Validators.required, Validators.pattern(this.myreg)]),
+      eventUrl: new FormControl(''), //, [Validators.required, Validators.pattern(this.myreg)]
       description: new FormControl('', Validators.required),
       eventCoordinator: new FormControl('', Validators.required)
     });//{validator: this.checkDates}); //to compare event registration dates
@@ -137,7 +169,7 @@ export class EventCreationComponent implements OnInit {
       this.getData();
       this.eventsDataFormGroup.value.eventType = res.data.eventData.eventType;
       this.eventTypeSelChange();
-     
+
       // For binding data on update screen
       if (this.selectedRowJson.event_Id != undefined || this.selectedRowJson.event_Id != null) {
         console.log("Patch Values event_Id = " + this.selectedRowJson.event_Id);
@@ -176,22 +208,27 @@ export class EventCreationComponent implements OnInit {
           });
         }
 
+        this.ttcExamDataFormGroup.patchValue({
+          ttcExamStartDate: this.eventsDataUpdate.ttcExamStartDate,
+          ttcExamEndDate: this.eventsDataUpdate.ttcExamEndDate
+        });
+
       }
 
       // For Label And button Show update
       if (this.selectedRowJson.event_Id != undefined || this.selectedRowJson.event_Id != null) {
         this.eventFormLabel = true; // update screen
       }
-      else{
+      else {
         this.eventFormLabel = false; // insert screen
       }
       this.selectedRowJson.event_Id = null;
 
 
-      if(this.eventFormLabel == true){
+      if (this.eventFormLabel == true) {
         this.evntTypedisabled = true;
       }
-      else{
+      else {
         this.evntTypedisabled = false;
       }
 
@@ -218,24 +255,156 @@ export class EventCreationComponent implements OnInit {
     }
   }
 
-  //Function to validate event dates
-  checkDates(group: FormGroup) {
-    if ((group.controls.registrationEndDate.value) < (group.controls.registrationStartDate.value) && (group.controls.registrationEndDate.value)) {
-      return { notValid: true }
+  /////////////////////////////////////////////// Validation Functions ///////////////////////////////////////////////////////////////////
 
-    }
-    if (group.controls.startDate.value < (group.controls.registrationEndDate.value) && (group.controls.startDate.value)) {
-      return { notValid1: true }
 
-    }
-    if (group.controls.endDate.value < (group.controls.startDate.value) && (group.controls.endDate.value)) {
-      return { notValid2: true }
+  //Registration End Date Validator that is registrationEndDate>registrationStartDate
+  comparisonRegiEnddateValidator(): any {
+    let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
+    let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
 
+    let startnew = new Date(regiStartDate);
+    let endnew = new Date(regiEndDate);
+
+    if (startnew > endnew) {
+      return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': true });
     }
-    return null;
+
+
+
+    // let oldvalue = startnew;
+    //this.eventsDataFormGroup.controls['registrationStartDate'].reset();
+    //this.eventsDataFormGroup.controls['registrationStartDate'].patchValue(oldvalue);
+    // return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange': false });
+
+  }
+  //Registration Start Date Validator that is registrationStartDate < registrationEndDate
+  comparisonRegiStartdatedateValidator(): any {
+    let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
+    let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
+
+    let startnew = new Date(regiStartDate);
+    let endnew = new Date(regiEndDate);
+    if (startnew > endnew) {
+      return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange': true });
+    }
+
+    //let oldvalue = endnew1;
+    //this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+    //this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+    // return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+  }
+  //Event End Date Validator that is endDate>startDate
+  comparisonEventEnddateValidator(): any {
+
+    let startDate = this.eventsDataFormGroup.value['startDate'];
+    let endDate = this.eventsDataFormGroup.value['endDate'];
+
+    // let eventstartnew = new Date(startDate);
+    //let eventendnew = new Date(endDate);
+    if (startDate > endDate) {
+      return this.eventsDataFormGroup.controls['endDate'].setErrors({ 'invaliddaterange': true });
+    }
+    /* let oldvalue = eventstartnew;
+     this.eventsDataFormGroup.controls['startDate'].reset();
+     this.eventsDataFormGroup.controls['startDate'].patchValue(oldvalue);
+     return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': false });
+     */
+
+  }
+  comparisonEventStartdateValidator(): any {
+
+    let startDate = this.eventsDataFormGroup.value['startDate'];
+    let endDate = this.eventsDataFormGroup.value['endDate'];
+
+    let eventstartnew = new Date(startDate);
+    let eventendnew = new Date(endDate);
+    if (eventstartnew > eventendnew) {
+      return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': true });
+    }
+    /* let oldvalue = eventstartnew;
+     this.eventsDataFormGroup.controls['startDate'].reset();
+     this.eventsDataFormGroup.controls['startDate'].patchValue(oldvalue);
+     return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': false });
+     */
+
+  }
+  //Event start Date Validator that is EentStartDate>RegistrationEndDate
+  comparisonEventStartandRegiEnddateValidator(): any {
+    let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
+    let startDate = this.eventsDataFormGroup.value['startDate'];
+
+
+    let eventstartnew = new Date(startDate);
+    let regiEndDatenew = new Date(regiEndDate);
+    if (regiEndDatenew > eventstartnew) {
+      return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange1': true });
+    }
+    /*let oldvalue = regiEndDatenew;
+    this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+    this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+    */
+
+  }
+  comparisonRegiEnddateandEventStartValidator(): any {
+    let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
+    let startDate = this.eventsDataFormGroup.value['startDate'];
+
+
+    let eventstartnew = new Date(startDate);
+    let regiEndDatenew = new Date(regiEndDate);
+    if (regiEndDatenew > eventstartnew) {
+      return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange2': true });
+    }
+    /*let oldvalue = regiEndDatenew;
+    this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+    this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+    */
+
+  }
+  //Event start Date Validator that is EentStartDate>RegistrationEndDate
+  comparisonEventStartandRegiStartdateValidator(): any {
+    let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
+    let startDate = this.eventsDataFormGroup.value['startDate'];
+
+
+    let eventstartnew = new Date(startDate);
+    let regiStartDateenew = new Date(regiStartDate);
+    if (regiStartDateenew > eventstartnew) {
+      return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange3': true });
+    }
+    /*let oldvalue = regiEndDatenew;
+    this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+    this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+    */
+
+  }
+  //Event start Date Validator that is EentStartDate>RegistrationEndDate
+  comparisontRegiStartdateandEventStarValidator(): any {
+    let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
+    let startDate = this.eventsDataFormGroup.value['startDate'];
+
+
+    let eventstartnew = new Date(startDate);
+    let regiStartDateenew = new Date(regiStartDate);
+    if (regiStartDateenew > eventstartnew) {
+      return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange4': true });
+    }
+    /*let oldvalue = regiEndDatenew;
+    this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+    this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+    */
+
   }
 
-  eventTypeSelChange(){
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  eventTypeSelChange() {
 
     //for getting event co ordinator as per event type
     if (this.eventsDataFormGroup.value.eventType == 'CWC') {
@@ -282,7 +451,7 @@ export class EventCreationComponent implements OnInit {
 
   }
 
- 
+
 
   onEventsNextBtnClick() {
 
@@ -344,7 +513,7 @@ export class EventCreationComponent implements OnInit {
       });
 
       // For binding categories section as per eventType on create event screen
-      if (this.eventFormLabel == false) {
+      if (this.eventFormLabel == false || !this.eventFormLabel) {
         for (let i = 0; i < this.eventList.length; i++) {
           if (this.eventsDataFormGroup.value.eventType == this.eventList[i].eventType) {
             this.categoriesDataFormGroup.setControl('categories', this.setEventCategory(this.eventcategorydata[i].eventName));
@@ -381,6 +550,22 @@ export class EventCreationComponent implements OnInit {
         }
       }
     }
+
+    // for hiding and showing different sections as per event type
+    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+      this.isQuestionnariesRequired = false;
+      this.isttcExamDataFormGroupRequired = true;
+      this.eventStartDateMin = this.eventsDataFormGroup.value.startDate;
+      this.eventEndDateMax = this.eventsDataFormGroup.value.endDate;
+    }
+    else {
+      this.isQuestionnariesRequired = true;
+      this.isttcExamDataFormGroupRequired = false;
+    }
+
+
+
+
   }
 
   onCategoriesNextBtn() {
@@ -553,8 +738,7 @@ export class EventCreationComponent implements OnInit {
       }
     }
 
-
-
+    this.onCloseBtnClick();
   }
 
   updateEvent() {
@@ -597,7 +781,50 @@ export class EventCreationComponent implements OnInit {
   }
 
   handleEventFlyerFileInput(event: any) {
-console.log('file uploaded');
+    console.log('file uploaded');
 
   }
+
+
+  createTtcEvent() {
+
+    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+
+      let eventCreationForm: any = {};
+      eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.categoriesDataFormGroup.value, ...this.questionnaireDataFormGroup.value, ...this.ttcExamDataFormGroup.value }
+      console.log("this.eventCreationForm", eventCreationForm);
+      this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
+        if (res.data.status == "success") {
+          this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
+        }
+        else
+          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+      });
+    }
+
+    this.onCloseBtnClick();
+  }
+
+  updateTtcEvent() {
+
+    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+
+      let eventCreationForm: any = {};
+      eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.categoriesDataFormGroup.value, ...this.questionnaireDataFormGroup.value, ...this.ttcExamDataFormGroup.value }
+      console.log("this.eventCreationForm", eventCreationForm);
+      this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
+        if (res.data.status == "success") {
+          this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
+        }
+        else
+          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+      });
+    }
+
+    //this.onCloseBtnClick();
+
+  }
+
+
+
 }

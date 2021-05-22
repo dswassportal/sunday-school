@@ -48,15 +48,14 @@
                             </mat-form-field>
 
 
-                            <mat-form-field>
+                            <!-- <mat-form-field>
                                 <mat-label>Judge</mat-label>
                                 <mat-select (selectionChange)="onDropdowwnSelChange($event)" [(value)]="selectedJudge">
-                                    <!-- <mat-option selected [value]="'All'"> All </mat-option> -->
                                     <mat-option *ngFor="let judge of judgeNameArr" [value]="judge.judgeId">
                                         {{judge.judgeName}}
                                     </mat-option>
                                 </mat-select>
-                            </mat-form-field>
+                            </mat-form-field> -->
 
                         </div>
 
@@ -73,6 +72,12 @@
                             <button mat-button class="ml-auto border" style="background: #d68165;" data-dismiss="modal">
                                 Cancel
                             </button>
+
+                            <button mat-button [disabled]="disableApproveBtn" class="ml-auto border"
+                                (click)="handleSaveApproveBtnClick()" style="background: #d68165;">
+                                Save
+                            </button>
+
                             <button mat-button [disabled]="disableApproveBtn" class="ml-auto border"
                                 (click)="handleScoreApproveBtnClick()" style="background: #d68165;">
                                 Approve

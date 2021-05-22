@@ -14,7 +14,7 @@
 
                 <div class="row form-group">
                     <mat-form-field class="form-field col-2">
-                            <mat-select formControlName="title" id="title" placeholder="Title">
+                            <mat-select required formControlName="title" id="title" placeholder="Title">
                                     <mat-option value="His Grace">His Grace</mat-option>
                                     <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
                                     <mat-option value="Very Rev">Very Rev</mat-option>
@@ -64,7 +64,7 @@
                     </mat-form-field>
 
                     <mat-form-field class="form-field col-12 col-md-6">
-                        <input matInput type="input" [matDatepicker]="picker" [max]="max_date" formControlName="dob" id="dob" placeholder="DoB" required>
+                        <input matInput type="input" [matDatepicker]="picker" [max]="max_date" formControlName="dob" id="dob" placeholder="DoB">
                         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                         <mat-datepicker #picker></mat-datepicker>
                         <mat-error *ngIf="signUpForm.controls.dob.touched && signUpForm.controls.dob.invalid">
@@ -72,7 +72,7 @@
                             <span *ngIf="signUpForm.controls.dob.errors.pattern">This field is invalid.</span>
                         </mat-error>
                     </mat-form-field>
-                                   </div>
+                 </div>
 <!-- 
                 <div class="form-group row justify-content-center">
                     <mat-form-field class="form-field col-md">
@@ -104,7 +104,7 @@
                     </div>
                     <div class="form-group row">
                             <mat-form-field class="form-field col-md">
-                                    <mat-select formControlName="memberType" id="memberType" placeholder="Member Type">
+                                    <mat-select formControlName="memberType" id="memberType" placeholder="Member Type" required>
                                             <mat-option value="member">Member</mat-option>
                                             <mat-option value="non-member">Non-member</mat-option>
                                             <mat-option value="guest">Guest</mat-option>

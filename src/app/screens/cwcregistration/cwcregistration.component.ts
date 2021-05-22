@@ -7,8 +7,8 @@ import * as moment from 'moment';
 import { Moment } from 'moment';
 import { EventRegistrationDataService } from '../event-registration/event.registrationDataService';
 import { Router } from '@angular/router';
-import { stringify } from '@angular/compiler/src/util';
-
+declare let $: any;
+import { DatePickerRendererComponent } from '../renderers/date-picker-renderer/date-picker-renderer.component'
 
 
 @Component({
@@ -55,6 +55,10 @@ export class CwcregistrationComponent implements OnInit {
   selectedEventType : any = {};
   currentURL='';
   venuesList!: any[];
+
+  minDate:string = '';
+  maxDate:string = '';
+
   ngOnInit(): void {
 
     this.currentURL = window.location.href; 
@@ -96,9 +100,13 @@ export class CwcregistrationComponent implements OnInit {
     this.apiService.callGetService(`getEvent?id=${this.selectedRowJson.event_Id}&isParticipant=`+addQParam.toString()).subscribe((res) => {
 
       this.venuesList = res.data.eventData.venues;
+      
+      //getting start date and end date from this api to set validation in grid. 
+      this.minDate = res.data.eventData.startDate;
+      this.maxDate = res.data.eventData.endDate;
 
       this.enrollmentId = res.data.eventData.enrollmentId;
-      console.log("this.enrollmentId : " + this.enrollmentId);
+      //console.log("this.enrollmentId : " + this.enrollmentId);
       
       if (this.enrollmentId && (this.selectedEventType == 'registered_events' || this.selectedEventType=='completed_events')) {
         this.enrollmentId = res.data.eventData.enrollmentId;
@@ -109,7 +117,7 @@ export class CwcregistrationComponent implements OnInit {
       }
       
       this.eventCatMapId = res.data.eventData.categories.eventCatMapId;
-      console.log(this.eventCatMapId);
+      ///console.log(this.eventCatMapId);
      
       
       this.eventcategorydata = res.data.eventData.categories;
@@ -122,7 +130,7 @@ export class CwcregistrationComponent implements OnInit {
 
       for (let i = 0; i < this.eventcategorydata.length; i++) {
           this.eventCatMapId = this.eventcategorydata[i].eventCatMapId;
-          console.log("eventCatMapId : " + this.eventCatMapId)
+         // console.log("eventCatMapId : " + this.eventCatMapId)
         }
 
     });
@@ -139,8 +147,20 @@ export class CwcregistrationComponent implements OnInit {
       this.rowDataBinding = res.data.metaData;
     });
 
-    this.columnDefs = [
+    this.columnDefs = this.getColDef()
+
+  }
+
+
+
+  getColDef(){
+
+    return   this.columnDefs = [
       { headerName: 'Name', field: 'firstName', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true },
+      { 
+        headerName: 'Date', field: 'startDate', width:300, resizable: true,sortable: true, filter: true, 
+        cellRendererFramework: DatePickerRendererComponent
+      },
       { headerName: 'Baptismal Name', field: 'baptismalName', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true },
       { headerName: 'Country', field: 'country', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true},
       { headerName: 'State', field: 'state', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true,  },
@@ -148,7 +168,6 @@ export class CwcregistrationComponent implements OnInit {
       { headerName: 'Postal Code', field: 'postalCode', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true},
       { headerName: 'Parish Name', field: 'parish_name', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true},
     ];
-    
   }
 
   addMemOnChange(event : any){
@@ -164,7 +183,7 @@ export class CwcregistrationComponent implements OnInit {
     }
 
     this.gridOptions = {
-      columnDefs: this.columnDefs,
+      columnDefs: this.getColDef(),
       rowData: this.rowData,
       treeData: true,
       enableFilter: true,
@@ -319,9 +338,4 @@ export class CwcregistrationComponent implements OnInit {
     }
     
   }
-
-  
-
-
-
 }
