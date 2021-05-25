@@ -40,7 +40,7 @@ app.use('*', cors())
 app.use(express.static(path.join(__dirname + "/dist/church")));
 
 app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname + "/dist/church/index.html"));
+   res.sendFile(path.join(__dirname + "/dist/church/index.html"));
   //res.sendFile('./dist/church/index.html');
 });
 
@@ -194,7 +194,8 @@ app.get('/api/getParishData', function (req, res) {
 app.post('/api/insertEvents', function (req, res) {
   console.log("insertevents called with : " + JSON.stringify(req.body));
   try {
-    processEventRequest.insertEvents(req.body.data)
+    let loggedInUser = decodeUser(req)
+    processEventRequest.insertEvents(req.body.data, loggedInUser)
       .then((data) => {
         // console.log(`Returning with resonse : ${data}`)
         res.send(data);

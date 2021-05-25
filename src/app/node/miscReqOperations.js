@@ -237,19 +237,18 @@ async function getLookupMasterData(reqParams) {
             let key = type.toLowerCase() + 's'
             for (let row of result.rows) {
                 if (type.toLowerCase() === row.type.toLowerCase()) {
-                    if (response[key] == undefined)
+                    if (response[key] == undefined){
                         response[key] = [];
-                    else
+                        response[key].push(row.code)
+                    }else
                         response[key].push(row.code)
                 }
             }
         }
 
+        response.status = "success";
         return {
-            data: {
-                status: 'success',
-                data: response
-            }
+            data:response 
         };
 
 
@@ -267,8 +266,9 @@ async function getRolesByUserId(userId) {
 
     let client = await dbConnections.getConnection();
     try {
-
-        let query = `select distinct role_id, org_id, role_start_date, role_end_date, org_type from v_user vu where user_id = ${userId} order by role_id;`
+        
+        //let query = `select distinct role_id, org_id, role_start_date, role_end_date, org_type from v_user vu where user_id = ${userId} order by role_id;`
+        let query =`select distinct role_id, user_org_id , role_start_date, role_end_date, user_org_type from v_user vu where user_id = ${userId} order by role_id;`;
 
         let roleResult = await client.query(query);
         let roles = [];

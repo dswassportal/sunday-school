@@ -1,14 +1,7 @@
-const { Client, Pool } = require('pg');
 const _ = require('underscore');
-const firebase = require('firebase');
-const firebaseConfig = require('./firebase/firebaseAdminUtils');
 const errorHandling = require('./ErrorHandling/commonDBError');
-const { result } = require('underscore');
-const { json } = require('express');
 const dbConnections = require(`${__dirname}/dbConnection`);
-
-
-
+const queries = require(`${__dirname}/static/event_queries`);
 
 async function deleteEvents(eventsData) {
     let client = await dbConnections.getConnection();
@@ -377,207 +370,320 @@ async function getVenues(venueData) {
 
 }
 
-async function insertEvents(eventsData) {
+async function insertEvents(eventsData, loggedInUser) {
 
     let client = await dbConnections.getConnection();
-    console.log("User Data" + JSON.stringify(eventsData));
+
     try {
         await client.query("BEGIN");
-        try {
-            if (eventsData != null) {
-                let eventId = 0;
-                console.log("1");
-                /********************** t_event*******************************************************************************************/
-                const insertevent = `INSERT INTO t_event (name, event_type, description, start_date, end_date, registration_start_date, registration_end_date, event_url) 
-                VALUES($1, $2, $3, $4, $5, $6, $7, $8) returning event_id;`
-                const insertevent_values = [
-                    eventsData.name,
-                    eventsData.eventType,
-                    eventsData.description,
-                    eventsData.startDate,
-                    eventsData.endDate,
-                    eventsData.registrationStartDate,
-                    eventsData.registrationEndDate,
-                    eventsData.eventUrl
-                ];
-                console.log("insertevent_values", insertevent_values);
-                let result = await client.query(insertevent, insertevent_values);
-                this.eventId = result.rows[0].event_id;
-                console.log("event id" + this.eventId);
 
+        let eventId;
+        console.log(`Processing request for ${eventsData.eventId} event and ${eventsData.sectionCode} section`);
+        switch (eventsData.sectionCode) {
 
+            // To populated event form's general section.
+            case "event_details": {
 
-                if (eventsData.orgId != null) {
-                    for (let org of eventsData.orgId) {
-                        console.log("org", org);
-                        const insertOrgTypeData = `INSERT INTO t_event_organization(event_id, org_type, org_id) VALUES($1, $2, $3);`
-                        insertOrgTypeDataValues = [
-                            this.eventId,
-                            eventsData.orgType,
-                            org
-                        ];
-                        console.log("insertOrgTypeDataValues", insertOrgTypeDataValues);
-                        await client.query(insertOrgTypeData, insertOrgTypeDataValues);
-                    }
-                }
+                //Logic :  if event id present in JSON then update the event record else create new one and return its event_id.
+                if (eventsData.eventId) {
+                    console.log(`Updating event ${eventsData.eventId}`);
+                    const updateEventValues = [
+                        eventsData.name, eventsData.eventType, eventsData.description,
+                        eventsData.startDate, eventsData.endDate, eventsData.registrationStartDate,
+                        eventsData.registrationEndDate, loggedInUser, new Date().toUTCString(),
+                        eventsData.eventUrl, eventsData.eventId
+                    ];
 
-                if (eventsData.eventCoordinator) {
-                    for (let coordinator of eventsData.eventCoordinator) {
-                        const insertEventCoordinator = `INSERT INTO t_event_coordinator (event_id, user_id, created_date) VALUES($1, $2, $3);`
-                        insertEventCoordinatorValues = [
-                            this.eventId,
-                            coordinator,
-                            new Date().toISOString()
-                        ];
-                        await client.query(insertEventCoordinator, insertEventCoordinatorValues);
-                    }
-                }
+                    //Query to update into t_event table
+                    let result = await client.query(queries.updateEvent, updateEventValues);
+                    console.log(`Event defination has been create Updated for event : ${eventsData.eventId},
+                                         Row updated : ${result.rowCount}`);
 
-
-                /********************** t_event_venue************************************************************************************/
-                console.log("2");
-                const insertVenue = `INSERT INTO t_event_venue(event_id, venue_id, proctor_id)
-                    VALUES ($1, $2, $3);`
-
-
-                if (eventsData.venues != null) {
-                    for (let venue of eventsData.venues) {
-                        //t_event_venue 
-                        console.log(`Inserting venue ${JSON.stringify(venue)}`);
-
-                        insertVenue_value =
-                            [
-                                this.eventId,
-                                venue.venueId,
-                                venue.proctorId
-                            ]
-                        if (venue.venueId != "") {
-                            await client.query(insertVenue, insertVenue_value);
+                    //Query to delete t_event_organization table records for given event ID
+                    await client.query(queries.deleteEventOrgs, [eventsData.eventId]);
+                    let eventOrgId = [];
+                    if (eventsData.orgId) {
+                        for (let org of eventsData.orgId) {
+                            let insertOrgTypeDataValues = [eventsData.eventId, eventsData.orgType, org];
+                            result = await client.query(queries.insertEventOrgs, insertOrgTypeDataValues);
+                            eventOrgId.push(result.rows[0].event_organization_id);
                         }
                     }
-                }
+                    console.log(`Event ${eventsData.eventId}, updated event_organization_ids are  : ${JSON.stringify(eventOrgId)}`);
 
+                    // Delete all event co-ordinators for provided event.
+                    await client.query(queries.deleteEventCords, [eventsData.eventId]);
 
-                /********************** t_event_category_map,   t_event_cat_staff_map*******************************************************************************/
-                console.log("3");
+                    let cordArr = []
+                    if (eventsData.eventCoordinator) {
+                        for (let coordinator of eventsData.eventCoordinator) {
+                            let insertEventCoordinatorValues = [eventsData.eventId, coordinator, loggedInUser, new Date().toUTCString()];
+                            result = await client.query(queries.insertEventCords, insertEventCoordinatorValues);
+                            cordArr.push(result.rows[0].event_coordinator_id)
+                        }
+                    }
+                    console.log(`Event ${eventsData.eventId}, updated event_coordinator_ids are  : ${JSON.stringify(cordArr)}`);
+                } else {    //If eventID present in request 
+                    console.log(`Creating new event of type ${eventsData.eventType}`);
+                    const insertEventValues = [
+                        eventsData.name, eventsData.eventType, eventsData.description,
+                        eventsData.startDate, eventsData.endDate, eventsData.registrationStartDate,
+                        eventsData.registrationEndDate, loggedInUser, new Date().toUTCString(),
+                        eventsData.eventUrl
+                    ];
+                    //Query to insert into t_event table
+                    let result = await client.query(queries.insertEvent, insertEventValues);
+                    eventId = result.rows[0].event_id;
+                    console.log("Event defination has been created, New event Id is : " + eventId);
+
+                    // To populate orgnizations
+                    let eventOrgId = [];
+                    if (eventsData.orgId) {
+                        for (let org of eventsData.orgId) {
+                            insertOrgTypeDataValues = [eventId, eventsData.orgType, org];
+                            //Query to insert into t_event_organization table
+                            result = await client.query(queries.insertEventOrgs, insertOrgTypeDataValues);
+                            eventOrgId.push(result.rows[0].event_organization_id);
+                        }
+                    }
+                    console.log(`Event ${eventId}, new event_organization_ids are  : ${JSON.stringify(eventOrgId)}`);
+
+                    // To populate co-ordinators
+                    let cordArr = []
+                    if (eventsData.eventCoordinator) {
+                        for (let coordinator of eventsData.eventCoordinator) {
+                            let insertEventCoordinatorValues = [eventId, coordinator, loggedInUser, new Date().toUTCString()];
+                            result = await client.query(queries.insertEventCords, insertEventCoordinatorValues);
+                            cordArr.push(result.rows[0].event_coordinator_id)
+                        }
+                    }//Co-ordinator check if
+                    console.log(`Event ${eventId}, new event_coordinator_ids are  : ${JSON.stringify(cordArr)}`);
+                }//else
+                break;
+            }// event_details case block
+            // To persist event form's event categories section.
+            case 'event_categories': {
 
                 if (eventsData.categories) {
+                    let catMapIds = []
                     for (let category of eventsData.categories) {
+                        if (category.catId) {
+                            let result = await client.query(queries.insertCatMap, [eventsData.eventId, category.catId]);
+                            catMapIds.push(result.rows[0].event_cat_map_id);
+                        } else if (category.catId == undefined || category.catId == null || category.catId == "") {
+                            console.log(`Seems like user added new cateogry named as ${category.catName}, Adding it to t_event_category for event type ${eventsData.eventType}`);
 
-                        console.log("4");
+                            //get event type id by eventType, for future use.              
+                            let eventTypeId = await client.query(queries.getFrststEveTypIdByEveTyp, [eventsData.eventType]);
 
-                        const insertCategory = `INSERT INTO t_event_category_map(event_id, event_category_id)
-                                                VALUES ($1, $2) returning event_cat_map_id;`
-                        insertCategory_value =
-                            [
-                                this.eventId,
-                                category.eventCategoryID
-                            ]
-                        if (category.eventCategoryID) {
-                            let result = await client.query(insertCategory, insertCategory_value);
-                            this.eventCategoryID = result.rows[0].event_cat_map_id;
+                            //Insert new category in the t_event_category table
+                            let insertNewCategory = await client.query(queries.insertNewCategory,
+                                [category.catName, category.description, eventsData.eventType, eventTypeId.rows[0].event_type_id]);
+
+                            let newCatId = insertNewCategory.rows[0].event_category_id;
+                            console.log(`event_category_id for newly added  category is  ${newCatId}`);
+
+                            let result = await client.query(queries.insertCatMap, [eventsData.eventId, newCatId]);
+                            catMapIds.push(result.rows[0].event_cat_map_id);
                         }
+                    }
+                    console.log(`Event ${eventsData.eventId}, new event_cat_map_ids are  : ${JSON.stringify(catMapIds)}`);
+                }
+            }// event_categories case block
+                break;
+            //To persist event groups
+            case 'event_groups': {
 
-                        //this.venueId = result.rows[0].venue_id;
+                if (eventsData.groups) {
+                    let gradeGroupMapIds = [];
+                    for (let group of eventsData.groups) {
+                        if (group.groupId) {
+                            //query to insert grade group mapping.
+                            let result = await client.query(queries.insertGradeGroupMapping,
+                                [eventsData.eventId, group.groupId, loggedInUser, new Date().toUTCString()]);
+                            gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
+                        } else if (group.groupId == undefined || group.groupId == null || group.groupId == "") {
+                            if (typeof group.groupName != undefined && typeof group.grades != undefined) {
+                                console.log(`Seems like user added new group as ${group.groupName}, Adding it to t_grade_group & t_grade_group_detail`);
+                                let result = await client.query(queries.insertGradeGroup,
+                                    [group.groupName, loggedInUser, new Date().toUTCString()]);
+                                let newGroupId = result.rows[0].grade_group_id;
 
-
-
-
-                        console.log("5");
-
-                        if (category.venueId) {
-                            for (let venue of category.venueId) {
-                                console.log("venue", venue);
-                                const eventCatVenueMap = `INSERT INTO t_event_category_venue_map(event_cat_map_id, event_venue_id) VALUES ($1, $2);`
-                                eventCatVenueMapValues = [
-                                    this.eventCategoryID,
-                                    venue
-                                ]
-                                await client.query(eventCatVenueMap, eventCatVenueMapValues);
-                            }
-                        }
-
-                        if (category.judges) {
-                            for (let judge of category.judges) {
-                                if (judge) {
-                                    const insertCatUserMap = `INSERT INTO  t_event_cat_staff_map(event_id, event_category_map_id, role_type, user_id)
-                                                       VALUES ($1, $2, $3, $4);`
-
-                                    insertCatUserMap_values = [
-                                        this.eventId,
-                                        this.eventCategoryID,
-                                        'Judge',
-                                        judge
-                                    ]
-
-                                    console.log("insertCatUserMap_values", insertCatUserMap_values);
-                                    await client.query(insertCatUserMap, insertCatUserMap_values);
-
+                                let gradeArr = group.grades.split(",");
+                                for (let grade of gradeArr) {
+                                    //Mapping group to grades in t_grade_group_detail table.
+                                    await client.query(queries.insertGradeGroupDtl, [newGroupId, grade])
                                 }
-
-                            }
+                                result = await client.query(queries.insertGradeGroupMapping,
+                                    [eventsData.eventId, newGroupId, loggedInUser, new Date().toUTCString()]);
+                                    gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
+                            } else throw "New groupName is empty. ";
                         }
-
                     }
+                    console.log(`Event ${eventsData.eventId}, new event_grade_group_map_ids are  : ${JSON.stringify(gradeGroupMapIds)}`);
                 }
-
-                console.log("6");
-
-                const insertQuestionare = `INSERT INTO t_event_questionnaire(event_id, question, answer_type)
-                    VALUES ($1, $2, $3);`
-
-
-                if (eventsData.questionnaire != null) {
-                    for (let question of eventsData.questionnaire) {
-                        //t_event_venue 
-                        console.log(`Inserting category ${JSON.stringify(question)}`);
-                        insertQuestionareValue =
-                            [
-                                this.eventId,
-                                question.question,
-                                question.responseType
-                            ]
-                        await client.query(insertQuestionare, insertQuestionareValue);
-                    }
-                }
-
-
-                if (eventsData) {
-                    const insertTtcExamDates = `INSERT INTO t_event_exam_date(event_id, exam_start_date, exam_end_date)
-                    VALUES ($1, $2, $3);`
-
-                    insertTtcExamDatesValues = [
-                        this.eventId,
-                        eventsData.ttcExamStartDate,
-                        eventsData.ttcExamEndDate
-                    ]
-
-                    if (eventsData.ttcExamStartDate) {
-                        await client.query(insertTtcExamDates, insertTtcExamDatesValues);
-                    }
-
-                }
-
-                await client.query("COMMIT");
-                console.log("After commit");
-
-                return ({
-                    data: {
-                        status: 'success'
-                    }
-                })
+                break;
             }
+        }// Switch
 
-        }
-        catch (err) {
-            await client.query("ROLLBACK");
-            console.error(`reqOperations.js::insertevents() --> error : }`, err);
-            console.log("Transaction ROLLBACK called");
-            return (errorHandling.handleDBError('transactionError'));
-        }
+        client.query("commit;");
+
+        return ({
+            data: {
+                status: 'success',
+                eventId: eventId
+            }
+        })
+
+
+
+
+
+
+        //     /********************** t_event_venue************************************************************************************/
+        //     console.log("2");
+        //     const insertVenue = `INSERT INTO t_event_venue(event_id, venue_id, proctor_id)
+        //         VALUES ($1, $2, $3);`
+
+
+        //     if (eventsData.venues != null) {
+        //         for (let venue of eventsData.venues) {
+        //             //t_event_venue 
+        //             console.log(`Inserting venue ${JSON.stringify(venue)}`);
+
+        //             insertVenue_value =
+        //                 [
+        //                     this.eventId,
+        //                     venue.venueId,
+        //                     venue.proctorId
+        //                 ]
+        //             if (venue.venueId != "") {
+        //                 await client.query(insertVenue, insertVenue_value);
+        //             }
+        //         }
+        //     }
+
+
+        //     /********************** t_event_category_map,   t_event_cat_staff_map*******************************************************************************/
+        //     console.log("3");
+
+        //     if (eventsData.categories) {
+        //         for (let category of eventsData.categories) {
+
+        //             console.log("4");
+
+        //             const insertCategory = `INSERT INTO t_event_category_map(event_id, event_category_id)
+        //                                     VALUES ($1, $2) returning event_cat_map_id;`
+        //             insertCategory_value =
+        //                 [
+        //                     this.eventId,
+        //                     category.eventCategoryID
+        //                 ]
+        //             if (category.eventCategoryID) {
+        //                 let result = await client.query(insertCategory, insertCategory_value);
+        //                 this.eventCategoryID = result.rows[0].event_cat_map_id;
+        //             }
+
+        //             //this.venueId = result.rows[0].venue_id;
+
+
+
+
+        //             console.log("5");
+
+        //             if (category.venueId) {
+        //                 for (let venue of category.venueId) {
+        //                     console.log("venue", venue);
+        //                     const eventCatVenueMap = `INSERT INTO t_event_category_venue_map(event_cat_map_id, event_venue_id) VALUES ($1, $2);`
+        //                     eventCatVenueMapValues = [
+        //                         this.eventCategoryID,
+        //                         venue
+        //                     ]
+        //                     await client.query(eventCatVenueMap, eventCatVenueMapValues);
+        //                 }
+        //             }
+
+        //             if (category.judges) {
+        //                 for (let judge of category.judges) {
+        //                     if (judge) {
+        //                         const insertCatUserMap = `INSERT INTO  t_event_cat_staff_map(event_id, event_category_map_id, role_type, user_id)
+        //                                            VALUES ($1, $2, $3, $4);`
+
+        //                         insertCatUserMap_values = [
+        //                             this.eventId,
+        //                             this.eventCategoryID,
+        //                             'Judge',
+        //                             judge
+        //                         ]
+
+        //                         console.log("insertCatUserMap_values", insertCatUserMap_values);
+        //                         await client.query(insertCatUserMap, insertCatUserMap_values);
+
+        //                     }
+
+        //                 }
+        //             }
+
+        //         }
+        //     }
+
+        //     console.log("6");
+
+        //     const insertQuestionare = `INSERT INTO t_event_questionnaire(event_id, question, answer_type)
+        //         VALUES ($1, $2, $3);`
+
+
+        //     if (eventsData.questionnaire != null) {
+        //         for (let question of eventsData.questionnaire) {
+        //             //t_event_venue 
+        //             console.log(`Inserting category ${JSON.stringify(question)}`);
+        //             insertQuestionareValue =
+        //                 [
+        //                     this.eventId,
+        //                     question.question,
+        //                     question.responseType
+        //                 ]
+        //             await client.query(insertQuestionare, insertQuestionareValue);
+        //         }
+        //     }
+
+
+        //     if (eventsData) {
+        //         const insertTtcExamDates = `INSERT INTO t_event_exam_date(event_id, exam_start_date, exam_end_date)
+        //         VALUES ($1, $2, $3);`
+
+        //         insertTtcExamDatesValues = [
+        //             this.eventId,
+        //             eventsData.ttcExamStartDate,
+        //             eventsData.ttcExamEndDate
+        //         ]
+
+        //         if (eventsData.ttcExamStartDate) {
+        //             await client.query(insertTtcExamDates, insertTtcExamDatesValues);
+        //         }
+
+        //     }
+
+        //     await client.query("COMMIT");
+        //     console.log("After commit");
+
+        //     return ({
+        //         data: {
+        //             status: 'success'
+        //         }
+        //     })
+        // }
+
+        // } catch (err) {
+        //     await client.query("ROLLBACK");
+        //     console.error(`reqOperations.js::insertevents() --> error : }`, err);
+        //     console.log("Transaction ROLLBACK called");
+        //     return (errorHandling.handleDBError('transactionError'));
+        // }
     }
     catch (error) {
-        console.error(`reqOperations.js::insertevents() --> error : }`, err);
+        await client.query("ROLLBACK;");
+        console.error(`eventReqOperations.js::insertevents() Rollback called since there is an error as: ${error}`);
         return (errorHandling.handleDBError('transactionError'));
     } finally {
         client.release();
