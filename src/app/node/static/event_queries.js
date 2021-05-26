@@ -38,6 +38,39 @@ const insertGradeGroup = `insert into t_grade_group (group_name, created_by, cre
 
 const insertGradeGroupDtl = `insert into t_grade_group_detail ( grade_group_id, grade ) values ($1, $2);`;
 
+const getSelecedAndAllCats = `select 
+                            jsonb_agg(
+                                jsonb_build_object(
+                                    'catId', tec.event_category_id,
+                                    'catName', tec."name", 
+                                    'decription', tec.description,
+                                    'catMapId', tecm.event_cat_map_id,
+                                    'isSelected', case when tecm.event_cat_map_id is null then false else true end
+                                ) 
+                            ) event_cats
+                            from t_event_category tec
+                            left join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
+                            and tecm.event_id = $1
+                            where lower(tec."type") = lower($2);`;
+
+const getSelectedAndAllGroups = `select 
+                                    jsonb_agg(
+                                        jsonb_build_object(
+                                            'gradeGroupName', tgg.group_name,
+                                            'gradeGroupId', tgg.grade_group_id,
+                                            'eventGradeGroupMapId', teggm.event_grade_group_map_id,
+                                            'grades', (select ARRAY_AGG (tggd.grade) 
+                                                    from  t_grade_group_detail tggd
+                                                    where tggd.grade_group_id = tgg.grade_group_id),
+                                            'isSelected', case when teggm.event_grade_group_map_id is null then false else true end		  
+                                        ) 
+                                    ) grades
+                                    from t_grade_group tgg 
+                                    left join t_event_grade_group_map teggm
+                                    on tgg.grade_group_id = teggm.grade_group_id 
+                                    and teggm.event_id = ${1};`;                            
+
+
 module.exports = {
     insertEvent,
     updateEvent,
@@ -50,5 +83,7 @@ module.exports = {
     insertNewCategory,
     insertGradeGroupMapping,
     insertGradeGroup,
-    insertGradeGroupDtl
+    insertGradeGroupDtl,
+    getSelecedAndAllCats,
+    getSelectedAndAllGroups
 }

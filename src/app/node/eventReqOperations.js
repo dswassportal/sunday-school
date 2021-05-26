@@ -1,3 +1,4 @@
+const { response } = require('express');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
@@ -378,6 +379,7 @@ async function insertEvents(eventsData, loggedInUser) {
         await client.query("BEGIN");
 
         let eventId;
+        let response = {}
         console.log(`Processing request for ${eventsData.eventId} event and ${eventsData.sectionCode} section`);
         switch (eventsData.sectionCode) {
 
@@ -433,7 +435,7 @@ async function insertEvents(eventsData, loggedInUser) {
                     ];
                     //Query to insert into t_event table
                     let result = await client.query(queries.insertEvent, insertEventValues);
-                    eventId = result.rows[0].event_id;
+                    response.eventId = result.rows[0].event_id;
                     console.log("Event defination has been created, New event Id is : " + eventId);
 
                     // To populate orgnizations
@@ -462,7 +464,7 @@ async function insertEvents(eventsData, loggedInUser) {
                 break;
             }// event_details case block
             // To persist event form's event categories section.
-            case 'event_categories': {
+            case "event_categories": {
 
                 if (eventsData.categories) {
                     let catMapIds = []
@@ -478,7 +480,7 @@ async function insertEvents(eventsData, loggedInUser) {
 
                             //Insert new category in the t_event_category table
                             let insertNewCategory = await client.query(queries.insertNewCategory,
-                                [category.catName, category.description, eventsData.eventType, eventTypeId.rows[0].event_type_id]);
+                                [category.catName, category.catDesc, eventsData.eventType, eventTypeId.rows[0].event_type_id]);
 
                             let newCatId = insertNewCategory.rows[0].event_category_id;
                             console.log(`event_category_id for newly added  category is  ${newCatId}`);
@@ -492,8 +494,7 @@ async function insertEvents(eventsData, loggedInUser) {
             }// event_categories case block
                 break;
             //To persist event groups
-            case 'event_groups': {
-
+            case "event_groups": {
                 if (eventsData.groups) {
                     let gradeGroupMapIds = [];
                     for (let group of eventsData.groups) {
@@ -516,29 +517,42 @@ async function insertEvents(eventsData, loggedInUser) {
                                 }
                                 result = await client.query(queries.insertGradeGroupMapping,
                                     [eventsData.eventId, newGroupId, loggedInUser, new Date().toUTCString()]);
-                                    gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
+                                gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
                             } else throw "New groupName is empty. ";
                         }
                     }
                     console.log(`Event ${eventsData.eventId}, new event_grade_group_map_ids are  : ${JSON.stringify(gradeGroupMapIds)}`);
                 }
                 break;
+            }//event_groups case block
+            case  "event_cat_group_map":{
+                if(eventsData.catGradeMap){
+
+                }
             }
         }// Switch
 
-        client.query("commit;");
-
-        return ({
-            data: {
-                status: 'success',
-                eventId: eventId
+        //if request from next section data in same requst
+        if (eventsData.nextSectionCode) {
+            switch (eventsData.nextSectionCode) {
+                case "event_categories": {
+                    response.event_categories = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_categories", eventsData.eventType, client);
+                    break;
+                }
+                case "event_groups" : {
+                    response.event_groups = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_groups", "", client);
+                    break;
+                }
             }
+        }
+
+
+
+        client.query("commit;");
+        response.status = "success";
+        return ({
+            data: response
         })
-
-
-
-
-
 
         //     /********************** t_event_venue************************************************************************************/
         //     console.log("2");
@@ -689,6 +703,30 @@ async function insertEvents(eventsData, loggedInUser) {
         client.release();
     }
 }
+
+async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType, client) {
+
+    try {
+        console.log(`getSectionWiseData : ${sectionCode} and eventId ${eventId}`)
+        switch (sectionCode) {
+            case "event_categories": {
+                let result = await client.query(queries.getSelecedAndAllCats, [ eventId, eventType ])
+                return result.rows[0].event_cats;
+            }
+            case "event_groups" : {
+                  let result = await client.query(queries.getSelectedAndAllGroups, [ eventId ])
+                  console.log(`Got rows : ${result.rowCount}`)
+                  return result.rows[0].selected_and_all_grades;
+            }
+        }
+
+    } catch (error) {
+        console.error(`eventReqOperations.js::getSectionWiseData() Rollback called since there is an error as: ${error}`);
+        return (errorHandling.handleDBError('transactionError'));
+    }
+
+}
+
 
 async function getRegionAndParish() {
 
@@ -873,12 +911,6 @@ async function getProctorData(userData) {
     }
 }
 
-
-
-
-
-
-
 async function getEventQuestionnaireData() {
     let client = await dbConnections.getConnection();
     try {
@@ -962,6 +994,7 @@ async function getEventForRegistration() {
     }
 
 }
+
 
 
 
