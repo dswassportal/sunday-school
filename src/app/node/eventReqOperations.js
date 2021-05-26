@@ -378,8 +378,8 @@ async function insertEvents(eventsData, loggedInUser) {
     try {
         await client.query("BEGIN");
 
-        let eventId;
-        let response = {}
+        let eventId = eventsData.eventId;
+        let response = { eventId : eventsData.eventId }
         console.log(`Processing request for ${eventsData.eventId} event and ${eventsData.sectionCode} section`);
         switch (eventsData.sectionCode) {
 
@@ -435,7 +435,7 @@ async function insertEvents(eventsData, loggedInUser) {
                     ];
                     //Query to insert into t_event table
                     let result = await client.query(queries.insertEvent, insertEventValues);
-                    response.eventId = result.rows[0].event_id;
+                    response.eventId = eventId = result.rows[0].event_id;
                     console.log("Event defination has been created, New event Id is : " + eventId);
 
                     // To populate orgnizations
@@ -498,20 +498,18 @@ async function insertEvents(eventsData, loggedInUser) {
                 if (eventsData.groups) {
                     let gradeGroupMapIds = [];
                     for (let group of eventsData.groups) {
-                        if (group.groupId) {
+                        if (group.gradeGroupId) {
                             //query to insert grade group mapping.
                             let result = await client.query(queries.insertGradeGroupMapping,
-                                [eventsData.eventId, group.groupId, loggedInUser, new Date().toUTCString()]);
+                                [eventsData.eventId, group.gradeGroupId, loggedInUser, new Date().toUTCString()]);
                             gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
-                        } else if (group.groupId == undefined || group.groupId == null || group.groupId == "") {
-                            if (typeof group.groupName != undefined && typeof group.grades != undefined) {
-                                console.log(`Seems like user added new group as ${group.groupName}, Adding it to t_grade_group & t_grade_group_detail`);
+                        } else if (group.gradeGroupId == undefined || group.gradeGroupId == null || group.gradeGroupId == "") {
+                            if (typeof group.gradeGroupName != undefined && typeof group.gradeGroupName != undefined) {
+                                console.log(`Seems like user added new group as ${group.gradeGroupName}, Adding it to t_grade_group & t_grade_group_detail`);
                                 let result = await client.query(queries.insertGradeGroup,
-                                    [group.groupName, loggedInUser, new Date().toUTCString()]);
+                                    [group.gradeGroupName, loggedInUser, new Date().toUTCString()]);
                                 let newGroupId = result.rows[0].grade_group_id;
-
-                                let gradeArr = group.grades.split(",");
-                                for (let grade of gradeArr) {
+                                for (let grade of group.grades) {
                                     //Mapping group to grades in t_grade_group_detail table.
                                     await client.query(queries.insertGradeGroupDtl, [newGroupId, grade])
                                 }
@@ -541,6 +539,10 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 case "event_groups" : {
                     response.event_groups = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_groups", "", client);
+                    break;
+                }
+                case "event_cat_group_map" :{
+                    response.event_groups = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_cat_group_map", "", client);
                     break;
                 }
             }
@@ -710,13 +712,21 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
         console.log(`getSectionWiseData : ${sectionCode} and eventId ${eventId}`)
         switch (sectionCode) {
             case "event_categories": {
-                let result = await client.query(queries.getSelecedAndAllCats, [ eventId, eventType ])
+                let result = await client.query(queries.getSelecedAndAllCats, [ eventId, eventType ]);
                 return result.rows[0].event_cats;
             }
             case "event_groups" : {
-                  let result = await client.query(queries.getSelectedAndAllGroups, [ eventId ])
-                  console.log(`Got rows : ${result.rowCount}`)
+                  let result = await client.query(queries.getSelectedAndAllGroups, [ eventId ]);
                   return result.rows[0].selected_and_all_grades;
+            }
+            case 'event_cat_group_map' : {
+                let groupData = await client.query(queries.getEventGroupMapping, [ eventId ]);
+                let catData = await client.query(queries.getEventCatMapping, [ eventId ]);
+                return {
+                    gradeGroupMapping : groupData.rows[0].group_mapping,
+                    categoryMapping: catData.rows[0].cat_mapping
+                }
+              
             }
         }
 
@@ -812,7 +822,7 @@ async function getEventType() {
         tec.event_category_id, tec.name event_category_name, tec.school_grade_from, tec.school_grade_to , tet.is_school_grade_required
         from t_event_type tet , t_event_category tec 
         where tet.is_deleted = false 
-        and tec.event_type_id = tet.event_type_id ;`
+        and tec.event_type_id = tet.event_type_id order by tet.name;`
         let res = await client.query(getEventType);
 
         if (res && res.rowCount > 0) {
