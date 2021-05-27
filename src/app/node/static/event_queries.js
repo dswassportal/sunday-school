@@ -119,7 +119,7 @@ const insertCatGradeMapping = `INSERT INTO t_event_cat_grade_grp_map(event_cat_m
                                                     ) returning event_cat_grade_grp_map_id;`; 
                                  
 
-const getVenusByEventLevel =    `select jsonb_agg(
+const getVenusAllDetailsByEventLevel =  `select jsonb_agg(
                                         jsonb_build_object(
                                         'venueId', tv.venue_id,
                                         'venueName', tv."name",
@@ -151,7 +151,65 @@ const getVenusByEventLevel =    `select jsonb_agg(
                                                                         INNER JOIN child_orgs c
                                                                         ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                                             FROM   child_orgs));`;  
-                                                                                                                            
+                                                                     
+const insertVenueEventMapping = ` insert into t_event_venue ( event_id, venue_id ) 
+                                    select $1, $2
+                                    WHERE NOT EXISTS (
+                                    SELECT 1 FROM t_event_venue tev
+                                                        WHERE tev.event_id = $1
+                                                        and tev.venue_id = $2
+                                                ) returning event_venue_id;`  
+                                                
+
+const getProctorsByEventId = `select 
+                                jsonb_agg(
+                                    distinct  jsonb_build_object(
+                                                    'name', concat(tu.title,'. ', tu.first_name ,' ', tu.middle_name,' ', tu.last_name),
+                                                    'proctorId', tu.user_id 
+                                                    ) 
+                                ) proctor_data
+                                from t_user tu		
+                                join t_user_role_context turc on turc.user_id = tu.user_id and turc.org_id in (            
+                                                (WITH recursive child_orgs 
+                                                AS (
+                                                    SELECT org_id
+                                                    FROM   t_organization parent_org 
+                                                    WHERE  org_id in (select org_id from t_event_organization teo 
+                                                                        where teo.event_id = $1)                                                  
+                                                    UNION
+                                                    SELECT     child_org.org_id child_id
+                                                    FROM       t_organization child_org
+                                                    INNER JOIN child_orgs c
+                                                    ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                        FROM   child_orgs))
+                                        and turc.role_id in (select tr.role_id from t_role tr 
+                                        where lower(tr.name) like lower($2))
+                                join t_user_role_mapping turm on turc.user_id = turm.user_id 
+                                and coalesce(turm.role_start_date, current_date) <= current_date 
+                                and coalesce(turm.role_end_date , current_date) >= current_date	`                                                
+
+const getVenusNameAndIsByEventLevel = `select jsonb_agg(
+                                        jsonb_build_object(
+                                        'venueId', tv.venue_id,
+                                        'venueName', tv."name",
+                                        'eventVenueMapId', tev.event_venue_id
+                                        ) 
+                                    ) venue_list from t_venue tv 
+                                    left join t_event_venue tev on tev.event_id = $1
+                                    where tv.is_deleted = false and tv.org_id in 
+                                    (select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
+                                            (WITH recursive child_orgs 
+                                                                    AS (
+                                                                        SELECT org_id
+                                                                        FROM   t_organization parent_org 
+                                                                        WHERE  org_id in (select org_id from t_event_organization teo 
+                                                                                            where teo.event_id = $1)                                                  
+                                                                        UNION
+                                                                        SELECT     child_org.org_id child_id
+                                                                        FROM       t_organization child_org
+                                                                        INNER JOIN child_orgs c
+                                                                        ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                                            FROM   child_orgs));`;
 
 
 module.exports = {
@@ -172,5 +230,9 @@ module.exports = {
     getEventGroupMapping,
     getEventCatMapping,
     insertCatGradeMapping,
-    getVenusByEventLevel
+    getVenusAllDetailsByEventLevel,
+    insertVenueEventMapping,
+    getProctorsByEventId,
+    getVenusNameAndIsByEventLevel 
+
 }

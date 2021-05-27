@@ -380,7 +380,10 @@ async function insertEvents(eventsData, loggedInUser) {
 
         let eventId = eventsData.eventId;
         let response = { eventId: eventsData.eventId }
-        console.log(`Processing request for ${eventsData.eventId} event and ${eventsData.sectionCode} section`);
+        console.log(`Processing request for ${eventsData.eventId} event Id and ${
+            eventsData.sectionCode == undefined 
+                    ?  ' to get ' + eventsData.nextSectionCode + ' section data ' 
+                    :  ' to process ' + eventsData.sectionCode  + ' section '}`);
         switch (eventsData.sectionCode) {
 
             // To populated event form's general section.
@@ -542,24 +545,16 @@ async function insertEvents(eventsData, loggedInUser) {
                 }// if
             }
             case "event_venue_assignment": {
-
-
-
-                {
-                    "data" : {
-                        "eventId" : 1208,
-                            "sectionCode" : "event_venue_assignment",
-                                "nexrSectionCode" : "event_proctor_assignment",
-                                    "venues": [
-                                        1028,
-                                        1004,
-                                        1003
-                                    ]
-                    }
-                }
-
-
-
+                if (eventsData.venues) {
+                    let venueMapIds = []
+                    for (let venue of eventsData.venues) {// to iterate venues
+                        let result = await client.query(queries.insertVenueEventMapping, [eventsData.eventId, venue]);
+                        if (result.rows[0].event_venue_id)
+                            venueMapIds.push(result.rows[0].event_venue_id)
+                    }// for
+                    console.log(`Event ${eventsData.eventId}, new event_venue_ids are  : ${JSON.stringify(venueMapIds)}`);
+                }// if
+                break;
             }
         }// Switch
 
@@ -578,13 +573,16 @@ async function insertEvents(eventsData, loggedInUser) {
                     response.eventCatGroupMap = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_cat_group_map", "", client);
                     break;
                 }
-                case 'event_venue_assignment': {
+                case "event_venue_assignment": {
                     response.event_venue_assignment = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_venue_assignment", "", client);
                     break;
                 }
-            }
-        }
-
+                case "event_proctor_assignment": {
+                    response.event_proctor_assignment = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_proctor_assignment", eventsData.eventType, client);
+                    break;
+                }
+            }//switch
+        }//if
 
 
         client.query("commit;");
@@ -755,7 +753,7 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             let result = await client.query(queries.getSelectedAndAllGroups, [eventId]);
             return result.rows[0].selected_and_all_grades;
         }
-        case 'event_cat_group_map': {
+        case "event_cat_group_map": {
             let groupData = await client.query(queries.getEventGroupMapping, [eventId]);
             let catData = await client.query(queries.getEventCatMapping, [eventId]);
             return {
@@ -764,10 +762,19 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             }
 
         }
-        case 'event_venue_assignment': {
+        case "event_venue_assignment": {
 
-            let result = await client.query(queries.getVenusByEventLevel, [eventId]);
+            let result = await client.query(queries.getVenusAllDetailsByEventLevel, [eventId ]);
             return result.rows[0].venue_list;
+        }
+        case "event_proctor_assignment": {
+
+            let proctorList = await client.query(queries.getProctorsByEventId, [eventId, `%${eventType}%proctor%`]);
+            let venueList = await client.query(queries.getVenusNameAndIsByEventLevel, [eventId]);
+            return {
+                   proctorList : proctorList.rows[0].proctor_data,
+                   venueList :  venueList.rows[0].venue_list
+            }
         }
     }
 }
