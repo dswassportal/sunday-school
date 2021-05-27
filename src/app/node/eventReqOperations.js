@@ -474,7 +474,7 @@ async function insertEvents(eventsData, loggedInUser) {
                     for (let category of eventsData.categories) {
                         if (category.catId) {
                             let result = await client.query(queries.insertCatMap, [eventsData.eventId, category.catId]);
-                            if (result.rows[0].event_cat_map_id)
+                            if (result.rows[0])
                                 catMapIds.push(result.rows[0].event_cat_map_id);
                         } else if (category.catId == undefined || category.catId == null || category.catId == "") {
                             console.log(`Seems like user added new cateogry named as ${category.catName}, Adding it to t_event_category for event type ${eventsData.eventType}`);
@@ -490,7 +490,7 @@ async function insertEvents(eventsData, loggedInUser) {
                             console.log(`event_category_id for newly added  category is  ${newCatId}`);
 
                             let result = await client.query(queries.insertCatMap, [eventsData.eventId, newCatId]);
-                            if (result.rows[0].event_cat_map_id)
+                            if (result.rows[0])
                                 catMapIds.push(result.rows[0].event_cat_map_id);
                         }
                     }
@@ -507,7 +507,7 @@ async function insertEvents(eventsData, loggedInUser) {
                             //query to insert grade group mapping.
                             let result = await client.query(queries.insertGradeGroupMapping,
                                 [eventsData.eventId, group.gradeGroupId, loggedInUser, new Date().toUTCString()]);
-                            if (result.rows[0].event_grade_group_map_id)
+                            if (result.rows[0])
                                 gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
                         } else if (group.gradeGroupId == undefined || group.gradeGroupId == null || group.gradeGroupId == "") {
                             if (typeof group.gradeGroupName != undefined && typeof group.gradeGroupName != undefined) {
@@ -521,7 +521,7 @@ async function insertEvents(eventsData, loggedInUser) {
                                 }
                                 result = await client.query(queries.insertGradeGroupMapping,
                                     [eventsData.eventId, newGroupId, loggedInUser, new Date().toUTCString()]);
-                                if (result.rows[0].event_grade_group_map_id)
+                                if (result.rows[0])
                                     gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
                             } else throw "New groupName is empty. ";
                         }
@@ -537,7 +537,7 @@ async function insertEvents(eventsData, loggedInUser) {
                         for (let groupMap of catGrp.groupMapIds) { // to iterate groupMapIds        
                             let result = await client.query(queries.insertCatGradeMapping,
                                 [catGrp.catMapId, groupMap.gradeGroupMapId, loggedInUser, new Date().toUTCString()]);
-                            if (result.rows[0].event_cat_grade_grp_map_id)
+                            if (result.rows[0])
                                 catGrpMapIds.push(result.rows[0].event_cat_grade_grp_map_id)
                         }// inner for
                     }// outer for
@@ -549,7 +549,7 @@ async function insertEvents(eventsData, loggedInUser) {
                     let venueMapIds = []
                     for (let venue of eventsData.venues) {// to iterate venues
                         let result = await client.query(queries.insertVenueEventMapping, [eventsData.eventId, venue]);
-                        if (result.rows[0].event_venue_id)
+                        if (result.rows[0])
                             venueMapIds.push(result.rows[0].event_venue_id)
                     }// for
                     console.log(`Event ${eventsData.eventId}, new event_venue_ids are  : ${JSON.stringify(venueMapIds)}`);

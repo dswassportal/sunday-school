@@ -136,7 +136,7 @@ const getVenusAllDetailsByEventLevel =  `select jsonb_agg(
                                         'isSelected', case when tev.event_venue_id is null then false else true end
                                         ) 
                                     ) venue_list from t_venue tv 
-                                    left join t_event_venue tev on tev.event_id = $1
+                                   left join t_event_venue tev on tv.venue_id  = tev.venue_id and tev.event_id  = $1
                                     where tv.is_deleted = false and tv.org_id in 
                                     (select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
                                             (WITH recursive child_orgs 
@@ -195,7 +195,7 @@ const getVenusNameAndIsByEventLevel = `select jsonb_agg(
                                         'eventVenueMapId', tev.event_venue_id
                                         ) 
                                     ) venue_list from t_venue tv 
-                                    left join t_event_venue tev on tev.event_id = $1
+                                     join t_event_venue tev on tv.venue_id  = tev.venue_id and tev.event_id = $1
                                     where tv.is_deleted = false and tv.org_id in 
                                     (select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
                                             (WITH recursive child_orgs 
