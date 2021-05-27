@@ -165,10 +165,15 @@ const getProctorsByEventId = `select
                                 jsonb_agg(
                                     distinct  jsonb_build_object(
                                                     'name', concat(tu.title,'. ', tu.first_name ,' ', tu.middle_name,' ', tu.last_name),
-                                                    'proctorId', tu.user_id 
+                                                    'proctorId', tu.user_id,
+                                                    'venueName', tv."name",
+                                                    'venueId', tev.venue_id,
+                                                    'eventVenueMapId', tev.event_venue_id
                                                     ) 
                                 ) proctor_data
-                                from t_user tu		
+                                from t_user tu
+                                left join t_event_venue tev on  tu.user_id = tev.proctor_id  and event_id = 1259
+                                left join t_venue tv on tv.venue_id = tev.venue_id 
                                 join t_user_role_context turc on turc.user_id = tu.user_id and turc.org_id in (            
                                                 (WITH recursive child_orgs 
                                                 AS (
@@ -211,6 +216,10 @@ const getVenusNameAndIsByEventLevel = `select jsonb_agg(
                                                                         ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                                             FROM   child_orgs));`;
 
+const updateVenueProctorMapping = `update t_event_venue set proctor_id = $1 
+                                    where event_id = $2
+                                    and event_venue_id = $3 returning event_venue_id;`;                                                                            
+
 
 module.exports = {
     insertEvent,
@@ -233,6 +242,7 @@ module.exports = {
     getVenusAllDetailsByEventLevel,
     insertVenueEventMapping,
     getProctorsByEventId,
-    getVenusNameAndIsByEventLevel 
+    getVenusNameAndIsByEventLevel,
+    updateVenueProctorMapping 
 
 }

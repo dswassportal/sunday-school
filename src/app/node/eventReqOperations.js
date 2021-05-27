@@ -1,4 +1,3 @@
-const { response } = require('express');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
@@ -380,10 +379,9 @@ async function insertEvents(eventsData, loggedInUser) {
 
         let eventId = eventsData.eventId;
         let response = { eventId: eventsData.eventId }
-        console.log(`Processing request for ${eventsData.eventId} event Id and ${
-            eventsData.sectionCode == undefined 
-                    ?  ' to get ' + eventsData.nextSectionCode + ' section data ' 
-                    :  ' to process ' + eventsData.sectionCode  + ' section '}`);
+        console.log(`Processing request for ${eventsData.eventId} event Id and ${eventsData.sectionCode == undefined
+            ? ' to get ' + eventsData.nextSectionCode + ' section data '
+            : ' to process ' + eventsData.sectionCode + ' section '}`);
         switch (eventsData.sectionCode) {
 
             // To populated event form's general section.
@@ -554,6 +552,21 @@ async function insertEvents(eventsData, loggedInUser) {
                     }// for
                     console.log(`Event ${eventsData.eventId}, new event_venue_ids are  : ${JSON.stringify(venueMapIds)}`);
                 }// if
+                break;
+            }
+            case "event_proctor_assignment": {
+                if (eventsData.venueProctorAssignment) {
+                    let eventVenueIds = [];
+                    for (let assignment of eventsData.venueProctorAssignment) {
+                        let result = await client.query(queries.updateVenueProctorMapping,
+                            [assignment.proctorId, eventsData.eventId, assignment.eventVenueMapId]);
+
+                        if (result.rows) {
+                            eventVenueIds.push(result.rows[0].event_venue_id)
+                        }
+                    }
+                    console.log(`Event ${eventsData.eventId}, updated for proctor assignment< Updated event_venue_ids are  : ${JSON.stringify(eventVenueIds)}`);
+                }
                 break;
             }
         }// Switch
@@ -764,7 +777,7 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
         }
         case "event_venue_assignment": {
 
-            let result = await client.query(queries.getVenusAllDetailsByEventLevel, [eventId ]);
+            let result = await client.query(queries.getVenusAllDetailsByEventLevel, [eventId]);
             return result.rows[0].venue_list;
         }
         case "event_proctor_assignment": {
@@ -772,8 +785,8 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             let proctorList = await client.query(queries.getProctorsByEventId, [eventId, `%${eventType}%proctor%`]);
             let venueList = await client.query(queries.getVenusNameAndIsByEventLevel, [eventId]);
             return {
-                   proctorList : proctorList.rows[0].proctor_data,
-                   venueList :  venueList.rows[0].venue_list
+                proctorList: proctorList.rows[0].proctor_data,
+                venueList: venueList.rows[0].venue_list
             }
         }
     }
