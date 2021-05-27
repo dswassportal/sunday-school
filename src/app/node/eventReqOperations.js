@@ -471,7 +471,8 @@ async function insertEvents(eventsData, loggedInUser) {
                     for (let category of eventsData.categories) {
                         if (category.catId) {
                             let result = await client.query(queries.insertCatMap, [eventsData.eventId, category.catId]);
-                            catMapIds.push(result.rows[0].event_cat_map_id);
+                            if (result.rows[0].event_cat_map_id)
+                                catMapIds.push(result.rows[0].event_cat_map_id);
                         } else if (category.catId == undefined || category.catId == null || category.catId == "") {
                             console.log(`Seems like user added new cateogry named as ${category.catName}, Adding it to t_event_category for event type ${eventsData.eventType}`);
 
@@ -486,7 +487,8 @@ async function insertEvents(eventsData, loggedInUser) {
                             console.log(`event_category_id for newly added  category is  ${newCatId}`);
 
                             let result = await client.query(queries.insertCatMap, [eventsData.eventId, newCatId]);
-                            catMapIds.push(result.rows[0].event_cat_map_id);
+                            if (result.rows[0].event_cat_map_id)
+                                catMapIds.push(result.rows[0].event_cat_map_id);
                         }
                     }
                     console.log(`Event ${eventsData.eventId}, new event_cat_map_ids are  : ${JSON.stringify(catMapIds)}`);
@@ -502,7 +504,8 @@ async function insertEvents(eventsData, loggedInUser) {
                             //query to insert grade group mapping.
                             let result = await client.query(queries.insertGradeGroupMapping,
                                 [eventsData.eventId, group.gradeGroupId, loggedInUser, new Date().toUTCString()]);
-                            gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
+                            if (result.rows[0].event_grade_group_map_id)
+                                gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
                         } else if (group.gradeGroupId == undefined || group.gradeGroupId == null || group.gradeGroupId == "") {
                             if (typeof group.gradeGroupName != undefined && typeof group.gradeGroupName != undefined) {
                                 console.log(`Seems like user added new group as ${group.gradeGroupName}, Adding it to t_grade_group & t_grade_group_detail`);
@@ -515,7 +518,8 @@ async function insertEvents(eventsData, loggedInUser) {
                                 }
                                 result = await client.query(queries.insertGradeGroupMapping,
                                     [eventsData.eventId, newGroupId, loggedInUser, new Date().toUTCString()]);
-                                gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
+                                if (result.rows[0].event_grade_group_map_id)
+                                    gradeGroupMapIds.push(result.rows[0].event_grade_group_map_id);
                             } else throw "New groupName is empty. ";
                         }
                     }
@@ -527,14 +531,35 @@ async function insertEvents(eventsData, loggedInUser) {
                 if (eventsData.catGradeMap) {
                     let catGrpMapIds = []
                     for (let catGrp of eventsData.catGradeMap) {// to iterate catGradeMap
-                        for(let groupMap of catGrp.groupMapIds){ // to iterate groupMapIds        
-                        let result = await client.query(queries.insertCatGradeMapping, 
-                            [ catGrp.catMapId, groupMap.gradeGroupMapId, loggedInUser, new Date().toUTCString()]);
-                            catGrpMapIds.push(result.rows[0].event_cat_grade_grp_map_id)
+                        for (let groupMap of catGrp.groupMapIds) { // to iterate groupMapIds        
+                            let result = await client.query(queries.insertCatGradeMapping,
+                                [catGrp.catMapId, groupMap.gradeGroupMapId, loggedInUser, new Date().toUTCString()]);
+                            if (result.rows[0].event_cat_grade_grp_map_id)
+                                catGrpMapIds.push(result.rows[0].event_cat_grade_grp_map_id)
                         }// inner for
                     }// outer for
                     console.log(`Event ${eventsData.eventId}, new event_cat_grade_grp_map_ids are  : ${JSON.stringify(catGrpMapIds)}`);
                 }// if
+            }
+            case "event_venue_assignment": {
+
+
+
+                {
+                    "data" : {
+                        "eventId" : 1208,
+                            "sectionCode" : "event_venue_assignment",
+                                "nexrSectionCode" : "event_proctor_assignment",
+                                    "venues": [
+                                        1028,
+                                        1004,
+                                        1003
+                                    ]
+                    }
+                }
+
+
+
             }
         }// Switch
 
@@ -720,31 +745,31 @@ async function insertEvents(eventsData, loggedInUser) {
 
 async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType, client) {
 
-        console.log(`getSectionWiseData : ${sectionCode} and eventId ${eventId}`)
-        switch (sectionCode) {
-            case "event_categories": {
-                let result = await client.query(queries.getSelecedAndAllCats, [eventId, eventType]);
-                return result.rows[0].event_cats;
-            }
-            case "event_groups": {
-                let result = await client.query(queries.getSelectedAndAllGroups, [eventId]);
-                return result.rows[0].selected_and_all_grades;
-            }
-            case 'event_cat_group_map': {
-                let groupData = await client.query(queries.getEventGroupMapping, [eventId]);
-                let catData = await client.query(queries.getEventCatMapping, [eventId]);
-                return {
-                    gradeGroupMapping: groupData.rows[0].group_mapping,
-                    categoryMapping: catData.rows[0].cat_mapping
-                }
-
-            }
-            case 'event_venue_assignment' : {
-
-                let result = await client.query(queries.getVenusByEventLevel, [eventId]); 
-                return result.rows[0].venue_list;
-            }      
+    console.log(`getSectionWiseData : ${sectionCode} and eventId ${eventId}`)
+    switch (sectionCode) {
+        case "event_categories": {
+            let result = await client.query(queries.getSelecedAndAllCats, [eventId, eventType]);
+            return result.rows[0].event_cats;
         }
+        case "event_groups": {
+            let result = await client.query(queries.getSelectedAndAllGroups, [eventId]);
+            return result.rows[0].selected_and_all_grades;
+        }
+        case 'event_cat_group_map': {
+            let groupData = await client.query(queries.getEventGroupMapping, [eventId]);
+            let catData = await client.query(queries.getEventCatMapping, [eventId]);
+            return {
+                gradeGroupMapping: groupData.rows[0].group_mapping,
+                categoryMapping: catData.rows[0].cat_mapping
+            }
+
+        }
+        case 'event_venue_assignment': {
+
+            let result = await client.query(queries.getVenusByEventLevel, [eventId]);
+            return result.rows[0].venue_list;
+        }
+    }
 }
 
 
