@@ -21,8 +21,16 @@ const  insertEventCords = `INSERT INTO t_event_coordinator (event_id, user_id, c
 
 const  deleteEventCords = `DELETE FROM t_event_coordinator where event_id = $1;`  
 
-const insertCatMap = `INSERT INTO t_event_category_map(event_id, event_category_id)
-                            VALUES ($1, $2) returning event_cat_map_id;`
+// const insertCatMap = `INSERT INTO t_event_category_map(event_id, event_category_id)
+//                             VALUES ($1, $2) returning event_cat_map_id;`
+
+const insertCatMap = `INSERT INTO t_event_category_map (event_id, event_category_id)
+                        select $1, $2
+                        WHERE NOT EXISTS (
+                        SELECT 1 FROM t_event_category_map turm 
+                                            WHERE event_id = $1
+                                            and event_category_id = $2
+                                    ) returning event_cat_map_id;`
 
 const getFrststEveTypIdByEveTyp =  `select event_type_id from t_event_category where lower(type) = lower($1) fetch first 1 row only;`;  
 
@@ -30,9 +38,17 @@ const insertNewCategory = `INSERT INTO t_event_category
                                     ("name", description, "type", event_type_id)
                            VALUES($1, $2, $3, $4) returning event_category_id;`;
 
-const  insertGradeGroupMapping =  `INSERT INTO t_event_grade_group_map
-                                (event_id, grade_group_id, created_by, created_date)
-                                VALUES($1, $2, $3, $4) returning event_grade_group_map_id;`;
+// const  insertGradeGroupMapping =  `INSERT INTO t_event_grade_group_map
+//                                 (event_id, grade_group_id, created_by, created_date)
+//                                 VALUES($1, $2, $3, $4) returning event_grade_group_map_id;`;
+
+const  insertGradeGroupMapping = `INSERT INTO t_event_grade_group_map(event_id, grade_group_id, created_by, created_date)
+                                    select $1, $2, $3, $4
+                                    WHERE NOT EXISTS (
+                                    SELECT 1 FROM t_event_grade_group_map teggm 
+                                                        WHERE teggm.event_id = $1
+                                                        and teggm.grade_group_id = $2
+                                                ) returning event_grade_group_map_id;`
 
 const insertGradeGroup = `insert into t_grade_group (group_name, created_by, created_date) values ($1, $2, $3) returning grade_group_id;`;                           
 
@@ -92,7 +108,47 @@ const getEventCatMapping = `select
                                 ) cat_mapping
                                 from t_event_category tec 
                                 join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
-                                and tecm.event_id = $1;`;                                    
+                                and tecm.event_id = $1;`;     
+                                
+const insertCatGradeMapping = `INSERT INTO t_event_cat_grade_grp_map 
+                                    (event_cat_map_id, event_grade_group_map_id, 
+                                        created_by, created_date) values ($1, $2, $3, $4)
+                                 returning event_cat_grade_grp_map_id;`; 
+                                 
+
+const getVenusByEventLevel =    `  select jsonb_agg(
+                                        jsonb_build_object(
+                                        'venueId', tv.venue_id,
+                                        'venueName', tv."name",
+                                        'addressLine1', tv.address_line1,
+                                        'addressLine2', tv.address_line2,
+                                        'addressLine3', tv.address_line3,
+                                        'city', tv.city,
+                                        'country', tv.country,
+                                        'postalCode', tv.postal_code,
+                                        'mobileNo', tv.mobile_no,
+                                        'phoneNo', tv.phone_no,
+                                        'mapUrl', tv.map_url,
+                                        'eventVenueMapId', tev.event_venue_id,
+                                        'isSelected', case when tev.event_venue_id is null then false else true end
+                                        ) 
+                                    ) venue_list from t_venue tv 
+                                    left join t_event_venue tev on tev.event_id = $1
+                                    where tv.is_deleted = false and tv.org_id in 
+                                    (select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
+                                            (WITH recursive child_orgs 
+                                                                    AS (
+                                                                        SELECT org_id
+                                                                        FROM   t_organization parent_org 
+                                                                        WHERE  org_id in (select org_id from t_event_organization teo 
+                                                                                            where teo.event_id = $1)                                                  
+                                                                        UNION
+                                                                        SELECT     child_org.org_id child_id
+                                                                        FROM       t_organization child_org
+                                                                        INNER JOIN child_orgs c
+                                                                        ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                                            FROM   child_orgs));`;  
+                                                                                                                            
 
 
 module.exports = {
@@ -111,5 +167,7 @@ module.exports = {
     getSelecedAndAllCats,
     getSelectedAndAllGroups,
     getEventGroupMapping,
-    getEventCatMapping
+    getEventCatMapping,
+    insertCatGradeMapping,
+    getVenusByEventLevel
 }

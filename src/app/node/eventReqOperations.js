@@ -379,7 +379,7 @@ async function insertEvents(eventsData, loggedInUser) {
         await client.query("BEGIN");
 
         let eventId = eventsData.eventId;
-        let response = { eventId : eventsData.eventId }
+        let response = { eventId: eventsData.eventId }
         console.log(`Processing request for ${eventsData.eventId} event and ${eventsData.sectionCode} section`);
         switch (eventsData.sectionCode) {
 
@@ -523,10 +523,18 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 break;
             }//event_groups case block
-            case  "event_cat_group_map":{
-                if(eventsData.catGradeMap){
-
-                }
+            case "event_cat_group_map": {
+                if (eventsData.catGradeMap) {
+                    let catGrpMapIds = []
+                    for (let catGrp of eventsData.catGradeMap) {// to iterate catGradeMap
+                        for(let groupMap of catGrp.groupMapIds){ // to iterate groupMapIds        
+                        let result = await client.query(queries.insertCatGradeMapping, 
+                            [ catGrp.catMapId, groupMap, loggedInUser, new Date().toUTCString()]);
+                            catGrpMapIds.push(result.rows[0].event_cat_grade_grp_map_id)
+                        }// inner for
+                    }// outer for
+                    console.log(`Event ${eventsData.eventId}, new event_cat_grade_grp_map_ids are  : ${JSON.stringify(catGrpMapIds)}`);
+                }// if
             }
         }// Switch
 
@@ -537,12 +545,16 @@ async function insertEvents(eventsData, loggedInUser) {
                     response.event_categories = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_categories", eventsData.eventType, client);
                     break;
                 }
-                case "event_groups" : {
+                case "event_groups": {
                     response.event_groups = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_groups", "", client);
                     break;
                 }
-                case "event_cat_group_map" :{
-                    response.event_groups = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_cat_group_map", "", client);
+                case "event_cat_group_map": {
+                    response.eventCatGroupMap = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_cat_group_map", "", client);
+                    break;
+                }
+                case 'event_venue_assignment': {
+                    response.eventCatGroupMap = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_venue_assignment", "", client);
                     break;
                 }
             }
@@ -708,33 +720,31 @@ async function insertEvents(eventsData, loggedInUser) {
 
 async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType, client) {
 
-    try {
         console.log(`getSectionWiseData : ${sectionCode} and eventId ${eventId}`)
         switch (sectionCode) {
             case "event_categories": {
-                let result = await client.query(queries.getSelecedAndAllCats, [ eventId, eventType ]);
+                let result = await client.query(queries.getSelecedAndAllCats, [eventId, eventType]);
                 return result.rows[0].event_cats;
             }
-            case "event_groups" : {
-                  let result = await client.query(queries.getSelectedAndAllGroups, [ eventId ]);
-                  return result.rows[0].selected_and_all_grades;
+            case "event_groups": {
+                let result = await client.query(queries.getSelectedAndAllGroups, [eventId]);
+                return result.rows[0].selected_and_all_grades;
             }
-            case 'event_cat_group_map' : {
-                let groupData = await client.query(queries.getEventGroupMapping, [ eventId ]);
-                let catData = await client.query(queries.getEventCatMapping, [ eventId ]);
+            case 'event_cat_group_map': {
+                let groupData = await client.query(queries.getEventGroupMapping, [eventId]);
+                let catData = await client.query(queries.getEventCatMapping, [eventId]);
                 return {
-                    gradeGroupMapping : groupData.rows[0].group_mapping,
+                    gradeGroupMapping: groupData.rows[0].group_mapping,
                     categoryMapping: catData.rows[0].cat_mapping
                 }
-              
+
             }
+            case 'event_venue_assignment' : {
+
+                let result = await client.query(queries.getVenusByEventLevel, [eventId]); 
+                return result.rows[0].venue_list;
+            }      
         }
-
-    } catch (error) {
-        console.error(`eventReqOperations.js::getSectionWiseData() Rollback called since there is an error as: ${error}`);
-        return (errorHandling.handleDBError('transactionError'));
-    }
-
 }
 
 
