@@ -102,7 +102,7 @@ const getEventCatMapping = `select
                                 jsonb_agg(
                                 jsonb_build_object(
                                     'catName', tec."name",
-                                    'eventCatMapId', tecm.event_cat_map_id,
+                                    'catMapId', tecm.event_cat_map_id,
                                     'catId', tec.event_category_id 
                                     ) 
                                 ) cat_mapping
@@ -110,13 +110,16 @@ const getEventCatMapping = `select
                                 join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
                                 and tecm.event_id = $1;`;     
                                 
-const insertCatGradeMapping = `INSERT INTO t_event_cat_grade_grp_map 
-                                    (event_cat_map_id, event_grade_group_map_id, 
-                                        created_by, created_date) values ($1, $2, $3, $4)
-                                 returning event_cat_grade_grp_map_id;`; 
+const insertCatGradeMapping = `INSERT INTO t_event_cat_grade_grp_map(event_cat_map_id, event_grade_group_map_id, created_by, created_date)
+                                        select $1, $2, $3, $4
+                                        WHERE NOT EXISTS (
+                                        SELECT 1 FROM t_event_cat_grade_grp_map tecggm
+                                                            WHERE tecggm.event_cat_map_id = $1
+                                                            and tecggm.event_grade_group_map_id = $2
+                                                    ) returning event_cat_grade_grp_map_id;`; 
                                  
 
-const getVenusByEventLevel =    `  select jsonb_agg(
+const getVenusByEventLevel =    `select jsonb_agg(
                                         jsonb_build_object(
                                         'venueId', tv.venue_id,
                                         'venueName', tv."name",
