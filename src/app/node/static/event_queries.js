@@ -90,7 +90,7 @@ const getEventGroupMapping = `select
                                     jsonb_agg(
                                         jsonb_build_object(
                                             'gradeGroupName', tgg.group_name,
-                                            'eventGradeGroupMapId', teggm.event_grade_group_map_id,
+                                            'gradeGroupMapId', teggm.event_grade_group_map_id,
                                             'gradeGroupId', tgg.grade_group_id
                                             ) 
                                     ) group_mapping 

@@ -529,7 +529,7 @@ async function insertEvents(eventsData, loggedInUser) {
                     for (let catGrp of eventsData.catGradeMap) {// to iterate catGradeMap
                         for(let groupMap of catGrp.groupMapIds){ // to iterate groupMapIds        
                         let result = await client.query(queries.insertCatGradeMapping, 
-                            [ catGrp.catMapId, groupMap, loggedInUser, new Date().toUTCString()]);
+                            [ catGrp.catMapId, groupMap.gradeGroupMapId, loggedInUser, new Date().toUTCString()]);
                             catGrpMapIds.push(result.rows[0].event_cat_grade_grp_map_id)
                         }// inner for
                     }// outer for
