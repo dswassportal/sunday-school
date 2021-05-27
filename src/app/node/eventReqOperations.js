@@ -554,7 +554,7 @@ async function insertEvents(eventsData, loggedInUser) {
                     break;
                 }
                 case 'event_venue_assignment': {
-                    response.eventCatGroupMap = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_venue_assignment", "", client);
+                    response.event_venue_assignment = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_venue_assignment", "", client);
                     break;
                 }
             }
