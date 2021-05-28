@@ -569,6 +569,53 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 break;
             }
+            case "event_judge_assignment": {
+                if (eventsData.judgeAssignment) {
+                    for (let assignment of eventsData.judgeAssignment) {
+                        let regionMapIds = [];
+                        if (assignment.regions) {
+                            for (let region of assignment.regions) {
+                                let regionStaffRes = await client.query(queries.insertRegionStaffMapping,
+                                    [eventsData.eventId, assignment.catId, assignment.catMapId,
+                                    region.regionId, loggedInUser, new Date().toUTCString()]);
+                                if (regionStaffRes.rowCount != 0)
+                                    regionMapIds.push(regionStaffRes.rows[0].event_region_staff_map_id);
+                                //console.log("insertRegionStaffMapping =>", eventsData.eventId, assignment.catId, assignment.catMapId,region.regionId, loggedInUser, new Date().toUTCString());
+                                if (region.judges) {
+                                    let staffMapIds = [];
+                                    for (let judge of region.judges) {
+                                        if (regionStaffRes.rowCount != 0) {
+                                            let catStaffMapRes = await client.query(queries.insertCatStaffMapId,
+                                                [eventsData.eventId, assignment.catMapId, judge,
+                                                    'Judge', loggedInUser, new Date().toUTCString(),
+                                                regionStaffRes.rows[0].event_region_staff_map_id]);
+                                            // console.log( "insertCatStaffMapId =>", eventsData.eventId, assignment.catMapId, judge,'Judge', loggedInUser, new Date().toUTCString())
+                                            if (catStaffMapRes.rowCount != 0)
+                                                staffMapIds.push(catStaffMapRes.rows[0].event_cat_staff_map_id)
+                                        }
+                                    }
+                                    console.log(`Event ${eventsData.eventId}, for region ${region.regionId}, and for category ${assignment.catId} event_cat_staff_map_ids are -> ${JSON.stringify(staffMapIds)}`)
+                                }
+                            }
+                            console.log(`Event ${eventsData.eventId}, for category ${assignment.catId} event_region_staff_map_ids are -> ${JSON.stringify(regionMapIds)}`)
+                        }
+                    }
+                }
+                break;
+            }
+            case "event_questionnaires": {
+                if (eventsData.questionnaire) {
+                    let questionIds = [];
+                    for (let question of eventsData.questionnaire) {
+                        let result = await client.query(queries.insertQuestionnaire,
+                            [eventsData.eventId, question.question, question.answerType, loggedInUser, new Date().toUTCString()]);
+                        if (result.rowCount != 0)
+                            questionIds.push(result.rows[0].question_id);
+                    }
+                    console.log(`Event ${eventsData.eventId}, question_ids are : ${JSON.stringify(questionIds)}`);
+                }
+                break;
+            }
         }// Switch
 
         //if request from next section data in same requst
@@ -598,8 +645,12 @@ async function insertEvents(eventsData, loggedInUser) {
                     response.event_judge_assignment = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_judge_assignment", eventsData.eventType, client);
                     break;
                 }
+                case "event_questionnaires": {
+                    response.event_questionnaires = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_questionnaires", eventsData.eventType, client);
+                    break
+                }
             }//switch
-        }//if
+        }//if  
 
 
         client.query("commit;");
@@ -803,6 +854,17 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                 categoriesList: categoriesList.rows[0].cat_mapping
             }
         }
+        case "event_questionnaires": {
+            let questionTypeList = await client.query(queries.getQuestionTypesFromLookup);
+            let tempArr = []
+            if (questionTypeList.rowCount > 0) {
+                for (let row of questionTypeList.rows) {
+                    tempArr.push(row.code)
+                }
+            } else
+                console.error("Of type \'Question Type\' not found in t_lookup table");
+            return tempArr
+        }
     }
 }
 
@@ -813,9 +875,9 @@ async function getRegionWiseJudges(loggedInUser, regionId) {
         let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, '%Judge%']);
 
         return ({
-            data : {
+            data: {
                 status: 'success',
-                judges : judgesList.rows == null ? [] : judgesList.rows[0].judge_list  
+                judges: judgesList.rows == null ? [] : judgesList.rows[0].judge_list
             }
         })
 

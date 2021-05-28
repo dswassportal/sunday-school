@@ -324,7 +324,16 @@ const getQuestionTypesFromLookup = `select tl.code
                                     from t_lookup tl 
                                     where tl."type" = 'Question Type' 
                                     and tl.is_deleted = false 
-                                    order by tl."sequence" ;`                                                    
+                                    order by tl."sequence" ;`   
+                                    
+const insertQuestionnaire = ` INSERT INTO t_event_questionnaire (event_id, question, answer_type, created_by, created_date)
+                            SELECT $1, $2, $3, $4, $5
+                            WHERE NOT EXISTS (
+                            SELECT 1 FROM t_event_questionnaire teq
+                                                    WHERE teq.event_id = $1 
+                                                    and teq.question = '$2'
+                                                    and teq.answer_type = '$3' 
+                                                    and teq.is_deleted = false) returning question_id;`                                    
 
 
 module.exports = {
@@ -355,5 +364,6 @@ module.exports = {
     getJudgesByEventRegion,
     insertRegionStaffMapping,
     insertCatStaffMapId,
-    getQuestionTypesFromLookup 
+    getQuestionTypesFromLookup,
+    insertQuestionnaire 
 }
