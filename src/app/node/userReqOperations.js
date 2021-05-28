@@ -226,10 +226,11 @@ async function setStaffAssignment(staffData, loggedInUser) {
 
         let ssStartDate = staffData.ssStartDate;
         let ssEndDate = staffData.ssEndDate;
-        let orgId = staffData.orgId;
+        //let orgId = staffData.schoolId;
 
         for (let staffMember of staffData.staffAssignment) {
 
+            let orgId = (staffMember.roleType == 'Principal') ? staffData.schoolId : staffMember.gradeId;
 
             /****************************** Upsert t_user_role_mapping ************************************/
             let updateRoleMappingQuery = `UPDATE t_user_role_mapping
@@ -273,44 +274,57 @@ async function setStaffAssignment(staffData, loggedInUser) {
                                                                 and role_id = $2
                                                                 and org_id = $3
                                                                 and is_deleted = false
-                                                        ) returning staff_school_assignment_id;`
+                                                        );`
 
             let insertRoleContextvValues = [staffMember.staffId, roles[staffMember.roleType], orgId, loggedInUser, new Date().toUTCString(), userRoleMapId]
             result = await client.query(insertRoleContext, insertRoleContextvValues);
-            console.log('Rows inserted into t_user_role_context  : ' + result.rowCount + ' and newly generated staff_school_assignment_id : ' + result.rows[0].staff_school_assignment_id);
+            console.log('Rows inserted into t_user_role_context  : ' + result.rowCount);
 
-             /******************************  Upsert t_staff_school_assignment ****************************************/
+            /******************************  Upsert t_staff_school_assignment ****************************************/
 
-             let updateStaffSchool = ` UPDATE t_staff_school_assignment
-                                    SET user_id=0, role_id=0, role_type='', is_primary=false, is_deleted=false, created_by=0, created_date='', updated_by=0, updated_date=''
-                                    WHERE school_id = 0 `;
+            //  let updateStaffSchool = ` UPDATE t_staff_school_assignment
+            //                         SET is_primary = $1, updated_by = 0, updated_date = ''
+            //                         WHERE user_id=0 and school_id = 0 and role_type=  and ` ;
 
-             let insertStaffSchool = ` INSERT INTO t_user_role_context (user_id, role_id, org_id, created_by, created_date, user_role_map_id)
-                                            select $1, $2, $3, $4, $5, $6  
+            let insertStaffSchool = ` INSERT INTO t_staff_school_assignment (school_id, user_id, role_id, role_type, is_primary, created_by, created_date)
+                                            select $1, $2, $3, $4, $5, $6, $7  
                                             WHERE NOT EXISTS (
                                             SELECT 1 FROM t_user_role_mapping turm 
-                                                                WHERE user_id = $1 
-                                                                and role_id = $2
-                                                                and org_id = $3
-                                                                and is_deleted = false
+                                                                WHERE school_id = $1
+                                                                and user_id = $2
+                                                                and role_id = $3
                                                         ) returning staff_school_assignment_id;`
 
-                                                                     
+            let insertStaffSchoolValues = [orgId, staffMember.staffId, roles[staffMember.roleType], staffMember.roleType, isPrimary, loggedInUser, new Date().toUTCString()]
+            result = await client.query(insertStaffSchool, insertStaffSchoolValues);
+            console.log('Rows inserted into t_staff_school_assignment  : ' + result.rowCount + ' and newly generated staff_school_assignment_id : ' + result.rows[0].staff_school_assignment_id);
+            // UPDATE t_staff_school_assignment
+            // SET school_id=0, user_id=0, role_id=0, role_type='', is_primary=false, is_deleted=false, created_by=0, created_date='', updated_by=0, updated_date=''
+            // WHERE staff_school_assignment_id=nextval('s_staff_school_assignment'::regclass);
+
 
         }
 
+        return {
+            data: {
+                status: "success",
+            }
+        }
 
 
     } catch (error) {
 
-    } finally {
-        console.error(`userReqOperations.js::setStaffAssignment() --> error : ${error}`);
+        console.error(`userReqOperations.js::updateUnApprovedUser() --> error as : ${error}`);
         return (errorHandling.handleDBError('connectionError'));
+
+    } finally {
+        client.release();
     }
-    client.release();
+
 }
 
 module.exports = {
     setUserApprovalState,
-    updateUnApprovedUser
+    updateUnApprovedUser,
+    setStaffAssignment
 }

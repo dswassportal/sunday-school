@@ -277,7 +277,10 @@ const getRegionsByEventId = `select jsonb_agg(
 const getJudgesByEventRegion = `select 
                                 jsonb_agg(
                                     jsonb_build_object(
-                                        'judgeName',  concat(ve.title,'. ', ve.first_name ,' ', ve.middle_name,' ', ve.last_name),
+                                        'judgeName',  concat(ve.title,'. ', ve.first_name ,' ', ve.middle_name,' ', ve.last_name,
+                                        '(',
+                                  		(select distinct user_org from v_user where user_id = ve.user_id)
+                                  		,')'),
                                         'judgeId', ve.user_id
                                         ) 
                                     ) judge_list
@@ -292,6 +295,36 @@ const getJudgesByEventRegion = `select
                                                     INNER JOIN child_orgs c
                                                     ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                         FROM   child_orgs));`;
+
+const insertRegionStaffMapping = ` INSERT INTO t_event_region_staff_map (event_id, event_category_id, 
+                                            event_category_map_id, org_id, created_by, created_date)
+                                    select $1, $2, $3, $4, $5, $6  
+                                    WHERE NOT EXISTS (
+                                    SELECT 1 FROM t_event_region_staff_map tersm 
+                                                        WHERE tersm.event_id = $1 
+                                                        and tersm.event_category_id = $2
+                                                        and tersm.event_category_map_id = $3
+                                                        and tersm.org_id = $4 
+                                                        and tersm.is_deleted = false
+                                                        ) returning event_region_staff_map_id;`;      
+
+                                                        
+const insertCatStaffMapId = ` INSERT INTO t_event_cat_staff_map (event_id, event_category_map_id, user_id, 
+                                        role_type, created_by, created_date, event_region_staff_map_id)
+                                select $1, $2, $3, $4, $5, $6, $7
+                                WHERE NOT EXISTS (
+                                SELECT 1 FROM t_event_cat_staff_map tersm 
+                                                    WHERE tersm.event_id = $1 
+                                                    and tersm.event_category_map_id = $2
+                                                    and tersm.user_id = $3 
+                                                    and tersm.is_deleted = false
+                                                    ) returning event_cat_staff_map_id;`;    
+                                                    
+const getQuestionTypesFromLookup = `select tl.code 
+                                    from t_lookup tl 
+                                    where tl."type" = 'Question Type' 
+                                    and tl.is_deleted = false 
+                                    order by tl."sequence" ;`                                                    
 
 
 module.exports = {
@@ -319,6 +352,8 @@ module.exports = {
     updateVenueProctorMapping,
     getRegionsByEventId, 
     // getJudgesByEventsRegion
-    getJudgesByEventRegion
-
+    getJudgesByEventRegion,
+    insertRegionStaffMapping,
+    insertCatStaffMapId,
+    getQuestionTypesFromLookup 
 }
