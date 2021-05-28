@@ -218,7 +218,61 @@ const getVenusNameAndIsByEventLevel = `select jsonb_agg(
 
 const updateVenueProctorMapping = `update t_event_venue set proctor_id = $1 
                                     where event_id = $2
-                                    and event_venue_id = $3 returning event_venue_id;`;                                                                            
+                                    and event_venue_id = $3 returning event_venue_id;`;    
+                                    
+const getRegionsByEventId = `select jsonb_agg(
+                                distinct  jsonb_build_object(
+                                                'regionId', org_id,
+                                                'regionName', name 
+                                    ) 
+                                ) region_array 
+                            from t_organization to2 
+                            where to2.org_type = 'Region' 
+                            and is_deleted = false 
+                            and to2.org_id in (  
+                                    (WITH recursive child_orgs 
+                                            AS (
+                                                    SELECT org_id
+                                                    FROM   t_organization parent_org 
+                                                    WHERE  org_id in (select org_id from t_event_organization teo 
+                                                                        where teo.event_id = $1)                                                  
+                                                    UNION
+                                                    SELECT     child_org.org_id child_id
+                                                    FROM       t_organization child_org
+                                                    INNER JOIN child_orgs c
+                                                    ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                 FROM   child_orgs))`;                
+
+
+const getJudgesByEventsRegion = `select distinct	
+                                    jsonb_agg(
+                                  distinct jsonb_build_object(
+                                        'judgeName', concat(tu.title,'. ', tu.first_name ,' ', tu.middle_name,' ', tu.last_name),
+                                        'judgeId', tu.user_id
+                                        ) 
+                                    ) judge_arr
+                                    from t_user tu
+                                    join t_user_role_context turc 
+                                    on turc.user_id = tu.user_id 
+                                    and turc.org_id in (            
+                                                            (WITH recursive child_orgs 
+                                                            AS (
+                                                                SELECT org_id
+                                                                FROM   t_organization parent_org 
+                                                                WHERE  org_id in (select org_id from t_event_organization teo 
+                                                                                    where teo.event_id = $1)                                                  
+                                                                UNION
+                                                                SELECT     child_org.org_id child_id
+                                                                FROM       t_organization child_org
+                                                                INNER JOIN child_orgs c
+                                                                ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                                    FROM   child_orgs))
+                                                and turc.role_id in (select tr.role_id from t_role tr where lower(tr.name) like lower($2))
+                                        join t_user_role_mapping turm on turc.user_id = turm.user_id 
+                                        and coalesce(turm.role_start_date, current_date) <= current_date 
+                                        and coalesce(turm.role_end_date , current_date) >= current_date
+                                        and tu.is_deleted = false 
+                                        and tu.is_locked = false;`;
 
 
 module.exports = {
@@ -243,6 +297,8 @@ module.exports = {
     insertVenueEventMapping,
     getProctorsByEventId,
     getVenusNameAndIsByEventLevel,
-    updateVenueProctorMapping 
+    updateVenueProctorMapping,
+    getRegionsByEventId, 
+    getJudgesByEventsRegion
 
 }

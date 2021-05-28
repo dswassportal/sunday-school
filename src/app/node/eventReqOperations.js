@@ -594,6 +594,10 @@ async function insertEvents(eventsData, loggedInUser) {
                     response.event_proctor_assignment = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_proctor_assignment", eventsData.eventType, client);
                     break;
                 }
+                case "event_judge_assignment": {
+                    response.event_judge_assignment = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_judge_assignment", eventsData.eventType, client);
+                    break;
+                }
             }//switch
         }//if
 
@@ -787,6 +791,16 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             return {
                 proctorList: proctorList.rows[0].proctor_data,
                 venueList: venueList.rows[0].venue_list
+            }
+        }
+        case "event_judge_assignment": {
+            let regionsList = await client.query(queries.getRegionsByEventId, [eventId]);
+            let JudgesList = await client.query(queries.getJudgesByEventsRegion, [eventId, `%judge%`]);
+            let categoriesList = await client.query(queries.getEventCatMapping, [eventId]);
+            return {
+                regionsList: regionsList.rows[0].region_array,
+                judgesList: JudgesList.rows[0].judge_arr,
+                categoriesList: categoriesList.rows[0].cat_mapping
             }
         }
     }
