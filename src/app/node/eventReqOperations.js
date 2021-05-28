@@ -795,17 +795,38 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
         }
         case "event_judge_assignment": {
             let regionsList = await client.query(queries.getRegionsByEventId, [eventId]);
-            let JudgesList = await client.query(queries.getJudgesByEventsRegion, [eventId, `%judge%`]);
+            // let JudgesList = await client.query(queries.getJudgesByEventsRegion, [eventId, `%judge%`]);
             let categoriesList = await client.query(queries.getEventCatMapping, [eventId]);
             return {
                 regionsList: regionsList.rows[0].region_array,
-                judgesList: JudgesList.rows[0].judge_arr,
+                // judgesList: JudgesList.rows[0].judge_arr,
                 categoriesList: categoriesList.rows[0].cat_mapping
             }
         }
     }
 }
 
+async function getRegionWiseJudges(loggedInUser, regionId) {
+
+    let client = await dbConnections.getConnection();
+    try {
+        let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, '%Judge%']);
+
+        return ({
+            data : {
+                status: 'success',
+                judges : judgesList.rows == null ? [] : judgesList.rows[0].judge_list  
+            }
+        })
+
+    } catch (error) {
+        console.error(`eventReqOperations.js::insertevents() Rollback called since there is an error as: ${error}`);
+        return (errorHandling.handleDBError('transactionError'));
+    } finally {
+        client.release();
+    }
+
+}
 
 async function getRegionAndParish() {
 
@@ -1087,5 +1108,6 @@ module.exports = {
     getEventType,
     getEventQuestionnaireData,
     getEventForRegistration,
-    deleteEvents
+    deleteEvents,
+    getRegionWiseJudges
 }

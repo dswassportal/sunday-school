@@ -755,6 +755,24 @@ app.post('/api/setStaffAssignment', function (req, res) {
   }
 });
 
+app.get('/api/getRegionWiseJudges', function (req, res) {
+  console.log("getRegionWiseJudges called... to fetch " + req.query.regionId);
+  // let loggedInUser = decodeUser(req)
+  try {
+    processEventRequest.getRegionWiseJudges('', req.query.regionId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getRegionWiseJudges as : ' + error)
+  }
+});
 
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {

@@ -244,35 +244,54 @@ const getRegionsByEventId = `select jsonb_agg(
                                                  FROM   child_orgs))`;                
 
 
-const getJudgesByEventsRegion = `select distinct	
-                                    jsonb_agg(
-                                  distinct jsonb_build_object(
-                                        'judgeName', concat(tu.title,'. ', tu.first_name ,' ', tu.middle_name,' ', tu.last_name),
-                                        'judgeId', tu.user_id
+// const getJudgesByEventsRegion = `select distinct	
+//                                     jsonb_agg(
+//                                   distinct jsonb_build_object(
+//                                         'judgeName', concat(tu.title,'. ', tu.first_name ,' ', tu.middle_name,' ', tu.last_name),
+//                                         'judgeId', tu.user_id
+//                                         ) 
+//                                     ) judge_arr
+//                                     from t_user tu
+//                                     join t_user_role_context turc 
+//                                     on turc.user_id = tu.user_id 
+//                                     and turc.org_id in (            
+//                                                             (WITH recursive child_orgs 
+//                                                             AS (
+//                                                                 SELECT org_id
+//                                                                 FROM   t_organization parent_org 
+//                                                                 WHERE  org_id in (select org_id from t_event_organization teo 
+//                                                                                     where teo.event_id = $1)                                                  
+//                                                                 UNION
+//                                                                 SELECT     child_org.org_id child_id
+//                                                                 FROM       t_organization child_org
+//                                                                 INNER JOIN child_orgs c
+//                                                                 ON         c.org_id = child_org.parent_org_id ) SELECT *
+//                                                                     FROM   child_orgs))
+//                                                 and turc.role_id in (select tr.role_id from t_role tr where lower(tr.name) like lower($2))
+//                                         join t_user_role_mapping turm on turc.user_id = turm.user_id 
+//                                         and coalesce(turm.role_start_date, current_date) <= current_date 
+//                                         and coalesce(turm.role_end_date , current_date) >= current_date
+//                                         and tu.is_deleted = false 
+//                                         and tu.is_locked = false;`;
+
+const getJudgesByEventRegion = `select 
+                                jsonb_agg(
+                                    jsonb_build_object(
+                                        'judgeName',  concat(ve.title,'. ', ve.first_name ,' ', ve.middle_name,' ', ve.last_name),
+                                        'judgeId', ve.user_id
                                         ) 
-                                    ) judge_arr
-                                    from t_user tu
-                                    join t_user_role_context turc 
-                                    on turc.user_id = tu.user_id 
-                                    and turc.org_id in (            
-                                                            (WITH recursive child_orgs 
-                                                            AS (
-                                                                SELECT org_id
-                                                                FROM   t_organization parent_org 
-                                                                WHERE  org_id in (select org_id from t_event_organization teo 
-                                                                                    where teo.event_id = $1)                                                  
-                                                                UNION
-                                                                SELECT     child_org.org_id child_id
-                                                                FROM       t_organization child_org
-                                                                INNER JOIN child_orgs c
-                                                                ON         c.org_id = child_org.parent_org_id ) SELECT *
-                                                                    FROM   child_orgs))
-                                                and turc.role_id in (select tr.role_id from t_role tr where lower(tr.name) like lower($2))
-                                        join t_user_role_mapping turm on turc.user_id = turm.user_id 
-                                        and coalesce(turm.role_start_date, current_date) <= current_date 
-                                        and coalesce(turm.role_end_date , current_date) >= current_date
-                                        and tu.is_deleted = false 
-                                        and tu.is_locked = false;`;
+                                    ) judge_list
+                                from v_user ve where lower(ve.role_name) like lower($2) and org_id in ((WITH recursive child_orgs 
+                                                AS (
+                                                    SELECT org_id
+                                                    FROM   t_organization parent_org 
+                                                    WHERE  org_id = $1                                                   
+                                                    UNION
+                                                    SELECT     child_org.org_id child_id
+                                                    FROM       t_organization child_org
+                                                    INNER JOIN child_orgs c
+                                                    ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                        FROM   child_orgs));`;
 
 
 module.exports = {
@@ -299,6 +318,7 @@ module.exports = {
     getVenusNameAndIsByEventLevel,
     updateVenueProctorMapping,
     getRegionsByEventId, 
-    getJudgesByEventsRegion
+    // getJudgesByEventsRegion
+    getJudgesByEventRegion
 
 }
