@@ -84,6 +84,7 @@ export class EventCreationComponent implements OnInit {
   responseTypeDropdownValues: any;
   venueListData: any;
   selectedCategories: any;
+  
 
 
 
@@ -274,7 +275,7 @@ export class EventCreationComponent implements OnInit {
 
   getColDefCat() {
     return this.columnDefsCat = [
-      { headerName: 'Category', field: 'catName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
+      { headerName: 'Category', field: 'catName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true, rowMultiSelectWithClick: true },
       { headerName: 'Description', field: 'catDesc', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true }
     ];
   }
@@ -298,7 +299,7 @@ export class EventCreationComponent implements OnInit {
 
   onCatGridReady(params: any) {
     this.catGridApi = params.api;
-    this.catGridApi.forEachNode((node: any) => node.setSelected(true));
+
   }
 
   onGroupsGridReady(params: any) {
@@ -315,6 +316,7 @@ export class EventCreationComponent implements OnInit {
     });
 
   }
+
 
 
 
@@ -379,10 +381,10 @@ export class EventCreationComponent implements OnInit {
       eventCoordinator: new FormControl('', Validators.required),
       orgType: new FormControl('', Validators.required),
       orgId: new FormControl(''),
-      startDate: new FormControl('', Validators.required),
+      startDate: new FormControl(''),
       endDate: new FormControl(''),
-      registrationStartDate: new FormControl('', Validators.required),
-      registrationEndDate: new FormControl('', Validators.required),
+      registrationStartDate: new FormControl(''),
+      registrationEndDate: new FormControl(''),
       eventUrl: new FormControl(''), //, [Validators.required, Validators.pattern(this.myreg)]
       description: new FormControl('', Validators.required),
       sectionCode: ('')
@@ -537,6 +539,19 @@ export class EventCreationComponent implements OnInit {
     }
   }
 
+  //if(node.id === this.rowDataCat[i]){
+
+  onFirstDataRendered(params: any) {
+    let len = this.rowDataCat.length;
+    this.catGridApi.forEachNode((node: any) => {
+      for (let i = 0; i < len; i++) {
+        if (node.id === this.rowDataCat[i]) {
+          node.setSelected(true);
+        }
+      }
+    });
+  }
+
 
   createUpdateEvents(payload: any) {
 
@@ -544,11 +559,27 @@ export class EventCreationComponent implements OnInit {
       if (res.data.status == "success") {
         this.eventId = res.data.eventId;
         if (res.data.event_categories) {
-          this.rowDataCat = res.data.event_categories;
-          //this.catGridApi.redrawRows();
+          //this.rowDataCat = res.data.event_categories;
+
+          this.catGridApi.setRowData(res.data.event_categories);
+          this.catGridApi.forEachNode(
+            (node: any) => {
+              if (node.data.isSelected !== null)
+                node.setSelected(node.data.isSelected)
+            });
+
         }
         if (res.data.event_groups) {
-          this.rowDataGroups = res.data.event_groups;
+          //this.rowDataGroups = res.data.event_groups;
+
+          this.groupsGridApi.setRowData(res.data.event_groups);
+
+          this.groupsGridApi.forEachNode(
+            (node: any) => {
+              if (node.data.isSelected !== null)
+                node.setSelected(node.data.isSelected)
+            });
+
         }
         if (res.data.eventCatGroupMap) {
           this.eventCatGroupMapdata = res.data.eventCatGroupMap.categoryMapping;

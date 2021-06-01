@@ -67,7 +67,7 @@
                                     <!-- <mat-label>Event Level Type</mat-label> -->
                                     <mat-select matNativeControl required formControlName="orgType"
                                         placeholder="Event Level" (selectionChange)="onOrgSelect($event)">
-                                        <mat-option *ngFor="let org of orgs" [value]="org.orgtype">{{org.orgtype}}
+                                        <mat-option *ngFor="let org of orgs" [disabled]="evntTypedisabled" [value]="org.orgtype">{{org.orgtype}}
                                         </mat-option>
                                     </mat-select>
                                 </mat-form-field>
@@ -76,7 +76,7 @@
                                     <!-- <mat-label>Event Level ID</mat-label> -->
                                     <mat-select multiple matNativeControl required formControlName="orgId"
                                         placeholder="Event Executed By">
-                                        <mat-option *ngFor="let orgDetail of orgDetails" [value]=orgDetail.id>
+                                        <mat-option *ngFor="let orgDetail of orgDetails" [disabled]="evntTypedisabled" [value]=orgDetail.id>
                                             {{orgDetail.name}}</mat-option>
                                     </mat-select>
                                 </mat-form-field>
@@ -93,10 +93,11 @@
                                     <mat-label *ngIf="ttcExaminationDateLabel">TTC Examination Date</mat-label>
                                     <mat-label *ngIf="cwcEventDateLabel">CWC Event Date</mat-label>
 
-
-                                    <input (dateChange)="comparisonEventStartdateValidator()"
-                                        (dateChange)="comparisonEventStartandRegiStartdateValidator()"
-                                        (dateChange)="comparisonEventStartandRegiEnddateValidator()" [min]="minDate"
+                                    <!-- (dateChange)="comparisonEventStartdateValidator()" -->
+                                    <!-- (dateChange)="comparisonEventStartandRegiStartdateValidator()"
+                                        (dateChange)="comparisonEventStartandRegiEnddateValidator()" -->
+                                    <input 
+                                         [min]="minDate"
                                         matInput id="startDate" formControlName="startDate"
                                         [matDatepicker]="startatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="startatpicker">
@@ -120,9 +121,10 @@
 
                                 <mat-form-field *ngIf="isEventEndDateRequired" class="col-md-6">
 
+                                    <!-- (dateChange)="comparisonEventEnddateValidator()" -->
                                     <mat-label>Event End Date</mat-label>
                                     <input [min]="minDate" matInput id="endDate" formControlName="endDate"
-                                        (dateChange)="comparisonEventEnddateValidator()" [matDatepicker]="endatpicker">
+                                         [matDatepicker]="endatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="endatpicker">
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #endatpicker></mat-datepicker>
@@ -141,10 +143,10 @@
 
                                 <mat-form-field class="col-md-6">
 
+                                    <!-- (dateChange)="comparisonRegiStartdatedateValidator()"
+                                        (dateChange)="comparisontRegiStartdateandEventStarValidator()" -->
                                     <mat-label>Registration Start Date</mat-label>
-                                    <input matInput id="registrationStartDate" formControlName="registrationStartDate"
-                                        (dateChange)="comparisonRegiStartdatedateValidator()"
-                                        (dateChange)="comparisontRegiStartdateandEventStarValidator()"
+                                    <input matInput id="registrationStartDate" formControlName="registrationStartDate"    
                                         [matDatepicker]="registrationStartatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationStartatpicker">
                                     </mat-datepicker-toggle>
@@ -165,9 +167,10 @@
 
                                 <mat-form-field class="col-md-6">
 
+                                    <!-- (dateChange)="comparisonRegiEnddateandEventStartValidator()" -->
+
                                     <mat-label>Registration End Date</mat-label>
-                                    <input (dateChange)="comparisonRegiEnddateValidator()"
-                                        (dateChange)="comparisonRegiEnddateandEventStartValidator()" [min]="minDate"
+                                    <input (dateChange)="comparisonRegiEnddateValidator()" [min]="minDate"
                                         matInput id="registrationEndDate" formControlName="registrationEndDate"
                                         [matDatepicker]="registrationEndatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationEndatpicker">
@@ -304,7 +307,7 @@
 
                             <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3"
                                 [rowData]="rowDataCat" [columnDefs]="columnDefsCat" [pagination]="true"
-                                rowSelection='multiple' [gridOptions]="gridOptionsCat"
+                                rowSelection='multiple' [gridOptions]="gridOptionsCat" 
                                 (gridReady)="onCatGridReady($event)">
                             </ag-grid-angular>
 
