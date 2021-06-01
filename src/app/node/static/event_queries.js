@@ -194,27 +194,33 @@ const getProctorsByEventId = `select
                                 and coalesce(turm.role_end_date , current_date) >= current_date	`                                                
 
 const getVenusNameAndIsByEventLevel = `select jsonb_agg(
-                                        jsonb_build_object(
-                                        'venueId', tv.venue_id,
-                                        'venueName', tv."name",
-                                        'eventVenueMapId', tev.event_venue_id
-                                        ) 
-                                    ) venue_list from t_venue tv 
-                                     join t_event_venue tev on tv.venue_id  = tev.venue_id and tev.event_id = $1
-                                    where tv.is_deleted = false and tv.org_id in 
-                                    (select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
-                                            (WITH recursive child_orgs 
-                                                                    AS (
-                                                                        SELECT org_id
-                                                                        FROM   t_organization parent_org 
-                                                                        WHERE  org_id in (select org_id from t_event_organization teo 
-                                                                                            where teo.event_id = $1)                                                  
-                                                                        UNION
-                                                                        SELECT     child_org.org_id child_id
-                                                                        FROM       t_organization child_org
-                                                                        INNER JOIN child_orgs c
-                                                                        ON         c.org_id = child_org.parent_org_id ) SELECT *
-                                                                            FROM   child_orgs));`;
+                                            jsonb_build_object(
+                                            'venueId', tv.venue_id,
+                                            'venueName', tv."name",
+                                            'eventVenueMapId', tev.event_venue_id,
+                                        'mappedProctor', json_build_object(
+                                                'name', case when tu.title is null then null else 
+                                                            concat(tu.title,'. ', tu.first_name ,' ', tu.middle_name,' ', tu.last_name) end ,
+                                                'proctorId', tu.user_id
+                                                ) 
+                                            ) ) venue_list
+                                        from t_venue tv 
+                                        join t_event_venue tev on tv.venue_id  = tev.venue_id and tev.event_id = $1
+                                        left join t_user tu on tev.proctor_id = tu.user_id
+                                        where tv.is_deleted = false and tv.org_id in 
+                                        (select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
+                                                (WITH recursive child_orgs 
+                                                                        AS (
+                                                                            SELECT org_id
+                                                                            FROM   t_organization parent_org 
+                                                                            WHERE  org_id in (select org_id from t_event_organization teo 
+                                                                                                where teo.event_id = $1)                                                  
+                                                                            UNION
+                                                                            SELECT     child_org.org_id child_id
+                                                                            FROM       t_organization child_org
+                                                                            INNER JOIN child_orgs c
+                                                                            ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                                                FROM   child_orgs));`;
 
 const updateVenueProctorMapping = `update t_event_venue set proctor_id = $1 
                                     where event_id = $2
