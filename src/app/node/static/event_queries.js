@@ -333,7 +333,20 @@ const insertQuestionnaire = ` INSERT INTO t_event_questionnaire (event_id, quest
                                                     WHERE teq.event_id = $1 
                                                     and teq.question = '$2'
                                                     and teq.answer_type = '$3' 
-                                                    and teq.is_deleted = false) returning question_id;`                                    
+                                                    and teq.is_deleted = false) returning question_id;`;
+                                                    
+const getSelectedCategories = `select 
+                                    tgg.group_name,
+                                    teggm.event_grade_group_map_id,
+                                    tgg.grade_group_id,
+                                    tecggm.event_cat_map_id,
+                                    tecm.event_category_id 
+                                    from t_grade_group tgg 
+                               join t_event_grade_group_map teggm 	
+                               on tgg.grade_group_id = teggm.grade_group_id and teggm.event_id = $1
+                               left join t_event_cat_grade_grp_map tecggm 
+                               on tecggm.event_grade_group_map_id = teggm.event_grade_group_map_id
+                               join t_event_category_map tecm on tecm.event_cat_map_id = tecggm.event_cat_map_id;`;                                                    
 
 
 module.exports = {
@@ -365,5 +378,6 @@ module.exports = {
     insertRegionStaffMapping,
     insertCatStaffMapId,
     getQuestionTypesFromLookup,
-    insertQuestionnaire 
+    insertQuestionnaire,
+    getSelectedCategories 
 }

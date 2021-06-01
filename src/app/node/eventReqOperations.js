@@ -824,9 +824,27 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
         case "event_cat_group_map": {
             let groupData = await client.query(queries.getEventGroupMapping, [eventId]);
             let catData = await client.query(queries.getEventCatMapping, [eventId]);
+            let mappedData = await client.query(queries.getSelectedCategories, [eventId]);
+            let catMapRespJson = catData.rows[0].cat_mapping;
+            for (let i = 0; i < catMapRespJson.length; i++) {
+                for (let grpMapRow of mappedData.rows) {
+                    if (catMapRespJson[i].catId == grpMapRow.event_category_id) {
+                        console.log(`cat-catId : ${catMapRespJson[i].catId} ----  grpMap-catId : ${grpMapRow.event_category_id}`)
+                        if (catMapRespJson[i].mappedGroups === undefined) {
+                            catMapRespJson[i].mappedGroups = [];
+                        }
+                        catMapRespJson[i].mappedGroups.push({
+                            "gradeGroupId": grpMapRow.grade_group_id,
+                            "gradeGroupName": grpMapRow.group_name,
+                            "gradeGroupMapId": grpMapRow.event_grade_group_map_id
+                        });
+                    }
+                }
+            }
+
             return {
                 gradeGroupMapping: groupData.rows[0].group_mapping,
-                categoryMapping: catData.rows[0].cat_mapping
+                categoryMapping: catMapRespJson
             }
 
         }
