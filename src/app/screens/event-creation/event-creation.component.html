@@ -14,7 +14,7 @@
                 </button>
             </div>
         </div>
-        <mat-vertical-stepper [linear]="true" #stepper>
+        <mat-vertical-stepper [linear]="false" #stepper>
 
             <mat-step [stepControl]="eventsDataFormGroup">
 
@@ -699,6 +699,8 @@
                                 </div>
                             </fieldset>
 
+                            <button (click)="patchValue()"> Patch Value</button>
+
                             <div style="padding-top: 4%; padding-bottom: 4%;">
                                 <button mat-raised-button matStepperNext>
                                     <span style="font-family: poppins;"
@@ -788,34 +790,31 @@
                 </div>
             </mat-step>
 
-            <mat-step *ngIf="isttcExamDataFormGroupRequired" [stepControl]="ttcExamDataFormGroup">
+            <mat-step [stepControl]="eventEvaluatorAssignFormGroup">
                 <div class="container">
-                    <form [formGroup]="ttcExamDataFormGroup">
-                        <ng-template matStepLabel>TTC Examination Dates</ng-template>
+                    <form [formGroup]="eventEvaluatorAssignFormGroup">
+                        <ng-template matStepLabel>Event Evaluator Assignment</ng-template>
                         <div class="form-container">
-                            <div class="row" style="padding-top: 4%;">
-                                <mat-form-field appearance="fill" class="example-form-field col-md-6">
-                                    <mat-label>Enter a date range</mat-label>
-                                    <mat-date-range-input [rangePicker]="rangePicker" [min]="eventStartDateMin"
-                                        [max]="eventEndDateMax">
-                                        <input matStartDate placeholder="Start date" formControlName="ttcExamStartDate">
-                                        <input matEndDate placeholder="End date" formControlName="ttcExamEndDate">
-                                    </mat-date-range-input>
-                                    <mat-datepicker-toggle matSuffix [for]="rangePicker"></mat-datepicker-toggle>
-                                    <mat-date-range-picker #rangePicker>
-                                        <mat-date-range-picker-actions>
-                                            <button mat-button matDateRangePickerCancel>Cancel</button>
-                                            <button mat-raised-button color="primary"
-                                                matDateRangePickerApply>Apply</button>
-                                        </mat-date-range-picker-actions>
-                                    </mat-date-range-picker>
-                                </mat-form-field>
+
+
+                            <div class="row" style="padding-top: 4%; padding-bottom: 10%;">
+                                
+                                <ng-multiselect-dropdown class="col-md-12"
+                                id="evaluators" placeholder="Select Evaluators"
+                                [settings]="dropdownSettingsEvaluator"
+                                [data]="evaluatorDropdownValues"
+                                formControlName="evaluators"
+                                (onSelect)="onItemSelect($event)"
+                                (onSelectAll)="onSelectAll($event)">
+                                </ng-multiselect-dropdown>
+
+
                             </div>
 
 
-                            <mat-divider
+                            <!-- <mat-divider
                                 style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 4%;margin-bottom: 3%;">
-                            </mat-divider>
+                            </mat-divider> -->
 
 
 

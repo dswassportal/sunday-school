@@ -47,6 +47,8 @@ export class EventCreationComponent implements OnInit {
   eventVenueAssignFormGroup: any;
   eventProctorAssignFormGroup: any;
   eventJudgeAssignFormGroup: any;
+  questionnaireDataFormGroup: any;
+  eventEvaluatorAssignFormGroup: any;
 
   gridOptionsCat: any;
   gridOptionsGroups: any;
@@ -57,6 +59,7 @@ export class EventCreationComponent implements OnInit {
   gradeListDropdownValues!: any[];
   groupsDropdownValues!: any[];
   judgesDropdownValues!: any[];
+  evaluatorDropdownValues!: any[];
   regionDropdownValues!: any;
   catPopUpName: any;
   catPopUpDesc: any;
@@ -66,6 +69,7 @@ export class EventCreationComponent implements OnInit {
   dropdownSettingsProctor: any;
   dropdownSettingsRegion: any;
   dropdownSettingsJudges: any;
+  dropdownSettingsEvaluator: any;
   dropdownSettingsResponseType: any;
   rowDataCat: any = [];
   rowDataGroups: any = [];
@@ -84,7 +88,7 @@ export class EventCreationComponent implements OnInit {
   responseTypeDropdownValues: any;
   venueListData: any;
   selectedCategories: any;
-  
+
 
 
 
@@ -92,8 +96,7 @@ export class EventCreationComponent implements OnInit {
 
   eventCreationForm: any;
   venuesDataFormGroup: any;
-  questionnaireDataFormGroup: any;
-  ttcExamDataFormGroup: any;
+  //ttcExamDataFormGroup: any;
   eventId: any;
   selectedRegion: any;
   venues: any;
@@ -130,10 +133,12 @@ export class EventCreationComponent implements OnInit {
   eventEndDateMax: any;
   isSchoolGradeRequired: any;
   isQuestionnariesRequired!: boolean;
-  isttcExamDataFormGroupRequired!: boolean;
+  //isttcExamDataFormGroupRequired!: boolean;
   public myreg = /(^|\s)((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gi
   minDate = new Date();
   selectedRowJson: any = {};
+
+ 
 
 
   constructor(private apiService: ApiService,
@@ -208,6 +213,17 @@ export class EventCreationComponent implements OnInit {
     maxHeight: 100
   };
 
+  dropdownSettingForEvaluators: IDropdownSettings = {
+    singleSelection: false,
+    idField: '',
+    textField: '',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
 
   getData() {
 
@@ -275,7 +291,7 @@ export class EventCreationComponent implements OnInit {
 
   getColDefCat() {
     return this.columnDefsCat = [
-      { headerName: 'Category', field: 'catName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true, rowMultiSelectWithClick: true },
+      { headerName: 'Category', field: 'catName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
       { headerName: 'Description', field: 'catDesc', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true }
     ];
   }
@@ -372,6 +388,7 @@ export class EventCreationComponent implements OnInit {
     this.dropdownSettingsRegion = this.dropdownSettingForRegion;
     this.dropdownSettingsJudges = this.dropdownSettingForJudges;
     this.dropdownSettingsResponseType = this.dropdownSettingForResponseType;
+    this.dropdownSettingsEvaluator = this.dropdownSettingForEvaluators;
 
 
     this.eventsDataFormGroup = this.formBuilder.group({
@@ -416,18 +433,14 @@ export class EventCreationComponent implements OnInit {
       categories: this.formBuilder.array([])
     });
 
-
-
-
-
-
     this.questionnaireDataFormGroup = this.formBuilder.group({
       questionnaire: this.formBuilder.array([this.adduserquestionary()])
     });
 
-    this.ttcExamDataFormGroup = this.formBuilder.group({
-      ttcExamStartDate: new FormControl('', Validators.required),
-      ttcExamEndDate: new FormControl('', Validators.required),
+
+
+    this.eventEvaluatorAssignFormGroup = this.formBuilder.group({
+      evaluators: new FormControl(''),
     });
 
     this.alluserdata = this.uiCommonUtils.getUserMetaDataJson();
@@ -485,10 +498,10 @@ export class EventCreationComponent implements OnInit {
           });
         }
 
-        this.ttcExamDataFormGroup.patchValue({
-          ttcExamStartDate: this.eventsDataUpdate.ttcExamStartDate,
-          ttcExamEndDate: this.eventsDataUpdate.ttcExamEndDate
-        });
+        // this.ttcExamDataFormGroup.patchValue({
+        //   ttcExamStartDate: this.eventsDataUpdate.ttcExamStartDate,
+        //   ttcExamEndDate: this.eventsDataUpdate.ttcExamEndDate
+        // });
 
       }
 
@@ -539,18 +552,7 @@ export class EventCreationComponent implements OnInit {
     }
   }
 
-  //if(node.id === this.rowDataCat[i]){
 
-  onFirstDataRendered(params: any) {
-    let len = this.rowDataCat.length;
-    this.catGridApi.forEachNode((node: any) => {
-      for (let i = 0; i < len; i++) {
-        if (node.id === this.rowDataCat[i]) {
-          node.setSelected(true);
-        }
-      }
-    });
-  }
 
 
   createUpdateEvents(payload: any) {
@@ -585,22 +587,58 @@ export class EventCreationComponent implements OnInit {
           this.eventCatGroupMapdata = res.data.eventCatGroupMap.categoryMapping;
           this.groupsDropdownValues = res.data.eventCatGroupMap.gradeGroupMapping;
           this.eventCatGroupMapFormGroup.setControl('eventCatGroupMapFormArray', this.setEventCatGroupMap(this.eventCatGroupMapdata)); //[i].eventName
+          //res.data.eventCatGroupMap.categoryMapping.mappedGroups;
         }
         if (res.data.event_venue_assignment) {
-          this.rowDataVenues = res.data.event_venue_assignment;
+          //this.rowDataVenues = res.data.event_venue_assignment;
+
+          this.venuesGridApi.setRowData(res.data.event_venue_assignment);
+
+          this.venuesGridApi.forEachNode(
+            (node: any) => {
+              if (node.data.isSelected !== null)
+                node.setSelected(node.data.isSelected)
+            });
+
+
         }
         if (res.data.event_proctor_assignment) {
           this.proctorDropdownValues = res.data.event_proctor_assignment.proctorList;
           this.venueListData = res.data.event_proctor_assignment.venueList;
-          this.eventProctorAssignFormGroup.setControl('eventProctorAssignFormArray', this.setProctorAssign(this.venueListData));
+
+          let formattedDataVenueListData: any = [];
+
+          for (let row of this.venueListData) {
+            let json = {
+              "venueId": row.venueId,
+              "venueName": row.venueName,
+              "mappedProctor": [
+                {
+                  "name": row.mappedProctor.name,
+                  "proctorId": row.mappedProctor.proctorId
+                }
+              ],
+              "eventVenueMapId": row.eventVenueMapId
+            }
+            formattedDataVenueListData.push(json);
+          }
+
+          this.eventProctorAssignFormGroup.setControl('eventProctorAssignFormArray', this.setProctorAssign(formattedDataVenueListData));
         }
         if (res.data.event_judge_assignment) {
+
           this.selectedCategories = res.data.event_judge_assignment.categoriesList;
-          this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));
+          //this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));  //   //this.categoriesList
+          //this.patchValue();
+          //this.eventJudgeAssignFormGroup.setControl('regionsJudgesArray', this.setRegionsAndJudges(this.categoriesList));
           this.regionDropdownValues = res.data.event_judge_assignment.regionsList;
+
         }
         if (res.data.event_questionnaires) {
           this.responseTypeDropdownValues = res.data.event_questionnaires;
+
+          //this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(this.eventsDataUpdate.questionnaire));
+
         }
 
       }
@@ -766,7 +804,7 @@ export class EventCreationComponent implements OnInit {
         for (let i = 0; i < this.eventList.length; i++) {
           if (this.eventsDataFormGroup.value.eventType == this.eventList[i].eventType) {
             //this.eventCategoriesFormGroup.setControl('categories', this.setEventCategory(updatedCategories));
-            this.venuesDataFormGroup.setControl('venues', this.setuserVenuAndProcter(this.eventsDataUpdate.venues));
+            //this.venuesDataFormGroup.setControl('venues', this.setuserVenuAndProcter(this.eventsDataUpdate.venues));
             this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(this.eventsDataUpdate.questionnaire));
           }
         }
@@ -932,7 +970,7 @@ export class EventCreationComponent implements OnInit {
             "regions": [
               {
                 "regionId": data2.regionId,
-                "judgeId": [judges]
+                "judges": [judges]
               }
             ]
           }
@@ -1050,6 +1088,19 @@ export class EventCreationComponent implements OnInit {
     });
   }
 
+  setRegionsAndJudges(eventcategorydata: any): FormArray {
+    const formArray = new FormArray([]);
+    eventcategorydata.forEach((e: any) => {
+      formArray.push(this.formBuilder.group({
+        regions: [e.mappedRegions],
+        judges: '',
+      }));
+    });
+    return formArray;
+  }
+
+
+
   regionsAndJudges(i: number): FormArray {
     return this.categories()
       .at(i)
@@ -1057,375 +1108,454 @@ export class EventCreationComponent implements OnInit {
   }
 
 
-  setEventCategory(eventcategorydata: any): FormArray {
-    const formArray = new FormArray([]);
-    eventcategorydata.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        catId: e.catId,
-        categoryName: e.catName,
-        catMapId: e.catMapId,
-        regionsJudgesArray: this.formBuilder.array([this.newRegionsAndJudges()])
-      }));
-    });
-    return formArray;
-  }
-
-
-
-
-
-
-
-
-  addProctorAssign(): FormGroup {
-    return this.formBuilder.group({
-      eventVenueMapId: '',
-      venueName: '',
-      proctorId: ''
-    });
-  }
-
-
-  addEventCatGroupMap(): FormGroup {
-    return this.formBuilder.group({
-      catMapId: '',
-      categoryName: '',
-      groupMapIds: ''
-    });
-  }
-
-  adduserquestionary(): FormGroup {
-    return this.formBuilder.group({
-      questionId: '',
-      question: '',
-      responseType: '',
-    });
-  }
-
-  adduserVenuAndProcter(): FormGroup {
-    return this.formBuilder.group({
-      venueId: '',
-      proctorId: '',
-      eventVenueId: ''
-    });
-  }
-
-  addeventCategory(): FormGroup {
-    return this.formBuilder.group({
-      eventCategoryID: '',
-      name: '',
-      schoolGradeFrom: '',
-      schoolGradeTo: '',
-      judges: '',
-      venueId: '',
-      eventCatMapId: ''
-    });
-  }
-
-
-
-  setuserVenuAndProcter(venuesdataOfdata: any): FormArray {
-    const formArray = new FormArray([]);
-    venuesdataOfdata.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        venueId: e.venueId,
-        proctorId: e.proctorId,
-        eventVenueId: e.eventVenueId
-      }));
-    });
-    return formArray;
-  }
-
-  setQuestionaireData(questionaireData: any): FormArray {
-    const formArray = new FormArray([]);
-    questionaireData.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        questionId: e.questionId,
-        question: e.question,
-        responseType: e.responseType
-      }));
-    });
-    return formArray;
-  }
-
-  setEventCatGroupMap(eventCatGroupMapdata: any): FormArray {
-    const formArray = new FormArray([]);
-    eventCatGroupMapdata.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        catMapId: e.catMapId,
-        categoryName: e.catName,
-        groupMapIds: ''
-      }));
-    });
-    return formArray;
-  }
-
-  setProctorAssign(eventProctorAssigndata: any): FormArray {
-    const formArray = new FormArray([]);
-    eventProctorAssigndata.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        eventVenueMapId: e.eventVenueMapId,
-        venueName: e.venueName,
-        proctorId: ''
-      }));
-    });
-    return formArray;
-  }
-
-
-
-
-
-
-
-  // createEvent() {
-
-  //   if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'OBVS' || this.eventsDataFormGroup.value.eventType == 'CWC') {
-  //     if (this.eventCategoriesFormGroup.value.categories.length == 0) {
-  //       this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
-  //     }
-  //     else if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-
-  //       let eventCreationForm: any = {};
-  //       eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value } //, ...this.ttcExamDataFormGroup.value 
-  //       console.log("this.eventCreationForm", eventCreationForm);
-  //       this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
-  //         if (res.data.status == "success") {
-  //           this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
-  //         }
-  //         else
-  //           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-  //       });
-  //     }
-  //     else {
-  //       let eventCreationForm: any = {};
-  //       eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value }
-  //       console.log("this.eventCreationForm", eventCreationForm);
-  //       this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
-  //         if (res.data.status == "success") {
-  //           this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
-  //         }
-  //         else
-  //           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-  //       });
-  //     }
-
-  //   }
-
-  //   //this.onCloseBtnClick();
-  // }
-
-  updateEvent() {
-    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'OBVS' || this.eventsDataFormGroup.value.eventType == 'CWC') {
-      if (this.eventCategoriesFormGroup.value.categories.length == 0) {
-        this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
-      }
-      else if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-
-        let eventCreationForm: any = {};
-        eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value } // , ...this.ttcExamDataFormGroup.value 
-        console.log("this.eventCreationForm", eventCreationForm);
-        this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
-          if (res.data.status == "success") {
-            this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
-          }
-          else
-            this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-        });
-      }
-      else {
-        let eventCreationForm: any = {};
-        eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value }
-        console.log("this.eventCreationForm", eventCreationForm);
-        this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
-          if (res.data.status == "success") {
-            this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
-          }
-          else
-            this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-        });
-      }
-    }
-
-
-    //this.onCloseBtnClick();
-  }
-
-  handleEventFlyerFileInput(event: any) {
-    console.log('file uploaded');
-  }
-
-
-
-  /////////////////////////////////////////////// Validation Functions ///////////////////////////////////////////////////////////////////
-
-
-  //Registration End Date Validator that is registrationEndDate>registrationStartDate
-  comparisonRegiEnddateValidator(): any {
-    let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
-    let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
-
-    let startnew = new Date(regiStartDate);
-    let endnew = new Date(regiEndDate);
-
-    if (startnew > endnew) {
-      return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': true });
-    }
-
-
-
-    // let oldvalue = startnew;
-    //this.eventsDataFormGroup.controls['registrationStartDate'].reset();
-    //this.eventsDataFormGroup.controls['registrationStartDate'].patchValue(oldvalue);
-    // return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange': false });
-
-  }
-  //Registration Start Date Validator that is registrationStartDate < registrationEndDate
-  comparisonRegiStartdatedateValidator(): any {
-    let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
-    let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
-
-    let startnew = new Date(regiStartDate);
-    let endnew = new Date(regiEndDate);
-    if (startnew > endnew) {
-      return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange': true });
-    }
-
-    //let oldvalue = endnew1;
-    //this.eventsDataFormGroup.controls['registrationEndDate'].reset();
-    //this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
-    // return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
-  }
-  //Event End Date Validator that is endDate>startDate
-  comparisonEventEnddateValidator(): any {
-
-    let startDate = this.eventsDataFormGroup.value['startDate'];
-    let endDate = this.eventsDataFormGroup.value['endDate'];
-
-    // let eventstartnew = new Date(startDate);
-    //let eventendnew = new Date(endDate);
-    if (startDate > endDate) {
-      return this.eventsDataFormGroup.controls['endDate'].setErrors({ 'invaliddaterange': true });
-    }
-    /* let oldvalue = eventstartnew;
-     this.eventsDataFormGroup.controls['startDate'].reset();
-     this.eventsDataFormGroup.controls['startDate'].patchValue(oldvalue);
-     return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': false });
-     */
-
-  }
-  comparisonEventStartdateValidator(): any {
-
-    let startDate = this.eventsDataFormGroup.value['startDate'];
-    let endDate = this.eventsDataFormGroup.value['endDate'];
-
-    let eventstartnew = new Date(startDate);
-    let eventendnew = new Date(endDate);
-    if (eventstartnew > eventendnew) {
-      return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': true });
-    }
-    /* let oldvalue = eventstartnew;
-     this.eventsDataFormGroup.controls['startDate'].reset();
-     this.eventsDataFormGroup.controls['startDate'].patchValue(oldvalue);
-     return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': false });
-     */
-
-  }
-  //Event start Date Validator that is EentStartDate>RegistrationEndDate
-  comparisonEventStartandRegiEnddateValidator(): any {
-    let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
-    let startDate = this.eventsDataFormGroup.value['startDate'];
-
-
-    let eventstartnew = new Date(startDate);
-    let regiEndDatenew = new Date(regiEndDate);
-    if (regiEndDatenew > eventstartnew) {
-      return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange1': true });
-    }
-    /*let oldvalue = regiEndDatenew;
-    this.eventsDataFormGroup.controls['registrationEndDate'].reset();
-    this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
-    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
-    */
-
-  }
-  comparisonRegiEnddateandEventStartValidator(): any {
-    let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
-    let startDate = this.eventsDataFormGroup.value['startDate'];
-
-
-    let eventstartnew = new Date(startDate);
-    let regiEndDatenew = new Date(regiEndDate);
-    if (regiEndDatenew > eventstartnew) {
-      return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange2': true });
-    }
-    /*let oldvalue = regiEndDatenew;
-    this.eventsDataFormGroup.controls['registrationEndDate'].reset();
-    this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
-    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
-    */
-
-  }
-  //Event start Date Validator that is EentStartDate>RegistrationEndDate
-  comparisonEventStartandRegiStartdateValidator(): any {
-    let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
-    let startDate = this.eventsDataFormGroup.value['startDate'];
-
-
-    let eventstartnew = new Date(startDate);
-    let regiStartDateenew = new Date(regiStartDate);
-    if (regiStartDateenew > eventstartnew) {
-      return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange3': true });
-    }
-    /*let oldvalue = regiEndDatenew;
-    this.eventsDataFormGroup.controls['registrationEndDate'].reset();
-    this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
-    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
-    */
-
-  }
-  //Event start Date Validator that is EentStartDate>RegistrationEndDate
-  comparisontRegiStartdateandEventStarValidator(): any {
-    let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
-    let startDate = this.eventsDataFormGroup.value['startDate'];
-
-
-    let eventstartnew = new Date(startDate);
-    let regiStartDateenew = new Date(regiStartDate);
-    if (regiStartDateenew > eventstartnew) {
-      return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange4': true });
-    }
-    /*let oldvalue = regiEndDatenew;
-    this.eventsDataFormGroup.controls['registrationEndDate'].reset();
-    this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
-    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
-    */
-
-  }
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-  onVenuesNextBtnClick() {
-    this.venues = this.venuesDataFormGroup.get('venues') as FormArray;
-    this.newVenues = this.venues.value;
-
-    for (let i = 0; i < this.venuesList.length; i++) {
-      console.log(this.venuesList[i].name);
-      console.log(this.venuesList[i].venueId);
-      for (let j = 0; j < this.newVenues.length; j++) {
-        if (this.newVenues[j].venueId == this.venuesList[i].venueId) {
-          this.newVenues[j].venueName = this.venuesList[i].venueName;
+  patchValue() {
+
+    let data = {
+      "categoriesList" :  [
+        {
+          "catId": 1000,
+          "categoryName": "Drawing",
+          "catMapId": 1662,
+          "mappedRegions": [
+            {
+              "regionId": 2,
+              "regionName": "Midwest",
+              "mappedJudges": [
+                {
+                  "judgeId": 1392,
+                  "judgeName": "Mr. vinayak  deshpande(St. Mary's Orthodox Church, Chicago)"
+                },
+                {
+                  "judgeId": 1336,
+                  "judgeName": "Ms. gloria mike watkins(St. Gregorios Orthodox Church, Chicago (Oak Park))"
+                }
+              ]
+            },
+            {
+              "regionId": 4,
+              "regionName": "South - Dallas",
+              "mappedJudges": [
+                {
+                  "judgeId": 1392,
+                  "judgeName": "Mr. vinayak  deshpande(St. Mary's Orthodox Church, Chicago)"
+                },
+                {
+                  "judgeId": 1336,
+                  "judgeName": "Ms. gloria mike watkins(St. Gregorios Orthodox Church, Chicago (Oak Park))"
+                }
+              ]
+            },
+          ]
+    
+        },
+        {
+          "catId": 1001,
+          "categoryName": "Bible Quiz",
+          "catMapId": 1663,
+          "mappedRegions": [
+            {
+              "regionId": 2,
+              "regionName": "Midwest",
+              "mappedJudges": [
+                {
+                  "judgeId": 1392,
+                  "judgeName": "Mr. vinayak  deshpande(St. Mary's Orthodox Church, Chicago)"
+                },
+                {
+                  "judgeId": 1336,
+                  "judgeName": "Ms. gloria mike watkins(St. Gregorios Orthodox Church, Chicago (Oak Park))"
+                }
+              ]
+            }  
+          ]
         }
+      ]
       }
-    }
 
-    if (this.venuesDataFormGroup.value.venues.length == 0) {
-      this.uiCommonUtils.showSnackBar("Event should atleast have one venue!", "error", 3000);
-    }
+    data.categoriesList.forEach((t: any) => {
+
+      var category: FormGroup = this.newCategories();
+      this.categories().push(category);
+
+      t.mappedRegions.forEach((b: any) => {
+        var region = this.newRegionsAndJudges();
+
+        (category.get("regionsJudgesArray") as FormArray).push(region)
+
+      });
+    });
+
+    this.eventJudgeAssignFormGroup.patchValue(data.categoriesList);
+    
 
   }
+ 
+
+
+setEventCategory(eventcategorydata: any): FormArray {
+  const formArray = new FormArray([]);
+  eventcategorydata.forEach((e: any) => {
+    formArray.push(this.formBuilder.group({
+      catId: e.catId,
+      categoryName: e.catName,
+      catMapId: e.catMapId,
+      regionsJudgesArray: this.formBuilder.array([this.newRegionsAndJudges()])
+    }));
+  });
+  return formArray;
+}
+
+
+
+addProctorAssign(): FormGroup {
+  return this.formBuilder.group({
+    eventVenueMapId: '',
+    venueName: '',
+    proctorId: ''
+  });
+}
+
+
+addEventCatGroupMap(): FormGroup {
+  return this.formBuilder.group({
+    catMapId: '',
+    categoryName: '',
+    groupMapIds: ''
+  });
+}
+
+adduserquestionary(): FormGroup {
+  return this.formBuilder.group({
+    questionId: '',
+    question: '',
+    responseType: '',
+  });
+}
+
+adduserVenuAndProcter(): FormGroup {
+  return this.formBuilder.group({
+    venueId: '',
+    proctorId: '',
+    eventVenueId: ''
+  });
+}
+
+addeventCategory(): FormGroup {
+  return this.formBuilder.group({
+    eventCategoryID: '',
+    name: '',
+    schoolGradeFrom: '',
+    schoolGradeTo: '',
+    judges: '',
+    venueId: '',
+    eventCatMapId: ''
+  });
+}
+
+
+
+// setuserVenuAndProcter(venuesdataOfdata: any): FormArray {
+//   const formArray = new FormArray([]);
+//   venuesdataOfdata.forEach((e: any) => {
+//     formArray.push(this.formBuilder.group({
+//       venueId: e.venueId,
+//       proctorId: e.proctorId,
+//       eventVenueId: e.eventVenueId
+//     }));
+//   });
+//   return formArray;
+// }
+
+setQuestionaireData(questionaireData: any): FormArray {
+  const formArray = new FormArray([]);
+  questionaireData.forEach((e: any) => {
+    formArray.push(this.formBuilder.group({
+      questionId: e.questionId,
+      question: e.question,
+      responseType: e.responseType
+    }));
+  });
+  return formArray;
+}
+
+setEventCatGroupMap(eventCatGroupMapdata: any): FormArray {
+  const formArray = new FormArray([]);
+  eventCatGroupMapdata.forEach((e: any) => {
+    formArray.push(this.formBuilder.group({
+      catMapId: e.catMapId,
+      categoryName: e.catName,
+      groupMapIds: [e.mappedGroups]
+    }));
+  });
+  return formArray;
+}
+
+setProctorAssign(eventProctorAssigndata: any): FormArray {
+  const formArray = new FormArray([]);
+  eventProctorAssigndata.forEach((e: any) => {
+    formArray.push(this.formBuilder.group({
+      eventVenueMapId: e.eventVenueMapId,
+      venueName: e.venueName,
+      proctorId: [e.mappedProctor]
+    }));
+  });
+  return formArray;
+}
+
+
+
+
+
+
+
+// createEvent() {
+
+//   if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'OBVS' || this.eventsDataFormGroup.value.eventType == 'CWC') {
+//     if (this.eventCategoriesFormGroup.value.categories.length == 0) {
+//       this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
+//     }
+//     else if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+
+//       let eventCreationForm: any = {};
+//       eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value } //, ...this.ttcExamDataFormGroup.value 
+//       console.log("this.eventCreationForm", eventCreationForm);
+//       this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
+//         if (res.data.status == "success") {
+//           this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
+//         }
+//         else
+//           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+//       });
+//     }
+//     else {
+//       let eventCreationForm: any = {};
+//       eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value }
+//       console.log("this.eventCreationForm", eventCreationForm);
+//       this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
+//         if (res.data.status == "success") {
+//           this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
+//         }
+//         else
+//           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+//       });
+//     }
+
+//   }
+
+//   //this.onCloseBtnClick();
+// }
+
+updateEvent() {
+  if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'OBVS' || this.eventsDataFormGroup.value.eventType == 'CWC') {
+    if (this.eventCategoriesFormGroup.value.categories.length == 0) {
+      this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
+    }
+    else if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+
+      let eventCreationForm: any = {};
+      eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value } // , ...this.ttcExamDataFormGroup.value 
+      console.log("this.eventCreationForm", eventCreationForm);
+      this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
+        if (res.data.status == "success") {
+          this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
+        }
+        else
+          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+      });
+    }
+    else {
+      let eventCreationForm: any = {};
+      eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value }
+      console.log("this.eventCreationForm", eventCreationForm);
+      this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
+        if (res.data.status == "success") {
+          this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
+        }
+        else
+          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+      });
+    }
+  }
+
+
+  //this.onCloseBtnClick();
+}
+
+handleEventFlyerFileInput(event: any) {
+  console.log('file uploaded');
+}
+
+
+
+/////////////////////////////////////////////// Validation Functions ///////////////////////////////////////////////////////////////////
+
+
+//Registration End Date Validator that is registrationEndDate>registrationStartDate
+comparisonRegiEnddateValidator(): any {
+  let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
+  let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
+
+  let startnew = new Date(regiStartDate);
+  let endnew = new Date(regiEndDate);
+
+  if (startnew > endnew) {
+    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': true });
+  }
+
+
+
+  // let oldvalue = startnew;
+  //this.eventsDataFormGroup.controls['registrationStartDate'].reset();
+  //this.eventsDataFormGroup.controls['registrationStartDate'].patchValue(oldvalue);
+  // return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange': false });
+
+}
+//Registration Start Date Validator that is registrationStartDate < registrationEndDate
+comparisonRegiStartdatedateValidator(): any {
+  let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
+  let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
+
+  let startnew = new Date(regiStartDate);
+  let endnew = new Date(regiEndDate);
+  if (startnew > endnew) {
+    return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange': true });
+  }
+
+  //let oldvalue = endnew1;
+  //this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+  //this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+  // return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+}
+//Event End Date Validator that is endDate>startDate
+comparisonEventEnddateValidator(): any {
+
+  let startDate = this.eventsDataFormGroup.value['startDate'];
+  let endDate = this.eventsDataFormGroup.value['endDate'];
+
+  // let eventstartnew = new Date(startDate);
+  //let eventendnew = new Date(endDate);
+  if (startDate > endDate) {
+    return this.eventsDataFormGroup.controls['endDate'].setErrors({ 'invaliddaterange': true });
+  }
+  /* let oldvalue = eventstartnew;
+   this.eventsDataFormGroup.controls['startDate'].reset();
+   this.eventsDataFormGroup.controls['startDate'].patchValue(oldvalue);
+   return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': false });
+   */
+
+}
+comparisonEventStartdateValidator(): any {
+
+  let startDate = this.eventsDataFormGroup.value['startDate'];
+  let endDate = this.eventsDataFormGroup.value['endDate'];
+
+  let eventstartnew = new Date(startDate);
+  let eventendnew = new Date(endDate);
+  if (eventstartnew > eventendnew) {
+    return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': true });
+  }
+  /* let oldvalue = eventstartnew;
+   this.eventsDataFormGroup.controls['startDate'].reset();
+   this.eventsDataFormGroup.controls['startDate'].patchValue(oldvalue);
+   return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange': false });
+   */
+
+}
+//Event start Date Validator that is EentStartDate>RegistrationEndDate
+comparisonEventStartandRegiEnddateValidator(): any {
+  let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
+  let startDate = this.eventsDataFormGroup.value['startDate'];
+
+
+  let eventstartnew = new Date(startDate);
+  let regiEndDatenew = new Date(regiEndDate);
+  if (regiEndDatenew > eventstartnew) {
+    return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange1': true });
+  }
+  /*let oldvalue = regiEndDatenew;
+  this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+  this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+  return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+  */
+
+}
+comparisonRegiEnddateandEventStartValidator(): any {
+  let regiEndDate = this.eventsDataFormGroup.value['registrationEndDate'];
+  let startDate = this.eventsDataFormGroup.value['startDate'];
+
+
+  let eventstartnew = new Date(startDate);
+  let regiEndDatenew = new Date(regiEndDate);
+  if (regiEndDatenew > eventstartnew) {
+    return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange2': true });
+  }
+  /*let oldvalue = regiEndDatenew;
+  this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+  this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+  return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+  */
+
+}
+//Event start Date Validator that is EentStartDate>RegistrationEndDate
+comparisonEventStartandRegiStartdateValidator(): any {
+  let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
+  let startDate = this.eventsDataFormGroup.value['startDate'];
+
+
+  let eventstartnew = new Date(startDate);
+  let regiStartDateenew = new Date(regiStartDate);
+  if (regiStartDateenew > eventstartnew) {
+    return this.eventsDataFormGroup.controls['startDate'].setErrors({ 'invaliddaterange3': true });
+  }
+  /*let oldvalue = regiEndDatenew;
+  this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+  this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+  return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+  */
+
+}
+//Event start Date Validator that is EentStartDate>RegistrationEndDate
+comparisontRegiStartdateandEventStarValidator(): any {
+  let regiStartDate = this.eventsDataFormGroup.value['registrationStartDate'];
+  let startDate = this.eventsDataFormGroup.value['startDate'];
+
+
+  let eventstartnew = new Date(startDate);
+  let regiStartDateenew = new Date(regiStartDate);
+  if (regiStartDateenew > eventstartnew) {
+    return this.eventsDataFormGroup.controls['registrationStartDate'].setErrors({ 'invaliddaterange4': true });
+  }
+  /*let oldvalue = regiEndDatenew;
+  this.eventsDataFormGroup.controls['registrationEndDate'].reset();
+  this.eventsDataFormGroup.controls['registrationEndDate'].patchValue(oldvalue);
+  return this.eventsDataFormGroup.controls['registrationEndDate'].setErrors({ 'invaliddaterange': false });
+  */
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+onVenuesNextBtnClick() {
+  this.venues = this.venuesDataFormGroup.get('venues') as FormArray;
+  this.newVenues = this.venues.value;
+
+  for (let i = 0; i < this.venuesList.length; i++) {
+    console.log(this.venuesList[i].name);
+    console.log(this.venuesList[i].venueId);
+    for (let j = 0; j < this.newVenues.length; j++) {
+      if (this.newVenues[j].venueId == this.venuesList[i].venueId) {
+        this.newVenues[j].venueName = this.venuesList[i].venueName;
+      }
+    }
+  }
+
+  if (this.venuesDataFormGroup.value.venues.length == 0) {
+    this.uiCommonUtils.showSnackBar("Event should atleast have one venue!", "error", 3000);
+  }
+
+}
 
 
 
