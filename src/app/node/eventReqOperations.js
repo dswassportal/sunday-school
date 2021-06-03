@@ -614,7 +614,27 @@ async function insertEvents(eventsData, loggedInUser) {
             case "event_judge_assignment": {
                 if (eventsData.judgeAssignment) {
                     for (let assignment of eventsData.judgeAssignment) {
-                        //console.log(`Assigning for catId ${assignment.catId} and object is : ${JSON.stringify(assignment)}`)
+                        // Logic to delete regions and judges mapping if user removed it from UI
+
+                        /*                        for(let assignment of eventsData.judgeAssignment){
+                                                       if(assignment.regions){
+                                                            let regionIdArr = []; 
+                                                            assignment.regions.forEach(item => {if(item.regionId) regionIdArr.push(item.regionId)});   
+                                                        //for(let region of assignment.regions)
+                                                       }     
+                                                }
+                        */
+                        let delRegionStaffMap = await client.query(queries.deleteStaffRegionMapping,
+                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+
+                        console.log(`Event ${eventsData.eventId}, Staff region-mapping deletion row count is : ${delRegionStaffMap.rowCount}`)
+
+                        let delStaffCatMap = await client.query(queries.deleteStaffCatMapping,
+                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+
+                        console.log(`Event ${eventsData.eventId}, Staff cat-mapping deletion row count is : ${delStaffCatMap.rowCount}`)
+
+                        //Logic ends here
                         let regionMapIds = [];
                         if (assignment.regions) {
                             for (let region of assignment.regions) {
@@ -668,11 +688,11 @@ async function insertEvents(eventsData, loggedInUser) {
                                 new Date().toUTCString(), eventsData.eventId, question.questionId]);
                             if (result.rowCount > 0)
                                 questionUpdatedIds.push(question.questionId);
-                        }else{
-                        let result = await client.query(queries.insertQuestionnaire,
-                            [eventsData.eventId, question.question, question.answerType[0], loggedInUser, new Date().toUTCString()]);
-                        if (result.rowCount != 0)
-                            questionIds.push(result.rows[0].question_id);
+                        } else {
+                            let result = await client.query(queries.insertQuestionnaire,
+                                [eventsData.eventId, question.question, question.answerType[0], loggedInUser, new Date().toUTCString()]);
+                            if (result.rowCount != 0)
+                                questionIds.push(result.rows[0].question_id);
                         }
                     }
                     console.log(`Event ${eventsData.eventId},updated questions question_ids are : ${JSON.stringify(questionUpdatedIds)}`)

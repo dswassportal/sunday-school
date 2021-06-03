@@ -379,6 +379,7 @@ const getJudgeMapForAssSec = `select distinct
                             join t_organization to2 on to2.org_id = tu.org_id 
                             join t_organization to3 on to3.org_id = tersm.org_id  
                             where tecm.event_id = $1 and tecsm.event_id = $1
+                            and tecsm.is_deleted = false and tersm.is_deleted = false
                             order by tec."sequence", tersm.org_id;`;
 
 
@@ -390,7 +391,13 @@ const deleteDefinedQuestions = `UPDATE t_event_questionnaire SET  is_deleted = $
 
 const updateQueStmtAndResType = `UPDATE t_event_questionnaire
                                 SET question = $1, answer_type = $2 , updated_by = $3, updated_date = $4
-                                WHERE  event_id = $5 and question_id = $6;`;                                 
+                                WHERE  event_id = $5 and question_id = $6;`; 
+                                
+const deleteStaffRegionMapping = `update t_event_region_staff_map set is_deleted= $1 ,updated_by= $2, updated_date= $3 where event_id = $4;`;
+
+const deleteStaffCatMapping = `update t_event_cat_staff_map set is_deleted= $1, updated_by= $2, updated_date= $3 where event_id = $4;`;
+
+                                
 
 module.exports = {
     insertEvent,
@@ -429,5 +436,7 @@ module.exports = {
     getJudgeMapForAssSec,
     getDefinedQuestionnaire,
     deleteDefinedQuestions,
-    updateQueStmtAndResType
+    updateQueStmtAndResType,
+    deleteStaffRegionMapping,
+    deleteStaffCatMapping
 }
