@@ -613,7 +613,7 @@ async function insertEvents(eventsData, loggedInUser) {
             }
             case "event_judge_assignment": {
                 if (eventsData.judgeAssignment) {
-                    for (let assignment of eventsData.judgeAssignment) {
+
                         // Logic to delete regions and judges mapping if user removed it from UI
 
                         /*                        for(let assignment of eventsData.judgeAssignment){
@@ -624,17 +624,19 @@ async function insertEvents(eventsData, loggedInUser) {
                                                        }     
                                                 }
                         */
-                        let delRegionStaffMap = await client.query(queries.deleteStaffRegionMapping,
-                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+                                                let delRegionStaffMap = await client.query(queries.deleteStaffRegionMapping,
+                                                    [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+                        
+                                                console.log(`Event ${eventsData.eventId}, Staff region-mapping deletion row count is : ${delRegionStaffMap.rowCount}`)
+                        
+                                                let delStaffCatMap = await client.query(queries.deleteStaffCatMapping,
+                                                    [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+                        
+                                                console.log(`Event ${eventsData.eventId}, Staff cat-mapping deletion row count is : ${delStaffCatMap.rowCount}`)
+                        
+                                                //Logic ends here
 
-                        console.log(`Event ${eventsData.eventId}, Staff region-mapping deletion row count is : ${delRegionStaffMap.rowCount}`)
-
-                        let delStaffCatMap = await client.query(queries.deleteStaffCatMapping,
-                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
-
-                        console.log(`Event ${eventsData.eventId}, Staff cat-mapping deletion row count is : ${delStaffCatMap.rowCount}`)
-
-                        //Logic ends here
+                    for (let assignment of eventsData.judgeAssignment) {
                         let regionMapIds = [];
                         if (assignment.regions) {
                             for (let region of assignment.regions) {
