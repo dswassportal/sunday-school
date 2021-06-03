@@ -397,7 +397,42 @@ const deleteStaffRegionMapping = `update t_event_region_staff_map set is_deleted
 
 const deleteStaffCatMapping = `update t_event_cat_staff_map set is_deleted= $1, updated_by= $2, updated_date= $3 where event_id = $4;`;
 
-                                
+const getSelectedAndAllEvaluators = `select jsonb_agg(
+                                        jsonb_build_object(
+                                            'evalName', concat(ve.title,'. ', ve.first_name ,' ', ve.middle_name,' ', ve.last_name,
+                                                        '(',
+                                                        (select distinct user_org from v_user where user_id = ve.user_id)
+                                                        ,')'),
+                                        'evalId', ve.user_id,
+                                            'eventEvaluatorId', tee.event_evaluator_id,
+                                            'isSelected', case when tee.event_evaluator_id is null then false else true end
+                                            )
+                                        ) evaluators
+                                    from v_user ve 
+                                    left join t_event_evaluator tee on tee.user_id = ve.user_id and event_id = $1
+                                    where lower(ve.role_name) like lower($2) and org_id in ((WITH recursive child_orgs 
+                                                    AS (
+                                                        SELECT org_id
+                                                        FROM   t_organization parent_org 
+                                                        WHERE  org_id in ( select org_id from t_event_organization teo where event_id = $1)                                                   
+                                                        UNION
+                                                        SELECT     child_org.org_id child_id
+                                                        FROM       t_organization child_org
+                                                        INNER JOIN child_orgs c
+                                                        ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                                            FROM   child_orgs));`;
+
+const insertEventEvaluator = `INSERT INTO t_event_evaluator (event_id, user_id, created_by, created_date)
+                                select $1, $2, $3, $4  
+                                WHERE NOT EXISTS (
+                                SELECT 1 FROM t_event_evaluator turm 
+                                                    WHERE event_id = $1 
+                                                    and user_id = $2
+                                                    and is_deleted = false) returning event_evaluator_id;`;             
+                                                    
+ const deleteEvaluatorsForEvalSection = ` UPDATE t_event_evaluator
+                                    SET is_deleted= $1, updated_by= $2, updated_date= $3
+                                    WHERE event_id = $4 and event_evaluator_id not in ($5);`;                                                   
 
 module.exports = {
     insertEvent,
@@ -438,5 +473,8 @@ module.exports = {
     deleteDefinedQuestions,
     updateQueStmtAndResType,
     deleteStaffRegionMapping,
-    deleteStaffCatMapping
+    deleteStaffCatMapping,
+    getSelectedAndAllEvaluators,
+    insertEventEvaluator,
+    deleteEvaluatorsForEvalSection
 }

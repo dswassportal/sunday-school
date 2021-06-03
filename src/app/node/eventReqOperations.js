@@ -614,27 +614,27 @@ async function insertEvents(eventsData, loggedInUser) {
             case "event_judge_assignment": {
                 if (eventsData.judgeAssignment) {
 
-                        // Logic to delete regions and judges mapping if user removed it from UI
+                    // Logic to delete regions and judges mapping if user removed it from UI
 
-                        /*                        for(let assignment of eventsData.judgeAssignment){
-                                                       if(assignment.regions){
-                                                            let regionIdArr = []; 
-                                                            assignment.regions.forEach(item => {if(item.regionId) regionIdArr.push(item.regionId)});   
-                                                        //for(let region of assignment.regions)
-                                                       }     
-                                                }
-                        */
-                                                let delRegionStaffMap = await client.query(queries.deleteStaffRegionMapping,
-                                                    [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
-                        
-                                                console.log(`Event ${eventsData.eventId}, Staff region-mapping deletion row count is : ${delRegionStaffMap.rowCount}`)
-                        
-                                                let delStaffCatMap = await client.query(queries.deleteStaffCatMapping,
-                                                    [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
-                        
-                                                console.log(`Event ${eventsData.eventId}, Staff cat-mapping deletion row count is : ${delStaffCatMap.rowCount}`)
-                        
-                                                //Logic ends here
+                    /*                        for(let assignment of eventsData.judgeAssignment){
+                                                   if(assignment.regions){
+                                                        let regionIdArr = []; 
+                                                        assignment.regions.forEach(item => {if(item.regionId) regionIdArr.push(item.regionId)});   
+                                                    //for(let region of assignment.regions)
+                                                   }     
+                                            }
+                    */
+                    let delRegionStaffMap = await client.query(queries.deleteStaffRegionMapping,
+                        [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+
+                    console.log(`Event ${eventsData.eventId}, Staff region-mapping deletion row count is : ${delRegionStaffMap.rowCount}`)
+
+                    let delStaffCatMap = await client.query(queries.deleteStaffCatMapping,
+                        [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+
+                    console.log(`Event ${eventsData.eventId}, Staff cat-mapping deletion row count is : ${delStaffCatMap.rowCount}`)
+
+                    //Logic ends here
 
                     for (let assignment of eventsData.judgeAssignment) {
                         let regionMapIds = [];
@@ -702,6 +702,30 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 break;
             }
+            case "event_evaluator_assignment": {
+                if (eventsData.evaluatorAssignment) {
+
+                    let selEvalIds = [];
+                    eventsData.evaluatorAssignment.forEach((item) => {if(item.eventEvaluatorId) selEvalIds.push(item.eventEvaluatorId)});
+                    if(selEvalIds.length > 0){
+                        
+                        let tempQuery = queries.deleteEvaluatorsForEvalSection.replace('$5', selEvalIds.join(','))
+                        let result = await client.query(tempQuery,
+                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+                        console.log(`for event ${eventsData.eventId}, Row count of deleted(Soft) evaluator mappings are: ${result.rowCount}`);
+                    }
+
+                    evantEvalIds =[];
+                    for (let eval of eventsData.evaluatorAssignment) {
+                        let result = await client.query(queries.insertEventEvaluator,
+                            [eventsData.eventId, eval.evalId, loggedInUser, new Date().toUTCString()]);
+                       if(result.rowCount > 0)
+                            evantEvalIds.push(result.rows[0].event_evaluator_id)
+                    }
+                    console.log(`Event ${eventsData.eventId}, Newly inserted event_evaluator_ids are: ${JSON.stringify(evantEvalIds)}`)
+                }
+                break;
+            }
         }// Switch
 
         //if request from next section data in same requst
@@ -733,7 +757,11 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 case "event_questionnaires": {
                     response.event_questionnaires = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_questionnaires", eventsData.eventType, client);
-                    break
+                    break;
+                }
+                case "event_evaluator_assignment": {
+                    response.event_evaluator_assignment = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_evaluator_assignment", eventsData.eventType, client);
+                    break;
                 }
             }//switch
         }//if  
@@ -955,6 +983,10 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                 "answerTypes": tempArr,
                 "questionnaire": definedQueArr
             }
+        }
+        case "event_evaluator_assignment": {
+            let evaluatorsList = await client.query(queries.getSelectedAndAllEvaluators, [eventId, `%Diocesan%${eventType}%Evaluator%`]);
+            return evaluatorsList.rowCount > 0 ? evaluatorsList.rows[0].evaluators : [];
         }
     }
 }
