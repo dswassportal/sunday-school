@@ -972,20 +972,21 @@ export class EventCreationComponent implements OnInit {
 
           regions.push({
             "regionId": data2.regionId,
-            "judges": [judges]
+            "judges": judges
           });
 
-          if (data.catId != json.catId) {
+          if (data.catId == json.catId) {
+            json.regions = regions;
+            regions = [];
+          }
+          else{
             json = {
               "catId": data.catId,
               "catMapId": data.catMapId,
-              "regions": [regions]
+              "regions": regions
             }
             judgeAssignment.push(json);
-          }
-          else{
-            json.regions = [regions];
-            regions = [];
+           
           }
 
           judges = [];
@@ -993,7 +994,6 @@ export class EventCreationComponent implements OnInit {
         }
 
       }
-
 
     }
 
