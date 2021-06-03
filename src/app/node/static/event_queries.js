@@ -382,6 +382,15 @@ const getJudgeMapForAssSec = `select distinct
                             order by tec."sequence", tersm.org_id;`;
 
 
+const getDefinedQuestionnaire = `select question_id, question, answer_type from t_event_questionnaire teq 
+                             where event_id = $1 and is_deleted = false order by question_id;`;
+
+const deleteDefinedQuestions = `UPDATE t_event_questionnaire SET  is_deleted = $1, updated_by = $2, updated_date = $3
+                                WHERE event_id = $4 and question_id not in ($5);`; 
+
+const updateQueStmtAndResType = `UPDATE t_event_questionnaire
+                                SET question = $1, answer_type = $2 , updated_by = $3, updated_date = $4
+                                WHERE  event_id = $5 and question_id = $6;`;                                 
 
 module.exports = {
     insertEvent,
@@ -417,5 +426,8 @@ module.exports = {
     deleteGroupMapping,
     deleteCatGroupMapping,
     deleteVenues,
-    getJudgeMapForAssSec
+    getJudgeMapForAssSec,
+    getDefinedQuestionnaire,
+    deleteDefinedQuestions,
+    updateQueStmtAndResType
 }

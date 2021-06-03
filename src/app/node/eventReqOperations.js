@@ -563,12 +563,14 @@ async function insertEvents(eventsData, loggedInUser) {
 
                     let catGrpMapIds = []
                     for (let catGrp of eventsData.catGradeMap) {// to iterate catGradeMap
-                        for (let groupMap of catGrp.groupMapIds) { // to iterate groupMapIds        
-                            let result = await client.query(queries.insertCatGradeMapping,
-                                [catGrp.catMapId, groupMap.gradeGroupMapId, loggedInUser, new Date().toUTCString()]);
-                            if (result.rows[0])
-                                catGrpMapIds.push(result.rows[0].event_cat_grade_grp_map_id)
-                        }// inner for
+                        if (catGrp.groupMapIds) {
+                            for (let groupMap of catGrp.groupMapIds) { // to iterate groupMapIds        
+                                let result = await client.query(queries.insertCatGradeMapping,
+                                    [catGrp.catMapId, groupMap.gradeGroupMapId, loggedInUser, new Date().toUTCString()]);
+                                if (result.rows[0])
+                                    catGrpMapIds.push(result.rows[0].event_cat_grade_grp_map_id)
+                            }// inner for
+                        }// if catGrp.groupMapIds
                     }// outer for
                     console.log(`Event ${eventsData.eventId}, new event_cat_grade_grp_map_ids are  : ${JSON.stringify(catGrpMapIds)}`);
                 }// if
@@ -615,7 +617,7 @@ async function insertEvents(eventsData, loggedInUser) {
                         //console.log(`Assigning for catId ${assignment.catId} and object is : ${JSON.stringify(assignment)}`)
                         let regionMapIds = [];
                         if (assignment.regions) {
-                            for (let region of assignment.regions[0]) {
+                            for (let region of assignment.regions) {
                                 //console.log(`region for regionId ${ region.regionId}`)
                                 let regionStaffRes = await client.query(queries.insertRegionStaffMapping,
                                     [eventsData.eventId, assignment.catId, assignment.catMapId,
@@ -625,7 +627,7 @@ async function insertEvents(eventsData, loggedInUser) {
                                 //console.log("insertRegionStaffMapping =>", eventsData.eventId, assignment.catId, assignment.catMapId,region.regionId, loggedInUser, new Date().toUTCString());
                                 if (region.judges) {
                                     let staffMapIds = [];
-                                    for (let judge of region.judges[0]) {
+                                    for (let judge of region.judges) {
                                         if (regionStaffRes.rowCount != 0) {
                                             let catStaffMapRes = await client.query(queries.insertCatStaffMapId,
                                                 [eventsData.eventId, assignment.catMapId, parseInt(judge + ""),
@@ -647,14 +649,34 @@ async function insertEvents(eventsData, loggedInUser) {
             }
             case "event_questionnaires": {
                 if (eventsData.questionnaire) {
+                    //Delete question if they are not coming from UI logic starts here
+                    let queIds = []
+                    eventsData.questionnaire.forEach((item) => { if (item.questionId) queIds.push(item.questionId) });
+                    if (queIds.length > 0) {
+                        let tempQuery = queries.deleteDefinedQuestions.replace('$5', queIds.join(','))
+                        let result = await client.query(tempQuery,
+                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
+                        console.log(`for event ${eventsData.eventId}, Row count of deleted(Soft) questionnaire mappings are: ${result.rowCount}`);
+                    }
+                    //logic ends here
                     let questionIds = [];
+                    let questionUpdatedIds = [];
                     for (let question of eventsData.questionnaire) {
+                        if (question.questionId) {
+                            let result = await client.query(queries.updateQueStmtAndResType,
+                                [question.question, question.answerType[0], loggedInUser,
+                                new Date().toUTCString(), eventsData.eventId, question.questionId]);
+                            if (result.rowCount > 0)
+                                questionUpdatedIds.push(question.questionId);
+                        }else{
                         let result = await client.query(queries.insertQuestionnaire,
-                            [eventsData.eventId, question.question, question.answerType, loggedInUser, new Date().toUTCString()]);
+                            [eventsData.eventId, question.question, question.answerType[0], loggedInUser, new Date().toUTCString()]);
                         if (result.rowCount != 0)
                             questionIds.push(result.rows[0].question_id);
+                        }
                     }
-                    console.log(`Event ${eventsData.eventId}, question_ids are : ${JSON.stringify(questionIds)}`);
+                    console.log(`Event ${eventsData.eventId},updated questions question_ids are : ${JSON.stringify(questionUpdatedIds)}`)
+                    console.log(`Event ${eventsData.eventId}, newly created question_ids are : ${JSON.stringify(questionIds)}`);
                 }
                 break;
             }
@@ -892,7 +914,25 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                 }
             } else
                 console.error("Of type \'Question Type\' not found in t_lookup table");
-            return tempArr
+
+            let definedQueArr = [];
+            let definedQueRes = await client.query(queries.getDefinedQuestionnaire, [eventId]);
+            if (definedQueRes.rowCount > 0) {
+                for (let row of definedQueRes.rows) {
+                    definedQueArr.push({
+                        "question": row.question,
+                        "questionId": row.question_id,
+                        "answerType": [
+                            row.answer_type
+                        ]
+                    });
+                }
+            }
+
+            return {
+                "answerTypes": tempArr,
+                "questionnaire": definedQueArr
+            }
         }
     }
 }
