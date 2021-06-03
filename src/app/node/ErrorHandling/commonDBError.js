@@ -47,7 +47,37 @@ function handleDBError(errorType) {
                 }
             }
         }
-       
+        case 'cat_grp_map_error': {
+            return {
+                data: {
+                    status: 'failed',
+                    errorCode: 'CH506',
+                    errorMessage: 'Please remove category group assignment for the category you want to remove.'
+                }
+            }
+
+        }
+        case 'cat_staff_map_error': {
+            return {
+                data: {
+                    status: 'failed',
+                    errorCode: 'CH507',
+                    errorMessage: 'Please remove category judge assignment for the category you want to remove.'
+                }
+            }
+
+        }
+        case 'grp_del_not_allowed': {
+            return {
+                data: {
+                    status: 'failed',
+                    errorCode: 'CH509',
+                    errorMessage: 'Please remove category group assignment for the group you want to remove.'
+                }
+            }
+
+        }
+
     }
 }
 

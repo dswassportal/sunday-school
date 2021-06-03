@@ -12,14 +12,14 @@ const updateEvent = `UPDATE t_event
                                  registration_start_date=$6, registration_end_date=$7, updated_by=$8, updated_date=$9, event_url = $10
                      WHERE event_id = $11;`;
 
-const insertEventOrgs = `INSERT INTO t_event_organization(event_id, org_type, org_id) VALUES($1, $2, $3) returning event_organization_id;`; 
+const insertEventOrgs = `INSERT INTO t_event_organization(event_id, org_type, org_id) VALUES($1, $2, $3) returning event_organization_id;`;
 
 const deleteEventOrgs = `DELETE FROM t_event_organization where event_id = $1;`
 
-const  insertEventCords = `INSERT INTO t_event_coordinator (event_id, user_id, created_by, created_date) 
+const insertEventCords = `INSERT INTO t_event_coordinator (event_id, user_id, created_by, created_date) 
                           VALUES($1, $2, $3, $4) returning event_coordinator_id;`;
 
-const  deleteEventCords = `DELETE FROM t_event_coordinator where event_id = $1;`  
+const deleteEventCords = `DELETE FROM t_event_coordinator where event_id = $1;`
 
 // const insertCatMap = `INSERT INTO t_event_category_map(event_id, event_category_id)
 //                             VALUES ($1, $2) returning event_cat_map_id;`
@@ -32,17 +32,16 @@ const insertCatMap = `INSERT INTO t_event_category_map (event_id, event_category
                                             and event_category_id = $2
                                     ) returning event_cat_map_id;`
 
-const getFrststEveTypIdByEveTyp =  `select event_type_id from t_event_category where lower(type) = lower($1) fetch first 1 row only;`;  
+const getFrststEveTypIdByEveTyp = `select event_type_id from t_event_category where lower(type) = lower($1) fetch first 1 row only;`;
 
 const insertNewCategory = `INSERT INTO t_event_category
-                                    ("name", description, "type", event_type_id)
-                           VALUES($1, $2, $3, $4) returning event_category_id;`;
+                                    ("name", description, "type", event_type_id, "sequence")
+                           VALUES($1, $2, $3,
+                            (select event_type_id from t_event_category where lower(type) = lower($4) fetch first 1 row only),
+                            (select max("sequence") + 1 seq_max_count from t_event_category tec where lower("type") = lower($4))
+                            ) returning event_category_id;`;
 
-// const  insertGradeGroupMapping =  `INSERT INTO t_event_grade_group_map
-//                                 (event_id, grade_group_id, created_by, created_date)
-//                                 VALUES($1, $2, $3, $4) returning event_grade_group_map_id;`;
-
-const  insertGradeGroupMapping = `INSERT INTO t_event_grade_group_map(event_id, grade_group_id, created_by, created_date)
+const insertGradeGroupMapping = `INSERT INTO t_event_grade_group_map(event_id, grade_group_id, created_by, created_date)
                                     select $1, $2, $3, $4
                                     WHERE NOT EXISTS (
                                     SELECT 1 FROM t_event_grade_group_map teggm 
@@ -50,24 +49,48 @@ const  insertGradeGroupMapping = `INSERT INTO t_event_grade_group_map(event_id, 
                                                         and teggm.grade_group_id = $2
                                                 ) returning event_grade_group_map_id;`
 
-const insertGradeGroup = `insert into t_grade_group (group_name, created_by, created_date) values ($1, $2, $3) returning grade_group_id;`;                           
+const insertGradeGroup = `insert into t_grade_group (group_name, created_by, created_date, "sequence") 
+                            values ($1, $2, $3, (select max("sequence") + 1 seq_max_count from t_grade_group)
+                                ) returning grade_group_id;`;
 
 const insertGradeGroupDtl = `insert into t_grade_group_detail ( grade_group_id, grade ) values ($1, $2);`;
 
-const getSelecedAndAllCats = `select 
-                            jsonb_agg(
-                                jsonb_build_object(
-                                    'catId', tec.event_category_id,
-                                    'catName', tec."name", 
-                                    'catDesc', tec.description,
-                                    'catMapId', tecm.event_cat_map_id,
-                                    'isSelected', case when tecm.event_cat_map_id is null then false else true end
-                                ) 
-                            ) event_cats
-                            from t_event_category tec
-                            left join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
-                            and tecm.event_id = $1
-                            where lower(tec."type") = lower($2);`;
+const getSelecedAndAllCats = `WITH staff_mapping_check AS (
+                                                select distinct tecsm.event_category_map_id
+                                                from t_event_cat_staff_map tecsm 
+                                                right join t_event_category_map tecm on tecsm.event_category_map_id = tecm.event_cat_map_id 
+                                                where tecsm.event_id = $1 and tecm.event_id = $1 and tecsm.is_deleted = false
+                                        ), grade_mapping_check AS (
+                                                select  distinct tecm.event_cat_map_id 
+                                                from t_event_category_map tecm
+                                                join t_event_cat_grade_grp_map tecggmt on tecm.event_cat_map_id = tecggmt.event_cat_map_id 
+                                                where tecm.event_id = $1 and tecggmt.is_deleted = false
+                                        ), participant_enrollment_check as (
+                                                select distinct tecm.event_cat_map_id from t_event_category_map tecm 
+                                                join t_participant_event_reg_cat tperc on tecm.event_category_id = tperc.event_category_id
+                                                join t_event_participant_registration tepr on tepr.event_participant_registration_id = tperc.event_participant_registration_id
+                                                and tepr.event_id = $1 and tepr.is_deleted = false
+                                        )
+                                        select  
+                                        jsonb_agg(
+                                               jsonb_build_object(
+                                                    'catId', tec.event_category_id,
+                                                    'catName', tec."name", 
+                                                    'catDesc', tec.description,
+                                                    'catMapId', tecm.event_cat_map_id,
+                                                    'isSelected', case when tecm.event_cat_map_id is null then false else true end,
+                                                    'hasJudgeMapped', case when smc.event_category_map_id is null then false else true end ,
+                                                    'hasGradeMapped', case when gmc.event_cat_map_id is null then false else true end , 
+                                                    'hasParticipant', case when pec.event_cat_map_id is null then false else true end,
+                                                    'sequence', tec."sequence"
+                                                    ) ORDER BY tec."sequence" 
+                                            ) event_cats 
+                                        from t_event_category tec
+                                        left join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id  and tecm.event_id = $1
+                                        left join staff_mapping_check smc on tecm.event_cat_map_id = smc.event_category_map_id
+                                        left join grade_mapping_check gmc on gmc.event_cat_map_id = tecm.event_cat_map_id
+                                        left join participant_enrollment_check pec on  pec.event_cat_map_id = tecm.event_cat_map_id
+                                        where lower(tec."type") = lower($2);`;
 
 const getSelectedAndAllGroups = `select 
                                     jsonb_agg(
@@ -78,14 +101,15 @@ const getSelectedAndAllGroups = `select
                                             'grades', (select ARRAY_AGG (tggd.grade) 
                                                     from  t_grade_group_detail tggd
                                                     where tggd.grade_group_id = tgg.grade_group_id),
-                                            'isSelected', case when teggm.event_grade_group_map_id is null then false else true end		  
-                                        ) 
+                                            'isSelected', case when teggm.event_grade_group_map_id is null then false else true end,
+                                            'hasMappedToCat', case when tecggmt.event_cat_grade_grp_map_id is null then false else true end,
+                                            'sequence', tgg."sequence" 
+                                        ) order by tgg."sequence" 
                                     ) selected_and_all_grades
                                     from t_grade_group tgg 
-                                    left join t_event_grade_group_map teggm
-                                    on tgg.grade_group_id = teggm.grade_group_id 
-                                    and teggm.event_id = $1;`;    
-                                    
+                                    left join t_event_grade_group_map teggm on tgg.grade_group_id = teggm.grade_group_id and teggm.event_id = $1
+                                    left join  t_event_cat_grade_grp_map tecggmt on teggm.event_grade_group_map_id = tecggmt.event_cat_grade_grp_map_id `;
+
 const getEventGroupMapping = `select 
                                     jsonb_agg(
                                         jsonb_build_object(
@@ -96,8 +120,8 @@ const getEventGroupMapping = `select
                                     ) group_mapping 
                                     from t_grade_group tgg 
                                     join t_event_grade_group_map teggm 	
-                                    on tgg.grade_group_id = teggm.grade_group_id and teggm.event_id = $1;`;      
-                                    
+                                    on tgg.grade_group_id = teggm.grade_group_id and teggm.event_id = $1;`;
+
 const getEventCatMapping = `select
                                 jsonb_agg(
                                 jsonb_build_object(
@@ -108,18 +132,19 @@ const getEventCatMapping = `select
                                 ) cat_mapping
                                 from t_event_category tec 
                                 join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
-                                and tecm.event_id = $1;`;     
-                                
+                                and tecm.event_id = $1;`;
+
 const insertCatGradeMapping = `INSERT INTO t_event_cat_grade_grp_map(event_cat_map_id, event_grade_group_map_id, created_by, created_date)
                                         select $1, $2, $3, $4
                                         WHERE NOT EXISTS (
                                         SELECT 1 FROM t_event_cat_grade_grp_map tecggm
                                                             WHERE tecggm.event_cat_map_id = $1
                                                             and tecggm.event_grade_group_map_id = $2
-                                                    ) returning event_cat_grade_grp_map_id;`; 
-                                 
+                                                            and tecggm.is_deleted = false
+                                                    ) returning event_cat_grade_grp_map_id;`;
 
-const getVenusAllDetailsByEventLevel =  `select jsonb_agg(
+
+const getVenusAllDetailsByEventLevel = `select jsonb_agg(
                                         jsonb_build_object(
                                         'venueId', tv.venue_id,
                                         'venueName', tv."name",
@@ -133,7 +158,8 @@ const getVenusAllDetailsByEventLevel =  `select jsonb_agg(
                                         'phoneNo', tv.phone_no,
                                         'mapUrl', tv.map_url,
                                         'eventVenueMapId', tev.event_venue_id,
-                                        'isSelected', case when tev.event_venue_id is null then false else true end
+                                        'isSelected', case when tev.event_venue_id is null then false else true end,
+                                        'hasProctor', case when tev.proctor_id is null then false else true end 
                                         ) 
                                     ) venue_list from t_venue tv 
                                    left join t_event_venue tev on tv.venue_id  = tev.venue_id and tev.event_id  = $1
@@ -150,16 +176,16 @@ const getVenusAllDetailsByEventLevel =  `select jsonb_agg(
                                                                         FROM       t_organization child_org
                                                                         INNER JOIN child_orgs c
                                                                         ON         c.org_id = child_org.parent_org_id ) SELECT *
-                                                                            FROM   child_orgs));`;  
-                                                                     
+                                                                            FROM   child_orgs));`;
+
 const insertVenueEventMapping = ` insert into t_event_venue ( event_id, venue_id ) 
                                     select $1, $2
                                     WHERE NOT EXISTS (
                                     SELECT 1 FROM t_event_venue tev
                                                         WHERE tev.event_id = $1
                                                         and tev.venue_id = $2
-                                                ) returning event_venue_id;`  
-                                                
+                                                ) returning event_venue_id;`
+
 
 const getProctorsByEventId = `select 
                                 jsonb_agg(
@@ -172,9 +198,11 @@ const getProctorsByEventId = `select
                                                     ) 
                                 ) proctor_data
                                 from t_user tu
-                                left join t_event_venue tev on  tu.user_id = tev.proctor_id  and event_id = 1259
-                                left join t_venue tv on tv.venue_id = tev.venue_id 
-                                join t_user_role_context turc on turc.user_id = tu.user_id and turc.org_id in (            
+                                left join t_event_venue tev on  tu.user_id = tev.proctor_id  and event_id = $1 
+                                and tev.is_deleted = false
+                                left join t_venue tv on tv.venue_id = tev.venue_id and tv.is_deleted = false
+                                join t_user_role_context turc on turc.user_id = tu.user_id and turc.is_deleted = false 
+                                and turc.org_id in (            
                                                 (WITH recursive child_orgs 
                                                 AS (
                                                     SELECT org_id
@@ -191,7 +219,7 @@ const getProctorsByEventId = `select
                                         where lower(tr.name) like lower($2))
                                 join t_user_role_mapping turm on turc.user_id = turm.user_id 
                                 and coalesce(turm.role_start_date, current_date) <= current_date 
-                                and coalesce(turm.role_end_date , current_date) >= current_date	`                                                
+                                and coalesce(turm.role_end_date , current_date) >= current_date	`
 
 const getVenusNameAndIsByEventLevel = `select jsonb_agg(
                                             jsonb_build_object(
@@ -206,6 +234,7 @@ const getVenusNameAndIsByEventLevel = `select jsonb_agg(
                                             ) ) venue_list
                                         from t_venue tv 
                                         join t_event_venue tev on tv.venue_id  = tev.venue_id and tev.event_id = $1
+                                        and tev.is_deleted = false
                                         left join t_user tu on tev.proctor_id = tu.user_id
                                         where tv.is_deleted = false and tv.org_id in 
                                         (select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
@@ -224,8 +253,8 @@ const getVenusNameAndIsByEventLevel = `select jsonb_agg(
 
 const updateVenueProctorMapping = `update t_event_venue set proctor_id = $1 
                                     where event_id = $2
-                                    and event_venue_id = $3 returning event_venue_id;`;    
-                                    
+                                    and event_venue_id = $3 returning event_venue_id;`;
+
 const getRegionsByEventId = `select jsonb_agg(
                                 distinct  jsonb_build_object(
                                                 'regionId', org_id,
@@ -247,38 +276,7 @@ const getRegionsByEventId = `select jsonb_agg(
                                                     FROM       t_organization child_org
                                                     INNER JOIN child_orgs c
                                                     ON         c.org_id = child_org.parent_org_id ) SELECT *
-                                                 FROM   child_orgs))`;                
-
-
-// const getJudgesByEventsRegion = `select distinct	
-//                                     jsonb_agg(
-//                                   distinct jsonb_build_object(
-//                                         'judgeName', concat(tu.title,'. ', tu.first_name ,' ', tu.middle_name,' ', tu.last_name),
-//                                         'judgeId', tu.user_id
-//                                         ) 
-//                                     ) judge_arr
-//                                     from t_user tu
-//                                     join t_user_role_context turc 
-//                                     on turc.user_id = tu.user_id 
-//                                     and turc.org_id in (            
-//                                                             (WITH recursive child_orgs 
-//                                                             AS (
-//                                                                 SELECT org_id
-//                                                                 FROM   t_organization parent_org 
-//                                                                 WHERE  org_id in (select org_id from t_event_organization teo 
-//                                                                                     where teo.event_id = $1)                                                  
-//                                                                 UNION
-//                                                                 SELECT     child_org.org_id child_id
-//                                                                 FROM       t_organization child_org
-//                                                                 INNER JOIN child_orgs c
-//                                                                 ON         c.org_id = child_org.parent_org_id ) SELECT *
-//                                                                     FROM   child_orgs))
-//                                                 and turc.role_id in (select tr.role_id from t_role tr where lower(tr.name) like lower($2))
-//                                         join t_user_role_mapping turm on turc.user_id = turm.user_id 
-//                                         and coalesce(turm.role_start_date, current_date) <= current_date 
-//                                         and coalesce(turm.role_end_date , current_date) >= current_date
-//                                         and tu.is_deleted = false 
-//                                         and tu.is_locked = false;`;
+                                                 FROM   child_orgs))`;
 
 const getJudgesByEventRegion = `select 
                                 jsonb_agg(
@@ -312,9 +310,9 @@ const insertRegionStaffMapping = ` INSERT INTO t_event_region_staff_map (event_i
                                                         and tersm.event_category_map_id = $3
                                                         and tersm.org_id = $4 
                                                         and tersm.is_deleted = false
-                                                        ) returning event_region_staff_map_id;`;      
+                                                        ) returning event_region_staff_map_id;`;
 
-                                                        
+
 const insertCatStaffMapId = ` INSERT INTO t_event_cat_staff_map (event_id, event_category_map_id, user_id, 
                                         role_type, created_by, created_date, event_region_staff_map_id)
                                 select $1, $2, $3, $4, $5, $6, $7
@@ -324,14 +322,14 @@ const insertCatStaffMapId = ` INSERT INTO t_event_cat_staff_map (event_id, event
                                                     and tersm.event_category_map_id = $2
                                                     and tersm.user_id = $3 
                                                     and tersm.is_deleted = false
-                                                    ) returning event_cat_staff_map_id;`;    
-                                                    
+                                                    ) returning event_cat_staff_map_id;`;
+
 const getQuestionTypesFromLookup = `select tl.code 
                                     from t_lookup tl 
                                     where tl."type" = 'Question Type' 
                                     and tl.is_deleted = false 
-                                    order by tl."sequence" ;`   
-                                    
+                                    order by tl."sequence" ;`
+
 const insertQuestionnaire = ` INSERT INTO t_event_questionnaire (event_id, question, answer_type, created_by, created_date)
                             SELECT $1, $2, $3, $4, $5
                             WHERE NOT EXISTS (
@@ -340,8 +338,8 @@ const insertQuestionnaire = ` INSERT INTO t_event_questionnaire (event_id, quest
                                                     and teq.question = '$2'
                                                     and teq.answer_type = '$3' 
                                                     and teq.is_deleted = false) returning question_id;`;
-                                                    
-const getSelectedCategories = `select 
+
+const getSelCatsCGmapSection = `select 
                                     tgg.group_name,
                                     teggm.event_grade_group_map_id,
                                     tgg.grade_group_id,
@@ -352,7 +350,37 @@ const getSelectedCategories = `select
                                on tgg.grade_group_id = teggm.grade_group_id and teggm.event_id = $1
                                left join t_event_cat_grade_grp_map tecggm 
                                on tecggm.event_grade_group_map_id = teggm.event_grade_group_map_id
-                               join t_event_category_map tecm on tecm.event_cat_map_id = tecggm.event_cat_map_id;`;                                                    
+                               join t_event_category_map tecm on tecm.event_cat_map_id = tecggm.event_cat_map_id
+                               where tecggm.is_deleted = false;`;
+
+const deleteCategoryMapping = `delete from t_event_category_map where event_id = $1 and event_cat_map_id not in ($2);`;
+
+const deleteGroupMapping =  `delete from t_event_grade_group_map where event_id = $1 and event_grade_group_map_id not in ($2);`; 
+
+const deleteCatGroupMapping = `UPDATE t_event_cat_grade_grp_map SET is_deleted = $1, updated_by = $2, updated_date = $3 
+                                WHERE event_cat_map_id in ($4);`
+
+const deleteVenues = `delete from t_event_venue WHERE event_id = $1 and venue_id not in ($2);`;        
+
+const getJudgeMapForAssSec = `select distinct  
+                            tecm.event_category_id cat_id,
+                            tec."name" cat_name,
+                            tecm.event_cat_map_id cat_map_id,
+                            concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name,'(',to2."name" ,')') judge_name,
+                            tersm.org_id,
+                            tu.user_id ,
+                            to3."name" region_name,
+                            tec."sequence" 
+                            from t_event_category_map tecm
+                            join t_event_category tec on tecm.event_category_id = tec.event_category_id 
+                            join t_event_cat_staff_map tecsm on tecm.event_cat_map_id = tecsm.event_category_map_id
+                            join t_event_region_staff_map tersm on tersm.event_region_staff_map_id = tecsm.event_region_staff_map_id 
+                            join t_user tu on tecsm.user_id = tu.user_id
+                            join t_organization to2 on to2.org_id = tu.org_id 
+                            join t_organization to3 on to3.org_id = tersm.org_id  
+                            where tecm.event_id = $1 and tecsm.event_id = $1
+                            order by tec."sequence", tersm.org_id;`;
+
 
 
 module.exports = {
@@ -378,12 +406,16 @@ module.exports = {
     getProctorsByEventId,
     getVenusNameAndIsByEventLevel,
     updateVenueProctorMapping,
-    getRegionsByEventId, 
-    // getJudgesByEventsRegion
+    getRegionsByEventId,
     getJudgesByEventRegion,
     insertRegionStaffMapping,
     insertCatStaffMapId,
     getQuestionTypesFromLookup,
     insertQuestionnaire,
-    getSelectedCategories 
+    getSelCatsCGmapSection,
+    deleteCategoryMapping,
+    deleteGroupMapping,
+    deleteCatGroupMapping,
+    deleteVenues,
+    getJudgeMapForAssSec
 }

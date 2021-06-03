@@ -469,6 +469,17 @@ async function insertEvents(eventsData, loggedInUser) {
 
                 if (eventsData.categories) {
                     let catMapIds = []
+
+                    // ------------------  Unselected cat Deletion logic Starts here---------------------------//
+                    let listOfCatMapIds = []
+                    eventsData.categories.forEach((item) => { if (item.catMapId) listOfCatMapIds.push(item.catMapId) });
+                    if (listOfCatMapIds.length > 0) {
+                        tempQuery = queries.deleteCategoryMapping.replace('$2', listOfCatMapIds.join(','))
+                        result = await client.query(tempQuery, [eventsData.eventId]);
+                        console.log(`for event ${eventsData.eventId}, row deleted for categories: ${result.rowCount}`);
+                    }
+                    // ------------------  Unselected cat Deletion logic Ends here ---------------------------//
+
                     for (let category of eventsData.categories) {
                         if (category.catId) {
                             let result = await client.query(queries.insertCatMap, [eventsData.eventId, category.catId]);
@@ -477,12 +488,9 @@ async function insertEvents(eventsData, loggedInUser) {
                         } else if (category.catId == undefined || category.catId == null || category.catId == "") {
                             console.log(`Seems like user added new cateogry named as ${category.catName}, Adding it to t_event_category for event type ${eventsData.eventType}`);
 
-                            //get event type id by eventType, for future use.              
-                            let eventTypeId = await client.query(queries.getFrststEveTypIdByEveTyp, [eventsData.eventType]);
-
                             //Insert new category in the t_event_category table
                             let insertNewCategory = await client.query(queries.insertNewCategory,
-                                [category.catName, category.catDesc, eventsData.eventType, eventTypeId.rows[0].event_type_id]);
+                                [category.catName, category.catDesc, eventsData.eventType, eventsData.eventType]);
 
                             let newCatId = insertNewCategory.rows[0].event_category_id;
                             console.log(`event_category_id for newly added  category is  ${newCatId}`);
@@ -499,6 +507,16 @@ async function insertEvents(eventsData, loggedInUser) {
             //To persist event groups
             case "event_groups": {
                 if (eventsData.groups) {
+                    // ------------------  Unselected group Deletion logic Starts here---------------------------//
+                    let listOfEveGrpMapIds = []
+                    eventsData.groups.forEach((item) => { if (item.eventGradeGroupMapId) listOfEveGrpMapIds.push(item.eventGradeGroupMapId) });
+                    if (listOfEveGrpMapIds.length > 0) {
+                        let tempQuery = queries.deleteGroupMapping.replace('$2', listOfEveGrpMapIds.join(','))
+                        let result = await client.query(tempQuery, [eventsData.eventId]);
+                        console.log(`for event ${eventsData.eventId}, row deleted for groups mapping: ${result.rowCount}`);
+                    }
+                    // ------------------  Unselected group Deletion logic Ends here---------------------------//
+
                     let gradeGroupMapIds = [];
                     for (let group of eventsData.groups) {
                         if (group.gradeGroupId) {
@@ -510,8 +528,9 @@ async function insertEvents(eventsData, loggedInUser) {
                         } else if (group.gradeGroupId == undefined || group.gradeGroupId == null || group.gradeGroupId == "") {
                             if (typeof group.gradeGroupName != undefined && typeof group.gradeGroupName != undefined) {
                                 console.log(`Seems like user added new group as ${group.gradeGroupName}, Adding it to t_grade_group & t_grade_group_detail`);
+                                let maxCountRes = await client.query(queries.getMaxSeqOfGroup);
                                 let result = await client.query(queries.insertGradeGroup,
-                                    [group.gradeGroupName, loggedInUser, new Date().toUTCString()]);
+                                    [group.gradeGroupName, loggedInUser, new Date().toUTCString(), maxCountRes.rows[0].seq_max_count]);
                                 let newGroupId = result.rows[0].grade_group_id;
                                 for (let grade of group.grades) {
                                     //Mapping group to grades in t_grade_group_detail table.
@@ -530,6 +549,18 @@ async function insertEvents(eventsData, loggedInUser) {
             }//event_groups case block
             case "event_cat_group_map": {
                 if (eventsData.catGradeMap) {
+
+                    // to Delete previous mapping and insert new mapping logic starts here
+                    let catMapIds = []
+                    eventsData.catGradeMap.forEach((item) => { if (item.catMapId) catMapIds.push(item.catMapId) });
+                    if (catMapIds.length > 0) {
+                        let tempQuery = queries.deleteCatGroupMapping.replace('$4', catMapIds.join(','))
+                        let result = await client.query(tempQuery,
+                            [true, loggedInUser, new Date().toUTCString()]);
+                        console.log(`for event ${eventsData.eventId},Row count of deleted(Soft) cat-groups mappings are: ${result.rowCount}`);
+                    }
+                    //deletion logic ends here.
+
                     let catGrpMapIds = []
                     for (let catGrp of eventsData.catGradeMap) {// to iterate catGradeMap
                         for (let groupMap of catGrp.groupMapIds) { // to iterate groupMapIds        
@@ -544,6 +575,15 @@ async function insertEvents(eventsData, loggedInUser) {
             }
             case "event_venue_assignment": {
                 if (eventsData.venues) {
+
+                    // To delete venue logic starts here//
+                    if (eventsData.venues.length > 0) {
+                        let tempQuery = queries.deleteVenues.replace('$2', eventsData.venues.join(','));
+                        let result = await client.query(tempQuery, [eventsData.eventId]);
+                        console.log(`for event ${eventsData.eventId},Row count of deleted(Soft) venues are: ${result.rowCount}`);
+                    }
+                    // To delete venue logic ends here//
+
                     let venueMapIds = []
                     for (let venue of eventsData.venues) {// to iterate venues
                         let result = await client.query(queries.insertVenueEventMapping, [eventsData.eventId, venue]);
@@ -565,16 +605,18 @@ async function insertEvents(eventsData, loggedInUser) {
                             eventVenueIds.push(result.rows[0].event_venue_id)
                         }
                     }
-                    console.log(`Event ${eventsData.eventId}, updated for proctor assignment< Updated event_venue_ids are  : ${JSON.stringify(eventVenueIds)}`);
+                    console.log(`Event ${eventsData.eventId}, updated for proctor assignment, Updated event_venue_ids are  : ${JSON.stringify(eventVenueIds)}`);
                 }
                 break;
             }
             case "event_judge_assignment": {
                 if (eventsData.judgeAssignment) {
                     for (let assignment of eventsData.judgeAssignment) {
+                        //console.log(`Assigning for catId ${assignment.catId} and object is : ${JSON.stringify(assignment)}`)
                         let regionMapIds = [];
                         if (assignment.regions) {
-                            for (let region of assignment.regions) {
+                            for (let region of assignment.regions[0]) {
+                                //console.log(`region for regionId ${ region.regionId}`)
                                 let regionStaffRes = await client.query(queries.insertRegionStaffMapping,
                                     [eventsData.eventId, assignment.catId, assignment.catMapId,
                                     region.regionId, loggedInUser, new Date().toUTCString()]);
@@ -583,10 +625,10 @@ async function insertEvents(eventsData, loggedInUser) {
                                 //console.log("insertRegionStaffMapping =>", eventsData.eventId, assignment.catId, assignment.catMapId,region.regionId, loggedInUser, new Date().toUTCString());
                                 if (region.judges) {
                                     let staffMapIds = [];
-                                    for (let judge of region.judges) {
+                                    for (let judge of region.judges[0]) {
                                         if (regionStaffRes.rowCount != 0) {
                                             let catStaffMapRes = await client.query(queries.insertCatStaffMapId,
-                                                [eventsData.eventId, assignment.catMapId, judge,
+                                                [eventsData.eventId, assignment.catMapId, parseInt(judge + ""),
                                                     'Judge', loggedInUser, new Date().toUTCString(),
                                                 regionStaffRes.rows[0].event_region_staff_map_id]);
                                             // console.log( "insertCatStaffMapId =>", eventsData.eventId, assignment.catMapId, judge,'Judge', loggedInUser, new Date().toUTCString())
@@ -658,147 +700,6 @@ async function insertEvents(eventsData, loggedInUser) {
         return ({
             data: response
         })
-
-        //     /********************** t_event_venue************************************************************************************/
-        //     console.log("2");
-        //     const insertVenue = `INSERT INTO t_event_venue(event_id, venue_id, proctor_id)
-        //         VALUES ($1, $2, $3);`
-
-
-        //     if (eventsData.venues != null) {
-        //         for (let venue of eventsData.venues) {
-        //             //t_event_venue 
-        //             console.log(`Inserting venue ${JSON.stringify(venue)}`);
-
-        //             insertVenue_value =
-        //                 [
-        //                     this.eventId,
-        //                     venue.venueId,
-        //                     venue.proctorId
-        //                 ]
-        //             if (venue.venueId != "") {
-        //                 await client.query(insertVenue, insertVenue_value);
-        //             }
-        //         }
-        //     }
-
-
-        //     /********************** t_event_category_map,   t_event_cat_staff_map*******************************************************************************/
-        //     console.log("3");
-
-        //     if (eventsData.categories) {
-        //         for (let category of eventsData.categories) {
-
-        //             console.log("4");
-
-        //             const insertCategory = `INSERT INTO t_event_category_map(event_id, event_category_id)
-        //                                     VALUES ($1, $2) returning event_cat_map_id;`
-        //             insertCategory_value =
-        //                 [
-        //                     this.eventId,
-        //                     category.eventCategoryID
-        //                 ]
-        //             if (category.eventCategoryID) {
-        //                 let result = await client.query(insertCategory, insertCategory_value);
-        //                 this.eventCategoryID = result.rows[0].event_cat_map_id;
-        //             }
-
-        //             //this.venueId = result.rows[0].venue_id;
-
-
-
-
-        //             console.log("5");
-
-        //             if (category.venueId) {
-        //                 for (let venue of category.venueId) {
-        //                     console.log("venue", venue);
-        //                     const eventCatVenueMap = `INSERT INTO t_event_category_venue_map(event_cat_map_id, event_venue_id) VALUES ($1, $2);`
-        //                     eventCatVenueMapValues = [
-        //                         this.eventCategoryID,
-        //                         venue
-        //                     ]
-        //                     await client.query(eventCatVenueMap, eventCatVenueMapValues);
-        //                 }
-        //             }
-
-        //             if (category.judges) {
-        //                 for (let judge of category.judges) {
-        //                     if (judge) {
-        //                         const insertCatUserMap = `INSERT INTO  t_event_cat_staff_map(event_id, event_category_map_id, role_type, user_id)
-        //                                            VALUES ($1, $2, $3, $4);`
-
-        //                         insertCatUserMap_values = [
-        //                             this.eventId,
-        //                             this.eventCategoryID,
-        //                             'Judge',
-        //                             judge
-        //                         ]
-
-        //                         console.log("insertCatUserMap_values", insertCatUserMap_values);
-        //                         await client.query(insertCatUserMap, insertCatUserMap_values);
-
-        //                     }
-
-        //                 }
-        //             }
-
-        //         }
-        //     }
-
-        //     console.log("6");
-
-        //     const insertQuestionare = `INSERT INTO t_event_questionnaire(event_id, question, answer_type)
-        //         VALUES ($1, $2, $3);`
-
-
-        //     if (eventsData.questionnaire != null) {
-        //         for (let question of eventsData.questionnaire) {
-        //             //t_event_venue 
-        //             console.log(`Inserting category ${JSON.stringify(question)}`);
-        //             insertQuestionareValue =
-        //                 [
-        //                     this.eventId,
-        //                     question.question,
-        //                     question.responseType
-        //                 ]
-        //             await client.query(insertQuestionare, insertQuestionareValue);
-        //         }
-        //     }
-
-
-        //     if (eventsData) {
-        //         const insertTtcExamDates = `INSERT INTO t_event_exam_date(event_id, exam_start_date, exam_end_date)
-        //         VALUES ($1, $2, $3);`
-
-        //         insertTtcExamDatesValues = [
-        //             this.eventId,
-        //             eventsData.ttcExamStartDate,
-        //             eventsData.ttcExamEndDate
-        //         ]
-
-        //         if (eventsData.ttcExamStartDate) {
-        //             await client.query(insertTtcExamDates, insertTtcExamDatesValues);
-        //         }
-
-        //     }
-
-        //     await client.query("COMMIT");
-        //     console.log("After commit");
-
-        //     return ({
-        //         data: {
-        //             status: 'success'
-        //         }
-        //     })
-        // }
-
-        // } catch (err) {
-        //     await client.query("ROLLBACK");
-        //     console.error(`reqOperations.js::insertevents() --> error : }`, err);
-        //     console.log("Transaction ROLLBACK called");
-        //     return (errorHandling.handleDBError('transactionError'));
-        // }
     }
     catch (error) {
         await client.query("ROLLBACK;");
@@ -808,6 +709,54 @@ async function insertEvents(eventsData, loggedInUser) {
         client.release();
     }
 }
+
+async function validateAndDeleteMappings(client, eventData) {
+    console.log('validateAndDeleteMappings called.')
+    switch (eventData.sectionCode) {
+
+        case "event_categories": {
+
+            let listOfCatIds = []
+            eventData.categories.forEach((item) => { if (item.catId) listOfCatIds.push(item.catId) });
+            if (listOfCatIds.length <= 0)
+                return { isError: false }
+
+            // validations if category has mapped to grade   
+            let tempQuery = queries.checkIsCategoryAllowedToDelete.replace('$2', listOfCatIds.join(','))
+            let result1 = await client.query(tempQuery, [eventData.eventId]);
+            //validation if category has been mapped to staff(Judge)
+            tempQuery = queries.checkIsCategoryMappedToStaff.replace('$2', listOfCatIds.join(','))
+            let result2 = await client.query(tempQuery, [eventData.eventId]);
+            console.log("validating selected categories : " + listOfCatIds.join(','))
+            console.log(`[Validation] : are unselected categories mapped to group? ${!result1.rows[0].allowed_to_delete}`);
+            console.log(`[Validation] : are unselected categories mapped to staff(Judge)? ${!result2.rows[0].allowed_to_delete}`);
+
+            if (result1.rows[0].allowed_to_delete === false) {
+                return {
+                    isError: true,
+                    error: errorHandling.handleDBError('cat_grp_map_error')
+                }
+            } else if (result2.rows[0].allowed_to_delete === false) {
+                return {
+                    isError: true,
+                    error: errorHandling.handleDBError('cat_staff_map_error')
+                }
+            } else if (
+                result1.rows[0].allowed_to_delete === true &&
+                result2.rows[0].allowed_to_delete === true
+            ) {
+
+                tempQuery = queries.deleteCategoryMapping.replace('$2', listOfCatIds.join(','))
+                result = await client.query(tempQuery, [eventData.eventId]);
+                console.log(`for event ${eventData.eventId}, row deleted for categories: ${result.rowCount}`);
+            }
+            return { isError: false }
+        }
+    }
+
+}
+
+
 
 async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType, client) {
 
@@ -824,12 +773,12 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
         case "event_cat_group_map": {
             let groupData = await client.query(queries.getEventGroupMapping, [eventId]);
             let catData = await client.query(queries.getEventCatMapping, [eventId]);
-            let mappedData = await client.query(queries.getSelectedCategories, [eventId]);
+            let mappedData = await client.query(queries.getSelCatsCGmapSection, [eventId]);
             let catMapRespJson = catData.rows[0].cat_mapping;
             for (let i = 0; i < catMapRespJson.length; i++) {
                 for (let grpMapRow of mappedData.rows) {
                     if (catMapRespJson[i].catId == grpMapRow.event_category_id) {
-                        console.log(`cat-catId : ${catMapRespJson[i].catId} ----  grpMap-catId : ${grpMapRow.event_category_id}`)
+                        //  console.log(`cat-catId : ${catMapRespJson[i].catId} ----  grpMap-catId : ${grpMapRow.event_category_id}`)
                         if (catMapRespJson[i].mappedGroups === undefined) {
                             catMapRespJson[i].mappedGroups = [];
                         }
@@ -866,9 +815,71 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             let regionsList = await client.query(queries.getRegionsByEventId, [eventId]);
             // let JudgesList = await client.query(queries.getJudgesByEventsRegion, [eventId, `%judge%`]);
             let categoriesList = await client.query(queries.getEventCatMapping, [eventId]);
+
+            let judgeMapping = await client.query(queries.getJudgeMapForAssSec, [eventId]);
+
+            let respObj = [];
+            if (judgeMapping.rowCount > 0) {
+                for (let row of judgeMapping.rows) {
+                    let index = respObj.findIndex((item) => item.catId == row.cat_id);
+                    if (index < 0) {
+                        let tempJObj = {
+                            catId: row.cat_id,
+                            categoryName: row.cat_name,
+                            catMapId: row.cat_map_id,
+                            regionsJudgesArray: [
+                                {
+                                    regions: [
+                                        {
+                                            regionId: row.org_id,
+                                            regionName: row.region_name
+                                        }
+                                    ],
+                                    judges: [
+                                        {
+                                            judgeId: row.user_id,
+                                            judgeName: row.judge_name
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                        respObj.push(tempJObj)
+                    } else {
+                        let regIndex = respObj[index].regionsJudgesArray.findIndex(item => item.regions[0].regionId == row.org_id)
+                        if (regIndex < 0) {
+
+                            respObj[index].regionsJudgesArray.push(
+                                {
+                                    regions: [
+                                        {
+                                            regionId: row.org_id,
+                                            regionName: row.region_name
+                                        }
+                                    ],
+                                    judges: [
+                                        {
+                                            judgeId: row.user_id,
+                                            judgeName: row.judge_name
+                                        }
+                                    ]
+                                }
+                            )
+
+                        } else {
+                            respObj[index].regionsJudgesArray[regIndex]
+                                .judges.push({
+                                    judgeId: row.user_id,
+                                    judgeName: row.judge_name
+                                })
+                        }
+                    }
+                }
+            }
+
             return {
                 regionsList: regionsList.rows[0].region_array,
-                // judgesList: JudgesList.rows[0].judge_arr,
+                categories: respObj,
                 categoriesList: categoriesList.rows[0].cat_mapping
             }
         }
