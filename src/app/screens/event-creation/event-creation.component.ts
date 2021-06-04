@@ -1120,15 +1120,7 @@ export class EventCreationComponent implements OnInit {
   onEventEvaluatorAssignSectionNextBtn(){
 
     let payload: any = {};
-    //let evaluatorAssignment: any = [];
     let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
-
-    // for(let row of this.selectedEvaluatorsDropdown){
-    //   for(let row1 of evaluatorAssignmentAllData)
-    //   if(row.evalId == row1.evalId){
-    //     evaluatorAssignment.push(row);
-    //   }
-    // }
 
     if (this.eventsDataFormGroup.value.eventType == 'TTC') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
