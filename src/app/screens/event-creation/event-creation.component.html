@@ -236,7 +236,7 @@
             </mat-step>
 
 
-            <mat-step [stepControl]="eventCategoriesFormGroup">
+            <mat-step *ngIf ="isCategoryRequired" [stepControl]="eventCategoriesFormGroup">
                 <div class="container">
 
                     <form [formGroup]="eventCategoriesFormGroup">
@@ -330,7 +330,7 @@
             </mat-step>
 
 
-            <mat-step [stepControl]="eventGroupsFormGroup">
+            <mat-step *ngIf="isCategoryRequired" [stepControl]="eventGroupsFormGroup">
                 <div class="container">
                     <form [formGroup]="eventGroupsFormGroup">
                         <ng-template matStepLabel>
@@ -428,7 +428,7 @@
             </mat-step>
 
 
-            <mat-step [stepControl]="eventCatGroupMapFormGroup">
+            <mat-step *ngIf="isCategoryRequired" [stepControl]="eventCatGroupMapFormGroup">
                 <div class="container">
                     <form [formGroup]="eventCatGroupMapFormGroup">
                         <ng-template matStepLabel>
@@ -480,7 +480,7 @@
             </mat-step>
 
 
-            <mat-step [stepControl]="eventVenueAssignFormGroup">
+            <mat-step *ngIf="isVenueRequired" [stepControl]="eventVenueAssignFormGroup">
                 <div class="container">
                     <form [formGroup]="eventVenueAssignFormGroup">
                         <ng-template matStepLabel>
@@ -508,7 +508,7 @@
             </mat-step>
 
 
-            <mat-step [stepControl]="eventProctorAssignFormGroup">
+            <mat-step *ngIf="isProctorRequired" [stepControl]="eventProctorAssignFormGroup">
                 <div class="container">
                     <form [formGroup]="eventProctorAssignFormGroup">
                         <ng-template matStepLabel>
@@ -560,9 +560,7 @@
             </mat-step>
 
 
-
-
-            <mat-step [stepControl]="eventJudgeAssignFormGroup">
+            <mat-step *ngIf="isJudgeRequired" [stepControl]="eventJudgeAssignFormGroup">
                 <div class="container">
                     <form [formGroup]="eventJudgeAssignFormGroup">
                         <ng-template matStepLabel>
@@ -714,11 +712,49 @@
             </mat-step>
 
 
+            <mat-step *ngIf="isEvaluatorRequired" [stepControl]="eventEvaluatorAssignFormGroup">
+                <div class="container">
+                    <form [formGroup]="eventEvaluatorAssignFormGroup">
+                        <ng-template matStepLabel>Event Evaluator Assignment</ng-template>
+                        <div class="form-container">
 
 
+                            <div class="row" style="padding-top: 2%; padding-bottom: 16%;">
+                                
+                                <ng-multiselect-dropdown class="col-md-12"
+                                id="evaluators" placeholder="Select Evaluators"
+                                [settings]="dropdownSettingsEvaluator"
+                                [data]="evaluatorDropdownValues"
+                                formControlName="evaluators"
+                                [(ngModel)]="selectedEvaluatorsDropdown"
+                                (onSelect)="onItemSelect($event)"
+                                (onSelectAll)="onSelectAll($event)">
+                                </ng-multiselect-dropdown>
 
-            <!-- *ngIf="isQuestionnariesRequired" -->
-            <mat-step [stepControl]="questionnaireDataFormGroup">
+
+                            </div>
+
+
+                            <!-- <mat-divider
+                                style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 4%;margin-bottom: 3%;">
+                            </mat-divider> -->
+
+
+                            <div style="padding-top: 4%; padding-bottom: 2%;">
+                                <button mat-raised-button matStepperNext>
+                                    <span style="font-family: poppins;"
+                                        (click)="onEventEvaluatorAssignSectionNextBtn()">Next</span>
+                                </button>
+                            </div>
+
+
+                        </div>
+                    </form>
+                </div>
+            </mat-step>
+
+
+            <mat-step *ngIf="isQuestionnaireRequired" [stepControl]="questionnaireDataFormGroup">
                 <div class="container">
                     <form [formGroup]="questionnaireDataFormGroup">
                         <ng-template matStepLabel>Event Questionaries</ng-template>
@@ -792,39 +828,7 @@
                 </div>
             </mat-step>
 
-            <mat-step *ngIf="isEvaluatorRequired" [stepControl]="eventEvaluatorAssignFormGroup">
-                <div class="container">
-                    <form [formGroup]="eventEvaluatorAssignFormGroup">
-                        <ng-template matStepLabel>Event Evaluator Assignment</ng-template>
-                        <div class="form-container">
-
-
-                            <div class="row" style="padding-top: 4%; padding-bottom: 10%;">
-                                
-                                <ng-multiselect-dropdown class="col-md-12"
-                                id="evaluators" placeholder="Select Evaluators"
-                                [settings]="dropdownSettingsEvaluator"
-                                [data]="evaluatorDropdownValues"
-                                formControlName="evaluators"
-                                (onSelect)="onItemSelect($event)"
-                                (onSelectAll)="onSelectAll($event)">
-                                </ng-multiselect-dropdown>
-
-
-                            </div>
-
-
-                            <!-- <mat-divider
-                                style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 4%;margin-bottom: 3%;">
-                            </mat-divider> -->
-
-
-
-
-                        </div>
-                    </form>
-                </div>
-            </mat-step>
+           
 
         </mat-vertical-stepper>
 
