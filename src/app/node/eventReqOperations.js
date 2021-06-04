@@ -705,7 +705,7 @@ async function insertEvents(eventsData, loggedInUser) {
                 if (eventsData.evaluatorAssignment) {
 
                     let selEvalIds = [];
-                    eventsData.evaluatorAssignment.forEach((item) => {if(item.eventEvaluatorId) selEvalIds.push(item.eventEvaluatorId)});
+                    eventsData.evaluatorAssignment.forEach((item) => {if(item.evalId) selEvalIds.push(item.evalId)});
                     if(selEvalIds.length > 0){
                         
                         let tempQuery = queries.deleteEvaluatorsForEvalSection.replace('$5', selEvalIds.join(','))

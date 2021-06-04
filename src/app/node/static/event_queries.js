@@ -432,7 +432,7 @@ const insertEventEvaluator = `INSERT INTO t_event_evaluator (event_id, user_id, 
                                                     
  const deleteEvaluatorsForEvalSection = ` UPDATE t_event_evaluator
                                     SET is_deleted= $1, updated_by= $2, updated_date= $3
-                                    WHERE event_id = $4 and event_evaluator_id not in ($5);`;                                                   
+                                    WHERE event_id = $4 and user_id not in ($5);`;                                                   
 
 module.exports = {
     insertEvent,
