@@ -704,26 +704,26 @@ async function insertEvents(eventsData, loggedInUser) {
             case "event_evaluator_assignment": {
                 if (eventsData.evaluatorAssignment) {
 
-                    if(eventsData.evaluatorAssignment.length == 0){
+                    if (eventsData.evaluatorAssignment.length == 0) {
                         await client.query(queries.deleteAllEvaluatorsForEvalSection,
-                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]); 
+                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
                     }
 
                     let selEvalIds = [];
-                    eventsData.evaluatorAssignment.forEach((item) => {if(item.evalId) selEvalIds.push(item.evalId)});
-                    if(selEvalIds.length > 0){
-                        
+                    eventsData.evaluatorAssignment.forEach((item) => { if (item.evalId) selEvalIds.push(item.evalId) });
+                    if (selEvalIds.length > 0) {
+
                         let tempQuery = queries.deleteEvaluatorsForEvalSection.replace('$5', selEvalIds.join(','))
                         let result = await client.query(tempQuery,
                             [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]);
                         console.log(`for event ${eventsData.eventId}, Row count of deleted(Soft) evaluator mappings are: ${result.rowCount}`);
                     }
 
-                    evantEvalIds =[];
+                    evantEvalIds = [];
                     for (let eval of eventsData.evaluatorAssignment) {
                         let result = await client.query(queries.insertEventEvaluator,
                             [eventsData.eventId, eval.evalId, loggedInUser, new Date().toUTCString()]);
-                       if(result.rowCount > 0)
+                        if (result.rowCount > 0)
                             evantEvalIds.push(result.rows[0].event_evaluator_id)
                     }
                     console.log(`Event ${eventsData.eventId}, Newly inserted event_evaluator_ids are: ${JSON.stringify(evantEvalIds)}`)
@@ -1097,8 +1097,21 @@ async function getEventType() {
         let metadata = {};
         let eventType = [];
 
-        let getEventType = `select tet.name event_type, tet.is_venue_required, tet.is_proctor_required, tet.is_judge_required, 
-        tec.event_category_id, tec.name event_category_name, tec.school_grade_from, tec.school_grade_to , tet.is_school_grade_required
+        let getEventType = `select tet.name event_type, 
+        tet.is_venue_required, 
+        tet.is_proctor_required, 
+        tet.is_judge_required, 
+        tet.is_school_grade_required,
+        tet.is_category_required,
+        tet.is_single_day_event,
+        tet.is_school_group_required,
+        tet.is_evaluator_required,
+        tet.is_questionnaire_requred,
+        tet.is_attachment_required,
+        tet.is_url_required,
+        tec.event_category_id, 
+        tec.name event_category_name, 
+        tec.description
         from t_event_type tet , t_event_category tec 
         where tet.is_deleted = false 
         and tec.event_type_id = tet.event_type_id order by tet.name;`
@@ -1125,16 +1138,21 @@ async function getEventType() {
                     eventTypes.isProctorRequired = row.is_proctor_required;
                     eventTypes.isJudgeRequired = row.is_judge_required;
                     eventTypes.isSchoolGradeRequired = row.is_school_grade_required;
+                    eventTypes.isCategoryRequired = row.is_category_required;
+                    eventTypes.isSingleDayEvent = row.is_single_day_event;
+                    eventTypes.isSchoolGroupRequired = row.is_school_group_required;
+                    eventTypes.isEvaluatorRequired = row.is_evaluator_required;
+                    eventTypes.isQuestionnaireRequired = row.is_questionnaire_requred;
+                    eventTypes.isAttachmentRequired = row.is_attachment_required;
+                    eventTypes.isUrlRequired = row.is_url_required;
                     type = row.event_type;
 
                 }
 
                 eventNames = {};
-                eventNames.id = row.event_category_id;
-                eventNames.name = row.event_category_name;
-                eventNames.description = row.description;
-                eventNames.schoolGradeFrom = row.school_grade_from;
-                eventNames.schoolGradeTo = row.school_grade_to;
+                eventNames.catId = row.event_category_id;
+                eventNames.catName = row.event_category_name;
+                eventNames.catDesc = row.description;
                 eventName.push(eventNames);
             }
             eventTypes.eventName = eventName;
