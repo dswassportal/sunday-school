@@ -704,6 +704,11 @@ async function insertEvents(eventsData, loggedInUser) {
             case "event_evaluator_assignment": {
                 if (eventsData.evaluatorAssignment) {
 
+                    if(eventsData.evaluatorAssignment.length == 0){
+                        await client.query(queries.deleteAllEvaluatorsForEvalSection,
+                            [true, loggedInUser, new Date().toUTCString(), eventsData.eventId]); 
+                    }
+
                     let selEvalIds = [];
                     eventsData.evaluatorAssignment.forEach((item) => {if(item.evalId) selEvalIds.push(item.evalId)});
                     if(selEvalIds.length > 0){
