@@ -528,9 +528,8 @@ async function insertEvents(eventsData, loggedInUser) {
                         } else if (group.gradeGroupId == undefined || group.gradeGroupId == null || group.gradeGroupId == "") {
                             if (typeof group.gradeGroupName != undefined && typeof group.gradeGroupName != undefined) {
                                 console.log(`Seems like user added new group as ${group.gradeGroupName}, Adding it to t_grade_group & t_grade_group_detail`);
-                                let maxCountRes = await client.query(queries.getMaxSeqOfGroup);
                                 let result = await client.query(queries.insertGradeGroup,
-                                    [group.gradeGroupName, loggedInUser, new Date().toUTCString(), maxCountRes.rows[0].seq_max_count]);
+                                    [group.gradeGroupName, loggedInUser, new Date().toUTCString()]);
                                 let newGroupId = result.rows[0].grade_group_id;
                                 for (let grade of group.grades) {
                                     //Mapping group to grades in t_grade_group_detail table.

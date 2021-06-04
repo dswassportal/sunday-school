@@ -116,7 +116,7 @@ const getEventGroupMapping = `select
                                             'gradeGroupName', tgg.group_name,
                                             'gradeGroupMapId', teggm.event_grade_group_map_id,
                                             'gradeGroupId', tgg.grade_group_id
-                                            ) 
+                                            ) order by tgg."sequence"
                                     ) group_mapping 
                                     from t_grade_group tgg 
                                     join t_event_grade_group_map teggm 	
@@ -128,7 +128,7 @@ const getEventCatMapping = `select
                                     'catName', tec."name",
                                     'catMapId', tecm.event_cat_map_id,
                                     'catId', tec.event_category_id 
-                                    ) 
+                                    ) order by tec."sequence" 
                                 ) cat_mapping
                                 from t_event_category tec 
                                 join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
@@ -351,7 +351,7 @@ const getSelCatsCGmapSection = `select
                                left join t_event_cat_grade_grp_map tecggm 
                                on tecggm.event_grade_group_map_id = teggm.event_grade_group_map_id
                                join t_event_category_map tecm on tecm.event_cat_map_id = tecggm.event_cat_map_id
-                               where tecggm.is_deleted = false;`;
+                               where tecggm.is_deleted = false order by tgg."sequence";`;
 
 const deleteCategoryMapping = `delete from t_event_category_map where event_id = $1 and event_cat_map_id not in ($2);`;
 
