@@ -409,7 +409,7 @@ const getSelectedAndAllEvaluators = `select jsonb_agg(
                                             )
                                         ) evaluators
                                     from v_user ve 
-                                    left join t_event_evaluator tee on tee.user_id = ve.user_id and event_id = $1
+                                    left join t_event_evaluator tee on tee.user_id = ve.user_id and event_id = $1 and tee.is_deleted = false
                                     where lower(ve.role_name) like lower($2) and org_id in ((WITH recursive child_orgs 
                                                     AS (
                                                         SELECT org_id
@@ -432,7 +432,11 @@ const insertEventEvaluator = `INSERT INTO t_event_evaluator (event_id, user_id, 
                                                     
  const deleteEvaluatorsForEvalSection = ` UPDATE t_event_evaluator
                                     SET is_deleted= $1, updated_by= $2, updated_date= $3
-                                    WHERE event_id = $4 and user_id not in ($5);`;                                                   
+                                    WHERE event_id = $4 and user_id not in ($5);`;       
+                                    
+const deleteAllEvaluatorsForEvalSection = ` UPDATE t_event_evaluator
+                                    SET is_deleted= $1, updated_by= $2, updated_date= $3
+                                    WHERE event_id = $4;`;                                      
 
 module.exports = {
     insertEvent,
@@ -476,5 +480,6 @@ module.exports = {
     deleteStaffCatMapping,
     getSelectedAndAllEvaluators,
     insertEventEvaluator,
-    deleteEvaluatorsForEvalSection
+    deleteEvaluatorsForEvalSection,
+    deleteAllEvaluatorsForEvalSection
 }
