@@ -243,6 +243,24 @@ export class EventCreationComponent implements OnInit {
     this.apiService.getEventType().subscribe((res: any) => {
       this.eventList = res.data.metaData.eventType;
       this.eventcategorydata = res.data.metaData.eventType;
+
+      // For showing and hiding different sections and fields as per eventType
+      for (let i = 0; i < this.eventList.length; i++) {
+        if (this.eventList[i].eventType == this.eventsDataFormGroup.value.eventType) {
+          this.isVenueRequired = this.eventList[i].isVenueRequired;
+          this.isProctorRequired = this.eventList[i].isProctorRequired;
+          this.isJudgeRequired = this.eventList[i].isJudgeRequired;
+          this.isSchoolGradeRequired = this.eventList[i].isSchoolGradeRequired;
+          this.isCategoryRequired = this.eventList[i].isCategoryRequired;
+          this.isSingleDayEvent = this.eventList[i].isSingleDayEvent;
+          this.isSchoolGroupRequired = this.eventList[i].isSchoolGroupRequired;
+          this.isEvaluatorRequired = this.eventList[i].isEvaluatorRequired;
+          this.isQuestionnaireRequired = this.eventList[i].isQuestionnaireRequired;
+          this.isAttachmentRequired = this.eventList[i].isAttachmentRequired;
+          this.isUrlRequired = this.eventList[i].isUrlRequired;
+          this.eventsDataFormGroup.value.eventType = this.eventList[i].eventType;
+        }
+      }
     });
 
     this.apiService.getUserRoleData().subscribe(res => {
@@ -488,7 +506,6 @@ export class EventCreationComponent implements OnInit {
       venues: this.formBuilder.array([this.adduserVenuAndProcter()])
     });
 
-    this.getData();
 
     // For getting event data by event id 
     this.apiService.callGetService(`getEvent?id=${this.selectedRowJson.event_Id}`).subscribe((res) => {
@@ -688,9 +705,8 @@ export class EventCreationComponent implements OnInit {
 
             let mappedEvaluators = [];
 
-            for(let row of this.evaluatorDropdownValues){
-              if(row.isSelected == true)
-              {
+            for (let row of this.evaluatorDropdownValues) {
+              if (row.isSelected == true) {
                 let json = {
                   "evalId": row.evalId,
                   "evalName": row.evalName,
@@ -786,24 +802,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    // For showing and hiding different sections and fields as per eventType
-    for (let i = 0; i < this.eventList.length; i++) {
-      if (this.eventList[i].eventType == this.eventsDataFormGroup.value.eventType) {
-        this.isVenueRequired = this.eventList[i].isVenueRequired;
-        this.isProctorRequired = this.eventList[i].isProctorRequired;
-        this.isJudgeRequired = this.eventList[i].isJudgeRequired;
-        this.isSchoolGradeRequired = this.eventList[i].isSchoolGradeRequired;
-        this.isCategoryRequired = this.eventList[i].isCategoryRequired;
-        this.isSingleDayEvent = this.eventList[i].isSingleDayEvent;
-        this.isSchoolGroupRequired = this.eventList[i].isSchoolGroupRequired;
-        this.isEvaluatorRequired = this.eventList[i].isEvaluatorRequired;
-        this.isQuestionnaireRequired = this.eventList[i].isQuestionnaireRequired;
-        this.isAttachmentRequired = this.eventList[i].isAttachmentRequired;
-        this.isUrlRequired = this.eventList[i].isUrlRequired;
-      }
-    }
-
-
+    this.getData();
 
   }
 
@@ -1117,7 +1116,7 @@ export class EventCreationComponent implements OnInit {
 
   }
 
-  onEventEvaluatorAssignSectionNextBtn(){
+  onEventEvaluatorAssignSectionNextBtn() {
 
     let payload: any = {};
     let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
@@ -1227,16 +1226,16 @@ export class EventCreationComponent implements OnInit {
     });
   }
 
-  setRegionsAndJudges(eventcategorydata: any): FormArray {
-    const formArray = new FormArray([]);
-    eventcategorydata.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        regions: [e.mappedRegions],
-        judges: '',
-      }));
-    });
-    return formArray;
-  }
+  // setRegionsAndJudges(eventcategorydata: any): FormArray {
+  //   const formArray = new FormArray([]);
+  //   eventcategorydata.forEach((e: any) => {
+  //     formArray.push(this.formBuilder.group({
+  //       regions: [e.mappedRegions],
+  //       judges: '',
+  //     }));
+  //   });
+  //   return formArray;
+  // }
 
 
 

@@ -14,7 +14,7 @@
                 </button>
             </div>
         </div>
-        <mat-vertical-stepper [linear]="false" #stepper>
+        <mat-vertical-stepper [linear]="true" #stepper>
 
             <mat-step [stepControl]="eventsDataFormGroup">
 
@@ -660,8 +660,7 @@
                                                                             id="judges" placeholder="Select Judges"
                                                                             [settings]="dropdownSettingsJudges"
                                                                             [data]="judgesDropdownValues"
-                                                                            formControlName="judges"
-                                                                            
+                                                                            formControlName="judges"                                                                            
                                                                             (onSelect)="onItemSelect($event)"
                                                                             (onSelectAll)="onSelectAll($event)">
                                                                         </ng-multiselect-dropdown>
