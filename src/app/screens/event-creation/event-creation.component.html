@@ -664,6 +664,7 @@
                                                                             [settings]="dropdownSettingsJudges"
                                                                             [data]="judgesDropdownValues"
                                                                             formControlName="judges"
+                                                                            
                                                                             (onSelect)="onItemSelect($event)"
                                                                             (onSelectAll)="onSelectAll($event)">
                                                                         </ng-multiselect-dropdown>
@@ -722,17 +723,20 @@
                     <form [formGroup]="questionnaireDataFormGroup">
                         <ng-template matStepLabel>Event Questionaries</ng-template>
                         <div class="form-container">
+
+                            <div style="margin-left: 83.7%; padding-bottom: 1%;" class="row">
+                                <button mat-raised-button (click)="onaddbtnclick1()">
+                                    <mat-icon>add</mat-icon>
+                                    <span style="font-family: poppins;">Add Questions</span>
+                                </button>
+                            </div>
+
                             <fieldset>
                                 <div class="row" formArrayName="questionnaire"
                                     *ngFor="let item of questionnaireDataFormGroup.get('questionnaire')['controls']; let i = index;">
 
                                     <div class="container" style="padding-left: 2%;" [formGroupName]="i">
-                                        <div style="margin-left: 91%; padding-bottom: 1%;" class="row">
-                                            <button mat-raised-button (click)="onaddbtnclick1()">
-                                                <mat-icon>add</mat-icon>
-                                                <span style="font-family: poppins;">Add</span>
-                                            </button>
-                                        </div>
+                                       
 
                                         <div class="row" style="padding-top:2%">
                                             <mat-form-field class="col-md-8">
@@ -788,7 +792,7 @@
                 </div>
             </mat-step>
 
-            <mat-step [stepControl]="eventEvaluatorAssignFormGroup">
+            <mat-step *ngIf="isEvaluatorRequired" [stepControl]="eventEvaluatorAssignFormGroup">
                 <div class="container">
                     <form [formGroup]="eventEvaluatorAssignFormGroup">
                         <ng-template matStepLabel>Event Evaluator Assignment</ng-template>
@@ -830,19 +834,19 @@
             style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 4%;margin-bottom: 3%;">
         </mat-divider>
 
-        <div *ngIf="!eventFormLabel" class="row" style="padding-top: 1%;">
+        <div class="row" style="padding-top: 1%;">
             <div class="col text-center">
                 <button mat-raised-button type="submit" class="mbutton" (click)="createEvent()">
                    <span style="font-family: poppins;"> Save</span></button>
             </div>
         </div>
 
-        <div *ngIf="eventFormLabel" class="row" style="padding-top: 1%;">
+        <!-- <div *ngIf="eventFormLabel" class="row" style="padding-top: 1%;">
             <div class="col text-center">
                 <button mat-raised-button type="submit" class="mbutton" (click)="updateEvent()">
                     Update Event</button>
             </div>
-        </div>
+        </div> -->
 
 
 

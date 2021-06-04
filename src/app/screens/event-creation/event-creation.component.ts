@@ -88,6 +88,7 @@ export class EventCreationComponent implements OnInit {
   responseTypeDropdownValues: any;
   venueListData: any;
   selectedCategories: any;
+  isEvaluatorRequired: any;
 
 
 
@@ -332,9 +333,9 @@ export class EventCreationComponent implements OnInit {
       this.judgesDropdownValues = res.data.judges;
     });
 
-    //this.eventJudgeAssignFormGroup.value. = 
-
   }
+
+  
 
 
 
@@ -348,6 +349,14 @@ export class EventCreationComponent implements OnInit {
       this.selectedRowJson = this.eventDataService.getSelectedRowData();
       this.eventId = this.selectedRowJson.event_Id;
       console.log('selected row data is :: ' + JSON.stringify(this.selectedRowJson))
+    }
+
+    // For Label And button Show update
+    if (this.selectedRowJson.event_Id != undefined || this.selectedRowJson.event_Id != null) {
+      this.eventFormLabel = true; // update screen
+    }
+    else {
+      this.eventFormLabel = false; // insert screen
     }
 
     this.gridOptionsCat = {
@@ -519,7 +528,6 @@ export class EventCreationComponent implements OnInit {
       }
       this.selectedRowJson.event_Id = null;
 
-
       if (this.eventFormLabel == true) {
         this.evntTypedisabled = true;
       }
@@ -633,15 +641,18 @@ export class EventCreationComponent implements OnInit {
         if (res.data.event_judge_assignment) {
 
           this.selectedCategories = res.data.event_judge_assignment.categoriesList;
-          //this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));  //   //this.categoriesList
-          //this.eventJudgeAssignFormGroup.setControl('regionsJudgesArray', this.setRegionsAndJudges(this.categoriesList));
+          if (this.eventFormLabel == false) {
+            this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));  //   //this.categoriesList
+          }
           this.regionDropdownValues = res.data.event_judge_assignment.regionsList;
-          this.patchValue();
+          if (this.eventFormLabel == true) {  // update screen
+            this.patchValueJudgesAssign(res.data.event_judge_assignment);
+          }
         }
         if (res.data.event_questionnaires) {
-          this.responseTypeDropdownValues = res.data.event_questionnaires;
+          this.responseTypeDropdownValues = res.data.event_questionnaires.answerTypes;
 
-          //this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(this.eventsDataUpdate.questionnaire));
+          this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(res.data.event_questionnaires.questionnaire));
 
         }
 
@@ -809,7 +820,7 @@ export class EventCreationComponent implements OnInit {
           if (this.eventsDataFormGroup.value.eventType == this.eventList[i].eventType) {
             //this.eventCategoriesFormGroup.setControl('categories', this.setEventCategory(updatedCategories));
             //this.venuesDataFormGroup.setControl('venues', this.setuserVenuAndProcter(this.eventsDataUpdate.venues));
-            this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(this.eventsDataUpdate.questionnaire));
+            //this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(this.eventsDataUpdate.questionnaire));
           }
         }
       }
@@ -822,6 +833,7 @@ export class EventCreationComponent implements OnInit {
           this.isProctorRequired = this.eventList[i].isProctorRequired;
           this.isJudgeRequired = this.eventList[i].isJudgeRequired;
           this.isSchoolGradeRequired = this.eventList[i].isSchoolGradeRequired;
+          this.isEvaluatorRequired = this.eventList[i].isEvaluatorRequired;
         }
       }
     }
@@ -976,17 +988,17 @@ export class EventCreationComponent implements OnInit {
           });
 
           if (data.catId == json.catId) {
-            json.regions = regions;
+            json.regions.push(regions[0]);
             regions = [];
           }
-          else{
+          else {
             json = {
               "catId": data.catId,
               "catMapId": data.catMapId,
               "regions": regions
             }
             judgeAssignment.push(json);
-           
+            regions = [];
           }
 
           judges = [];
@@ -1017,6 +1029,7 @@ export class EventCreationComponent implements OnInit {
 
     for (let row of questionnaireAllData) {
       let json = {
+        "questionId": row.questionId,
         "question": row.question,
         "answerType": row.responseType
       }
@@ -1122,80 +1135,9 @@ export class EventCreationComponent implements OnInit {
   }
 
 
-  patchValue() {
+  patchValueJudgesAssign(data: any) {
 
-    var data = {
-      "categories": [
-        {
-          "catId": 1000,
-          "categoryName": "Drawing",
-          "catMapId": 1662,
-          "regionsJudgesArray": [
-            {
-              "regions": [
-                {
-                  "regionId": 2,
-                  "regionName": "Midwest",
-                }
-              ],
-              "judges": [
-                {
-                  "judgeId": 1392,
-                  "judgeName": "Mr. vinayak  deshpande(St. Mary's Orthodox Church, Chicago)"
-                },
-                {
-                  "judgeId": 1336,
-                  "judgeName": "Ms. gloria mike watkins(St. Gregorios Orthodox Church, Chicago (Oak Park))"
-                }
-              ]
-            },
-            {
-              "regions": [
-                {
-                  "regionId": 4,
-                  "regionName": "South - Dallas",
-                }
-              ],
-              "judges": [
-                {
-                  "judgeId": 1392,
-                  "judgeName": "Mr. vinayak  deshpande(St. Mary's Orthodox Church, Chicago)"
-                },
-                {
-                  "judgeId": 1336,
-                  "judgeName": "Ms. gloria mike watkins(St. Gregorios Orthodox Church, Chicago (Oak Park))"
-                }
-              ]
-            },
-          ]
-        },
-        {
-          "catId": 1001,
-          "categoryName": "Bible Quiz",
-          "catMapId": 1663,
-          "regionsJudgesArray": [
-            {
-              "regions": [
-                {
-                  "regionId": 2,
-                  "regionName": "Midwest",
-                }
-              ],
-              "judges": [
-                {
-                  "judgeId": 1392,
-                  "judgeName": "Mr. vinayak  deshpande(St. Mary's Orthodox Church, Chicago)"
-                },
-                {
-                  "judgeId": 1336,
-                  "judgeName": "Ms. gloria mike watkins(St. Gregorios Orthodox Church, Chicago (Oak Park))"
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
+    
 
     data.categories.forEach((t: any) => {
 
@@ -1210,8 +1152,8 @@ export class EventCreationComponent implements OnInit {
       });
     });
 
-    this.onRegionSelect({ regionId: data.categories[0].regionsJudgesArray[0].regions[0].regionId });
-
+    //this.onRegionSelect({ regionId: data.categories[0].regionsJudgesArray[0].regions[0].regionId });
+    // {emitEvent: true, onlySelf: true}
     this.eventJudgeAssignFormGroup.patchValue(data);
 
 
@@ -1299,7 +1241,7 @@ export class EventCreationComponent implements OnInit {
       formArray.push(this.formBuilder.group({
         questionId: e.questionId,
         question: e.question,
-        responseType: e.responseType
+        responseType: [e.answerType]
       }));
     });
     return formArray;
