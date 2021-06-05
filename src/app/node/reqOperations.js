@@ -264,6 +264,15 @@ async function processGetUserMetaDataRequest(uid) {
 
                 let isFamilyMemberRes = await client.query(isFamilyMember);
 
+
+                let isStudent = `select case when count(student_id) > 0 then true else false end is_student
+                from t_student_sundayschool_dtl tssd 
+                where current_date <= school_year_end_date 
+                and current_date >= school_year_start_date 
+                and student_id = ${uid};`
+
+                let isStudentRes = await client.query(isStudent);
+
                 metaData.middleName = res.rows[0].middle_name;
                 metaData.nickName = res.rows[0].nick_name;
                 metaData.mobile_no = res.rows[0].mobile_no;
@@ -283,6 +292,8 @@ async function processGetUserMetaDataRequest(uid) {
                 metaData.orgId = res.rows[0].org_id;
                 metaData.isFamilyHead = res.rows[0].is_family_head;
                 metaData.isFamilyMember = isFamilyMemberRes.rows[0].is_family_member;
+
+                metaData.isStudent = isStudentRes.rows[0].is_student;
 
                 let roles = []
                 for (let row of res.rows) {
@@ -508,7 +519,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                     vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name, tepr.ttc_exam_date 
                                 from v_user vu 
                                 left join t_event_participant_registration tepr on vu.user_id = tepr.user_id 
-                                where vu.role_name = 'Teacher' or vu.role_name = 'Principal'
+                                where vu.role_name = 'Teacher' or vu.role_name = 'Sunday School Principal'
                                 and tepr.event_id != ${eventId}
                                 and vu.is_approved = true 
                                 and vu.org_id in  ${hierarchicalQry}
@@ -525,7 +536,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
         }
 
         try {
-            if (userType.toLowerCase() === 'principal' || userType.toLowerCase() === 'teacher') {
+            if (userType.toLowerCase() === 'sunday school principal' || userType.toLowerCase() === 'teacher') {
 
                 getuserRecords = `select distinct 
                                 vu.title,
@@ -1381,7 +1392,8 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                         insertPersonValues =
                             [
                                 newUserId,
-                                details.dob,
+                                //details.dob,
+                                details.dob == '' ? null : details.dob,
                                 details.mobileNo,
                                 userData.updatedBy,
                                 new Date().toISOString(),
@@ -1619,9 +1631,17 @@ async function processUpdateUserRoles(userData, loggedInUser) {
 
             for (let role of userData.roles) {
 
-                const insertRoleMapping = `INSERT INTO public.t_user_role_mapping(
-                    role_id, user_id, is_deleted, role_start_date, role_end_date)
-                    VALUES ($1, $2, $3, $4, $5);`
+                // const insertRoleMapping = `INSERT INTO public.t_user_role_mapping(
+                //     role_id, user_id, is_deleted, role_start_date, role_end_date)
+                //     VALUES ($1, $2, $3, $4, $5);`
+
+        let insertRoleMapping = `INSERT INTO t_user_role_mapping( role_id, user_id, is_deleted, role_start_date, role_end_date)
+                    select $1, $2, $3, $4, $5  
+                    WHERE NOT EXISTS (
+                    SELECT 1 FROM t_user_role_mapping turm 
+                                        WHERE user_id = $2
+                                        and  role_id = $1
+                                        and is_deleted = false );`
 
                 //t_user_role_context 
                 console.log(`Inserting role ${JSON.stringify(role)} into t_user_role_mapping t_user_role_context and t_user_role_context table.`)
@@ -1629,16 +1649,26 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                 console.log("999", insertRoleMapping_value);
                 await client.query(insertRoleMapping, insertRoleMapping_value);
 
-                const insertRoleContext = `INSERT INTO public.t_user_role_context(
-                                                        role_id,
-                                                        user_id,
-                                                        org_id, 
-                                                        is_deleted,
-                                                        created_by,
-                                                        created_date,
-                                                        updated_by, 
-                                                        updated_date)
-                                                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+                // const insertRoleContext = `INSERT INTO public.t_user_role_context(
+                //                                         role_id,
+                //                                         user_id,
+                //                                         org_id, 
+                //                                         is_deleted,
+                //                                         created_by,
+                //                                         created_date,
+                //                                         updated_by, 
+                //                                         updated_date)
+                //                                      VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+
+            let insertRoleContext = `INSERT INTO t_user_role_context( role_id, user_id, org_id, is_deleted, 
+                                                        created_by, created_date, updated_by, updated_date)
+                                                    select $1, $2, $3, $4, $5, $6, $7, $8  
+                                                    WHERE NOT EXISTS (
+                                                    SELECT 1 FROM t_user_role_context turm 
+                                                                        WHERE user_id = $2
+                                                                        and  role_id = $1 
+                                                                        and  org_id = $3
+                                                                        and is_deleted = false );`
 
                 insertRoleContext_value = [role.roleId, userData.userId, role.orgId, false, userData.updatedBy, new Date().toISOString(), userData.updatedBy, new Date().toISOString()]
                 console.log(role.roleId, userData.userId, role.orgId, false, userData.updatedBy, new Date().toISOString(), userData.updatedBy, new Date().toISOString());

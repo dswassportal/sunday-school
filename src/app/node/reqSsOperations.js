@@ -33,7 +33,7 @@ async function getSSchoolData(loggedInUserId, role) {
                                                             INNER JOIN child_orgs c
                                                             ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                                 FROM   child_orgs) hyrq on to2.org_id  = hyrq.org_id
-                          left join t_user_role_context turc on  hyrq.org_id = turc.org_id and turc.role_id = (select role_id from t_role where "name" = 'Principal')  
+                          left join t_user_role_context turc on  hyrq.org_id = turc.org_id and turc.role_id = (select role_id from t_role where "name" = 'Sunday School Principal')  
                           left join t_user tu on turc.user_id = tu.user_id; `
 
 
