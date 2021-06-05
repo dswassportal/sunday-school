@@ -723,7 +723,6 @@ export class EventCreationComponent implements OnInit {
             this.selectedEvaluatorsDropdown = mappedEvaluators;
 
           }
-
         }
 
       }
