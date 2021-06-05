@@ -81,7 +81,9 @@ export class LandingPageComponent implements OnInit{
   alluserdata: any;
   roleEndDateErrorFlag: any;
   minDate = new Date();
-
+  titles!: any[];
+  maritalstatus!:any[];
+  error = {validatePhoneNumber: true};
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
     private http: HttpClient, private formBuilder: FormBuilder, public router: Router) { }
   // this.gridOptions = <GridOptions>{};
@@ -163,6 +165,11 @@ export class LandingPageComponent implements OnInit{
       console.log("Roles Data:", this.orgs);
     })
 
+	this.apiService.callGetService('getLookupMasterData?types=title,martial status').subscribe((res: any) => {
+      this.titles = res.data["titles"];
+      this.maritalstatus =res.data["martial statuss"];
+    
+    });
 
     //   this.apiService.callGetService('getuserRecords?type=approved').subscribe((res) => {
     //  this.alluserdata = res.data.metaData;

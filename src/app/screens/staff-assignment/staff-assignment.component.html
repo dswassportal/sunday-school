@@ -50,11 +50,11 @@
                                             <mat-label>Sunday School Year Start Date:</mat-label>
                                             <input (dateChange)="comparisonSchoolStartdateValidator()" [min]="minDate"
                                                 matInput id="schoolStartDate" formControlName="schoolStartDate"
-                                                [matDatepicker]="startatpicker" >
-                                            <mat-datepicker-toggle matSuffix [for]="startatpicker">
+                                                [matDatepicker]="startDatepicker" >
+                                            <mat-datepicker-toggle matSuffix [for]="startDatepicker">
                                                 <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                             </mat-datepicker-toggle>
-                                            <mat-datepicker #startatpicker></mat-datepicker>
+                                            <mat-datepicker #startDatepicker></mat-datepicker>
                                             <mat-error
                                                 *ngIf="staffDataFormGroup.controls['schoolStartDate'].hasError('invaliddaterange')">
                                                Start date cannot be greater than end date
@@ -65,11 +65,11 @@
 
                                         <mat-label>Sunday School Year End Date:</mat-label>
                                         <input [min]="minDate" matInput id="schoolEndDate" formControlName="schoolEndDate"
-                                            (dateChange)="comparisonSchoolEnddateValidator()" [matDatepicker]="endatpicker" >
-                                        <mat-datepicker-toggle matSuffix [for]="endatpicker" >
+                                            (dateChange)="comparisonSchoolEnddateValidator()" [matDatepicker]="endDatepicker" >
+                                        <mat-datepicker-toggle matSuffix [for]="endDatepicker" >
                                             <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
                                         </mat-datepicker-toggle>
-                                        <mat-datepicker #endatpicker></mat-datepicker>
+                                        <mat-datepicker #endDatepicker></mat-datepicker>
     
                                         <mat-error
                                             *ngIf="staffDataFormGroup.controls['schoolEndDate'].hasError('invaliddaterange1')">
@@ -80,18 +80,18 @@
                                     
                             </div>
                 
-                            <div class="row">
+                            <div class="row" *ngIf="showHidePrincipal">
                                 
                                         <mat-form-field class="col-md-6" >
-                                            <mat-select  id="principalName" formControlName="principalName" placeholder="Principal">
-                                              <mat-option  *ngFor = "let principal of principalList" [value]=principal.userId>{{principal.firstName}}  {{principal.lastName}} </mat-option>
+                                            <mat-select  id="principalId" formControlName="principalId" placeholder="Principal">
+                                              <mat-option  *ngFor = "let principal of principalList" [value]=principal.userId>{{principal.title}}.  {{principal.firstName}}  {{principal.lastName}} </mat-option>
                                             </mat-select>
                                           </mat-form-field> 
                                 
                             
                                     <mat-form-field class="col-md-6" >
-                                        <mat-select id="vicePrincipalName" formControlName = "vicePrincipalName" placeholder="Vice Principal">
-                                          <mat-option *ngFor = "let principal of principalList" [value]=principal.userId>{{principal.firstName}}  {{principal.lastName}} </mat-option>
+                                        <mat-select id="vicePrincipalId" formControlName = "vicePrincipalId" placeholder="Vice Principal">
+                                          <mat-option *ngFor = "let principal of principalList" [value]=principal.userId>{{principal.title}}.  {{principal.firstName}}  {{principal.lastName}} </mat-option>
                                         </mat-select>
                                       </mat-form-field> 
                                 </div>
@@ -123,15 +123,15 @@
                                                 
                                                 <div class="row">
                                                     <mat-form-field class="col-md-6" >
-                                                        <mat-select id="teacherName" formControlName = "teacherName" placeholder="Teacher Name" >
-                                                          <mat-option *ngFor = "let teacher of teacherList" [value]=teacher.userId>{{teacher.firstName}} {{teacher.lastName}}</mat-option>
+                                                        <mat-select id="staffId" formControlName = "staffId" placeholder="Teacher Name" >
+                                                          <mat-option *ngFor = "let teacher of teacherList" [value]=teacher.userId>{{teacher.title}}.  {{teacher.firstName}} {{teacher.lastName}}</mat-option>
                                                         </mat-select>
                                                       </mat-form-field> 
                                                 
                 
                                                     <mat-form-field class="col-md-6" >
-                                                        <mat-select id="substituteTeacher" formControlName = "substituteTeacher" placeholder="Substitute Teacher Name" >
-                                                          <mat-option *ngFor = "let subteacher of subtituteTeacherList" [value]=subteacher.userId>{{subteacher.firstName}} {{subteacher.lastName}}</mat-option>
+                                                        <mat-select id="subStaffId" formControlName = "subStaffId" placeholder="Substitute Teacher Name" >
+                                                          <mat-option *ngFor = "let subteacher of teacherList" [value]=subteacher.userId>{{subteacher.title}}.  {{subteacher.firstName}} {{subteacher.lastName}}</mat-option>
                                                         </mat-select>
                                                       </mat-form-field> 
                                                 </div>
@@ -152,7 +152,7 @@
                                 <div class="row" style="padding-top: 1%;">
                                     <div class="col text-center">
 
-                                            <button mat-button type="submit" [disabled]="!staffDataFormGroup.valid" mat-button class="mbutton"  (click)="saveStaffProfile()">
+                                            <button mat-button type="submit"  mat-button class="mbutton"  (click)="saveStaffProfile()">
                                                     Save</button>
                                     </div>
                             </div>

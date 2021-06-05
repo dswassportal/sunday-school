@@ -74,6 +74,7 @@ import { StaffAssignmentComponent } from './screens/staff-assignment/staff-assig
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { NgxMatIntlTelInputModule } from 'ngx-mat-intl-tel-input';
 
 
 @NgModule({
@@ -146,6 +147,7 @@ import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
     MatStepperModule,
     NgxDaterangepickerMd.forRoot(),
     NgMultiSelectDropDownModule.forRoot(),
+    NgxMatIntlTelInputModule
   ],
   providers: [AuthService,  { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true },EventDataService, {provide: LocationStrategy, useClass: HashLocationStrategy}],
   bootstrap: [AppComponent],

@@ -88,6 +88,15 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   minDate = new Date();
   ishidden: boolean = false;
   isStudent: any;
+  grades!: any[];
+  relationships!: any[];
+  maritalstatus!:any[];
+  membership!:any[];
+  titles!: any[];
+  memberships!: any[];
+  error = {validatePhoneNumber: true};
+  
+  
   //, Validators.required
   //[Validators.required, Validators.email]
   ngOnInit(): void {
@@ -163,6 +172,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       this.userId = this.alluserdata.userId;
       this.fbUid = this.alluserdata.fbUid;
       this.isFamilyHead = this.alluserdata.isFamilyHead;
+	  this.isStudent = this.alluserdata.isStudent;
       this.orgId = this.alluserdata.orgId;
       this.memberDetailsData = this.alluserdata.memberDetails;
       this.myprofileform.setControl('memberDetails', this.setMemberDetails(this.memberDetailsData));
@@ -209,6 +219,13 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         //console.log(this.parishList);
       });
 
+	  this.apiService.callGetService('getLookupMasterData?types=title,grade,relationship,martial status').subscribe((res: any) => {
+        this.titles = res.data["titles"];
+        this.grades = res.data["grades"];
+        this.relationships =res.data["relationships"];
+        this.maritalstatus =res.data["martial statuss"];
+        
+      })
 
       this.apiService.getCountryStates().subscribe((res: any) => {
         this.countries = res.data.countryState;
@@ -328,6 +345,11 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
           this.parishList = res.data.metaData.Parish;
         }
       })
+	  
+	this.apiService.callGetService('getLookupMasterData?types=title,membership').subscribe((res: any) => {
+        this.titles = res.data.titles;
+        this.memberships = res.data.memberships;
+      })
 
     }
   }
@@ -421,11 +443,11 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   }
 
   updateUserProfile() {
-    // if (this.myprofileform.invalid) {
-    //   this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
+     if (this.myprofileform.invalid) {
+       this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
     //   return
-    // }
-    // else {
+     }
+     else //{
     if (this.isApprovedUserLoggedIn == true) {
       this.myprofileform.value.userId = this.userId;
       this.myprofileform.value.updatedBy = this.userId;

@@ -12,7 +12,7 @@
 
         <mat-form-field style="width:10%;">
           <mat-label>Title</mat-label>
-          <mat-select matNativeControl required formControlName="title">
+          <!--<mat-select matNativeControl required formControlName="title">
             <mat-option value="His Grace">His Grace</mat-option>
             <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
             <mat-option value="Very Rev">Very Rev</mat-option>
@@ -23,7 +23,10 @@
             <mat-option value="Ms">Ms</mat-option>
             <mat-option value="Mrs">Mrs</mat-option>
             <mat-option value="Dr">Dr</mat-option>
-            <!-- <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> -->
+             <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> 
+          </mat-select>-->
+          <mat-select required id="title" formControlName = "title" placeholder="title" >
+            <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -71,23 +74,45 @@
       </div>
       <div class="row">
         <mat-form-field class="col-md-4">
-          <mat-label style="padding-left: 15%;">Mobile Number</mat-label>
-          <input required id="mobileNo" matInput formControlName="mobileNo" ng2TelInput maxlength="10" (keypress)="keyPress($event)"
-            placeholder="Enter Mobile Number" />
-            <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
+          <mat-label style="padding-left: 15%;">Mobile Number *</mat-label>
+           <!--<input required id="mobileNo" matInput formControlName="mobileNo" ng2TelInput maxlength="10" (keypress)="keyPress($event)"
+            placeholder="Enter Mobile Number" /> 
+          [preferredCountries]="['us', 'in']"
+          [onlyCountries]= "['us','in']"-->
+            
+          <ngx-mat-intl-tel-input id="mobileNo" matInput (keypress)="keyPress($event)" 
+          [onlyCountries]= "['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']"
+          [enableAutoCountrySelect]="true" name="mobileNo" formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true"></ngx-mat-intl-tel-input>
+
+            <!-- <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
               <span *ngIf="myprofileform.controls.mobileNo.errors.required">This field is mandatory.</span>
-              <span *ngIf="myprofileform.controls.mobileNo.errors.pattern">Enter 10 digit number.</span>
+               <span *ngIf="myprofileform.controls.mobileNo.errors.pattern">Enter 10 digit number.</span> 
+          </mat-error> -->
+          <!-- <mat-error *ngIf="myprofileform.controls['mobileNo']?.errors?.required">Required Field</mat-error>
+          <mat-error *ngIf="myprofileform.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</mat-error> -->
+       
+           <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
+              <span *ngIf="myprofileform.controls['mobileNo']?.errors?.required">This field is mandatory.</span>
+               <span *ngIf="myprofileform.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
           </mat-error>
         </mat-form-field>
 
         <mat-form-field class="col-md-4">
           <mat-label style="padding-left: 15%;">Home Phone Number</mat-label>
-          <input id="homePhoneNo" matInput formControlName="homePhoneNo" ng2TelInput  maxlength="10" (keypress)="keyPress($event)"
+          <!-- <input id="homePhoneNo" matInput formControlName="homePhoneNo" ng2TelInput  maxlength="10" (keypress)="keyPress($event)"
             placeholder="Enter Home Phone Number" />
             <mat-error *ngIf="myprofileform.controls.homePhoneNo.touched && myprofileform.controls.homePhoneNo.invalid">
               <span *ngIf="myprofileform.controls.homePhoneNo.errors.required">This field is mandatory.</span>
               <span *ngIf="myprofileform.controls.homePhoneNo.errors.pattern">Enter 10 digit number.</span>
-          </mat-error>
+          </mat-error> -->
+          <ngx-mat-intl-tel-input id="homePhoneNo" matInput (keypress)="keyPress($event)" 
+            [onlyCountries]= "['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']"
+            [enableAutoCountrySelect]="true" name="homePhoneNo" formControlName="homePhoneNo" [preferredCountries]="['us']" [enableRequired]="true">
+          </ngx-mat-intl-tel-input>
+          <mat-error *ngIf="myprofileform.controls.homePhoneNo.touched && myprofileform.controls.homePhoneNo.invalid">
+            <!-- <span *ngIf="myprofileform.controls['homePhoneNo']?.errors?.required">This field is mandatory.</span> -->
+             <span *ngIf="myprofileform.controls['homePhoneNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
+        </mat-error>
         </mat-form-field>
 
         <mat-form-field class="col-md-4">
@@ -143,8 +168,8 @@
 
           <mat-form-field class="col-md-6">
               <mat-label>Country</mat-label>
-              <!--required-->
-              <select matNativeControl  id="country" formControlName="country" placeholder="Select Country" [(ngModel)]="selectedCountry" (change)="changeCountry($event)">
+              <!--required [(ngModel)]="selectedCountry"-->
+              <select matNativeControl  id="country" formControlName="country" placeholder="Select Country"  (change)="changeCountry($event)">
                       <option *ngFor="let country of countries" [value]="country.countryName">{{country.countryName}}</option>
               </select>
       </mat-form-field>
@@ -228,7 +253,7 @@
     <mat-radio-button [checked]=!isStudent value=false>No</mat-radio-button>
   </mat-radio-group>
 </div>
-
+<div *ngIf ="isStudent || showStudentQuestion" ></div>
 </div>
 
 
@@ -258,7 +283,7 @@
                 <div class="col-md-4" style="margin-left: -0.2%;">
                   <mat-form-field class="col text-left">
                     <mat-label>Relationship</mat-label>
-                    <mat-select matNativeControl required id="relationship" formControlName="relationship"
+                     <!-- <mat-select matNativeControl required id="relationship" formControlName="relationship"
                       placeholder="Enter Relationship">
                       <mat-option value="husband">Husband</mat-option>
                       <mat-option value="Wife">Wife</mat-option>
@@ -266,6 +291,9 @@
                       <mat-option value="Daughter">Daughter</mat-option>
                       <mat-option value="Father">Father</mat-option>
                       <mat-option value="Mother">Mother</mat-option>
+                    </mat-select> -->
+                    <mat-select required id="relationship" formControlName = "relationship" placeholder="relationship" >
+                      <mat-option *ngFor = "let relationship of relationships; index as i" [value]=relationship>{{relationship}}</mat-option>
                     </mat-select>
                   </mat-form-field>
                 </div>
@@ -291,7 +319,7 @@
 
                 <mat-form-field style="width:10%;">
                   <mat-label>Title</mat-label>
-                  <mat-select matNativeControl required formControlName="title">
+                  <!--   <mat-select matNativeControl required formControlName="title">
                     <mat-option value="His Grace">His Grace</mat-option>
                     <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
                     <mat-option value="Very Rev">Very Rev</mat-option>
@@ -302,7 +330,10 @@
                     <mat-option value="Ms">Ms</mat-option>
                     <mat-option value="Mrs">Mrs</mat-option>
                     <mat-option value="Dr">Dr</mat-option>
-                    <!-- <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> -->
+                   <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> 
+                  </mat-select>-->
+                  <mat-select required id="title" formControlName = "title" placeholder="title" >
+                    <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
                   </mat-select>
                 </mat-form-field>
 
@@ -380,7 +411,7 @@
 <div ></div>
     <div *ngIf="!isFamilyHead">
       <form [formGroup]="studentDetailsForm">
-        <div *ngIf = "isStudentvar" >
+       <div *ngIf = "isStudentvar || isStudent" >
     
           <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
           </mat-divider>
@@ -520,7 +551,7 @@
     
         </div>
     
-        <div *ngIf = "isStudentvar" >
+        <div *ngIf = "isStudentvar|| isStudent" >
         <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
         </mat-divider>
     
@@ -641,7 +672,7 @@
 
         <div class="row form-group">
             <mat-form-field class="form-field col-2">
-                    <mat-select required formControlName="title" id="title" placeholder="Title">
+                    <!-- <mat-select required formControlName="title" id="title" placeholder="Title">
                             <mat-option value="His Grace">His Grace</mat-option>
                             <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
                             <mat-option value="Very Rev">Very Rev</mat-option>
@@ -652,6 +683,9 @@
                             <mat-option value="Ms">Ms</mat-option>
                             <mat-option value="Mrs">Mrs</mat-option>
                             <mat-option value="Dr">Dr</mat-option>
+                    </mat-select> -->
+                    <mat-select required id="title" formControlName ="title" placeholder="Title" >
+                      <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
                     </mat-select>
             </mat-form-field>
             <mat-form-field class="form-field col-md-5">

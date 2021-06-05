@@ -16,6 +16,7 @@ export class StaffAssignmentComponent implements OnInit {
   subtituteTeacherList!:any[];
   eventList!: any[];
   teacherGradeDataFormGroup : any;
+  substituteTeacherGradeDataFormGroup:any;
   eventCategorydData!: any[];
   userMetaData: any;
   gridApi:any;
@@ -32,13 +33,19 @@ export class StaffAssignmentComponent implements OnInit {
   roles:any;
   rolesList!: any[];
   orgName:any;
-  teacherGradeData:any;
+  teacherGradeData!:any [];
+  subteacherGradeData:any;
   principalData:any;
   principalList!:any[];
   //sundaySchoolName!:any [];
   sundaySchoolName:any;
-  maxDate = new Date();
+  //maxDate = new Date();
   minDate = new Date();
+  isPrimary: boolean = false;
+  showHidePrincipal:boolean = true;
+  //staffId:any;
+  //substituteTeacher:any;
+  //roleType:any;
   constructor(private apiService: ApiService,
       private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils,) { }
 
@@ -48,19 +55,17 @@ export class StaffAssignmentComponent implements OnInit {
     this.loggedInUser = this.userMetaData.userId;
     this.orgName = this.userMetaData.orgName;
     
+    window.onunload = function() { debugger; }
 
     this.rolesList = this.userMetaData.roles;
 
-    for (let i = 0; i < this.userMetaData.roles.length; i++) {
+    //for (let i = 0; i < this.userMetaData.roles.length; i++) {
       this.rolesList = this.userMetaData.roles;
-    }
+    //}
     
-    
-    this.apiService.callGetService(`getSSchools?role=vicar`).subscribe((res: any) => {
-      //this.rowData = res.data.schoolData;
-      //this.gridOptions.rowData.push(this.orgName)
-     
-      //this.principalData =  res.data.schoolData.principalName;
+    console.log(this.rolesList);
+    this.apiService.callGetService(`getSSchools?role=Vicar`).subscribe((res: any) => {
+
       
       this.rowData =  res.data.schoolData;
 
@@ -70,12 +75,16 @@ export class StaffAssignmentComponent implements OnInit {
       console.log("School Data : " + this.rowData.orgId);
 
       this.teacherGradeData = this.rowData;
+      this.subteacherGradeData = this.rowData;
       //this.teacherGradeDataFormGroup.setControl('teacherGrades', this.setTeacherAndGrades(this.teacherGradeData));
       
-      for (let i = 0; i < this.teacherGradeData.length; i++) {
-        this.teacherGradeDataFormGroup.setControl('teacherGrades', this.setTeacherAndGrades(this.teacherGradeData[i].grades));   
-      }
-
+      //for (let i = 0; i < this.teacherGradeData.length; i++) {
+        
+        this.teacherGradeDataFormGroup.setControl('teacherGrades', this.setTeacherAndGrades(this.teacherGradeData[0].grades));   
+           
+        
+      //}
+   
       
     });
 
@@ -97,49 +106,60 @@ export class StaffAssignmentComponent implements OnInit {
       }
     };
 
-    this.apiService.callGetService('getParishData').subscribe((res: any) => {
-      for(let i=0;i<res.data.metaData.Parish.length;i++){
-        this.parishList = res.data.metaData.Parish;
-      }
-    });
-
-    this.apiService.callGetService('getEventType').subscribe((res: any) => {
-      this.eventList = res.data.metaData.eventType;
-      this.eventCategorydData = res.data.metaData.eventType;
+    this.apiService.callGetService('getEventType').subscribe((res: any) => {	
+      this.eventList = res.data.metaData.eventType;	
+      this.eventCategorydData = res.data.metaData.eventType;	
     });
 
     this.teacherGradeDataFormGroup = this.formBuilder.group({
       teacherGrades: this.formBuilder.array([this.addTeachersData()])
     });
 
+    
+  
+    
+   
     this.staffDataFormGroup = this.formBuilder.group({
       //orgName: new FormControl('',Validators.required),
       name: new FormControl('', [Validators.required]), 
+      gradeId: new FormControl('', [Validators.required]), 
       schoolStartDate: new FormControl('', [Validators.required]),
       schoolEndDate : new FormControl('', [Validators.required]),
-      principalName : new FormControl(''),
-      //firstName : new FormControl(''),
-      //lastName : new FormControl(''),
-      vicePrincipalName : new FormControl('',),
+      principalId : new FormControl(''),
+      
+      vicePrincipalId : new FormControl('',),
       parish : new FormControl(''),
       roles: this.formBuilder.array([this.adduserroles()], [Validators.required]),
+      
+      staffId :  new FormControl(''),
+      subStaffId:new FormControl('')
+      //teacherName: new FormControl(''),
+      //substituteTeacher :  new FormControl(''),
 
     });
 
     
   }
-
-  setTeacherAndGrades(teacherGradeData: any): FormArray {
+  
+  setTeacherAndGrades(teacherGradeData: any[]): FormArray {
     const formArray = new FormArray([]);
     teacherGradeData.forEach((e: any) => {
       formArray.push(this.formBuilder.group({
+        gradeId : e.orgId,
         name: e.name,
-        teacherName: e.teacherName,
-        substituteTeacher:e.substituteTeacher
+        staffId: e.staffId,
+        isPrimary:'true',
+        roleType:'Teacher',
+      subStaffId:e.subStaffId
       }));
     });
     return formArray;
   }
+  
+  
+
+  
+  
   rolesArr: any[] = [];
 
   adduserroles(): FormGroup {
@@ -152,113 +172,177 @@ export class StaffAssignmentComponent implements OnInit {
   }
   addTeachersData(): FormGroup {
     return this.formBuilder.group({
+      gradeId:'',
         name: '',
-        teacherName: '',
-        substituteTeacher:''
+        staffId: '',
+        isPrimary : '',
+        roleType:'',
+        subStaffId:''
     });
   }
+  
+  addSubstituteTeachersData(): FormGroup {
+    return this.formBuilder.group({
+      gradeId:'',
+      name: '',
+      staffId: '',
+      isPrimary : '',
+      roleType:'',
+      subStaffId:''
+    });
+  }
+  
   onGridReady(params:any) {
     this.gridApi = params.api;
   }
   resetForm() {
     this.staffDataFormGroup.reset();
   }
+  
   openModal() {
     $("#imagemodal").modal("show");
   }
+  
   onRowClicked(event:any){
     $("#imagemodal").modal("show");
 
+    //if(this.rolesList)
+    if(this.rolesList.indexOf("Principal") !== -1){ // if logged in user is Principal
+      //alert("Value exists!")
+      this.showHidePrincipal = false;
+      this.staffDataFormGroup.value.principalId = this.loggedInUser;
+    }
     let rowData = event;
     this.selectedUserData = event.data;
     
     let i = rowData.rowIndex;
     this.orgId = this.selectedUserData.orgId;
-/*
-    this.apiService.callGetService(`getSSchools?role=vicar`).subscribe((res: any) => {
-      //console.log(res.data.schoolData);
-      for(let i=0;i<res.data.schoolData.length;i++){
-         // if (res.data.schoolData != null) {
-          this.principalList = res.data.schoolData;
-        //}
-      }
-    });
-    */  
+
     this.apiService.callGetService(`getuserRecords?type=principal`).subscribe((res: any) => {
-      //console.log(res.data.metaData);
-      for(let i=0;i<res.data.metaData.length;i++){
-          this.principalList = res.data.metaData;
-      }
+      console.log("Principal List : " + res.data.metaData);
+      this.principalList = res.data.metaData;
+      
     });
+
     this.apiService.callGetService(`getuserRecords?type=teacher`).subscribe((res: any) => {
-      console.log(res.data.metaData);
-      for(let i=0;i<res.data.metaData.length;i++){
+      console.log("Teacher List : " + res.data.metaData);
+     
           this.teacherList = res.data.metaData;
-      }
+          //this.subtituteTeacherList = res.data.metaData;
+     
     });
-    this.apiService.callGetService(`getuserRecords?type=teacher`).subscribe((res: any) => {
-      //console.log(res.data.metaData);
-      for(let i=0;i<res.data.metaData.length;i++){
-          this.subtituteTeacherList = res.data.metaData;
-      }
-    });
+ 
     this.staffDataFormGroup.patchValue({
       name: this.selectedUserData.name,
       parish : this.selectedUserData.parish,
+      schoolStartDate: this.staffDataFormGroup.schoolStartDate,
+      schoolEndDate : this.staffDataFormGroup.schoolEndDate,
+      principalId:this.staffDataFormGroup.principalId,
+      //staffId : this.staffDataFormGroup.staffId,
+      //subStaffId:this.staffDataFormGroup.subStaffId
       
     });
 
     this.selectedUserRole = this.selectedUserData.roles;
-
+    console.log("staff vallue for principa; : " + this.staffDataFormGroup.value);
     
   }
 
   saveStaffProfile(){
-  /*
-    let payLoad = {
-      "orgId": this.orgId,    // school Id
-      "staffId": this.loggedInUser,   //user id of that principal/Teacher.
-      "isPrimary": false,   //its a boolean, true if teacher is primary; false if teacher is subtitute.
-      "roleType": ""    //"Principal"/ "Teacher"
-    }
-    */
-   let payLoad = {
-    
-    "ssStartDate" : this.staffDataFormGroup.schoolStartDate,
-    "ssEndDate" : this.staffDataFormGroup.schoolEndDate,
-    "orgId": this.orgId,
-    "staffAssignment": [
-      {
-        
-        "staffId":  this.teacherList[0].userId,
-        "isPrimary": false,
-        "roleType": "Teacher"
-      },
-      {
-        
-        "staffId":  this.subtituteTeacherList[0].userId,
-        "isPrimary": true,
-        "roleType": "Teacher"
-      },
-      {
-        
-        "staffId":  this.principalList[0].userId,
-        "isPrimary": true,
-        "roleType": "Principal"
-      }
-    ]
-  }
-    console.log("payLoad is " + payLoad);
 
-    /*
-    this.apiService.callPostService('',payLoad ).subscribe((res: any) => {
+    let payloadnew = {
+      staffAssignment: this.teacherGradeDataFormGroup.value.teacherGrades,
+      principalData : this.staffDataFormGroup.value
+    }
+    let myList = this.teacherGradeDataFormGroup.value.teacherGrades.push(this.principalList);
+    console.log("payloadnew : " + payloadnew);
+    let staff_list = [];
+    
+    for( let staffMember of this.teacherGradeDataFormGroup.value.teacherGrades){
+      
+      if(staffMember.roleType == "Teacher"){
+          
+          staff_list.push({
+            gradeId: staffMember.gradeId,
+            staffId: staffMember.staffId,
+            isPrimary: true,
+            roleType: "Teacher"
+          });
+          
+          staff_list.push({
+            gradeId: staffMember.gradeId,
+            staffId: staffMember.subStaffId,
+            isPrimary: false,
+            roleType: "Teacher"
+          });
+          
+      }
+      //else if(this.rolesList.indexOf("Principal") == -1){  // if logged in user is not Principal      
+      if(staffMember.roleType !="Teacher" && this.staffDataFormGroup.value.principalId != null){
+      staff_list.push({
+          //gradeId: staffMember.gradeId,
+          schoolId:this.orgId,
+          //gradeId:this.orgId,
+          //schoolId:this.orgId,
+          staffId: this.staffDataFormGroup.value.principalId,
+          isPrimary: true,
+          roleType: "Sunday School Principal"
+        });
+        
+      }
+      if(staffMember.roleType != "Teacher" && this.staffDataFormGroup.value.vicePrincipalId!=null){
+        staff_list.push({
+          //gradeId: staffMember.gradeId,
+          schoolId:this.orgId,
+          //gradeId:this.orgId,
+          //schoolId:this.orgId,
+          staffId: this.staffDataFormGroup.value.vicePrincipalId,
+          isPrimary: true,
+          roleType: "Sunday School Vice Principal"
+        });
+      }
+    // }
+     
+     /*
+     else if(this.rolesList.indexOf("Principal") !== -1){  // if logged in user is a Principal
+      staff_list.push({
+        gradeId: staffMember.gradeId,
+        subStaffId: this.loggedInUser,
+        isPrimary: true,
+        roleType: "Principal"
+      });
+     }
+     */
+    }
+   
+    console.log(staff_list);
+
+    
+   let payload = {
+
+    //ssStartDate: this.staffDataFormGroup.value.schoolStartDate,
+    //ssEndDate : this.staffDataFormGroup.value.schoolEndDate,
+
+    ssStartDate: this.staffDataFormGroup.value.schoolStartDate,
+    ssEndDate : this.staffDataFormGroup.value.schoolEndDate,
+
+    schoolId: this.orgId,
+
+    staffAssignment : staff_list
+    
+  }
+    console.log("payLoad is " + payload);
+    
+
+    
+    this.apiService.callPostService('setStaffAssignment',payload).subscribe((res: any) => {
       if (res.data.status == "success") {
-        this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
+        this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
       }
       else
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
     });
-    */
+  
   }
 
   comparisonSchoolStartdateValidator(): any {
@@ -266,12 +350,17 @@ export class StaffAssignmentComponent implements OnInit {
     let schoolStartDate = this.staffDataFormGroup.value['schoolStartDate'];
     let schoolEndDate = this.staffDataFormGroup.value['schoolEndDate'];
 
+    
+
     let eventstartnew = new Date(schoolStartDate);
     let eventendnew = new Date(schoolEndDate);
     if (eventstartnew > eventendnew) {
       return this.staffDataFormGroup.controls['schoolStartDate'].setErrors({ 'invaliddaterange': true });
     }
-
+    /*
+    var offsetMs = schoolStartDate.getTimezoneOffset() * 60000;
+      return new Date(schoolStartDate.getTime() - offsetMs);
+*/
   }
 
   comparisonSchoolEnddateValidator(): any {
@@ -279,11 +368,20 @@ export class StaffAssignmentComponent implements OnInit {
     let schoolStartDate = this.staffDataFormGroup.value['schoolStartDate'];
     let schoolEndDate = this.staffDataFormGroup.value['schoolEndDate'];
 
+   
+
+    //let eventstartnew = new Date(schoolStartDate);
+    //let eventendnew = new Date(schoolEndDate);
+
     if (schoolStartDate > schoolEndDate) {
       return this.staffDataFormGroup.controls['schoolEndDate'].setErrors({ 'invaliddaterange1': true });
     }
-  
-
+    /*
+    var offsetMs = schoolEndDate.getTimezoneOffset() * 60000;
+    return new Date(schoolEndDate.getTime() - offsetMs);
+    */
   }
+
+  
 
 }
