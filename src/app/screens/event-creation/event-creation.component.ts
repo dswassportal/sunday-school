@@ -682,13 +682,18 @@ export class EventCreationComponent implements OnInit {
         if (res.data.event_judge_assignment) {
 
           this.selectedCategories = res.data.event_judge_assignment.categoriesList;
-          if (this.eventFormLabel == false) {
-            this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));  //   //this.categoriesList
+          if (this.eventFormLabel == false) { // create event screen
+            this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));  
           }
           this.regionDropdownValues = res.data.event_judge_assignment.regionsList;
-          if (this.eventFormLabel == true) {  // update screen
-            this.categories().clear();
-            this.patchValueJudgesAssign(res.data.event_judge_assignment);
+          if (this.eventFormLabel == true) {  // update screen     
+            if(res.data.event_judge_assignment.categories.length != 0){
+              this.categories().clear();
+              this.patchValueJudgesAssign(res.data.event_judge_assignment);
+            }
+            else{
+              this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));  
+            }
           }
         }
         if (res.data.event_questionnaires) {
