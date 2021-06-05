@@ -268,7 +268,7 @@ async function getRolesByUserId(userId) {
     try {
         
         //let query = `select distinct role_id, org_id, role_start_date, role_end_date, org_type from v_user vu where user_id = ${userId} order by role_id;`
-        let query =`select distinct role_id, user_org_id , role_start_date, role_end_date, user_org_type from v_user vu where user_id = ${userId} order by role_id;`;
+        let query =`select distinct role_id, role_start_date, role_end_date, org_id, org_type from v_user vu where user_id = ${userId} order by role_id;`;
 
         let roleResult = await client.query(query);
         let roles = [];
