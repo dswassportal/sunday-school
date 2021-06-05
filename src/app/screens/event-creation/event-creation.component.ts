@@ -727,6 +727,21 @@ export class EventCreationComponent implements OnInit {
     });
   }
 
+
+  fnRegionDropdownValues(region: any): any {
+
+    try {
+      for (let reg of this.regionDropdownValues) {
+        if (reg.regionId == region.value.regions[0].regionId) {
+          return reg.judges;
+        }
+      }
+
+    } catch (error) {
+      return [];
+    }
+  }
+
   eventTypeSelChange() {
 
     //for getting event co ordinator as per event type

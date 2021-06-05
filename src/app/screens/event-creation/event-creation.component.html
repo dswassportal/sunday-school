@@ -657,9 +657,9 @@
                                                                     <div class="col-md-12">
 
                                                                         <ng-multiselect-dropdown class="col-md-12"
-                                                                            id="judges" placeholder="Select Judges"
+                                                                            placeholder="Select Judges"
                                                                             [settings]="dropdownSettingsJudges"
-                                                                            [data]="judgesDropdownValues"
+                                                                            [data]="fnRegionDropdownValues(region)"
                                                                             formControlName="judges"                                                                            
                                                                             (onSelect)="onItemSelect($event)"
                                                                             (onSelectAll)="onSelectAll($event)">

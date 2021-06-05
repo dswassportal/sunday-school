@@ -894,6 +894,8 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
 
             let judgeMapping = await client.query(queries.getJudgeMapForAssSec, [eventId]);
 
+
+            //to create judge mapping...
             let respObj = [];
             if (judgeMapping.rowCount > 0) {
                 for (let row of judgeMapping.rows) {
@@ -953,8 +955,25 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                 }
             }
 
+
+            //to create regionwise judges list.
+            let regList = [];
+            if (regionsList.rowCount > 0) {
+                for (let region of regionsList.rows[0].region_array) {
+                    let judgesList = await client.query(queries.getJudgesByEventRegion, [region.regionId, '%Judge%']);
+                    if (judgesList.rowCount > 0) {
+                        region.judges = judgesList.rows[0].judge_list;
+                        regList.push(region);
+                    } else {
+                        region.judges = [];
+                        regList.push(region);
+                    }
+                }
+            }
+
+
             return {
-                regionsList: regionsList.rows[0].region_array,
+                regionsList: regList,
                 categories: respObj,
                 categoriesList: categoriesList.rows[0].cat_mapping
             }
