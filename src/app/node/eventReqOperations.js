@@ -1133,7 +1133,7 @@ async function getEventType() {
         tec.description
         from t_event_type tet , t_event_category tec 
         where tet.is_deleted = false 
-        and tec.event_type_id = tet.event_type_id order by tet.name;`
+        and tec.event_type_id = tet.event_type_id order by tet."sequence";`
         let res = await client.query(getEventType);
 
         if (res && res.rowCount > 0) {
