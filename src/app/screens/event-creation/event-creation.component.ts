@@ -683,16 +683,16 @@ export class EventCreationComponent implements OnInit {
 
           this.selectedCategories = res.data.event_judge_assignment.categoriesList;
           if (this.eventFormLabel == false) { // create event screen
-            this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));  
+            this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));
           }
           this.regionDropdownValues = res.data.event_judge_assignment.regionsList;
           if (this.eventFormLabel == true) {  // update screen     
-            if(res.data.event_judge_assignment.categories.length != 0){
+            if (res.data.event_judge_assignment.categories.length != 0) {
               this.categories().clear();
               this.patchValueJudgesAssign(res.data.event_judge_assignment);
             }
-            else{
-              this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));  
+            else {
+              this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));
             }
           }
         }
@@ -793,6 +793,25 @@ export class EventCreationComponent implements OnInit {
     }
 
 
+    if (this.eventsDataFormGroup.value.eventType == 'OVBS') {
+      this.isEventEndDateRequired = true;
+      this.eventStartDateMatLabel = true;
+      this.ttcExaminationDateLabel = false;
+      this.cwcEventDateLabel = false;
+      this.iseventUrlRequired = true;
+      this.isUploadDocumentsRequired = true;
+
+    }
+    else {
+      this.isEventEndDateRequired = true;
+      this.eventStartDateMatLabel = true;
+      this.ttcExaminationDateLabel = false;
+      this.cwcEventDateLabel = false;
+      this.iseventUrlRequired = true;
+      this.isUploadDocumentsRequired = true;
+    }
+
+
     if (this.eventsDataFormGroup.value.eventType == 'TTC') {
       this.isEventEndDateRequired = false;
       this.ttcExaminationDateLabel = true;
@@ -811,16 +830,6 @@ export class EventCreationComponent implements OnInit {
       this.isUploadDocumentsRequired = true;
 
     }
-    if (this.eventsDataFormGroup.value.eventType == 'OVBS') {
-      this.isEventEndDateRequired = true;
-      this.eventStartDateMatLabel = true;
-      this.ttcExaminationDateLabel = false;
-      this.cwcEventDateLabel = false;
-      this.iseventUrlRequired = true;
-      this.isUploadDocumentsRequired = true;
-
-    }
-
 
     this.getData();
 
@@ -949,6 +958,15 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payload);
     }
 
+    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading') {
+      this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload = this.eventsDataFormGroup.value;
+      payload.sectionCode = 'event_details';
+      payload.nextSectionCode = 'event_venue_assignment';
+      this.createUpdateEvents(payload);
+    }
+
   }
 
   onEventCategoriesSectionNextBtn() {
@@ -1031,6 +1049,15 @@ export class EventCreationComponent implements OnInit {
       payload.nextSectionCode = 'event_proctor_assignment';
       payload.eventType = this.eventsDataFormGroup.value.eventType;
       payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading') {
+      this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload = this.eventsDataFormGroup.value;
+      payload.sectionCode = 'event_venue_assignment';
+      payload.nextSectionCode = 'event_questionnaires';
       this.createUpdateEvents(payload);
     }
 
@@ -1168,7 +1195,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'TTC') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Bible Reading') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payload.questionnaire = questionnaire;
       payload.sectionCode = 'event_questionnaires';
@@ -1393,11 +1420,21 @@ export class EventCreationComponent implements OnInit {
   setProctorAssign(eventProctorAssigndata: any): FormArray {
     const formArray = new FormArray([]);
     eventProctorAssigndata.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        eventVenueMapId: e.eventVenueMapId,
-        venueName: e.venueName,
-        proctorId: [e.mappedProctor]
-      }));
+
+      if (e.mappedProctor.name != null) {
+        formArray.push(this.formBuilder.group({
+          eventVenueMapId: e.eventVenueMapId,
+          venueName: e.venueName,
+          proctorId: [e.mappedProctor]
+        }));
+      }
+      else{
+        formArray.push(this.formBuilder.group({
+          eventVenueMapId: e.eventVenueMapId,
+          venueName: e.venueName,
+          proctorId: ''
+        }));
+      }
     });
     return formArray;
   }
