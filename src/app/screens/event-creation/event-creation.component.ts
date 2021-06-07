@@ -1420,7 +1420,7 @@ export class EventCreationComponent implements OnInit {
     const formArray = new FormArray([]);
     eventProctorAssigndata.forEach((e: any) => {
 
-      if (e.mappedProctor.name != null) {
+      if (e.mappedProctor[0].name != null) {
         formArray.push(this.formBuilder.group({
           eventVenueMapId: e.eventVenueMapId,
           venueName: e.venueName,
