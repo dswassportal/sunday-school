@@ -939,7 +939,7 @@ export class EventCreationComponent implements OnInit {
 
 
     //create/update event for CWC for event_details section
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
       this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload = this.eventsDataFormGroup.value;
@@ -948,7 +948,7 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payload);
     }
 
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Teachers Training') {
       this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload = this.eventsDataFormGroup.value;
@@ -957,7 +957,7 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payload);
     }
 
-    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading') {
+    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading' || this.eventsDataFormGroup.value.eventType == 'Diploma Exam' || this.eventsDataFormGroup.value.eventType == 'OVBS' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
       this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload = this.eventsDataFormGroup.value;
@@ -973,7 +973,7 @@ export class EventCreationComponent implements OnInit {
     let categories = this.catGridApi.getSelectedRows();
 
     //create/update event for CWC
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload: any = {};
       payload.categories = categories;
@@ -991,7 +991,7 @@ export class EventCreationComponent implements OnInit {
     let groups = this.groupsGridApi.getSelectedRows();
 
     //create/update event for CWC 
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload: any = {};
       payload.groups = groups;
@@ -1006,7 +1006,7 @@ export class EventCreationComponent implements OnInit {
 
   onEventCatGroupMapSectionNextBtn() {
 
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload: any = {};
       payload.catGradeMap = this.eventCatGroupMapFormGroup.value.eventCatGroupMapFormArray;
@@ -1028,7 +1028,7 @@ export class EventCreationComponent implements OnInit {
     }
 
     //create/update event for CWC 
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload: any = {};
       payload.venues = venues;
@@ -1040,7 +1040,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload: any = {};
       payload.venues = venues;
@@ -1051,7 +1051,16 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payload);
     }
 
-    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading') {
+    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading' || this.eventsDataFormGroup.value.eventType == 'OVBS') {
+      this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload = this.eventsDataFormGroup.value;
+      payload.sectionCode = 'event_venue_assignment';
+      payload.nextSectionCode = 'event_questionnaires';
+      this.createUpdateEvents(payload);
+    }
+
+    if(this.eventsDataFormGroup.value.eventType == 'Teachers Training'){
       this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
       this.eventsDataFormGroup.value.eventId = this.eventId;
       let payload = this.eventsDataFormGroup.value;
@@ -1080,7 +1089,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payload.venueProctorAssignment = venueProctorAssignment;
       payload.sectionCode = 'event_proctor_assignment';
@@ -1090,11 +1099,21 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payload);
     }
 
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payload.venueProctorAssignment = venueProctorAssignment;
       payload.sectionCode = 'event_proctor_assignment';
       payload.nextSectionCode = 'event_evaluator_assignment';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+    if(this.eventsDataFormGroup.value.eventType == 'Talent Show'){
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payload.venueProctorAssignment = venueProctorAssignment;
+      payload.sectionCode = 'event_proctor_assignment';
+      payload.nextSectionCode = 'event_questionnaires';
       payload.eventType = this.eventsDataFormGroup.value.eventType;
       payload.eventId = this.eventId;
       this.createUpdateEvents(payload);
@@ -1150,7 +1169,7 @@ export class EventCreationComponent implements OnInit {
 
     }
 
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payload.judgeAssignment = judgeAssignment;
       payload.sectionCode = 'event_judge_assignment';
@@ -1167,7 +1186,7 @@ export class EventCreationComponent implements OnInit {
     let payload: any = {};
     let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
 
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payload.evaluatorAssignment = evaluatorAssignment;
       payload.sectionCode = 'event_evaluator_assignment';
@@ -1194,7 +1213,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Bible Reading') {
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Bible Reading' || this.eventsDataFormGroup.value.eventType == 'OVBS' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payload.questionnaire = questionnaire;
       payload.sectionCode = 'event_questionnaires';
