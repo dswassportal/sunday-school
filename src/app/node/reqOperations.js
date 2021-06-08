@@ -1,12 +1,9 @@
-const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const firebase = require('firebase');
 const firebaseConfig = require('./firebase/firebaseAdminUtils');
 const errorHandling = require('./ErrorHandling/commonDBError');
-const { result } = require('underscore');
-const { event } = require('jquery');
 const dbConnections = require(`${__dirname}/dbConnection`);
-
+const reqOpQueries = require(`${__dirname}/static/reqOperations_queries`);
 
 
 try {
@@ -486,7 +483,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
 
         /****************Removed from projection by Sudip ********************* */
         //vu.role_id,
-        /****************Removed from projection by vishwesh ********************* */  
+        /****************Removed from projection by vishwesh ********************* */
         // vu.role_start_date,
         // vu.role_end_date                    
         // vu.org_id,
@@ -1064,8 +1061,28 @@ async function processUpdateUserRoles(userData, loggedInUser) {
     let client = await dbConnections.getConnection();
     //  console.log("User Data" + JSON.stringify(userData));
     try {
-        await client.query("BEGIN");
 
+        //Isolating transaction from the main transaction
+        if (userData.hasEmailChanged === true) {
+            await client.query("BEGIN");
+            console.debug(`User ${userData.userId} has changed his email address from ${userData.oldEmail} to ${userData.emailId}`);
+
+            let result = await client.query(reqOpQueries.updateEmailId, [userData.emailId, userData.oldEmail])
+            if (result.rowCount > 0) {
+                console.log(`User ${userData.userId}, Email updated, row count is : ${result.rowCount}`);
+
+                for (let row of result.rows) {
+                    await client.query(reqOpQueries.insUsrOpsLog,
+                        [row.user_id, 'Email Address Change', 'Email address has been changed.',
+                        userData.userId, new Date().toUTCString()])
+                }
+                await client.query("commit;");
+            }
+        }
+
+
+
+        await client.query("BEGIN");
         if (userData.isFamilyHead == true || userData.isFamilyHead == "true") {
 
             let insertRoleMapping = `insert into t_user_role_mapping (user_id, role_id)
@@ -1084,9 +1101,9 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             await client.query(deleteRole)
 
             //let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
-                //select ${userData.userId}, role_id from t_role where name = 'Member';`
+            //select ${userData.userId}, role_id from t_role where name = 'Member';`
 
-                let insertRoleMappingmember = `INSERT INTO t_user_role_mapping (user_id, role_id)
+            let insertRoleMappingmember = `INSERT INTO t_user_role_mapping (user_id, role_id)
                 select ${userData.userId}, (select role_id from t_role where name = 'Member') role_id  
                 WHERE NOT EXISTS (
                 SELECT 1 FROM t_user_role_mapping turm 
@@ -1097,9 +1114,27 @@ async function processUpdateUserRoles(userData, loggedInUser) {
 
             await client.query(insertRoleMappingmember)
         }
-
-
         /********************** t_user************************* */
+
+        var oldParish = userData.orgId;
+        if (userData.hasParishChanged === true) {
+            console.debug(`User ${userData.userId}, has changed his parish.`)
+            userData.orgId = userData.parish;
+
+            if (userData.isFamilyHead == true || userData.isFamilyHead == "true") {
+                console.debug(`User ${userData.userId}, has changed parish and also a family head.`);
+
+                let setMemberParish = `update t_user set org_id = ${userData.orgId},is_approved= false where user_id in(
+                                            select user_id from t_person_relationship tpr 
+                                            join t_user tu on tpr.family_member_id = tu.user_id 
+                                            and tpr.family_head_id = ${userData.userId} and tu.org_id = ${oldParish}) returning user_id;`;
+
+                if (setMemberParish.rowCount > 0) {
+                    console.log(`User ${userData.userId}, member's to updated ${JSON.stringify(setMemberParish.rows)}`)
+                }
+
+            }
+        }
 
         const updateUserTbl = `UPDATE public.t_user
                 SET  org_id=$1,
@@ -1111,8 +1146,9 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                      is_family_head=$7,
                      updated_by=$8, 
                      updated_date=$9
+                     ${(userData.hasParishChanged === true) ? ',is_approved = false': ''}
                 WHERE user_id=$10;`;
-
+                
         const updateUserTbl_values = [
             userData.orgId,
             userData.title,
@@ -1381,7 +1417,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                             userData.updatedBy,
                             new Date().toISOString(),
                             'member',
-                            true
+                            false
                         ]
 
                         let result = await client.query(insertuserTbl, insertuserTblValues)
@@ -1480,7 +1516,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                             userData.updatedBy,
                             new Date().toISOString(),
                             'member',
-                            true,
+                            false
                         ]
 
                         let result = await client.query(insertuserTbl, insertuserTblValues)
@@ -1635,7 +1671,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                 //     role_id, user_id, is_deleted, role_start_date, role_end_date)
                 //     VALUES ($1, $2, $3, $4, $5);`
 
-        let insertRoleMapping = `INSERT INTO t_user_role_mapping( role_id, user_id, is_deleted, role_start_date, role_end_date)
+                let insertRoleMapping = `INSERT INTO t_user_role_mapping( role_id, user_id, is_deleted, role_start_date, role_end_date)
                     select $1, $2, $3, $4, $5  
                     WHERE NOT EXISTS (
                     SELECT 1 FROM t_user_role_mapping turm 
@@ -1660,7 +1696,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                 //                                         updated_date)
                 //                                      VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
 
-            let insertRoleContext = `INSERT INTO t_user_role_context( role_id, user_id, org_id, is_deleted, 
+                let insertRoleContext = `INSERT INTO t_user_role_context( role_id, user_id, org_id, is_deleted, 
                                                         created_by, created_date, updated_by, updated_date)
                                                     select $1, $2, $3, $4, $5, $6, $7, $8  
                                                     WHERE NOT EXISTS (
@@ -1689,7 +1725,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
 
                     let insertRoleMappingmember = `insert into t_user_role_mapping (user_id, role_id)
                select ${userData.userId}, role_id from t_role where name = 'Member';`
-                  
+
 
                     await client.query(insertRoleMappingmember);
                 }

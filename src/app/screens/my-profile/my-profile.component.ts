@@ -1,17 +1,14 @@
 import { HttpClient } from '@angular/common/http';
-import { ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDatepicker } from '@angular/material/datepicker';
 import { Router } from '@angular/router';
 import { uiCommonUtils } from 'src/app/common/uiCommonUtils';
 import { ComponentCanDeactivate } from 'src/app/component-can-deactivate';
 import { ApiService } from 'src/app/services/api.service';
-
-import { Moment } from 'moment';
 import * as _moment from 'moment';
 import { default as _rollupMoment } from 'moment';
 import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
+import { AuthService } from '../../services/auth.service'
 
 const moment = _rollupMoment || _moment;
 
@@ -54,7 +51,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     { value: "married", viewValue: "married" }
   ];*/
   constructor(private apiService: ApiService,
-    private http: HttpClient, private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils,
+    private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils, private authService: AuthService,
     public router: Router) { }
 
   canDeactivate(): boolean {
@@ -91,13 +88,13 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   isStudent: any;
   grades!: any[];
   relationships!: any[];
-  maritalstatus!:any[];
-  membership!:any[];
+  maritalstatus!: any[];
+  membership!: any[];
   titles!: any[];
   memberships!: any[];
-  error = {validatePhoneNumber: true};
-  
-  
+  error = { validatePhoneNumber: true };
+
+
   //, Validators.required
   //[Validators.required, Validators.email]
   ngOnInit(): void {
@@ -226,12 +223,12 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         //console.log(this.parishList);
       });
 
-	  this.apiService.callGetService('getLookupMasterData?types=title,grade,relationship,martial status').subscribe((res: any) => {
+      this.apiService.callGetService('getLookupMasterData?types=title,grade,relationship,martial status').subscribe((res: any) => {
         this.titles = res.data["titles"];
         this.grades = res.data["grades"];
-        this.relationships =res.data["relationships"];
-        this.maritalstatus =res.data["martial statuss"];
-        
+        this.relationships = res.data["relationships"];
+        this.maritalstatus = res.data["martial statuss"];
+
       })
 
       this.apiService.getCountryStates().subscribe((res: any) => {
@@ -262,7 +259,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         postalCode: this.alluserdata.postalCode,
         //country: this.alluserdata.country,
         state: this.alluserdata.state,
-        parish: this.alluserdata.orgName,
+        parish: this.alluserdata.orgId,
         //memberDetails: this.alluserdata.memberDetails,
         maritalStatus: this.alluserdata.maritalStatus,
         dateofMarriage: this.alluserdata.dateOfMarriage,
@@ -352,8 +349,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
           this.parishList = res.data.metaData.Parish;
         }
       })
-	  
-	this.apiService.callGetService('getLookupMasterData?types=title,membership').subscribe((res: any) => {
+
+      this.apiService.callGetService('getLookupMasterData?types=title,membership').subscribe((res: any) => {
         this.titles = res.data.titles;
         this.memberships = res.data.memberships;
       })
@@ -450,21 +447,15 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   }
 
   updateUserProfile() {
-     if (this.myprofileform.invalid) {
-       this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
-    //   return
-     }
-     else //{
+    //  if (this.myprofileform.invalid) {
+    //    this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
+    // //   return
+    //  }
+    //  else //{
     if (this.isApprovedUserLoggedIn == true) {
       this.myprofileform.value.userId = this.userId;
       this.myprofileform.value.updatedBy = this.userId;
       this.myprofileform.value.orgId = this.orgId;
-
-      // if((this.myprofileform.value.isFamilyHead == '' || this.alluserdata.isFamilyHead ==true )
-      //      &&  this.myprofileform.value.isFamilyHead == true){
-      //   this.myprofileform.value.isFamilyHead = true;
-      // }else
-      // this.myprofileform.value.isFamilyHead = false;
 
       let currFHValue = this.myprofileform.value.isFamilyHead;
       if (currFHValue === true || currFHValue == 'true')
@@ -483,22 +474,41 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       else if (currisStudentValue === '')
         this.myprofileform.value.isStudent = this.alluserdata.isStudent
 
-      this.apiService.callPostService(`updateUserRoles`, {...this.myprofileform.value, ...this.studentDetailsForm.value
-      }).subscribe((res: any) => {
-        if (res.data.status == "success") {
-          this.uiCommonUtils.showSnackBar("Profile updated successfully!", "success", 3000);
-          this.getAndSetMetdata(this.userId)
+      if (this.alluserdata.emailId.toLowerCase() !== this.myprofileform.value.emailId.toLowerCase()) {
+        let confmMsgSt = 'You have changed your email address, You need to complete email verfication process for new email otherwise your account will be locked. Press OK to continue';
+        if (confirm(confmMsgSt)) {
+          this.authService.updateEmailAddress(this.myprofileform.value.emailId)?.then(() => {
+            this.invokeApi({
+              ...this.myprofileform.value,
+              ...this.studentDetailsForm.value,
+              respondWith: 'user_meta_data',
+              hasEmailChanged: true,
+              oldEmail: this.alluserdata
+            })
+          }).catch((error: any) => {
+            console.log(error);
+            this.uiCommonUtils.showSnackBar("Session Expired!", "error", 3000);
+          })
         }
-        else
-          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-      });
+      } else {
+        let payloadJson = {
+          ...this.myprofileform.value,
+          ...this.studentDetailsForm.value,
+          respondWith: 'user_meta_data',
+          hasEmailChanged: false
+        };
+        if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
+          payloadJson.hasParishChanged = true;
+        }
+        this.invokeApi(payloadJson);
+      }
     }
 
     if (this.isApprovedUserLoggedIn == false) {
 
       this.signUpForm.value.userId = this.alluserdata.userId;
       this.signUpForm.value.updatedBy = this.alluserdata.userId;
-      this.signUpForm.value.orgId = this.alluserdata.orgId;
+      // this.signUpForm.value.orgId = this.alluserdata.orgId;
 
       this.apiService.callPostService(`updateBasicProfile`, this.signUpForm.value).subscribe((data) => {
 
@@ -512,7 +522,20 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
 
     }
-   
+
+  }
+
+  invokeApi(payload: any) {
+    this.apiService.callPostService(`updateUserRoles`,
+      payload
+    ).subscribe((res: any) => {
+      if (res.data.status == "success") {
+        localStorage.setItem('chUserMetaData', JSON.stringify(res.data.metaData));
+        this.uiCommonUtils.showSnackBar("Profile updated successfully!", "success", 3000);
+      }
+      else
+        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+    });
   }
 
 
