@@ -1051,21 +1051,14 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payload);
     }
 
-    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading' || this.eventsDataFormGroup.value.eventType == 'OVBS') {
-      this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading' || this.eventsDataFormGroup.value.eventType == 'OVBS' || this.eventsDataFormGroup.value.eventType == 'Teachers Training') { 
       this.eventsDataFormGroup.value.eventId = this.eventId;
-      let payload = this.eventsDataFormGroup.value;
+      let payload: any = {};
+      payload.venues = venues;
       payload.sectionCode = 'event_venue_assignment';
       payload.nextSectionCode = 'event_questionnaires';
-      this.createUpdateEvents(payload);
-    }
-
-    if(this.eventsDataFormGroup.value.eventType == 'Teachers Training'){
-      this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
-      this.eventsDataFormGroup.value.eventId = this.eventId;
-      let payload = this.eventsDataFormGroup.value;
-      payload.sectionCode = 'event_venue_assignment';
-      payload.nextSectionCode = 'event_questionnaires';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
       this.createUpdateEvents(payload);
     }
 
