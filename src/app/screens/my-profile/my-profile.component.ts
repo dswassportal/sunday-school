@@ -71,6 +71,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   alluserdata: any;
   userId: any;
   isFamilyHead: any;
+  isReadOnly: any;
   isStudentvar!: boolean;
   orgId: any;
   parishList!: any[];
@@ -172,7 +173,13 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       this.userId = this.alluserdata.userId;
       this.fbUid = this.alluserdata.fbUid;
       this.isFamilyHead = this.alluserdata.isFamilyHead;
-	  this.isStudent = this.alluserdata.isStudent;
+      if(this.isFamilyHead == true){
+        this.isReadOnly = false;
+      }
+      else{
+        this.isReadOnly = true;
+      }
+	    this.isStudent = this.alluserdata.isStudent;
       this.orgId = this.alluserdata.orgId;
       this.memberDetailsData = this.alluserdata.memberDetails;
       this.myprofileform.setControl('memberDetails', this.setMemberDetails(this.memberDetailsData));
