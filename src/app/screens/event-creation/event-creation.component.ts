@@ -794,6 +794,7 @@ export class EventCreationComponent implements OnInit {
       this.isEvalSecNextButtonRequired = true;
     }
 
+    
   }
 
   onEventDetailsSectionNextBtnClick() {
