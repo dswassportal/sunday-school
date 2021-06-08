@@ -733,7 +733,7 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 2%;">
-                                <button (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                <button *ngIf = "isNextButtonRequired" (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
                                     <span style="font-family: poppins;">Next</span>
                                 </button>
                             </div>

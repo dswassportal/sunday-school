@@ -100,6 +100,7 @@ export class EventCreationComponent implements OnInit {
   isQuestionnaireRequired: any;
   isAttachmentRequired: any;
   isUrlRequired: any;
+  isNextButtonRequired: any;
   selectedEvaluatorsDropdown: any;
 
 
@@ -491,8 +492,6 @@ export class EventCreationComponent implements OnInit {
       questionnaire: this.formBuilder.array([this.adduserquestionary()])
     });
 
-
-
     this.eventEvaluatorAssignFormGroup = this.formBuilder.group({
       evaluators: new FormControl(''),
     });
@@ -832,6 +831,13 @@ export class EventCreationComponent implements OnInit {
 
     this.getData();
 
+    if (this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam'){
+      this.isNextButtonRequired = false;
+    }
+    else{
+      this.isNextButtonRequired = true;
+    }
+
   }
 
   onEventDetailsSectionNextBtnClick() {
@@ -924,18 +930,6 @@ export class EventCreationComponent implements OnInit {
 
 
     }
-
-    // for hiding and showing different sections as per event type
-    // if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-    //   this.isQuestionnariesRequired = false;
-    //   this.isttcExamDataFormGroupRequired = true;
-    //   this.eventStartDateMin = this.eventsDataFormGroup.value.startDate;
-    //   this.eventEndDateMax = this.eventsDataFormGroup.value.endDate;
-    // }
-    // else {
-    //   this.isQuestionnariesRequired = true;
-    //   this.isttcExamDataFormGroupRequired = false;
-    // }
 
 
     //create/update event for CWC for event_details section
@@ -1179,7 +1173,7 @@ export class EventCreationComponent implements OnInit {
     let payload: any = {};
     let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
 
-    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payload.evaluatorAssignment = evaluatorAssignment;
       payload.sectionCode = 'event_evaluator_assignment';
@@ -1215,6 +1209,23 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payload);
       this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
     }
+
+
+    let payloadEval: any = {};
+    let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
+
+    if (this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payloadEval.evaluatorAssignment = evaluatorAssignment;
+      payloadEval.sectionCode = 'event_evaluator_assignment';
+      payloadEval.nextSectionCode = 'event_questionnaires';
+      payloadEval.eventType = this.eventsDataFormGroup.value.eventType;
+      payloadEval.eventId = this.eventId;
+      this.createUpdateEvents(payloadEval);
+      this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
+    }
+
+
 
   }
 
