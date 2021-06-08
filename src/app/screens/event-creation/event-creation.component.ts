@@ -74,12 +74,6 @@ export class EventCreationComponent implements OnInit {
   rowDataCat: any = [];
   rowDataGroups: any = [];
   rowDataVenues: any = [];
-  eventStartDateMatLabel: boolean = true;
-  ttcExaminationDateLabel: boolean = false;
-  cwcEventDateLabel: boolean = false;
-  isEventEndDateRequired: boolean = true;
-  iseventUrlRequired: boolean = true;
-  isUploadDocumentsRequired: boolean = true;
   catGridApi: any;
   groupsGridApi: any;
   venuesGridApi: any;
@@ -100,7 +94,7 @@ export class EventCreationComponent implements OnInit {
   isQuestionnaireRequired: any;
   isAttachmentRequired: any;
   isUrlRequired: any;
-  isNextButtonRequired: any;
+  isEvalSecNextButtonRequired: any;
   selectedEvaluatorsDropdown: any;
 
 
@@ -791,51 +785,13 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    if (this.eventsDataFormGroup.value.eventType == 'OVBS') {
-      this.isEventEndDateRequired = true;
-      this.eventStartDateMatLabel = true;
-      this.ttcExaminationDateLabel = false;
-      this.cwcEventDateLabel = false;
-      this.iseventUrlRequired = true;
-      this.isUploadDocumentsRequired = true;
-
-    }
-    else {
-      this.isEventEndDateRequired = true;
-      this.eventStartDateMatLabel = true;
-      this.ttcExaminationDateLabel = false;
-      this.cwcEventDateLabel = false;
-      this.iseventUrlRequired = true;
-      this.isUploadDocumentsRequired = true;
-    }
-
-
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-      this.isEventEndDateRequired = false;
-      this.ttcExaminationDateLabel = true;
-      this.cwcEventDateLabel = false;
-      this.eventStartDateMatLabel = false;
-      this.iseventUrlRequired = false;
-      this.isUploadDocumentsRequired = false;
-
-    }
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
-      this.isEventEndDateRequired = false;
-      this.cwcEventDateLabel = true;
-      this.eventStartDateMatLabel = false;
-      this.ttcExaminationDateLabel = false;
-      this.iseventUrlRequired = false;
-      this.isUploadDocumentsRequired = true;
-
-    }
-
     this.getData();
 
     if (this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam'){
-      this.isNextButtonRequired = false;
+      this.isEvalSecNextButtonRequired = false;
     }
     else{
-      this.isNextButtonRequired = true;
+      this.isEvalSecNextButtonRequired = true;
     }
 
   }

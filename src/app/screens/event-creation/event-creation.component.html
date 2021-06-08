@@ -88,9 +88,8 @@
 
                                 <mat-form-field class="col-md-6">
 
-                                    <mat-label *ngIf="eventStartDateMatLabel">Event Start Date</mat-label>
-                                    <mat-label *ngIf="ttcExaminationDateLabel">TTC Examination Date</mat-label>
-                                    <mat-label *ngIf="cwcEventDateLabel">CWC Event Date</mat-label>
+                                    <mat-label *ngIf="!isSingleDayEvent">Event Start Date</mat-label>
+                                    <mat-label *ngIf="isSingleDayEvent">Event Date</mat-label>
 
                                     <!-- (dateChange)="comparisonEventStartdateValidator()" -->
                                     <!-- (dateChange)="comparisonEventStartandRegiStartdateValidator()"
@@ -118,7 +117,7 @@
                                 </mat-form-field>
 
 
-                                <mat-form-field *ngIf="isEventEndDateRequired" class="col-md-6">
+                                <mat-form-field *ngIf="!isSingleDayEvent" class="col-md-6">
 
                                     <!-- (dateChange)="comparisonEventEnddateValidator()" -->
                                     <mat-label>Event End Date</mat-label>
@@ -733,7 +732,7 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 2%;">
-                                <button *ngIf = "isNextButtonRequired" (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                <button *ngIf = "isEvalSecNextButtonRequired" (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
                                     <span style="font-family: poppins;">Next</span>
                                 </button>
                             </div>
