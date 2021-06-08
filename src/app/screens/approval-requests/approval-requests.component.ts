@@ -31,7 +31,7 @@ class CustomDateAdapter extends NativeDateAdapter {
       provide: DateAdapter, useClass: CustomDateAdapter
     }
   ]
-  })
+})
 export class ApprovalRequestsComponent implements OnInit {
 
   data: any;
@@ -188,8 +188,7 @@ export class ApprovalRequestsComponent implements OnInit {
     this.approveReqForm.value.isApproved = this.isApproved;
     this.approveReqForm.value.loggedInuserId = this.loggedInUser;
     //console.log(this.approveReqForm.value);
-    this.apiService.approveOrRejReq({ data: this.approveReqForm.value }).subscribe(res => {
-      console.log(res);
+    this.apiService.callPostService('setUserApprovalState', this.approveReqForm.value).subscribe(res => {
       this.getUnapprovedUserData('approval_requests');
       $("#imagemodal").modal("hide");
     })
@@ -199,9 +198,9 @@ export class ApprovalRequestsComponent implements OnInit {
     this.approveReqForm.value.userId = this.selectedUserData.userId;
     this.approveReqForm.value.isApproved = this.isApproved;
     this.approveReqForm.value.loggedInuserId = this.loggedInUser;
-    console.log(this.approveReqForm.value);
-    this.apiService.approveOrRejReq({ data: this.approveReqForm.value }).subscribe(res => {
-      console.log(res);
+    this.approveReqForm.value.memberType = this.selectedUserData.memberType;
+    this.approveReqForm.value.orgId = this.selectedUserData.orgId;
+    this.apiService.callPostService('setUserApprovalState', this.approveReqForm.value).subscribe(res => {
       this.getUnapprovedUserData('approval_requests');
       $("#imagemodal").modal("hide");
     })

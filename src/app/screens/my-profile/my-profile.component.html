@@ -117,7 +117,7 @@
 
         <mat-form-field class="col-md-4">
           <mat-label>Email Address</mat-label>
-          <input id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address" readonly />
+          <input id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address"/>
           <mat-error *ngIf="myprofileform.controls.emailId.touched && myprofileform.controls.emailId.invalid">
             <span *ngIf="myprofileform.controls.emailId.errors.required">This field is mandatory.</span>
             <span *ngIf="myprofileform.controls.emailId.errors.pattern">Enter valid email id.</span>
@@ -157,11 +157,11 @@
 
         <mat-form-field class="col-md">
           <mat-label>Parish</mat-label>
-          <input id="parish" matInput formControlName="parish" readonly />
-         <!-- readonly
+          <!-- <input id="parish" matInput formControlName="parish" readonly /> -->
+         <!-- readonly -->
           <mat-select id="parish" formControlName = "parish" placeholder="Parish">
             <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
-          </mat-select>-->
+          </mat-select>
         </mat-form-field>
       </div>
       <div class="row">
@@ -710,7 +710,7 @@
 
         <div class="form-group row justify-content-center">
             <mat-form-field class="form-field col-md">
-                <input [readonly]=true type="text" matInput formControlName="email" id="email" placeholder="Email" required>
+                <input type="text" matInput formControlName="email" id="email" placeholder="Email" required>
                 <mat-error *ngIf="signUpForm.controls.email.touched && signUpForm.controls.email.invalid">
                     <span *ngIf="signUpForm.controls.email.errors.required">This field is mandatory.</span>
                     <span *ngIf="signUpForm.controls.email.errors.pattern">This field is invalid.</span>
