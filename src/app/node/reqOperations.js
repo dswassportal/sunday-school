@@ -354,6 +354,7 @@ async function processGetUserMetaDataRequest(uid) {
                                         vu.first_name, vu.middle_name, vu.last_name,
                                         vu.dob, vu.mobile_no, family_tree.relationship from v_user vu, family_tree
                                         where vu.user_id = family_tree.user_id;`
+                                        
                 }
 
                 let res1 = await client.query(query1);
