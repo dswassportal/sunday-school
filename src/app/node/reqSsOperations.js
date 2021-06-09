@@ -8,7 +8,7 @@ async function getSSchoolData(loggedInUserId, role) {
     let client = await dbConnections.getConnection();
 
     try {
-
+        let metadata = {};
         let query = '';
         if (role) {
 
@@ -58,9 +58,11 @@ async function getSSchoolData(loggedInUserId, role) {
                                              FROM   child_orgs)
                  and to2.org_type in ('Sunday School', 'Grade') order by org_id;`
         }
+       
         let result = await client.query(query);
-        schoolData = [];
 
+        schoolData = [];
+        AllstaffSchoolData = [];
         for (let row of result.rows) {
             let temp = {};
             if (row.org_type === 'Sunday School') {
@@ -84,15 +86,44 @@ async function getSSchoolData(loggedInUserId, role) {
                         temp2.name = row.name;
                         schoolData[index].grades.push(temp2);
                     }
+                    metadata.schoolData = schoolData;
                 }
             }
-
+            
         }
+        
+        
 
+        let queryGetSchoolStaffData = `select distinct org_staff_assignment_id, tssa.org_id, tssa.user_id, role_type, is_primary,
+                                    concat(tu.title,'. ',tu.first_name, ' ', tu.last_name) staff_name,turm.role_start_date,turm.role_end_date
+                                    from t_organization_staff_assignment tssa
+                                    left join t_user tu on tu.user_id=tssa.user_id
+                                    left join t_user_role_mapping turm on tu.user_id=turm.user_id
+                                    and tssa.is_deleted = false   ;`
+
+        if(role == 'Principal' || role == 'Vicar'){
+        
+            let staffData = await client.query(queryGetSchoolStaffData);
+            let staffSchoolDataJson = {}
+            for(let row of staffData.rows){
+                let staffSchoolData = {};
+                staffSchoolData.staffSchoolAssignmentId = row.org_staff_assignment_id;
+                staffSchoolData.schoolId = row.org_id;
+                staffSchoolData.userId = row.user_id,
+                staffSchoolData.roleType = row.role_type;
+                staffSchoolData.isPrimary = row.is_primary;
+                staffSchoolData.staffName = row.staff_name;
+                staffSchoolData.roleStartDate = row.role_start_date;
+                staffSchoolData.roleEndDate = row.role_end_date;
+                AllstaffSchoolData.push(staffSchoolData);
+                
+            }
+            metadata.AllstaffSchoolData = AllstaffSchoolData;
+        }
         return ({
             data: {
                 status: 'success',
-                schoolData: schoolData
+                schoolData: metadata
             }
         })
 
