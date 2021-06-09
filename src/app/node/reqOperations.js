@@ -225,6 +225,7 @@ async function processGetUserMetaDataRequest(uid) {
 
 
         let res = await client.query(query);
+        let isFamilyHead = res.rows[0].is_family_head;
         let lastLoggedInRes = await client.query(lastLoggedIn);
 
         if (res && res.rowCount > 0) {
@@ -321,14 +322,40 @@ async function processGetUserMetaDataRequest(uid) {
 
                 console.log("metaData.userId", metaData.userId);
 
-                let query1 = `select distinct vu.user_id,vu.baptismal_name, vu.email_id, vu.title,
-                    vu.first_name, vu.middle_name, vu.last_name,
-			    	vu.dob, vu.mobile_no, tpr.relationship,
-                    tpr.relationship_id relationship_id
-                    from v_user vu, t_person_relationship tpr 
-                    where tpr.family_head_id = '${metaData.userId}' 
-                    and tpr.is_deleted = false
-                    and vu.user_id = tpr.family_member_id;`
+
+
+                if (isFamilyHead == true) {
+
+                    query1 = `with family_tree as (select family_member_id user_id, relationship 
+                        from t_person_relationship tpr 
+                        where tpr.family_head_id = '${metaData.userId}'
+                        and is_deleted != true
+                        )
+                        select distinct vu.user_id,vu.baptismal_name, vu.email_id, vu.title,
+                        vu.first_name, vu.middle_name, vu.last_name,
+                        vu.dob, vu.mobile_no, family_tree.relationship from v_user vu, family_tree
+                        where vu.user_id = family_tree.user_id;`
+
+                }
+                else {
+
+                    query1 = `with family_tree as (		select distinct tpr3.family_head_id user_id, 'Family Head' relationship 
+                                            from t_person_relationship tpr2, t_person_relationship tpr3 
+                                            where tpr2.family_member_id = '${metaData.userId}'
+                                            and tpr3.family_head_id = tpr2.family_head_id and tpr3.is_deleted != true
+                                        union 
+                                            select distinct tpr3.family_member_id user_id, tpr3.relationship 
+                                            from t_person_relationship tpr2, t_person_relationship tpr3 
+                                            where tpr2.family_member_id = '${metaData.userId}'
+                                            and tpr3.family_head_id = tpr2.family_head_id and tpr3.is_deleted != true
+                                            and tpr3.family_member_id != '${metaData.userId}'
+                                        )
+                                        select distinct vu.user_id,vu.baptismal_name, vu.email_id, vu.title,
+                                        vu.first_name, vu.middle_name, vu.last_name,
+                                        vu.dob, vu.mobile_no, family_tree.relationship from v_user vu, family_tree
+                                        where vu.user_id = family_tree.user_id;`
+                                        
+                }
 
                 let res1 = await client.query(query1);
 
