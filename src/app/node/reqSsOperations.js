@@ -58,7 +58,7 @@ async function getSSchoolData(loggedInUserId, role) {
                                              FROM   child_orgs)
                  and to2.org_type in ('Sunday School', 'Grade') order by org_id;`
         }
-       
+
         let result = await client.query(query);
 
         schoolData = [];
@@ -89,10 +89,10 @@ async function getSSchoolData(loggedInUserId, role) {
                     metadata.schoolData = schoolData;
                 }
             }
-            
+
         }
-        
-        
+
+
 
         let queryGetSchoolStaffData = `select distinct org_staff_assignment_id, tssa.org_id, tssa.user_id, role_type, is_primary,
                                     concat(tu.title,'. ',tu.first_name, ' ', tu.last_name) staff_name,turm.role_start_date,turm.role_end_date
@@ -101,29 +101,43 @@ async function getSSchoolData(loggedInUserId, role) {
                                     left join t_user_role_mapping turm on tu.user_id=turm.user_id
                                     and tssa.is_deleted = false   ;`
 
-        if(role == 'Principal' || role == 'Vicar'){
-        
+        if (role == 'Principal' || role == 'Vicar') {
+
             let staffData = await client.query(queryGetSchoolStaffData);
             let staffSchoolDataJson = {}
-            for(let row of staffData.rows){
+            for (let row of staffData.rows) {
                 let staffSchoolData = {};
                 staffSchoolData.staffSchoolAssignmentId = row.org_staff_assignment_id;
                 staffSchoolData.schoolId = row.org_id;
                 staffSchoolData.userId = row.user_id,
-                staffSchoolData.roleType = row.role_type;
+                    staffSchoolData.roleType = row.role_type;
                 staffSchoolData.isPrimary = row.is_primary;
                 staffSchoolData.staffName = row.staff_name;
                 staffSchoolData.roleStartDate = row.role_start_date;
                 staffSchoolData.roleEndDate = row.role_end_date;
                 AllstaffSchoolData.push(staffSchoolData);
-                
+
             }
             metadata.AllstaffSchoolData = AllstaffSchoolData;
+
         }
+
+        let termData = `select jsonb_agg(
+                                        jsonb_build_object(
+                                            'term', tstd.term_year,
+                                            'startDate', tstd.term_start_date,
+                                            'endDate', tstd.term_end_date,
+                                            'termDtlId', tstd.school_term_detail_id 
+                                        ) order by term_start_date
+                                    ) term_data from t_school_term_detail tstd
+                                    where is_deleted = false ;`
+
+        let termResult = await client.query(termData);
         return ({
             data: {
                 status: 'success',
-                schoolData: metadata
+                schoolData: metadata,
+                ssTerms: (termResult.rowCount > 0) ? termResult.rows[0].term_data : []
             }
         })
 
