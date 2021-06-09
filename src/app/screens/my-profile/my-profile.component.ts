@@ -447,11 +447,11 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   }
 
   updateUserProfile() {
-    //  if (this.myprofileform.invalid) {
-    //    this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
-    // //   return
-    //  }
-    //  else //{
+     if (this.myprofileform.invalid) {
+       this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
+    //   return
+     }
+     else //{
     if (this.isApprovedUserLoggedIn == true) {
       this.myprofileform.value.userId = this.userId;
       this.myprofileform.value.updatedBy = this.userId;
