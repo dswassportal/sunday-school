@@ -1125,7 +1125,7 @@ async function getEventType() {
         tet.is_single_day_event,
         tet.is_school_group_required,
         tet.is_evaluator_required,
-        tet.is_questionnaire_requred,
+        tet.is_questionnaire_required,
         tet.is_attachment_required,
         tet.is_url_required,
         tec.event_category_id, 
@@ -1161,7 +1161,7 @@ async function getEventType() {
                     eventTypes.isSingleDayEvent = row.is_single_day_event;
                     eventTypes.isSchoolGroupRequired = row.is_school_group_required;
                     eventTypes.isEvaluatorRequired = row.is_evaluator_required;
-                    eventTypes.isQuestionnaireRequired = row.is_questionnaire_requred;
+                    eventTypes.isQuestionnaireRequired = row.is_questionnaire_required;
                     eventTypes.isAttachmentRequired = row.is_attachment_required;
                     eventTypes.isUrlRequired = row.is_url_required;
                     type = row.event_type;
