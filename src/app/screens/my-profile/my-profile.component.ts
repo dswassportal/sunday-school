@@ -484,7 +484,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
               ...this.studentDetailsForm.value,
               respondWith: 'user_meta_data',
               hasEmailChanged: true,
-              oldEmail: this.alluserdata
+              oldEmail: this.alluserdata.emailId
             })
           }).catch((error: any) => {
             console.log(error);
