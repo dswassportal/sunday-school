@@ -750,7 +750,7 @@ app.post('/api/setStaffAssignment', function (req, res) {
   console.log("setStaffAssignment called...");
   // let loggedInUser = decodeUser(req)
   try {
-    processMiscRequest.setStaffAssignment(req.body.data)
+    processUserRequest.setStaffAssignment(req.body.data)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
