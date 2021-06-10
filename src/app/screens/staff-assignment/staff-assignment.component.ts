@@ -67,7 +67,7 @@ export class StaffAssignmentComponent implements OnInit {
     this.apiService.callGetService(`getSSchools?role=Vicar`).subscribe((res: any) => {
 
       
-      this.rowData =  res.data.schoolData;
+      this.rowData =  res.data.schoolData.schoolData;
 
       for(let school of this.rowData){
           school.parish = this.orgName;

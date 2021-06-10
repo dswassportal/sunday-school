@@ -325,11 +325,11 @@ app.post('/api/updateEvent', function (req, res) {
   try {
     processEventRequest.updateEvent(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${data}`)
+       // console.log(`Returning with resonse : ${data}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -344,11 +344,11 @@ app.post('/api/getProctorData', function (req, res) {
   try {
     processEventRequest.getProctorData(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -362,11 +362,11 @@ app.post('/api/getVenues', function (req, res) {
   try {
     processEventRequest.getVenues(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+       // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -380,11 +380,11 @@ app.get('/api/getRegionAndParish', function (req, res) {
   try {
     processEventRequest.getRegionAndParish()
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+       // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -398,11 +398,11 @@ app.get('/api/getEventType', function (req, res) {
   try {
     processEventRequest.getEventType()
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+       // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -417,11 +417,11 @@ app.get('/api/getMembers', function (req, res) {
   try {
     processMiscRequest.getMembers(req.query.fbuid)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+       // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+       // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -437,11 +437,11 @@ app.get('/api/getEventQuestionnaireData', function (req, res) {
   try {
     processEventRequest.getEventQuestionnaireData()
       .then((data) => {
-        console.log(`Returning with response : ${JSON.stringify(data)}`)
+      //  console.log(`Returning with response : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with response : ${error}`)
+        //console.log(`Returning with response : ${error}`)
         res.send(error);
         res.end();
       })
@@ -456,11 +456,11 @@ app.get('/api/getEventForRegistration', function (req, res) {
   try {
     processEventRequest.getEventForRegistration()
       .then((data) => {
-        console.log(`Returning with response : ${JSON.stringify(data)}`)
+       // console.log(`Returning with response : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with response : ${error}`)
+        //console.log(`Returning with response : ${error}`)
         res.send(error);
         res.end();
       })
@@ -475,11 +475,11 @@ app.get('/api/getUserApprovalStatus', function (req, res) {
   try {
     processMiscRequest.getUserApprovalStatus(req.query.fbuid)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+     //   console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+       // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -493,11 +493,11 @@ app.post('/api/updateBasicProfile', function (req, res) {
   try {
     processUserRequest.updateUnApprovedUser(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+       // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -583,7 +583,7 @@ app.get('/api/getParticipants', function (req, res) {
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Error with resonse : ${error}`)
+        //console.log(`Error with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -602,7 +602,7 @@ app.post('/api/postScore', function (req, res) {
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+       // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -637,11 +637,11 @@ app.post('/api/deleteEvents', function (req, res) {
   try {
     processEventRequest.deleteEvents(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${data}`)
+        //console.log(`Returning with resonse : ${data}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+       // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
