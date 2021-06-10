@@ -44,72 +44,122 @@ export class AuthService {
     //   }
     // })
   }
+  // ______________________________________ Commented By Sudip ____________________________________________
+  // Sign in with email/password for church project
+  // SignIn(data: any) {
+  //   console.log(`Attempting to sign in with email: ${data.data.username} and password: ${data.data.password}`)
+  //   this.afAuth.auth.signInWithEmailAndPassword(data.data.username, data.data.password)
+  //     .then((result: any) => {
+  //       // if (result.user?.emailVerified == false) {
+  //       // this.uiCommonUtils.showSnackBar('Please verify your email.', 'error', 3000)
+  //       // return;
+  //       //} else {
+  //       this.signedInUser = result.user;
+  //       this.ngZone.run(() => {
+  //         result.user?.getIdToken().then((token: string) => {
+  //           localStorage.setItem('chUserToken', token);
+  //           localStorage.setItem('chUserFbId', result.user?.uid);
+
+  //           this.apiService.callGetService(`getUserApprovalStatus?fbuid=${result.user?.uid}`).subscribe((data) => {
+
+  //             if (data == null) {
+  //               try {
+  //                 // result.user?.delete();
+  //                 //this.uiCommonUtils.showSnackBar('No such account exist!','error',3000)
+  //                 return;
+  //               } catch (error) {
+  //                 console.log('Error while deleting User.');
+  //               }
+  //             }
+
+  //             if (data.data.status == 'failed') {
+  //               this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
+  //             } else {
+  //               this.userData = result.user;
+  //               if (data.data.isapproved == false) {
+  //                 this.apiService.callGetService(`getUserMetaData?uid=${data.data.user}`).subscribe((data) => {
+
+  //                   if (data.data.status == 'failed') {
+  //                     this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
+  //                   } else {
+  //                     localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData))
+  //                     this.router.navigate(['/dashboard']);
+  //                     //this.router.navigate(['/dashboard']);
+  //                   }
+  //                 })
+  //               }
+  //               else
+  //                 this.router.navigate(['/loginAccList']);
+  //             }
+  //           })
+
+
+
+  //         })
+  //         // this.apiService.callGetService(`getUserMetaData?uid=${userId}`).subscribe((data) => {
+
+  //         //   if (data.data.status == 'failed') {
+  //         //     this.uiCommonUtils.showSnackBar(data.data.errorMessage, 'error', 3000);
+  //         //   } else {
+  //         //     localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData))
+  //         //     //this.router.navigate(['/dashboard']);
+  //         //   }
+  //         // })
+  //       });
+  //       // }
+  //       this.SetUserData(result.user);
+  //     }).catch((error: any) => {
+  //       this.uiCommonUtils.showSnackBar(error.message, 'Dismiss', 4000)
+  //     })
+  // }
+
+
 
   // Sign in with email/password for church project
   SignIn(data: any) {
-    console.log(`Attempting to sign in with email: ${data.data.username} and password: ${data.data.password}`)
-    this.afAuth.auth.signInWithEmailAndPassword(data.data.username, data.data.password)
-      .then((result: any) => {
-        // if (result.user?.emailVerified == false) {
-        // this.uiCommonUtils.showSnackBar('Please verify your email.', 'error', 3000)
-        // return;
-        //} else {
-        this.signedInUser = result.user;
-        this.ngZone.run(() => {
-          result.user?.getIdToken().then((token: string) => {
-            localStorage.setItem('chUserToken', token);
-            localStorage.setItem('chUserFbId', result.user?.uid);
+    this.afAuth.auth.setPersistence('local')
+      .then(() => {
+        return this.afAuth.auth.signInWithEmailAndPassword(data.data.username, data.data.password)
+          .then((result: any) => {
+            // if (result.user?.emailVerified == false) {
+            // this.uiCommonUtils.showSnackBar('Please verify your email.', 'error', 3000)
+            // return;
+            //} else {
+            this.signedInUser = result.user;
+            this.ngZone.run(() => {
+              result.user?.getIdToken().then((token: string) => {
+                localStorage.setItem('chUserToken', token);
+                localStorage.setItem('chUserFbId', result.user?.uid);
 
-            this.apiService.callGetService(`getUserApprovalStatus?fbuid=${result.user?.uid}`).subscribe((data) => {
-
-              if(data == null){
-                try{  
-               // result.user?.delete();
-                //this.uiCommonUtils.showSnackBar('No such account exist!','error',3000)
-                return;
-              }catch(error){
-                console.log('Error while deleting User.');
-              }
-              }
-              
-                if (data.data.status == 'failed') {
-                this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
-              } else {
-                if (data.data.isapproved == false) {
-                  this.apiService.callGetService(`getUserMetaData?uid=${data.data.user}`).subscribe((data) => {
-
-                    if (data.data.status == 'failed') {
-                      this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
-                    } else {
-                      localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData))
-                      this.router.navigate(['/dashboard']);
-                      //this.router.navigate(['/dashboard']);
+                this.apiService.callGetService(`getUserApprovalStatus?fbuid=${result.user?.uid}`).subscribe((data) => {
+                  if (data.data.status == 'failed') {
+                    this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
+                  } else {
+                    this.userData = result.user;
+                    if (data.data.isapproved == false) {
+                      this.apiService.callGetService(`getUserMetaData?uid=${data.data.user}`).subscribe((data) => {
+                        if (data.data.status == 'failed') {
+                          this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
+                        } else {
+                          localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData))
+                          this.router.navigate(['/dashboard']);
+                        }
+                      })
                     }
-                  })
-                }
-                else
-                  this.router.navigate(['/loginAccList']);
-              }
-            })
-
-
-
+                    else
+                      this.router.navigate(['/loginAccList']);
+                  }
+                })
+              })
+            });
+            // }
+          }).catch((error: any) => {
+            this.uiCommonUtils.showSnackBar(error.message, 'Dismiss', 4000)
           })
-          // this.apiService.callGetService(`getUserMetaData?uid=${userId}`).subscribe((data) => {
-
-          //   if (data.data.status == 'failed') {
-          //     this.uiCommonUtils.showSnackBar(data.data.errorMessage, 'error', 3000);
-          //   } else {
-          //     localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData))
-          //     //this.router.navigate(['/dashboard']);
-          //   }
-          // })
-        });
-        // }
-        this.SetUserData(result.user);
-      }).catch((error: any) => {
-        this.uiCommonUtils.showSnackBar(error.message, 'Dismiss', 4000)
       })
+      .catch((error) => {
+        this.uiCommonUtils.showSnackBar(error.message, 'error', 5000);
+      });
   }
 
 
@@ -143,23 +193,6 @@ export class AuthService {
         // window.alert(error.message)
       })
   }
-
-  // Reset Forggot password
-  //   ForgotPassword(passwordResetEmail: string) {
-  //     return this.afAuth.auth.sendPasswordResetEmail(passwordResetEmail)
-  //       .then(() => {
-  //        // window.alert('Password reset email sent, check your inbox.');
-  //         this.cormantisCommonUtils.openSnackBar('Password reset email sent, check your inbox.','Close')
-  //       }).catch((error) => {
-  //         window.alert(error)
-  //       })
-  //   }
-
-  // Returns true when user is looged in and email is verified
-  // get isLoggedIn(): boolean {
-  //   const user = JSON.parse(localStorage.getItem('user'));
-  //   return (user !== null && user.emailVerified !== false) ? true : false;
-  // }
 
 
   SetUserData(user: any) {
@@ -219,9 +252,18 @@ export class AuthService {
     })
   }
 
-deleteUserFromFirebase(){
-  this.afAuth.user.subscribe(data=>{
-    data?.delete()
-  })
+  deleteUserFromFirebase() {
+    this.afAuth.user.subscribe(data => {
+      data?.delete()
+    })
+  }
+
+  updateEmailAddress(newEmailId: string) {
+    return this.afAuth.auth.currentUser?.updateEmail(newEmailId);
+  }
+
+  sendEmailVaidation() {
+    this.afAuth.auth.currentUser?.sendEmailVerification;
+  }
 }
-}
+

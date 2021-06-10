@@ -84,7 +84,7 @@ async function getMembers(fireBaseId) {
                         ) order by user_id 
                         ) res`;
 
-                        //, res.last_name,  'role', res.role_name 
+            //, res.last_name,  'role', res.role_name 
             let result2 = await client.query(fetchAllMembersData)/* (err, result) => {
 
                             if (err) {
@@ -169,7 +169,7 @@ async function getUserApprovalStatus(fbuid) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::getUserApprovalStatus() --> error while fetching results : ${error}`)
-        return(errorHandling.handleDBError('connectionError'));
+        return (errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }
@@ -206,7 +206,7 @@ async function handleLogIn_LogOut(reqContextData) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::handleLogIn_LogOut() --> Error : ${error}`)
-        return(errorHandling.handleDBError('connectionError'));
+        return (errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }
@@ -237,19 +237,18 @@ async function getLookupMasterData(reqParams) {
             let key = type.toLowerCase() + 's'
             for (let row of result.rows) {
                 if (type.toLowerCase() === row.type.toLowerCase()) {
-                    if (response[key] == undefined)
+                    if (response[key] == undefined) {
                         response[key] = [];
-                    else
+                        response[key].push(row.code)
+                    } else
                         response[key].push(row.code)
                 }
             }
         }
 
+        response.status = "success";
         return {
-            data: {
-                status: 'success',
-                data: response
-            }
+            data: response
         };
 
 
@@ -268,7 +267,14 @@ async function getRolesByUserId(userId) {
     let client = await dbConnections.getConnection();
     try {
 
-        let query = `select distinct role_id, org_id, role_start_date, role_end_date, org_type from v_user vu where user_id = ${userId} order by role_id;`
+        //let query = `select distinct role_id, org_id, role_start_date, role_end_date, org_type from v_user vu where user_id = ${userId} order by role_id;`
+        let query = `select distinct 
+        role_id,
+        role_start_date, 
+        role_end_date, 
+        case when org_id is null then user_org_id else org_id end org_id,
+        case when org_type is null then user_org_type else org_type end org_type 
+        from v_user vu where user_id = ${userId} order by role_id;`;
 
         let roleResult = await client.query(query);
         let roles = [];
@@ -298,7 +304,7 @@ async function getRolesByUserId(userId) {
 
     } catch (error) {
         console.error(`miscReqOperations.js::getRolesByUserId() --> Error : ${error}`)
-        return(errorHandling.handleDBError('connectionError'));
+        return (errorHandling.handleDBError('connectionError'));
     } finally {
         client.release(false);
     }

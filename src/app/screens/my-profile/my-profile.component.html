@@ -12,7 +12,7 @@
 
         <mat-form-field style="width:10%;">
           <mat-label>Title</mat-label>
-          <mat-select matNativeControl required formControlName="title">
+          <!--<mat-select matNativeControl required formControlName="title">
             <mat-option value="His Grace">His Grace</mat-option>
             <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
             <mat-option value="Very Rev">Very Rev</mat-option>
@@ -23,7 +23,10 @@
             <mat-option value="Ms">Ms</mat-option>
             <mat-option value="Mrs">Mrs</mat-option>
             <mat-option value="Dr">Dr</mat-option>
-            <!-- <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> -->
+             <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> 
+          </mat-select>-->
+          <mat-select required id="title" formControlName = "title" placeholder="title" >
+            <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -71,28 +74,50 @@
       </div>
       <div class="row">
         <mat-form-field class="col-md-4">
-          <mat-label style="padding-left: 15%;">Mobile Number</mat-label>
-          <input required id="mobileNo" matInput formControlName="mobileNo" ng2TelInput maxlength="10" (keypress)="keyPress($event)"
-            placeholder="Enter Mobile Number" />
-            <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
+          <mat-label style="padding-left: 15%;">Mobile Number *</mat-label>
+           <!--<input required id="mobileNo" matInput formControlName="mobileNo" ng2TelInput maxlength="10" (keypress)="keyPress($event)"
+            placeholder="Enter Mobile Number" /> 
+          [preferredCountries]="['us', 'in']"
+          [onlyCountries]= "['us','in']"-->
+            
+          <ngx-mat-intl-tel-input id="mobileNo" matInput (keypress)="keyPress($event)" 
+          [onlyCountries]= "['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']"
+          [enableAutoCountrySelect]="true" name="mobileNo" formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true"></ngx-mat-intl-tel-input>
+
+            <!-- <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
               <span *ngIf="myprofileform.controls.mobileNo.errors.required">This field is mandatory.</span>
-              <span *ngIf="myprofileform.controls.mobileNo.errors.pattern">Enter 10 digit number.</span>
+               <span *ngIf="myprofileform.controls.mobileNo.errors.pattern">Enter 10 digit number.</span> 
+          </mat-error> -->
+          <!-- <mat-error *ngIf="myprofileform.controls['mobileNo']?.errors?.required">Required Field</mat-error>
+          <mat-error *ngIf="myprofileform.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</mat-error> -->
+       
+           <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
+              <span *ngIf="myprofileform.controls['mobileNo']?.errors?.required">This field is mandatory.</span>
+               <span *ngIf="myprofileform.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
           </mat-error>
         </mat-form-field>
 
         <mat-form-field class="col-md-4">
           <mat-label style="padding-left: 15%;">Home Phone Number</mat-label>
-          <input id="homePhoneNo" matInput formControlName="homePhoneNo" ng2TelInput  maxlength="10" (keypress)="keyPress($event)"
+          <!-- <input id="homePhoneNo" matInput formControlName="homePhoneNo" ng2TelInput  maxlength="10" (keypress)="keyPress($event)"
             placeholder="Enter Home Phone Number" />
             <mat-error *ngIf="myprofileform.controls.homePhoneNo.touched && myprofileform.controls.homePhoneNo.invalid">
               <span *ngIf="myprofileform.controls.homePhoneNo.errors.required">This field is mandatory.</span>
               <span *ngIf="myprofileform.controls.homePhoneNo.errors.pattern">Enter 10 digit number.</span>
-          </mat-error>
+          </mat-error> -->
+          <ngx-mat-intl-tel-input id="homePhoneNo" matInput (keypress)="keyPress($event)" 
+            [onlyCountries]= "['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']"
+            [enableAutoCountrySelect]="true" name="homePhoneNo" formControlName="homePhoneNo" [preferredCountries]="['us']" [enableRequired]="true">
+          </ngx-mat-intl-tel-input>
+          <mat-error *ngIf="myprofileform.controls.homePhoneNo.touched && myprofileform.controls.homePhoneNo.invalid">
+            <!-- <span *ngIf="myprofileform.controls['homePhoneNo']?.errors?.required">This field is mandatory.</span> -->
+             <span *ngIf="myprofileform.controls['homePhoneNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
+        </mat-error>
         </mat-form-field>
 
         <mat-form-field class="col-md-4">
           <mat-label>Email Address</mat-label>
-          <input id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address" readonly />
+          <input id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address"/>
           <mat-error *ngIf="myprofileform.controls.emailId.touched && myprofileform.controls.emailId.invalid">
             <span *ngIf="myprofileform.controls.emailId.errors.required">This field is mandatory.</span>
             <span *ngIf="myprofileform.controls.emailId.errors.pattern">Enter valid email id.</span>
@@ -132,19 +157,19 @@
 
         <mat-form-field class="col-md">
           <mat-label>Parish</mat-label>
-          <input id="parish" matInput formControlName="parish" readonly />
-         <!-- readonly
+          <!-- <input id="parish" matInput formControlName="parish" readonly /> -->
+         <!-- readonly -->
           <mat-select id="parish" formControlName = "parish" placeholder="Parish">
             <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
-          </mat-select>-->
+          </mat-select>
         </mat-form-field>
       </div>
       <div class="row">
 
           <mat-form-field class="col-md-6">
               <mat-label>Country</mat-label>
-              <!--required-->
-              <select matNativeControl  id="country" formControlName="country" placeholder="Select Country" [(ngModel)]="selectedCountry" (change)="changeCountry($event)">
+              <!--required [(ngModel)]="selectedCountry"-->
+              <select matNativeControl  id="country" formControlName="country" placeholder="Select Country"  (change)="changeCountry($event)">
                       <option *ngFor="let country of countries" [value]="country.countryName">{{country.countryName}}</option>
               </select>
       </mat-form-field>
@@ -228,12 +253,13 @@
     <mat-radio-button [checked]=!isStudent value=false>No</mat-radio-button>
   </mat-radio-group>
 </div>
-
+<div *ngIf ="isStudent || showStudentQuestion" ></div>
 </div>
 
 
-     
-      <div *ngIf="hasAddMemPerm">
+    
+       <!-- <div *ngIf="hasAddMemPerm"> -->
+         <div>
         <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
         </mat-divider>
         <div class="row" style="padding-top: 1%;">
@@ -241,7 +267,7 @@
             <h2>Family Member Assignment</h2>
           </div>
           <div class="col-md-6 col text-right">
-            <button mat-button (click)="onaddbtnclick()">
+            <button mat-raised-button *ngIf="!isReadOnly" (click)="onaddbtnclick()">
               <mat-icon>add</mat-icon>
               <span style="padding-top: 2%;font-size: 16px;">Add</span>
             </button>
@@ -258,7 +284,7 @@
                 <div class="col-md-4" style="margin-left: -0.2%;">
                   <mat-form-field class="col text-left">
                     <mat-label>Relationship</mat-label>
-                    <mat-select matNativeControl required id="relationship" formControlName="relationship"
+                     <!-- <mat-select matNativeControl required id="relationship" formControlName="relationship"
                       placeholder="Enter Relationship">
                       <mat-option value="husband">Husband</mat-option>
                       <mat-option value="Wife">Wife</mat-option>
@@ -266,20 +292,23 @@
                       <mat-option value="Daughter">Daughter</mat-option>
                       <mat-option value="Father">Father</mat-option>
                       <mat-option value="Mother">Mother</mat-option>
+                    </mat-select> -->
+                    <mat-select  required id="relationship" formControlName = "relationship" placeholder="relationship" >
+                      <mat-option [disabled]="isReadOnly" *ngFor = "let relationship of relationships; index as i" [value]=relationship>{{relationship}}</mat-option>
                     </mat-select>
                   </mat-form-field>
                 </div>
                 <div class="col-md-6">
                   <mat-form-field class="col-md-12">
                     <mat-label>Baptismal Name</mat-label>
-                    <input style="text-transform: capitalize;" id="baptismalName" matInput formControlName="baptismalName" placeholder="Enter Baptismal Name" />
+                    <input [readonly]="isReadOnly" style="text-transform: capitalize;" id="baptismalName" matInput formControlName="baptismalName" placeholder="Enter Baptismal Name" />
                   </mat-form-field>
                 </div>
 
 
                 <div class="col-md-2" style="padding-top: 2%;padding-right: 4%;">
                   <div class="col text-right">
-                    <button (click)="onremovebtnclick(i)" mat-button>
+                    <button *ngIf="!isReadOnly" (click)="onremovebtnclick(i)" mat-raised-button>
                       <mat-icon>delete</mat-icon><span>Delete</span>
                     </button>
                   </div>
@@ -291,7 +320,7 @@
 
                 <mat-form-field style="width:10%;">
                   <mat-label>Title</mat-label>
-                  <mat-select matNativeControl required formControlName="title">
+                  <!--   <mat-select matNativeControl required formControlName="title">
                     <mat-option value="His Grace">His Grace</mat-option>
                     <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
                     <mat-option value="Very Rev">Very Rev</mat-option>
@@ -302,27 +331,30 @@
                     <mat-option value="Ms">Ms</mat-option>
                     <mat-option value="Mrs">Mrs</mat-option>
                     <mat-option value="Dr">Dr</mat-option>
-                    <!-- <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> -->
+                   <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> 
+                  </mat-select>-->
+                  <mat-select required id="title" formControlName = "title" placeholder="title" >
+                    <mat-option [disabled]="isReadOnly" *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
                   </mat-select>
                 </mat-form-field>
 
 
                 <mat-form-field style="width:30%;padding-left: 1%;">
                   <mat-label>First Name</mat-label>
-                  <input style="text-transform: capitalize;" required id="firstName" matInput formControlName="firstName" placeholder="Enter First Name" />
+                  <input [readonly]="isReadOnly" style="text-transform: capitalize;" required id="firstName" matInput formControlName="firstName" placeholder="Enter First Name" />
                 </mat-form-field>
 
                 <mat-form-field style="width:30%;padding-left: 1%;">
                   <mat-label>Middle Name</mat-label>
                   <!--required-->
-                  <input style="text-transform: capitalize;" id="middleName" matInput formControlName="middleName"
+                  <input [readonly]="isReadOnly" style="text-transform: capitalize;" id="middleName" matInput formControlName="middleName"
                     placeholder="Enter Middle Name" />
 
                 </mat-form-field>
 
                 <mat-form-field style="width:30%;padding-left: 1%;padding-right: 2%;">
                   <mat-label>Last Name</mat-label>
-                  <input style="text-transform: capitalize;" required id="lastName" matInput formControlName="lastName" placeholder="Enter Last Name" />
+                  <input [readonly]="isReadOnly" style="text-transform: capitalize;" required id="lastName" matInput formControlName="lastName" placeholder="Enter Last Name" />
                 </mat-form-field>
 
               </div>
@@ -333,7 +365,7 @@
                 <mat-form-field class="col-md-4">
                   <mat-label>Date of Birth</mat-label>
                   <!--required-->
-                  <input [max]="maxDate" matInput type="input" [matDatepicker]="picker"  id="dob" formControlName="dob">
+                  <input [readonly]="isReadOnly" [max]="maxDate" matInput type="input" [matDatepicker]="picker"  id="dob" formControlName="dob">
                   <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
 
@@ -342,7 +374,7 @@
                 <mat-form-field class="col-md-4">
                   <mat-label style="padding-left: 15%;">Mobile Number</mat-label>
                   <!-- <input id="mobileNo" matInput formControlName="mobileNo" placeholder="Enter Mobile No" ng2TelInput length="10"/>                  -->
-                  <input matInput type="text" ng2TelInput formControlName="mobileNo" id="mobileNo" maxLength="10"
+                  <input [readonly]="isReadOnly" matInput type="text" ng2TelInput formControlName="mobileNo" id="mobileNo" maxLength="10"
                     minLength="10" required style="width: fit-content;" />
                     <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
                       <span *ngIf="myprofileform.controls.mobileNo.errors.required">This field is mandatory.</span>
@@ -352,7 +384,7 @@
 
                 <mat-form-field class="col-md-4" style="padding-right: 2%;">
                   <mat-label>Email Address</mat-label>
-                  <input required id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address" />
+                  <input [readonly]="isReadOnly" required id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address" />
                   <mat-error *ngIf="myprofileform.controls.emailId.touched && myprofileform.controls.emailId.invalid">
                     <span *ngIf="myprofileform.controls.emailId.errors.required">This field is mandatory.</span>
                     <span *ngIf="myprofileform.controls.emailId.errors.pattern">Enter valid mailid.</span>
@@ -362,17 +394,19 @@
             </div>
           </div>
         </fieldset>
-        <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
-        </mat-divider>
-        <div class="row" style="padding-top: 1%;" >
-            <div class="col text-center"  >
-              <!--[disabled]="!myprofileform.dirty"-->
-                <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
-              <button [disabled]="!myprofileform.dirty" mat-button type="submit" mat-button class="mbutton" (change)="isDirty = false"
-               (click)="updateUserProfile()">
-                Update</button>
-            </div>
-          </div>
+
+        <div *ngIf="!isReadOnly" class="col text-center">
+         
+          <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
+          </mat-divider>
+          
+            <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
+          <button mat-button type="submit" mat-button class="mbutton"
+           (click)="updateUserProfile()">
+            Update</button>
+        </div>
+       
+       
       </div>
       
      
@@ -380,7 +414,7 @@
 <div ></div>
     <div *ngIf="!isFamilyHead">
       <form [formGroup]="studentDetailsForm">
-        <div *ngIf = "isStudentvar" >
+       <div *ngIf = "isStudentvar || isStudent" >
     
           <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
           </mat-divider>
@@ -520,7 +554,7 @@
     
         </div>
     
-        <div *ngIf = "isStudentvar" >
+        <div *ngIf = "isStudentvar|| isStudent" >
         <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
         </mat-divider>
     
@@ -641,7 +675,7 @@
 
         <div class="row form-group">
             <mat-form-field class="form-field col-2">
-                    <mat-select required formControlName="title" id="title" placeholder="Title">
+                    <!-- <mat-select required formControlName="title" id="title" placeholder="Title">
                             <mat-option value="His Grace">His Grace</mat-option>
                             <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
                             <mat-option value="Very Rev">Very Rev</mat-option>
@@ -652,6 +686,9 @@
                             <mat-option value="Ms">Ms</mat-option>
                             <mat-option value="Mrs">Mrs</mat-option>
                             <mat-option value="Dr">Dr</mat-option>
+                    </mat-select> -->
+                    <mat-select required id="title" formControlName ="title" placeholder="Title" >
+                      <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
                     </mat-select>
             </mat-form-field>
             <mat-form-field class="form-field col-md-5">
@@ -673,7 +710,7 @@
 
         <div class="form-group row justify-content-center">
             <mat-form-field class="form-field col-md">
-                <input [readonly]=true type="text" matInput formControlName="email" id="email" placeholder="Email" required>
+                <input type="text" matInput formControlName="email" id="email" placeholder="Email" required>
                 <mat-error *ngIf="signUpForm.controls.email.touched && signUpForm.controls.email.invalid">
                     <span *ngIf="signUpForm.controls.email.errors.required">This field is mandatory.</span>
                     <span *ngIf="signUpForm.controls.email.errors.pattern">This field is invalid.</span>

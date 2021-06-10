@@ -107,7 +107,7 @@ app.get('/api/getRoleMetadata', function (req, res) {
 });
 
 app.get('/api/getUserMetaData', function (req, res) {
-  console.log("signUp called with : " + JSON.stringify(req.query.uid));
+  console.log("getUserMetaData called with : " + JSON.stringify(req.query.uid));
 
   let reqContextData = {
     actType: 'LOG_IN',
@@ -194,7 +194,8 @@ app.get('/api/getParishData', function (req, res) {
 app.post('/api/insertEvents', function (req, res) {
   console.log("insertevents called with : " + JSON.stringify(req.body));
   try {
-    processEventRequest.insertEvents(req.body.data)
+    let loggedInUser = decodeUser(req)
+    processEventRequest.insertEvents(req.body.data, loggedInUser)
       .then((data) => {
         // console.log(`Returning with resonse : ${data}`)
         res.send(data);
@@ -217,9 +218,18 @@ app.post('/api/updateUserRoles', function (req, res) {
     let loggedInUser = decodeUser(req);
     processRequest.processUpdateUserRoles(req.body.data, loggedInUser)
       .then((data) => {
-        /// console.log(`Returning with resonse : ${data}`)
-        res.send(data);
-        res.end();
+            if(req.body.data.respondWith){
+              if(req.body.data.respondWith === `user_meta_data`){
+                processRequest.processGetUserMetaDataRequest(loggedInUser).then((metaData) => {
+                    data.data.metaData = metaData.data.metaData;
+                    res.send(data);
+                    res.end();            
+                })
+              }
+            }else{
+              res.send(data);
+              res.end();      
+            }
       }).catch((error) => {
         //console.log(`Returning with resonse : ${error}`)
         res.send(error);
@@ -270,9 +280,10 @@ app.post('/api/deleteUsers', function (req, res) {
 
 //Endpoint to set user is_approved status 
 app.post('/api/setUserApprovalState', function (req, res) {
-  console.log("setUserApprovalState called with : " + JSON.stringify(req.body));
+  console.debug("setUserApprovalState called with : " + JSON.stringify(req.body));
   try {
-    processUserRequest.setUserApprovalState(req.body.data)
+    let loggedInUser = decodeUser(req);
+    processUserRequest.setUserApprovalState(req.body.data, loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -739,7 +750,7 @@ app.post('/api/setStaffAssignment', function (req, res) {
   console.log("setStaffAssignment called...");
   // let loggedInUser = decodeUser(req)
   try {
-    processMiscRequest.setStaffAssignment(req.body.data)
+    processUserRequest.setStaffAssignment(req.body.data)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -754,6 +765,24 @@ app.post('/api/setStaffAssignment', function (req, res) {
   }
 });
 
+app.get('/api/getRegionWiseJudges', function (req, res) {
+  console.log("getRegionWiseJudges called... to fetch " + req.query.regionId);
+  // let loggedInUser = decodeUser(req)
+  try {
+    processEventRequest.getRegionWiseJudges('', req.query.regionId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getRegionWiseJudges as : ' + error)
+  }
+});
 
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {

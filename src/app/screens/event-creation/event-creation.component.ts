@@ -1,5 +1,5 @@
 import { ViewChild } from '@angular/core';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatAccordion } from '@angular/material/expansion';
@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { uiCommonUtils } from 'src/app/common/uiCommonUtils';
 import { EventDataService } from '../events/event.dataService';
 import { Router } from '@angular/router';
+declare let $: any;
 
 
 import { Moment } from 'moment';
@@ -16,6 +17,7 @@ import { default as _rollupMoment } from 'moment';
 import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
 
 const moment = _rollupMoment || _moment;
+import { IDropdownSettings } from 'ng-multiselect-dropdown';
 
 
 class CustomDateAdapter extends NativeDateAdapter {
@@ -38,14 +40,72 @@ class CustomDateAdapter extends NativeDateAdapter {
 
 export class EventCreationComponent implements OnInit {
 
-  eventCreationForm: any;
   eventsDataFormGroup: any;
-  venuesDataFormGroup: any;
-  categoriesDataFormGroup: any;
+  eventCategoriesFormGroup: any;
+  eventGroupsFormGroup: any;
+  eventCatGroupMapFormGroup: any;
+  eventVenueAssignFormGroup: any;
+  eventProctorAssignFormGroup: any;
+  eventJudgeAssignFormGroup: any;
   questionnaireDataFormGroup: any;
-  ttcExamDataFormGroup: any;
+  eventEvaluatorAssignFormGroup: any;
+
+  gridOptionsCat: any;
+  gridOptionsGroups: any;
+  gridOptionsVenues: any;
+  columnDefsCat!: any[];
+  columnDefsGroup!: any[];
+  columnDefsVenues!: any[];
+  gradeListDropdownValues!: any[];
+  groupsDropdownValues!: any[];
+  judgesDropdownValues!: any[];
+  evaluatorDropdownValues!: any[];
+  regionDropdownValues!: any;
+  catPopUpName: any;
+  catPopUpDesc: any;
+  selectedItemsGradeListPopUp: any;
+  dropdownSettingsGradeList: any;
+  dropdownSettingsGroups: any;
+  dropdownSettingsProctor: any;
+  dropdownSettingsRegion: any;
+  dropdownSettingsJudges: any;
+  dropdownSettingsEvaluator: any;
+  dropdownSettingsResponseType: any;
+  rowDataCat: any = [];
+  rowDataGroups: any = [];
+  rowDataVenues: any = [];
+  catGridApi: any;
+  groupsGridApi: any;
+  venuesGridApi: any;
+  eventCatGroupMapdata!: any[];
+  proctorDropdownValues: any;
+  responseTypeDropdownValues: any;
+  venueListData: any;
+  selectedCategories: any;
+
+  isVenueRequired: any;
+  isProctorRequired: any;
+  isJudgeRequired: any;
+  isSchoolGradeRequired: any;
+  isCategoryRequired: any;
+  isSingleDayEvent: any;
+  isSchoolGroupRequired: any;
+  isEvaluatorRequired: any;
+  isQuestionnaireRequired: any;
+  isAttachmentRequired: any;
+  isUrlRequired: any;
+  isEvalSecNextButtonRequired: any;
+  selectedEvaluatorsDropdown: any;
+
+
+
+
+
+
+
+  eventCreationForm: any;
+  venuesDataFormGroup: any;
   eventId: any;
-  rowData: any;
   selectedRegion: any;
   venues: any;
   questionnaire: any;
@@ -70,27 +130,104 @@ export class EventCreationComponent implements OnInit {
   rolesData!: any[];
   eventcategories: any;
   eventcategorydata!: any[];
-  categories: any;
   eventarray!: any[];
   eventCategoryForm!: FormGroup;
   ISCategory!: any[];
   newVenues!: any[];
-  isVenueRequired: any;
-  isProctorRequired: any;
-  isJudgeRequired: any;
   eventStartDateMin: any;
   eventEndDateMax: any;
-  isSchoolGradeRequired: any;
   isQuestionnariesRequired!: boolean;
-  isttcExamDataFormGroupRequired!: boolean;
+  //isttcExamDataFormGroupRequired!: boolean;
   public myreg = /(^|\s)((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gi
   minDate = new Date();
   selectedRowJson: any = {};
 
 
+
+
   constructor(private apiService: ApiService,
     private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils,
-    private eventDataService: EventDataService, private router: Router) { }
+    private eventDataService: EventDataService, private router: Router
+  ) { }
+
+  dropdownSettingForGardeList: IDropdownSettings = {
+    singleSelection: false,
+    idField: 'id',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+  dropdownSettingForGroups: IDropdownSettings = {
+    singleSelection: false,
+    idField: 'gradeGroupMapId',
+    textField: 'gradeGroupName',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+  dropdownSettingForProctor: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'proctorId',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 1,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+  dropdownSettingForRegion: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'regionId',
+    textField: 'regionName',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 1,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+
+  dropdownSettingForJudges: IDropdownSettings = {
+    singleSelection: false,
+    idField: 'judgeId',
+    textField: 'judgeName',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+  dropdownSettingForResponseType: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'responseTypeDropdownValues',
+    textField: 'responseTypeDropdownValues',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+  dropdownSettingForEvaluators: IDropdownSettings = {
+    singleSelection: false,
+    idField: 'evalId',
+    textField: 'evalName',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
 
   getData() {
 
@@ -101,6 +238,24 @@ export class EventCreationComponent implements OnInit {
     this.apiService.getEventType().subscribe((res: any) => {
       this.eventList = res.data.metaData.eventType;
       this.eventcategorydata = res.data.metaData.eventType;
+
+      // For showing and hiding different sections and fields as per eventType
+      for (let i = 0; i < this.eventList.length; i++) {
+        if (this.eventList[i].eventType == this.eventsDataFormGroup.value.eventType) {
+          this.isVenueRequired = this.eventList[i].isVenueRequired;
+          this.isProctorRequired = this.eventList[i].isProctorRequired;
+          this.isJudgeRequired = this.eventList[i].isJudgeRequired;
+          this.isSchoolGradeRequired = this.eventList[i].isSchoolGradeRequired;
+          this.isCategoryRequired = this.eventList[i].isCategoryRequired;
+          this.isSingleDayEvent = this.eventList[i].isSingleDayEvent;
+          this.isSchoolGroupRequired = this.eventList[i].isSchoolGroupRequired;
+          this.isEvaluatorRequired = this.eventList[i].isEvaluatorRequired;
+          this.isQuestionnaireRequired = this.eventList[i].isQuestionnaireRequired;
+          this.isAttachmentRequired = this.eventList[i].isAttachmentRequired;
+          this.isUrlRequired = this.eventList[i].isUrlRequired;
+          this.eventsDataFormGroup.value.eventType = this.eventList[i].eventType;
+        }
+      }
     });
 
     this.apiService.getUserRoleData().subscribe(res => {
@@ -113,54 +268,237 @@ export class EventCreationComponent implements OnInit {
 
   }
 
+  onaddNewGroupbtnclick() {
+    $("#imagemodalGroup").modal("show");
+    this.apiService.callGetService(`getLookupMasterData?types=grade`).subscribe((res) => {
+      this.gradeListDropdownValues = res.data.grades;
+    });
+  }
+
+  closeNewGroupPopUp() {
+    $("#imagemodalGroup").modal("hide");
+  }
+
+  onaddNewCatbtnclick() {
+    $("#imagemodal").modal("show");
+  }
+
+  closeNewCatPopUp() {
+    $("#imagemodal").modal("hide");
+  }
+
+  saveNewCategory() {
+    let rowData: any = [];
+    this.catGridApi.forEachNode((node: any) => rowData.push(node.data));
+    rowData.push({
+      "id": undefined,
+      "catName": this.eventCategoriesFormGroup.value.newCatName,
+      "catDesc": this.eventCategoriesFormGroup.value.newCatDesc,
+      "isSelected": true
+    })
+
+    this.catGridApi.setRowData(rowData);
+    this.catGridApi.forEachNode(
+      (node: any) => {
+        if (node.data.isSelected !== null)
+          node.setSelected(node.data.isSelected)
+      });
+    $("#imagemodal").modal("hide");
+  }
+
+  saveNewGroup() {
+    let rowData: any = [];
+    this.groupsGridApi.forEachNode((node: any) => rowData.push(node.data));
+    rowData.push({
+      "gradeGroupId": undefined,
+      "gradeGroupName": this.eventGroupsFormGroup.value.newGroupName,
+      "grades": this.eventGroupsFormGroup.value.newGradeList,
+      "isSelected": true
+    });
+
+    this.groupsGridApi.setRowData(rowData);
+    this.groupsGridApi.forEachNode(
+      (node: any) => {
+        if (node.data.isSelected !== null)
+          node.setSelected(node.data.isSelected)
+      });
+    $("#imagemodalGroup").modal("hide");
+  }
+
+
+  getColDefCat() {
+    return this.columnDefsCat = [
+      { headerName: 'Category', field: 'catName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
+      { headerName: 'Description', field: 'catDesc', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true }
+    ];
+  }
+
+  getColDefGroups() {
+    return this.columnDefsGroup = [
+      { headerName: 'Group Name', field: 'gradeGroupName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
+      { headerName: 'Grades', field: 'grades', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true }
+    ];
+  }
+
+  getColDefVenues() {
+    return this.columnDefsVenues = [
+      { headerName: 'Venue Name', field: 'venueName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
+      { headerName: 'Address', field: 'addressLine1', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+      { headerName: 'Country', field: 'country', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+      { headerName: 'City', field: 'city', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+      { headerName: 'Postal Code', field: 'postalCode', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true }
+    ];
+  }
+
+  onCatGridReady(params: any) {
+    this.catGridApi = params.api;
+
+  }
+
+  onGroupsGridReady(params: any) {
+    this.groupsGridApi = params.api;
+  }
+
+  onVenuesGridReady(params: any) {
+    this.venuesGridApi = params.api;
+  }
+
+  onRegionSelect(item: any) {
+    this.apiService.callGetService(`getRegionWiseJudges?regionId=${item.regionId}`).subscribe((res) => {
+      this.judgesDropdownValues = res.data.judges;
+    });
+
+  }
+
+
+
+
+
+
+
 
   ngOnInit(): void {
-
 
     // For getting data of selected row from grid 
     if (this.eventDataService.getSelectedRowData() != undefined) {
       this.selectedRowJson = this.eventDataService.getSelectedRowData();
+      this.eventId = this.selectedRowJson.event_Id;
       console.log('selected row data is :: ' + JSON.stringify(this.selectedRowJson))
     }
 
-    this.categoriesDataFormGroup = this.formBuilder.group({
-      categories: this.formBuilder.array([this.addeventCategory()])
-    });
+    // For Label And button Show update
+    if (this.selectedRowJson.event_Id != undefined || this.selectedRowJson.event_Id != null) {
+      this.eventFormLabel = true; // update screen
+    }
+    else {
+      this.eventFormLabel = false; // insert screen
+    }
 
-    this.questionnaireDataFormGroup = this.formBuilder.group({
-      questionnaire: this.formBuilder.array([this.adduserquestionary()])
-    });
+    this.gridOptionsCat = {
+      columnDefs: this.getColDefCat(),
+      rowData: this.rowDataCat,
+      treeData: true,
+      enableFilter: true,
+      enableColResize: true,
+      defaultColDef: {
+        editable: false,
+        filter: 'agTextColumnFilter'
+      }
+    };
 
-    this.ttcExamDataFormGroup = this.formBuilder.group({
-      ttcExamStartDate: new FormControl('', Validators.required),
-      ttcExamEndDate: new FormControl('', Validators.required),
-    });
+    this.gridOptionsGroups = {
+      columnDefs: this.getColDefGroups(),
+      rowData: this.rowDataGroups,
+      treeData: true,
+      enableFilter: true,
+      enableColResize: true,
+      defaultColDef: {
+        editable: false,
+        filter: 'agTextColumnFilter'
+      }
+    }
+
+    this.gridOptionsVenues = {
+      columnDefs: this.getColDefVenues(),
+      rowData: this.rowDataVenues,
+      treeData: true,
+      enableFilter: true,
+      enableColResize: true,
+      defaultColDef: {
+        editable: false,
+        filter: 'agTextColumnFilter'
+      }
+    }
 
 
-
-    this.alluserdata = this.uiCommonUtils.getUserMetaDataJson();
-    this.orgId = this.alluserdata.orgId;
-    this.userId = this.alluserdata.userId;
+    this.dropdownSettingsGradeList = this.dropdownSettingForGardeList;
+    this.dropdownSettingsGroups = this.dropdownSettingForGroups;
+    this.dropdownSettingsProctor = this.dropdownSettingForProctor;
+    this.dropdownSettingsRegion = this.dropdownSettingForRegion;
+    this.dropdownSettingsJudges = this.dropdownSettingForJudges;
+    this.dropdownSettingsResponseType = this.dropdownSettingForResponseType;
+    this.dropdownSettingsEvaluator = this.dropdownSettingForEvaluators;
 
 
     this.eventsDataFormGroup = this.formBuilder.group({
       eventId: '',
       name: new FormControl('', Validators.required),
       eventType: new FormControl('', Validators.required),
+      eventCoordinator: new FormControl('', Validators.required),
       orgType: new FormControl('', Validators.required),
       orgId: new FormControl(''),
-      startDate: new FormControl('', Validators.required),
-      endDate: new FormControl('', Validators.required),
-      registrationStartDate: new FormControl('', Validators.required),
-      registrationEndDate: new FormControl('', Validators.required),
+      startDate: new FormControl(''),
+      endDate: new FormControl(''),
+      registrationStartDate: new FormControl(''),
+      registrationEndDate: new FormControl(''),
       eventUrl: new FormControl(''), //, [Validators.required, Validators.pattern(this.myreg)]
       description: new FormControl('', Validators.required),
-      eventCoordinator: new FormControl('', Validators.required)
-    });//{validator: this.checkDates}); //to compare event registration dates
+      sectionCode: ('')
+    });
+
+    this.eventCategoriesFormGroup = this.formBuilder.group({
+      newCatName: new FormControl(''),
+      newCatDesc: new FormControl('')
+    });
+
+    this.eventGroupsFormGroup = this.formBuilder.group({
+      newGroupName: new FormControl(''),
+      newGradeList: new FormControl('')
+    });
+
+    this.eventCatGroupMapFormGroup = this.formBuilder.group({
+      eventCatGroupMapFormArray: this.formBuilder.array([this.addEventCatGroupMap()])
+    });
+
+    this.eventVenueAssignFormGroup = this.formBuilder.group({
+
+    });
+
+    this.eventProctorAssignFormGroup = this.formBuilder.group({
+      eventProctorAssignFormArray: this.formBuilder.array([this.addProctorAssign()])
+    });
+
+    this.eventJudgeAssignFormGroup = this.formBuilder.group({
+      categories: this.formBuilder.array([])
+    });
+
+    this.questionnaireDataFormGroup = this.formBuilder.group({
+      questionnaire: this.formBuilder.array([this.adduserquestionary()])
+    });
+
+    this.eventEvaluatorAssignFormGroup = this.formBuilder.group({
+      evaluators: new FormControl(''),
+    });
+
+    this.alluserdata = this.uiCommonUtils.getUserMetaDataJson();
+    this.orgId = this.alluserdata.orgId;
+    this.userId = this.alluserdata.userId;
+
 
     this.venuesDataFormGroup = this.formBuilder.group({
       venues: this.formBuilder.array([this.adduserVenuAndProcter()])
     });
+
 
     // For getting event data by event id 
     this.apiService.callGetService(`getEvent?id=${this.selectedRowJson.event_Id}`).subscribe((res) => {
@@ -189,29 +527,29 @@ export class EventCreationComponent implements OnInit {
           eventCoordinator: this.eventsDataUpdate.eventCoordinator // array
         });
 
-        if (this.eventsDataUpdate.venues != null) {
-          this.venuesDataFormGroup.patchValue({
-            venues: this.eventsDataUpdate.venues // array
-          });
-        }
+        // if (this.eventsDataUpdate.venues != null) {
+        //   this.venuesDataFormGroup.patchValue({
+        //     venues: this.eventsDataUpdate.venues // array
+        //   });
+        // }
 
-        if (this.eventsDataUpdate.categories != null) {
-          this.categoriesDataFormGroup.patchValue({
-            categories: this.eventsDataUpdate.categories // array
-          });
-        }
+        // if (this.eventsDataUpdate.categories != null) {
+        //   this.eventCategoriesFormGroup.patchValue({
+        //     categories: this.eventsDataUpdate.categories // array
+        //   });
+        // }
 
 
-        if (this.eventsDataUpdate.questionnaire != null) {
-          this.questionnaireDataFormGroup.patchValue({
-            questionnaire: this.eventsDataUpdate.questionnaire // array
-          });
-        }
+        // if (this.eventsDataUpdate.questionnaire != null) {
+        //   this.questionnaireDataFormGroup.patchValue({
+        //     questionnaire: this.eventsDataUpdate.questionnaire // array
+        //   });
+        // }
 
-        this.ttcExamDataFormGroup.patchValue({
-          ttcExamStartDate: this.eventsDataUpdate.ttcExamStartDate,
-          ttcExamEndDate: this.eventsDataUpdate.ttcExamEndDate
-        });
+        // this.ttcExamDataFormGroup.patchValue({
+        //   ttcExamStartDate: this.eventsDataUpdate.ttcExamStartDate,
+        //   ttcExamEndDate: this.eventsDataUpdate.ttcExamEndDate
+        // });
 
       }
 
@@ -224,7 +562,6 @@ export class EventCreationComponent implements OnInit {
       }
       this.selectedRowJson.event_Id = null;
 
-
       if (this.eventFormLabel == true) {
         this.evntTypedisabled = true;
       }
@@ -233,9 +570,16 @@ export class EventCreationComponent implements OnInit {
       }
 
     });
-
   }
 
+
+  //miscellaneous
+  onItemSelect(item: any) {
+    console.log(item);
+  }
+  onSelectAll(items: any) {
+    console.log(items);
+  }
 
   // For relational dropdown ie. orgId and orgType
   onOrgSelect(event: any) {
@@ -254,6 +598,910 @@ export class EventCreationComponent implements OnInit {
       }
     }
   }
+
+
+
+
+  createUpdateEvents(payload: any) {
+
+    this.apiService.callPostService('insertEvents', payload).subscribe((res: any) => {
+      if (res.data.status == "success") {
+        this.eventId = res.data.eventId;
+        if (res.data.event_categories) {
+          //this.rowDataCat = res.data.event_categories;
+
+          this.catGridApi.setRowData(res.data.event_categories);
+          this.catGridApi.forEachNode(
+            (node: any) => {
+              if (node.data.isSelected !== null)
+                node.setSelected(node.data.isSelected)
+            });
+
+        }
+        if (res.data.event_groups) {
+          //this.rowDataGroups = res.data.event_groups;
+
+          this.groupsGridApi.setRowData(res.data.event_groups);
+
+          this.groupsGridApi.forEachNode(
+            (node: any) => {
+              if (node.data.isSelected !== null)
+                node.setSelected(node.data.isSelected)
+            });
+
+        }
+        if (res.data.eventCatGroupMap) {
+          this.eventCatGroupMapdata = res.data.eventCatGroupMap.categoryMapping;
+          this.groupsDropdownValues = res.data.eventCatGroupMap.gradeGroupMapping;
+          this.eventCatGroupMapFormGroup.setControl('eventCatGroupMapFormArray', this.setEventCatGroupMap(this.eventCatGroupMapdata)); //[i].eventName
+          //res.data.eventCatGroupMap.categoryMapping.mappedGroups;
+        }
+        if (res.data.event_venue_assignment) {
+          //this.rowDataVenues = res.data.event_venue_assignment;
+
+          this.venuesGridApi.setRowData(res.data.event_venue_assignment);
+
+          this.venuesGridApi.forEachNode(
+            (node: any) => {
+              if (node.data.isSelected !== null)
+                node.setSelected(node.data.isSelected)
+            });
+
+
+        }
+        if (res.data.event_proctor_assignment) {
+          this.proctorDropdownValues = res.data.event_proctor_assignment.proctorList;
+          this.venueListData = res.data.event_proctor_assignment.venueList;
+
+          let formattedDataVenueListData: any = [];
+
+          for (let row of this.venueListData) {
+            let json = {
+              "venueId": row.venueId,
+              "venueName": row.venueName,
+              "mappedProctor": [
+                {
+                  "name": row.mappedProctor.name,
+                  "proctorId": row.mappedProctor.proctorId
+                }
+              ],
+              "eventVenueMapId": row.eventVenueMapId
+            }
+            formattedDataVenueListData.push(json);
+          }
+
+          this.eventProctorAssignFormGroup.setControl('eventProctorAssignFormArray', this.setProctorAssign(formattedDataVenueListData));
+        }
+        if (res.data.event_judge_assignment) {
+
+          this.selectedCategories = res.data.event_judge_assignment.categoriesList;
+          if (this.eventFormLabel == false) { // create event screen
+            this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));
+          }
+          this.regionDropdownValues = res.data.event_judge_assignment.regionsList;
+          if (this.eventFormLabel == true) {  // update screen     
+            if (res.data.event_judge_assignment.categories.length != 0) {
+              this.categories().clear();
+              this.patchValueJudgesAssign(res.data.event_judge_assignment);
+            }
+            else {
+              this.eventJudgeAssignFormGroup.setControl('categories', this.setEventCategory(this.selectedCategories));
+            }
+          }
+        }
+        if (res.data.event_questionnaires) {
+          this.responseTypeDropdownValues = res.data.event_questionnaires.answerTypes;
+
+          this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(res.data.event_questionnaires.questionnaire));
+
+        }
+
+        if (res.data.event_evaluator_assignment) {
+          this.evaluatorDropdownValues = res.data.event_evaluator_assignment;
+
+          if (this.eventFormLabel == true) {  // update screen
+
+            let mappedEvaluators = [];
+
+            for (let row of this.evaluatorDropdownValues) {
+              if (row.isSelected == true) {
+                let json = {
+                  "evalId": row.evalId,
+                  "evalName": row.evalName,
+                  "eventEvaluatorId": row.eventEvaluatorId
+                }
+                mappedEvaluators.push(json);
+              }
+            }
+            this.selectedEvaluatorsDropdown = mappedEvaluators;
+
+          }
+        }
+
+      }
+      else
+        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+    });
+  }
+
+
+  fnRegionDropdownValues(region: any): any {
+
+    try {
+      for (let reg of this.regionDropdownValues) {
+        if (reg.regionId == region.value.regions[0].regionId) {
+          return reg.judges;
+        }
+      }
+
+    } catch (error) {
+      return [];
+    }
+  }
+
+  eventTypeSelChange() {
+
+    //for getting event co ordinator as per event type
+    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+      this.rolesData = ['CWC Coordinator'];
+      let roleData =
+      {
+        "data": {
+          "rolesData": this.rolesData
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+      this.rolesData = ['TTC Exam Coordinator'];
+      let roleData =
+      {
+        "data": {
+          "rolesData": this.rolesData
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+    if (this.eventsDataFormGroup.value.eventType == 'OVBS') {
+      this.rolesData = ['OVBS Coordinator'];
+      let roleData =
+      {
+        "data": {
+          "rolesData": this.rolesData
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+
+    this.getData();
+
+    if (this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam'){
+      this.isEvalSecNextButtonRequired = false;
+    }
+    else{
+      this.isEvalSecNextButtonRequired = true;
+    }
+
+    
+  }
+
+  onEventDetailsSectionNextBtnClick() {
+
+    if (this.eventsDataFormGroup.valid) {
+
+      // For getting Proctor data as per rolesdata
+      if (this.eventsDataFormGroup.value.eventType == 'CWC') {
+        this.rolesData = ['CWC Competition Proctor', 'CWC Coordinator'];
+        let roleData =
+        {
+          "data": {
+            "rolesData": this.rolesData
+          }
+        }
+        this.apiService.getProctorData(roleData).subscribe(res => {
+          this.proctorData = res.data.metaData.proctorData;
+          console.log("this.proctorData", this.proctorData);
+        });
+      }
+
+      if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+        this.rolesData = ['TTC Exam Proctor', 'TTC Exam Coordinator'];
+        let roleData =
+        {
+          "data": {
+            "rolesData": this.rolesData
+          }
+        }
+        this.apiService.getProctorData(roleData).subscribe(res => {
+          this.proctorData = res.data.metaData.proctorData;
+          console.log("this.proctorData", this.proctorData);
+        });
+      }
+
+      if (this.eventsDataFormGroup.value.eventType == 'OVBS') {
+        this.rolesData = ['OVBS Coordinator'];
+        let roleData =
+        {
+          "data": {
+            "rolesData": this.rolesData
+          }
+        }
+        this.apiService.getProctorData(roleData).subscribe(res => {
+          this.proctorData = res.data.metaData.proctorData;
+          console.log("this.proctorData", this.proctorData);
+        });
+      }
+
+
+      // For getting Venues as per orgType and orgId
+      let venuesDatanew: any = {};
+
+      venuesDatanew.orgType = this.eventsDataFormGroup.value.orgType;
+      venuesDatanew.orgId = this.eventsDataFormGroup.value.orgId;
+
+      this.apiService.getVenues({ data: venuesDatanew }).subscribe((res: any) => {
+        this.venuesList = res.data.venueList;
+        console.log("venuesList", this.venuesList);
+      });
+
+      //For binding categories section as per eventType on create event screen
+      // if (this.eventFormLabel == false || !this.eventFormLabel) {
+      //   for (let i = 0; i < this.eventList.length; i++) {
+      //     if (this.eventsDataFormGroup.value.eventType == this.eventList[i].eventType) {
+      //       this.rowData = this.eventList[i].eventName;
+      //       //this.eventCategoriesFormGroup.setControl('categories', this.setEventCategory(this.eventcategorydata[i].eventName));
+      //     }
+      //   }
+      // }
+
+      // For binding categories section as per eventType on update event screen
+      if (this.eventFormLabel == true) {
+        let updatedCategories: any = [];
+
+        for (let category of this.eventsDataUpdate.categories) {
+          if (category.eventCatMapId != null) {
+            updatedCategories.push(category);
+          }
+        }
+        for (let i = 0; i < this.eventList.length; i++) {
+          if (this.eventsDataFormGroup.value.eventType == this.eventList[i].eventType) {
+            //this.eventCategoriesFormGroup.setControl('categories', this.setEventCategory(updatedCategories));
+            //this.venuesDataFormGroup.setControl('venues', this.setuserVenuAndProcter(this.eventsDataUpdate.venues));
+            //this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(this.eventsDataUpdate.questionnaire));
+          }
+        }
+      }
+
+
+
+    }
+
+
+    //create/update event for CWC for event_details section
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
+      this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload = this.eventsDataFormGroup.value;
+      payload.sectionCode = 'event_details';
+      payload.nextSectionCode = 'event_categories';
+      this.createUpdateEvents(payload);
+    }
+
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Teachers Training') {
+      this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload = this.eventsDataFormGroup.value;
+      payload.sectionCode = 'event_details';
+      payload.nextSectionCode = 'event_venue_assignment';
+      this.createUpdateEvents(payload);
+    }
+
+    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading' || this.eventsDataFormGroup.value.eventType == 'Diploma Exam' || this.eventsDataFormGroup.value.eventType == 'OVBS' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
+      this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload = this.eventsDataFormGroup.value;
+      payload.sectionCode = 'event_details';
+      payload.nextSectionCode = 'event_venue_assignment';
+      this.createUpdateEvents(payload);
+    }
+
+  }
+
+  onEventCategoriesSectionNextBtn() {
+
+    let categories = this.catGridApi.getSelectedRows();
+
+    //create/update event for CWC
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload: any = {};
+      payload.categories = categories;
+      payload.sectionCode = 'event_categories';
+      payload.nextSectionCode = 'event_groups';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+
+  }
+
+  onEventGroupsSectionNextBtn() {
+    let groups = this.groupsGridApi.getSelectedRows();
+
+    //create/update event for CWC 
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload: any = {};
+      payload.groups = groups;
+      payload.sectionCode = 'event_groups';
+      payload.nextSectionCode = 'event_cat_group_map';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+  }
+
+  onEventCatGroupMapSectionNextBtn() {
+
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload: any = {};
+      payload.catGradeMap = this.eventCatGroupMapFormGroup.value.eventCatGroupMapFormArray;
+      payload.sectionCode = 'event_cat_group_map';
+      payload.nextSectionCode = 'event_venue_assignment';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+  }
+
+  onEventVenueAssignSectionNextBtn() {
+
+    let allVenuesData = this.venuesGridApi.getSelectedRows();
+    let venues: any = [];
+    for (let venue of allVenuesData) {
+      venues.push(venue.venueId);
+    }
+
+    //create/update event for CWC 
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload: any = {};
+      payload.venues = venues;
+      payload.sectionCode = 'event_venue_assignment';
+      payload.nextSectionCode = 'event_proctor_assignment';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload: any = {};
+      payload.venues = venues;
+      payload.sectionCode = 'event_venue_assignment';
+      payload.nextSectionCode = 'event_proctor_assignment';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+    if (this.eventsDataFormGroup.value.eventType == 'Bible Reading' || this.eventsDataFormGroup.value.eventType == 'OVBS' || this.eventsDataFormGroup.value.eventType == 'Teachers Training') { 
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload: any = {};
+      payload.venues = venues;
+      payload.sectionCode = 'event_venue_assignment';
+      payload.nextSectionCode = 'event_questionnaires';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+  }
+
+  onEventProctorAssignSectionNextBtn() {
+
+    let payload: any = {};
+    let venueProctorAssignment: any = [];
+    let allVenueProctorData = this.eventProctorAssignFormGroup.value.eventProctorAssignFormArray;
+
+    for (let data of allVenueProctorData) {
+      let json: any = {};
+      if (data.proctorId) {
+        json = {
+          "eventVenueMapId": data.eventVenueMapId,
+          "proctorId": data.proctorId[0].proctorId
+        }
+        venueProctorAssignment.push(json);
+      }
+    }
+
+
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payload.venueProctorAssignment = venueProctorAssignment;
+      payload.sectionCode = 'event_proctor_assignment';
+      payload.nextSectionCode = 'event_judge_assignment';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payload.venueProctorAssignment = venueProctorAssignment;
+      payload.sectionCode = 'event_proctor_assignment';
+      payload.nextSectionCode = 'event_evaluator_assignment';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+    if(this.eventsDataFormGroup.value.eventType == 'Talent Show'){
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payload.venueProctorAssignment = venueProctorAssignment;
+      payload.sectionCode = 'event_proctor_assignment';
+      payload.nextSectionCode = 'event_questionnaires';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+
+
+  }
+
+  onEventJudgeAssignSectionNextBtn() {
+
+    let json: any = {};
+    let payload: any = {};
+    let regions: any = [];
+    let judges: any = [];
+    let judgeAssignment: any = [];
+    let judgeAssignmentAllData = this.eventJudgeAssignFormGroup.value.categories;
+
+
+
+    for (let data of judgeAssignmentAllData) {
+      for (let row of data.regionsJudgesArray) {
+        for (let data1 of row.judges) {
+          judges.push(data1.judgeId);
+        }
+
+        for (let data2 of row.regions) {
+
+          regions.push({
+            "regionId": data2.regionId,
+            "judges": judges
+          });
+
+          if (data.catId == json.catId) {
+            json.regions.push(regions[0]);
+            regions = [];
+          }
+          else {
+            json = {
+              "catId": data.catId,
+              "catMapId": data.catMapId,
+              "regions": regions
+            }
+            judgeAssignment.push(json);
+            regions = [];
+          }
+
+          judges = [];
+
+        }
+
+      }
+
+    }
+
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'Talent Competition') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payload.judgeAssignment = judgeAssignment;
+      payload.sectionCode = 'event_judge_assignment';
+      payload.nextSectionCode = 'event_questionnaires';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+  }
+
+  onEventEvaluatorAssignSectionNextBtn() {
+
+    let payload: any = {};
+    let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
+
+    if (this.eventsDataFormGroup.value.eventType == 'TTC' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payload.evaluatorAssignment = evaluatorAssignment;
+      payload.sectionCode = 'event_evaluator_assignment';
+      payload.nextSectionCode = 'event_questionnaires';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+  }
+
+  createEvent() {
+
+    let payload: any = {};
+    let questionnaire: any = [];
+    let questionnaireAllData = this.questionnaireDataFormGroup.value.questionnaire;
+
+    for (let row of questionnaireAllData) {
+      let json = {
+        "questionId": row.questionId,
+        "question": row.question,
+        "answerType": row.responseType
+      }
+      questionnaire.push(json);
+    }
+
+
+    if (this.eventsDataFormGroup.value.eventType == 'CWC' || this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'Bible Reading' || this.eventsDataFormGroup.value.eventType == 'OVBS' || this.eventsDataFormGroup.value.eventType == 'Talent Competition' || this.eventsDataFormGroup.value.eventType == 'Talent Show') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payload.questionnaire = questionnaire;
+      payload.sectionCode = 'event_questionnaires';
+      payload.eventType = this.eventsDataFormGroup.value.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+      this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
+    }
+
+
+    let payloadEval: any = {};
+    let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
+
+    if (this.eventsDataFormGroup.value.eventType == 'Diploma Exam' ||  this.eventsDataFormGroup.value.eventType == 'Sunday School Final Exam' || this.eventsDataFormGroup.value.eventType =='Sunday School Midterm Exam') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payloadEval.evaluatorAssignment = evaluatorAssignment;
+      payloadEval.sectionCode = 'event_evaluator_assignment';
+      payloadEval.nextSectionCode = 'event_questionnaires';
+      payloadEval.eventType = this.eventsDataFormGroup.value.eventType;
+      payloadEval.eventId = this.eventId;
+      this.createUpdateEvents(payloadEval);
+      this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
+    }
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+  onaddbtnclick() {
+    this.venues = this.venuesDataFormGroup.get('venues') as FormArray;
+    this.venues.push(this.adduserVenuAndProcter());
+  }
+
+  onaddbtnclick1() {
+    this.questionnaire = this.questionnaireDataFormGroup.get('questionnaire') as FormArray;
+    this.questionnaire.push(this.adduserquestionary());
+  }
+
+  onremovebtnclickVenu(index: any) {
+    (<FormArray>this.venuesDataFormGroup.get('venues').removeAt(index));
+  }
+
+  onremovebtnclickQuestion(index: any) {
+    (<FormArray>this.questionnaireDataFormGroup.get('questionnaire').removeAt(index));
+  }
+
+  removeEventCategory(index: any) {
+    //(<FormArray>this.eventCategoriesFormGroup.get('categories').removeAt(index));
+  }
+
+  addRegionAndJudges(regIndex: number) {
+    this.regionsAndJudges(regIndex).push(this.newRegionsAndJudges());
+  }
+
+  removeRegionsAndJudges(i: number, regIndex: number) {
+    this.regionsAndJudges(i).removeAt(regIndex);
+  }
+
+  onCloseBtnClick() {
+    this.router.navigate(['/dashboard/events/']);
+  }
+
+
+
+
+  categories(): FormArray {
+    return this.eventJudgeAssignFormGroup.get('categories') as FormArray;
+  }
+
+  newCategories(): FormGroup {
+    return this.formBuilder.group({
+      catId: '',
+      categoryName: '',
+      catMapId: '',
+      regionsJudgesArray: this.formBuilder.array([])
+    });
+  }
+
+  newRegionsAndJudges(): FormGroup {
+    return this.formBuilder.group({
+      regions: '',
+      judges: ''
+    });
+  }
+
+  // setRegionsAndJudges(eventcategorydata: any): FormArray {
+  //   const formArray = new FormArray([]);
+  //   eventcategorydata.forEach((e: any) => {
+  //     formArray.push(this.formBuilder.group({
+  //       regions: [e.mappedRegions],
+  //       judges: '',
+  //     }));
+  //   });
+  //   return formArray;
+  // }
+
+
+
+  regionsAndJudges(i: number): FormArray {
+    return this.categories()
+      .at(i)
+      .get('regionsJudgesArray') as FormArray;
+  }
+
+
+  patchValueJudgesAssign(data: any) {
+
+
+
+    data.categories.forEach((t: any) => {
+
+      var category: FormGroup = this.newCategories();
+      this.categories().push(category);
+
+      t.regionsJudgesArray.forEach((b: any) => {
+        var region = this.newRegionsAndJudges();
+
+        (category.get("regionsJudgesArray") as FormArray).push(region)
+
+      });
+    });
+
+    //this.onRegionSelect({ regionId: data.categories[0].regionsJudgesArray[0].regions[0].regionId });
+    // {emitEvent: true, onlySelf: true}
+    this.eventJudgeAssignFormGroup.patchValue(data);
+
+
+  }
+
+
+
+  setEventCategory(eventcategorydata: any): FormArray {
+    const formArray = new FormArray([]);
+    eventcategorydata.forEach((e: any) => {
+      formArray.push(this.formBuilder.group({
+        catId: e.catId,
+        categoryName: e.catName,
+        catMapId: e.catMapId,
+        regionsJudgesArray: this.formBuilder.array([this.newRegionsAndJudges()])
+      }));
+    });
+    return formArray;
+  }
+
+
+
+  addProctorAssign(): FormGroup {
+    return this.formBuilder.group({
+      eventVenueMapId: '',
+      venueName: '',
+      proctorId: ''
+    });
+  }
+
+
+  addEventCatGroupMap(): FormGroup {
+    return this.formBuilder.group({
+      catMapId: '',
+      categoryName: '',
+      groupMapIds: ''
+    });
+  }
+
+  adduserquestionary(): FormGroup {
+    return this.formBuilder.group({
+      questionId: '',
+      question: '',
+      responseType: '',
+    });
+  }
+
+  adduserVenuAndProcter(): FormGroup {
+    return this.formBuilder.group({
+      venueId: '',
+      proctorId: '',
+      eventVenueId: ''
+    });
+  }
+
+  addeventCategory(): FormGroup {
+    return this.formBuilder.group({
+      eventCategoryID: '',
+      name: '',
+      schoolGradeFrom: '',
+      schoolGradeTo: '',
+      judges: '',
+      venueId: '',
+      eventCatMapId: ''
+    });
+  }
+
+
+
+  // setuserVenuAndProcter(venuesdataOfdata: any): FormArray {
+  //   const formArray = new FormArray([]);
+  //   venuesdataOfdata.forEach((e: any) => {
+  //     formArray.push(this.formBuilder.group({
+  //       venueId: e.venueId,
+  //       proctorId: e.proctorId,
+  //       eventVenueId: e.eventVenueId
+  //     }));
+  //   });
+  //   return formArray;
+  // }
+
+  setQuestionaireData(questionaireData: any): FormArray {
+    const formArray = new FormArray([]);
+    questionaireData.forEach((e: any) => {
+      formArray.push(this.formBuilder.group({
+        questionId: e.questionId,
+        question: e.question,
+        responseType: [e.answerType]
+      }));
+    });
+    return formArray;
+  }
+
+  setEventCatGroupMap(eventCatGroupMapdata: any): FormArray {
+    const formArray = new FormArray([]);
+    eventCatGroupMapdata.forEach((e: any) => {
+      formArray.push(this.formBuilder.group({
+        catMapId: e.catMapId,
+        categoryName: e.catName,
+        groupMapIds: [e.mappedGroups]
+      }));
+    });
+    return formArray;
+  }
+
+  setProctorAssign(eventProctorAssigndata: any): FormArray {
+    const formArray = new FormArray([]);
+    eventProctorAssigndata.forEach((e: any) => {
+
+      if (e.mappedProctor[0].name != null) {
+        formArray.push(this.formBuilder.group({
+          eventVenueMapId: e.eventVenueMapId,
+          venueName: e.venueName,
+          proctorId: [e.mappedProctor]
+        }));
+      }
+      else{
+        formArray.push(this.formBuilder.group({
+          eventVenueMapId: e.eventVenueMapId,
+          venueName: e.venueName,
+          proctorId: ''
+        }));
+      }
+    });
+    return formArray;
+  }
+
+
+
+
+
+
+
+  // createEvent() {
+
+  //   if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'OBVS' || this.eventsDataFormGroup.value.eventType == 'CWC') {
+  //     if (this.eventCategoriesFormGroup.value.categories.length == 0) {
+  //       this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
+  //     }
+  //     else if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+
+  //       let eventCreationForm: any = {};
+  //       eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value } //, ...this.ttcExamDataFormGroup.value 
+  //       console.log("this.eventCreationForm", eventCreationForm);
+  //       this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
+  //         if (res.data.status == "success") {
+  //           this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
+  //         }
+  //         else
+  //           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+  //       });
+  //     }
+  //     else {
+  //       let eventCreationForm: any = {};
+  //       eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value }
+  //       console.log("this.eventCreationForm", eventCreationForm);
+  //       this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
+  //         if (res.data.status == "success") {
+  //           this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
+  //         }
+  //         else
+  //           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+  //       });
+  //     }
+
+  //   }
+
+  //   //this.onCloseBtnClick();
+  // }
+
+  // updateEvent() {
+  //   if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'OBVS' || this.eventsDataFormGroup.value.eventType == 'CWC') {
+  //     if (this.eventCategoriesFormGroup.value.categories.length == 0) {
+  //       this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
+  //     }
+  //     else if (this.eventsDataFormGroup.value.eventType == 'TTC') {
+
+  //       let eventCreationForm: any = {};
+  //       eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value } // , ...this.ttcExamDataFormGroup.value 
+  //       console.log("this.eventCreationForm", eventCreationForm);
+  //       this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
+  //         if (res.data.status == "success") {
+  //           this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
+  //         }
+  //         else
+  //           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+  //       });
+  //     }
+  //     else {
+  //       let eventCreationForm: any = {};
+  //       eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.eventCategoriesFormGroup.value, ...this.questionnaireDataFormGroup.value }
+  //       console.log("this.eventCreationForm", eventCreationForm);
+  //       this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
+  //         if (res.data.status == "success") {
+  //           this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
+  //         }
+  //         else
+  //           this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+  //       });
+  //     }
+  //   }
+
+
+  //   //this.onCloseBtnClick();
+  // }
+
+  handleEventFlyerFileInput(event: any) {
+    console.log('file uploaded');
+  }
+
+
 
   /////////////////////////////////////////////// Validation Functions ///////////////////////////////////////////////////////////////////
 
@@ -404,175 +1652,6 @@ export class EventCreationComponent implements OnInit {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  eventTypeSelChange() {
-
-    //for getting event co ordinator as per event type
-    if (this.eventsDataFormGroup.value.eventType == 'CWC') {
-      this.rolesData = ['CWC Coordinator'];
-      let roleData =
-      {
-        "data": {
-          "rolesData": this.rolesData
-        }
-      }
-      this.apiService.getProctorData(roleData).subscribe(res => {
-        this.proctorData = res.data.metaData.proctorData;
-        console.log("this.proctorData", this.proctorData);
-      });
-    }
-
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-      this.rolesData = ['TTC Exam Coordinator'];
-      let roleData =
-      {
-        "data": {
-          "rolesData": this.rolesData
-        }
-      }
-      this.apiService.getProctorData(roleData).subscribe(res => {
-        this.proctorData = res.data.metaData.proctorData;
-        console.log("this.proctorData", this.proctorData);
-      });
-    }
-
-    if (this.eventsDataFormGroup.value.eventType == 'OVBS') {
-      this.rolesData = ['OVBS Coordinator'];
-      let roleData =
-      {
-        "data": {
-          "rolesData": this.rolesData
-        }
-      }
-      this.apiService.getProctorData(roleData).subscribe(res => {
-        this.proctorData = res.data.metaData.proctorData;
-        console.log("this.proctorData", this.proctorData);
-      });
-    }
-
-  }
-
-
-
-  onEventsNextBtnClick() {
-
-    if (this.eventsDataFormGroup.valid) {
-
-      // For getting Proctor data as per rolesdata
-      if (this.eventsDataFormGroup.value.eventType == 'CWC') {
-        this.rolesData = ['CWC Competition Proctor', 'CWC Coordinator'];
-        let roleData =
-        {
-          "data": {
-            "rolesData": this.rolesData
-          }
-        }
-        this.apiService.getProctorData(roleData).subscribe(res => {
-          this.proctorData = res.data.metaData.proctorData;
-          console.log("this.proctorData", this.proctorData);
-        });
-      }
-
-      if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-        this.rolesData = ['TTC Exam Proctor', 'TTC Exam Coordinator'];
-        let roleData =
-        {
-          "data": {
-            "rolesData": this.rolesData
-          }
-        }
-        this.apiService.getProctorData(roleData).subscribe(res => {
-          this.proctorData = res.data.metaData.proctorData;
-          console.log("this.proctorData", this.proctorData);
-        });
-      }
-
-      if (this.eventsDataFormGroup.value.eventType == 'OVBS') {
-        this.rolesData = ['OVBS Coordinator'];
-        let roleData =
-        {
-          "data": {
-            "rolesData": this.rolesData
-          }
-        }
-        this.apiService.getProctorData(roleData).subscribe(res => {
-          this.proctorData = res.data.metaData.proctorData;
-          console.log("this.proctorData", this.proctorData);
-        });
-      }
-
-
-      // For getting Venues as per orgType and orgId
-      let venuesDatanew: any = {};
-
-      venuesDatanew.orgType = this.eventsDataFormGroup.value.orgType;
-      venuesDatanew.orgId = this.eventsDataFormGroup.value.orgId;
-
-      this.apiService.getVenues({ data: venuesDatanew }).subscribe((res: any) => {
-        this.venuesList = res.data.venueList;
-        console.log("venuesList", this.venuesList);
-      });
-
-      // For binding categories section as per eventType on create event screen
-      if (this.eventFormLabel == false || !this.eventFormLabel) {
-        for (let i = 0; i < this.eventList.length; i++) {
-          if (this.eventsDataFormGroup.value.eventType == this.eventList[i].eventType) {
-            this.categoriesDataFormGroup.setControl('categories', this.setEventCategory(this.eventcategorydata[i].eventName));
-          }
-        }
-      }
-
-      // For binding categories section as per eventType on update event screen
-      if (this.eventFormLabel == true) {
-        let updatedCategories: any = [];
-
-        for (let category of this.eventsDataUpdate.categories) {
-          if (category.eventCatMapId != null) {
-            updatedCategories.push(category);
-          }
-        }
-        for (let i = 0; i < this.eventList.length; i++) {
-          if (this.eventsDataFormGroup.value.eventType == this.eventList[i].eventType) {
-            this.categoriesDataFormGroup.setControl('categories', this.setEventCategory(updatedCategories));
-            this.venuesDataFormGroup.setControl('venues', this.setuserVenuAndProcter(this.eventsDataUpdate.venues));
-            this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(this.eventsDataUpdate.questionnaire));
-          }
-        }
-      }
-
-
-      // For showing and hiding different sections and fields as per eventType
-      for (let i = 0; i < this.eventList.length; i++) {
-        if (this.eventList[i].eventType == this.eventsDataFormGroup.value.eventType) {
-          this.isVenueRequired = this.eventList[i].isVenueRequired;
-          this.isProctorRequired = this.eventList[i].isProctorRequired;
-          this.isJudgeRequired = this.eventList[i].isJudgeRequired;
-          this.isSchoolGradeRequired = this.eventList[i].isSchoolGradeRequired;
-        }
-      }
-    }
-
-    // for hiding and showing different sections as per event type
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-      this.isQuestionnariesRequired = false;
-      this.isttcExamDataFormGroupRequired = true;
-      this.eventStartDateMin = this.eventsDataFormGroup.value.startDate;
-      this.eventEndDateMax = this.eventsDataFormGroup.value.endDate;
-    }
-    else {
-      this.isQuestionnariesRequired = true;
-      this.isttcExamDataFormGroupRequired = false;
-    }
-
-
-
-
-  }
-
-  onCategoriesNextBtn() {
-    if (this.categoriesDataFormGroup.value.categories.length == 0) {
-      this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
-    }
-  }
 
   onVenuesNextBtnClick() {
     this.venues = this.venuesDataFormGroup.get('venues') as FormArray;
@@ -594,236 +1673,6 @@ export class EventCreationComponent implements OnInit {
 
   }
 
-
-
-
-
-
-  onaddbtnclick() {
-    this.venues = this.venuesDataFormGroup.get('venues') as FormArray;
-    this.venues.push(this.adduserVenuAndProcter());
-  }
-
-  onaddbtnclick1() {
-    this.questionnaire = this.questionnaireDataFormGroup.get('questionnaire') as FormArray;
-    this.questionnaire.push(this.adduserquestionary());
-  }
-
-  onremovebtnclickVenu(index: any) {
-    (<FormArray>this.venuesDataFormGroup.get('venues').removeAt(index));
-  }
-
-  onremovebtnclickQuestion(index: any) {
-    (<FormArray>this.questionnaireDataFormGroup.get('questionnaire').removeAt(index));
-  }
-
-  removeEventCategory(index: any) {
-    (<FormArray>this.categoriesDataFormGroup.get('categories').removeAt(index));
-  }
-
-  onCloseBtnClick() {
-    this.router.navigate(['/dashboard/events/']);
-  }
-
-
-
-
-
-  adduserquestionary(): FormGroup {
-    return this.formBuilder.group({
-      questionId: '',
-      question: '',
-      responseType: '',
-    });
-  }
-
-  adduserVenuAndProcter(): FormGroup {
-    return this.formBuilder.group({
-      venueId: '',
-      proctorId: '',
-      eventVenueId: ''
-    });
-  }
-
-  addeventCategory(): FormGroup {
-    return this.formBuilder.group({
-      eventCategoryID: '',
-      name: '',
-      schoolGradeFrom: '',
-      schoolGradeTo: '',
-      judges: '',
-      venueId: '',
-      eventCatMapId: ''
-    });
-  }
-
-  setEventCategory(eventcategorydata: any): FormArray {
-    const formArray = new FormArray([]);
-    eventcategorydata.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        eventCategoryID: e.id,
-        name: e.name,
-        schoolGradeFrom: e.schoolGradeFrom,
-        schoolGradeTo: e.schoolGradeTo,
-        judges: [e.judges],
-        venueId: [e.venueId],
-        eventCatMapId: e.eventCatMapId
-      }));
-    });
-    return formArray;
-  }
-
-  setuserVenuAndProcter(venuesdataOfdata: any): FormArray {
-    const formArray = new FormArray([]);
-    venuesdataOfdata.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        venueId: e.venueId,
-        proctorId: e.proctorId,
-        eventVenueId: e.eventVenueId
-      }));
-    });
-    return formArray;
-  }
-
-  setQuestionaireData(questionaireData: any): FormArray {
-    const formArray = new FormArray([]);
-    questionaireData.forEach((e: any) => {
-      formArray.push(this.formBuilder.group({
-        questionId: e.questionId,
-        question: e.question,
-        responseType: e.responseType
-      }));
-    });
-    return formArray;
-  }
-
-
-
-
-
-  createEvent() {
-
-    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'OBVS' || this.eventsDataFormGroup.value.eventType == 'CWC') {
-      if (this.categoriesDataFormGroup.value.categories.length == 0) {
-        this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
-      }
-      else {
-        let eventCreationForm: any = {};
-        eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.categoriesDataFormGroup.value, ...this.questionnaireDataFormGroup.value }
-        console.log("this.eventCreationForm", eventCreationForm);
-        this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
-          if (res.data.status == "success") {
-            this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
-          }
-          else
-            this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-        });
-      }
-    }
-    else if (this.eventsDataFormGroup.value.eventType == 'CWC') {
-      if (this.venuesDataFormGroup.value.venues.length == 0) {
-        this.uiCommonUtils.showSnackBar("Event should atleast have one venue!", "error", 3000);
-      }
-      else {
-        let eventCreationForm: any = {};
-        eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.categoriesDataFormGroup.value, ...this.questionnaireDataFormGroup.value }
-        console.log("this.eventCreationForm", eventCreationForm);
-        this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
-          if (res.data.status == "success") {
-            this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
-          }
-          else
-            this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-        });
-      }
-    }
-
-    this.onCloseBtnClick();
-  }
-
-  updateEvent() {
-    if (this.eventsDataFormGroup.value.eventType == 'TTC' || this.eventsDataFormGroup.value.eventType == 'OBVS' || this.eventsDataFormGroup.value.eventType == 'CWC') {
-      if (this.categoriesDataFormGroup.value.categories.length == 0) {
-        this.uiCommonUtils.showSnackBar("Event should atleast have one category!", "error", 3000);
-      }
-      else {
-        let eventCreationForm: any = {};
-        eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.categoriesDataFormGroup.value, ...this.questionnaireDataFormGroup.value }
-        console.log("this.eventCreationForm", eventCreationForm);
-        this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
-          if (res.data.status == "success") {
-            this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
-          }
-          else
-            this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-        });
-      }
-    }
-    else if (this.eventsDataFormGroup.value.eventType == 'CWC') {
-      if (this.venuesDataFormGroup.value.venues.length == 0) {
-        this.uiCommonUtils.showSnackBar("Event should atleast have one venue!", "error", 3000);
-      }
-      else {
-        let eventCreationForm: any = {};
-        eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.categoriesDataFormGroup.value, ...this.questionnaireDataFormGroup.value }
-        console.log("this.eventCreationForm", eventCreationForm);
-        this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
-          if (res.data.status == "success") {
-            this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
-          }
-          else
-            this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-        });
-      }
-    }
-
-    this.onCloseBtnClick();
-  }
-
-  handleEventFlyerFileInput(event: any) {
-    console.log('file uploaded');
-
-  }
-
-
-  createTtcEvent() {
-
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-
-      let eventCreationForm: any = {};
-      eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.venuesDataFormGroup.value, ...this.categoriesDataFormGroup.value, ...this.questionnaireDataFormGroup.value, ...this.ttcExamDataFormGroup.value }
-      console.log("this.eventCreationForm", eventCreationForm);
-      this.apiService.insertevents({ data: eventCreationForm }).subscribe((res: any) => {
-        if (res.data.status == "success") {
-          this.uiCommonUtils.showSnackBar("Event Created Successfully!", "success", 3000);
-        }
-        else
-          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-      });
-    }
-
-    this.onCloseBtnClick();
-  }
-
-  updateTtcEvent() {
-
-    if (this.eventsDataFormGroup.value.eventType == 'TTC') {
-
-      let eventCreationForm: any = {};
-      eventCreationForm = { ...this.eventsDataFormGroup.value, ...this.categoriesDataFormGroup.value, ...this.questionnaireDataFormGroup.value, ...this.ttcExamDataFormGroup.value }
-      console.log("this.eventCreationForm", eventCreationForm);
-      this.apiService.updateEvent({ data: eventCreationForm }).subscribe((res: any) => {
-        if (res.data.status == "success") {
-          this.uiCommonUtils.showSnackBar("Event Updated Successfully!", "success", 3000);
-        }
-        else
-          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-      });
-    }
-
-    //this.onCloseBtnClick();
-
-  }
 
 
 

@@ -81,7 +81,9 @@ export class LandingPageComponent implements OnInit{
   alluserdata: any;
   roleEndDateErrorFlag: any;
   minDate = new Date();
-
+  titles!: any[];
+  maritalstatus!:any[];
+  error = {validatePhoneNumber: true};
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
     private http: HttpClient, private formBuilder: FormBuilder, public router: Router) { }
   // this.gridOptions = <GridOptions>{};
@@ -107,8 +109,9 @@ export class LandingPageComponent implements OnInit{
       nickName: new FormControl(''),
       baptismalName: new FormControl(''),
       dob: new FormControl(''),
-      mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
-      homePhoneNo: new FormControl('', [Validators.pattern('[0-9].{9}')]),
+      //mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
+      mobileNo: new FormControl(''),
+      homePhoneNo: new FormControl(''),
       emailAddress: new FormControl('', [Validators.email]),
       addressLine1: new FormControl(''),
       addressLine2: new FormControl(''),
@@ -163,6 +166,11 @@ export class LandingPageComponent implements OnInit{
       console.log("Roles Data:", this.orgs);
     })
 
+	this.apiService.callGetService('getLookupMasterData?types=title,martial status').subscribe((res: any) => {
+      this.titles = res.data["titles"];
+      this.maritalstatus =res.data["martial statuss"];
+    
+    });
 
     //   this.apiService.callGetService('getuserRecords?type=approved').subscribe((res) => {
     //  this.alluserdata = res.data.metaData;
@@ -387,8 +395,8 @@ export class LandingPageComponent implements OnInit{
       roleId: [null, Validators.required],
       role: [null, Validators.required],
       orgId: [null, Validators.required],
-      roleStartDate: [null, Validators.required],
-      roleEndDate: [null, Validators.required]
+      roleStartDate: [null],
+      roleEndDate: [null ]
     });
   }
 

@@ -1,3 +1,7 @@
 .shadow{
 box-shadow: 7px 7px 22px grey;
 }
+
+::ng-deep .mat-form-field-wrapper{
+    margin-bottom: -0.4em;
+ }

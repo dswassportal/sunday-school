@@ -38,7 +38,10 @@ export class SignUpComponent implements OnInit {
   hide = true;
   hide1 = true;
   minDate = new Date();
-
+  titles!: any[];
+  memberships!: any[];
+  
+ 
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
@@ -69,7 +72,13 @@ export class SignUpComponent implements OnInit {
        this.parishList = res.data.metaData.Parish;
      }
       console.log(this.parishList);
+    });
+	
+    this.apiService.callGetService('getLookupMasterData?types=title,membership').subscribe((res: any) => {
+      this.titles = res.data["titles"];
+      this.memberships = res.data["memberships"];
     })
+ 
  
   }
 

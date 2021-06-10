@@ -73,6 +73,8 @@ import { DatePickerRendererComponent } from './screens/renderers/date-picker-ren
 import { StaffAssignmentComponent } from './screens/staff-assignment/staff-assignment.component';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
+import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { NgxMatIntlTelInputModule } from 'ngx-mat-intl-tel-input';
 
 
 @NgModule({
@@ -143,7 +145,9 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     AgGridModule.withComponents([ButtonRendererComponent]),
     NgxSpinnerModule,
     MatStepperModule,
-    NgxDaterangepickerMd.forRoot()
+    NgxDaterangepickerMd.forRoot(),
+    NgMultiSelectDropDownModule.forRoot(),
+    NgxMatIntlTelInputModule
   ],
   providers: [AuthService,  { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true },EventDataService, {provide: LocationStrategy, useClass: HashLocationStrategy}],
   bootstrap: [AppComponent],

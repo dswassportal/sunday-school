@@ -35,7 +35,7 @@
                                                 <!-- <div class="col-md-12"> -->
                                                 <div class="row">
                                                         <mat-form-field class="col-2">
-                                                                <mat-select formControlName="title" id="title"
+                                                               <!-- <mat-select formControlName="title" id="title"
                                                                         placeholder="Title" required>
                                                                         <mat-option value="His Grace">His Grace
                                                                         </mat-option>
@@ -51,7 +51,10 @@
                                                                         <mat-option value="Ms">Ms</mat-option>
                                                                         <mat-option value="Mrs">Mrs</mat-option>
                                                                         <mat-option value="Dr">Dr</mat-option>
-                                                                </mat-select>
+                                                                </mat-select> -->
+                                                                <mat-select id="title" formControlName = "title" placeholder="title" >
+                                                                        <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
+                                                                      </mat-select>
                                                         </mat-form-field>
                                                         <mat-form-field class="col">
                                                                 <mat-label>First Name</mat-label>
@@ -97,9 +100,9 @@
                                                 </div>
                                                 <div class="row">
                                                         <mat-form-field class="col-md-4">
-                                                                <mat-label style="padding-left: 15%;">Mobile Number
+                                                                <mat-label style="padding-left: 15%;">Mobile Number*
                                                                 </mat-label>
-                                                                <input matInput type="text" ng2TelInput
+                                                                <!-- <input matInput type="text" ng2TelInput
                                                                         (ng2TelOutput)="getMobileNumber($event)"
                                                                         formControlName="mobileNo" id="mobileNo"
                                                                         maxLength="10" minLength="10"
@@ -113,12 +116,20 @@
                                                                         <span
                                                                                 *ngIf="updateuserinfo.controls.mobileNo.errors.pattern">Enter
                                                                                 10 digit number.</span>
-                                                                </mat-error>
+                                                                </mat-error> -->
+                                                                <ngx-mat-intl-tel-input id="mobileNo" matInput (keypress)="keyPress($event)" 
+                                                                [onlyCountries]= "['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']"
+                                                                [enableAutoCountrySelect]="true" name="mobileNo" formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true">
+                                                               </ngx-mat-intl-tel-input>
+                                                               <mat-error *ngIf="updateuserinfo.controls.mobileNo.touched && updateuserinfo.controls.mobileNo.invalid">
+                                                                <!-- <span *ngIf="updateuserinfo.controls['mobileNo']?.errors?.required">This field is mandatory.</span> -->
+                                                                 <span *ngIf="updateuserinfo.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
+                                                            </mat-error> 
                                                         </mat-form-field>
                                                         <mat-form-field class="col-md-4">
                                                                 <mat-label style="padding-left: 15%;">Home Phone Number
                                                                 </mat-label>
-                                                                <input id="homePhoneNo" matInput
+                                                                 <!-- <input id="homePhoneNo" matInput
                                                                         formControlName="homePhoneNo" ng2TelInput
                                                                         (ng2TelOutput)="getHomePhoneNumber($event)"
                                                                         maxLength="10" minLength="10"
@@ -132,6 +143,14 @@
                                                                         <span
                                                                                 *ngIf="updateuserinfo.controls.homePhoneNo.errors.pattern">Enter
                                                                                 10 digit number.</span>
+                                                                </mat-error> -->
+                                                                <ngx-mat-intl-tel-input id="homePhoneNo" matInput (keypress)="keyPress($event)" 
+                                                                  [onlyCountries]= "['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']"
+                                                                  [enableAutoCountrySelect]="true" name="homePhoneNo" formControlName="homePhoneNo" [preferredCountries]="['us']" [enableRequired]="true">
+                                                                </ngx-mat-intl-tel-input>
+                                                                <mat-error *ngIf="updateuserinfo.controls.homePhoneNo.touched && updateuserinfo.controls.homePhoneNo.invalid">
+                                                                   <!-- <span *ngIf="updateuserinfo.controls['homePhoneNo']?.errors?.required">This field is mandatory.</span> -->
+                                                                   <span *ngIf="updateuserinfo.controls['homePhoneNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
                                                                 </mat-error>
                                                         </mat-form-field>
 
