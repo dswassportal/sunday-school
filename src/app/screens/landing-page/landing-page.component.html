@@ -122,7 +122,7 @@
                                                                 [enableAutoCountrySelect]="true" name="mobileNo" formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true">
                                                                </ngx-mat-intl-tel-input>
                                                                <mat-error *ngIf="updateuserinfo.controls.mobileNo.touched && updateuserinfo.controls.mobileNo.invalid">
-                                                                <span *ngIf="updateuserinfo.controls['mobileNo']?.errors?.required">This field is mandatory.</span>
+                                                                <!-- <span *ngIf="updateuserinfo.controls['mobileNo']?.errors?.required">This field is mandatory.</span> -->
                                                                  <span *ngIf="updateuserinfo.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
                                                             </mat-error> 
                                                         </mat-form-field>
