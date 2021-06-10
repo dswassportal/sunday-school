@@ -204,7 +204,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       this.apiService.callGetService(`getSSchools`).subscribe((res: any) => {
 
-        this.schoolDataList = res.data.schoolData;
+        this.schoolDataList = res.data.schoolData.schoolData;
         //to default the dropdrown value
         this.sundaySchoolNameSelect = this.schoolDataList[0].orgId;
         this.sundaySchoolGradeSelect = this.schoolDataList[0].orgId;
