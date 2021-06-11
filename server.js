@@ -6,7 +6,10 @@ const processEventRequest = require(`./src/app/node/eventReqOperations`)
 const processScoreRequest = require(`./src/app/node/reqScoreOperations`)
 const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions`)
 const processSSRequest = require(`./src/app/node/reqSsOperations`)
-const dbConnections = require(`${__dirname}/src/app/node/dbConnection`);
+const processFileUpload = require(`./src/app/node/reqFileUpload`)
+
+const fileUpload = require('express-fileupload');
+const os = require('os');
 express = require('express')
 const cors = require('cors')
 var app = express();
@@ -35,14 +38,52 @@ process.on('SIGTERM', () => {
 app.use(express.json());
 app.use('*', cors())
 
-//let basePath = __dirname.split('\\src\\app\\node')[0];
-//console.log(`Final path is ${path.join(basePath + "/dist/church/index.html")}`)
 app.use(express.static(path.join(__dirname + "/dist/church")));
 
 app.get('/', function (req, res) {
-   res.sendFile(path.join(__dirname + "/dist/church/index.html"));
+  res.sendFile(path.join(__dirname + "/dist/church/index.html"));
   //res.sendFile('./dist/church/index.html');
 });
+
+function getUserHome() {
+
+  return process.env[(process.platform == 'win32')
+    ? 'USERPROFILE' : 'HOME'];
+}
+
+app.use(fileUpload({
+  useTempFiles: false,
+  tempFileDir: getUserHome(),
+}));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '/dist/church/index.html'));
+});
+
+app.post('/api/uploadfile', (req, res) => {
+console.log('/api/uploadfile called... for event : ' + req.query.eventId )
+  try {
+
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).send('No files were uploaded.');
+    }
+  
+    processFileUpload.eventDocUpload(req.files, req.query.eventId).then((data) => {
+      res.send(data)
+      res.end();
+    })
+ 
+  } catch (error) {
+    res.send(error)
+    res.end();
+  }
+
+});
+
+
+
+
+
 
 app.post('/api/signUp', function (req, res) {
   console.log("signUp called with : " + JSON.stringify(req.body));
@@ -218,18 +259,18 @@ app.post('/api/updateUserRoles', function (req, res) {
     let loggedInUser = decodeUser(req);
     processRequest.processUpdateUserRoles(req.body.data, loggedInUser)
       .then((data) => {
-            if(req.body.data.respondWith){
-              if(req.body.data.respondWith === `user_meta_data`){
-                processRequest.processGetUserMetaDataRequest(loggedInUser).then((metaData) => {
-                    data.data.metaData = metaData.data.metaData;
-                    res.send(data);
-                    res.end();            
-                })
-              }
-            }else{
+        if (req.body.data.respondWith) {
+          if (req.body.data.respondWith === `user_meta_data`) {
+            processRequest.processGetUserMetaDataRequest(loggedInUser).then((metaData) => {
+              data.data.metaData = metaData.data.metaData;
               res.send(data);
-              res.end();      
-            }
+              res.end();
+            })
+          }
+        } else {
+          res.send(data);
+          res.end();
+        }
       }).catch((error) => {
         //console.log(`Returning with resonse : ${error}`)
         res.send(error);
@@ -325,7 +366,7 @@ app.post('/api/updateEvent', function (req, res) {
   try {
     processEventRequest.updateEvent(req.body.data)
       .then((data) => {
-       // console.log(`Returning with resonse : ${data}`)
+        // console.log(`Returning with resonse : ${data}`)
         res.send(data);
         res.end();
       }).catch((error) => {
@@ -362,7 +403,7 @@ app.post('/api/getVenues', function (req, res) {
   try {
     processEventRequest.getVenues(req.body.data)
       .then((data) => {
-       // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
@@ -380,7 +421,7 @@ app.get('/api/getRegionAndParish', function (req, res) {
   try {
     processEventRequest.getRegionAndParish()
       .then((data) => {
-       // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
@@ -398,7 +439,7 @@ app.get('/api/getEventType', function (req, res) {
   try {
     processEventRequest.getEventType()
       .then((data) => {
-       // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
@@ -417,11 +458,11 @@ app.get('/api/getMembers', function (req, res) {
   try {
     processMiscRequest.getMembers(req.query.fbuid)
       .then((data) => {
-       // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-       // console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -437,7 +478,7 @@ app.get('/api/getEventQuestionnaireData', function (req, res) {
   try {
     processEventRequest.getEventQuestionnaireData()
       .then((data) => {
-      //  console.log(`Returning with response : ${JSON.stringify(data)}`)
+        //  console.log(`Returning with response : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
@@ -456,7 +497,7 @@ app.get('/api/getEventForRegistration', function (req, res) {
   try {
     processEventRequest.getEventForRegistration()
       .then((data) => {
-       // console.log(`Returning with response : ${JSON.stringify(data)}`)
+        // console.log(`Returning with response : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
@@ -475,11 +516,11 @@ app.get('/api/getUserApprovalStatus', function (req, res) {
   try {
     processMiscRequest.getUserApprovalStatus(req.query.fbuid)
       .then((data) => {
-     //   console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        //   console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-       // console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -497,7 +538,7 @@ app.post('/api/updateBasicProfile', function (req, res) {
         res.send(data);
         res.end();
       }).catch((error) => {
-       // console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -602,7 +643,7 @@ app.post('/api/postScore', function (req, res) {
         res.send(data);
         res.end();
       }).catch((error) => {
-       // console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -641,7 +682,7 @@ app.post('/api/deleteEvents', function (req, res) {
         res.send(data);
         res.end();
       }).catch((error) => {
-       // console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
