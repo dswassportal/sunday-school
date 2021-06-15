@@ -14,14 +14,15 @@ export class StaffAssignmentComponent implements OnInit {
   parishList!: any[];
   teacherList!: any[];
   subtituteTeacherList!:any[];
-  eventList!: any[];
+  
   teacherGradeDataFormGroup : any;
   substituteTeacherGradeDataFormGroup:any;
-  eventCategorydData!: any[];
+  sSchoolDatesData:any;
+  
   userMetaData: any;
   gridApi:any;
   columnDefs!:any[];
-  //rowData: any = [];
+  
   rowData: any ;
   term: any;
   gridOptions:any;
@@ -37,15 +38,27 @@ export class StaffAssignmentComponent implements OnInit {
   subteacherGradeData:any;
   principalData:any;
   principalList!:any[];
-  //sundaySchoolName!:any [];
+  
   sundaySchoolName:any;
-  //maxDate = new Date();
+  
   minDate = new Date();
   isPrimary: boolean = false;
   showHidePrincipal:boolean = true;
-  //staffId:any;
-  //substituteTeacher:any;
-  //roleType:any;
+
+  schoolStartDate : any;
+  schoolEndDate : any;
+  principalId : any;
+  staffId : any;
+  subStaffId : any;
+  sundaySchoolTermsList:any;
+  startDateEndDateData:any;
+  TermStartDate:any;
+  TermEndDate:any;
+  selectedYearData:any;
+  startAndEndDatesData!:any[];
+  setDateData!:any[];
+ 
+  staffDataPatchValue:any;
   constructor(private apiService: ApiService,
       private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils,) { }
 
@@ -59,23 +72,20 @@ export class StaffAssignmentComponent implements OnInit {
 
     this.rolesList = this.userMetaData.roles;
 
-    //for (let i = 0; i < this.userMetaData.roles.length; i++) {
       this.rolesList = this.userMetaData.roles;
-    //}
     
-    console.log(this.rolesList);
     this.apiService.callGetService(`getSSchools?role=Vicar`).subscribe((res: any) => {
 
       
-      this.rowData =  res.data.schoolData.schoolData;
+      this.rowData =  res.data.schoolData;
 
       for(let school of this.rowData){
           school.parish = this.orgName;
       }      
-      console.log("School Data : " + this.rowData.orgId);
-
+      
       this.teacherGradeData = this.rowData;
       this.subteacherGradeData = this.rowData;
+      
       //this.teacherGradeDataFormGroup.setControl('teacherGrades', this.setTeacherAndGrades(this.teacherGradeData));
       
       //for (let i = 0; i < this.teacherGradeData.length; i++) {
@@ -87,7 +97,7 @@ export class StaffAssignmentComponent implements OnInit {
    
       
     });
-
+    
     this.columnDefs = [
       { headerName: 'Sunday School Name', field: 'name', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true },
       { headerName: 'Parish Name', field: 'parish', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true},
@@ -106,10 +116,7 @@ export class StaffAssignmentComponent implements OnInit {
       }
     };
 
-    this.apiService.callGetService('getEventType').subscribe((res: any) => {	
-      this.eventList = res.data.metaData.eventType;	
-      this.eventCategorydData = res.data.metaData.eventType;	
-    });
+
 
     this.teacherGradeDataFormGroup = this.formBuilder.group({
       teacherGrades: this.formBuilder.array([this.addTeachersData()])
@@ -120,7 +127,7 @@ export class StaffAssignmentComponent implements OnInit {
     
    
     this.staffDataFormGroup = this.formBuilder.group({
-      //orgName: new FormControl('',Validators.required),
+      
       name: new FormControl('', [Validators.required]), 
       gradeId: new FormControl('', [Validators.required]), 
       schoolStartDate: new FormControl('', [Validators.required]),
@@ -132,9 +139,10 @@ export class StaffAssignmentComponent implements OnInit {
       roles: this.formBuilder.array([this.adduserroles()], [Validators.required]),
       
       staffId :  new FormControl(''),
-      subStaffId:new FormControl('')
-      //teacherName: new FormControl(''),
-      //substituteTeacher :  new FormControl(''),
+      subStaffId:new FormControl(''),
+      sundaySchoolTerm: new FormControl('', [Validators.required]),
+      sSchoolStartEndDate:new FormControl('')
+      
 
     });
 
@@ -156,10 +164,6 @@ export class StaffAssignmentComponent implements OnInit {
     return formArray;
   }
   
-  
-
-  
-  
   rolesArr: any[] = [];
 
   adduserroles(): FormGroup {
@@ -177,20 +181,11 @@ export class StaffAssignmentComponent implements OnInit {
         staffId: '',
         isPrimary : '',
         roleType:'',
-        subStaffId:''
+        subStaffId:'',
+        
     });
   }
   
-  addSubstituteTeachersData(): FormGroup {
-    return this.formBuilder.group({
-      gradeId:'',
-      name: '',
-      staffId: '',
-      isPrimary : '',
-      roleType:'',
-      subStaffId:''
-    });
-  }
   
   onGridReady(params:any) {
     this.gridApi = params.api;
@@ -219,43 +214,50 @@ export class StaffAssignmentComponent implements OnInit {
     this.orgId = this.selectedUserData.orgId;
 
     this.apiService.callGetService(`getuserRecords?type=principal`).subscribe((res: any) => {
-      console.log("Principal List : " + res.data.metaData);
+      
       this.principalList = res.data.metaData;
       
     });
 
+    this.apiService.callGetService(`getSSchools?role=Vicar`).subscribe((res: any) => {
+      this.staffDataPatchValue = res.data.schoolData.AllstaffSchoolData;
+
+      this.staffDataPatchValue = res.data.schoolData.AllstaffSchoolData;
+      this.sundaySchoolTermsList = res.data.ssTerms;
+    
+      this.teacherGradeData.push(this.staffDataPatchValue[0].staffName);
+
+    
+    });
+    
     this.apiService.callGetService(`getuserRecords?type=teacher`).subscribe((res: any) => {
-      console.log("Teacher List : " + res.data.metaData);
-     
+      
           this.teacherList = res.data.metaData;
-          //this.subtituteTeacherList = res.data.metaData;
-     
+          
     });
  
     this.staffDataFormGroup.patchValue({
       name: this.selectedUserData.name,
       parish : this.selectedUserData.parish,
+      principalId:this.staffDataFormGroup.principalName,
+      sundaySchoolTerm:this.staffDataFormGroup.sundaySchoolTerm,
       schoolStartDate: this.staffDataFormGroup.schoolStartDate,
       schoolEndDate : this.staffDataFormGroup.schoolEndDate,
-      principalId:this.staffDataFormGroup.principalId,
-      //staffId : this.staffDataFormGroup.staffId,
-      //subStaffId:this.staffDataFormGroup.subStaffId
+      //principalId:this.staffDataFormGroup.principalId,
+      staffId : this.staffDataFormGroup.staffId,
+      subStaffId:this.staffDataFormGroup.subStaffId
       
-    });
 
+    });
+    
     this.selectedUserRole = this.selectedUserData.roles;
-    console.log("staff vallue for principa; : " + this.staffDataFormGroup.value);
+    
     
   }
 
   saveStaffProfile(){
 
-    let payloadnew = {
-      staffAssignment: this.teacherGradeDataFormGroup.value.teacherGrades,
-      principalData : this.staffDataFormGroup.value
-    }
-    let myList = this.teacherGradeDataFormGroup.value.teacherGrades.push(this.principalList);
-    console.log("payloadnew : " + payloadnew);
+    
     let staff_list = [];
     
     for( let staffMember of this.teacherGradeDataFormGroup.value.teacherGrades){
@@ -277,12 +279,12 @@ export class StaffAssignmentComponent implements OnInit {
           });
           
       }
-      //else if(this.rolesList.indexOf("Principal") == -1){  // if logged in user is not Principal      
+        // if logged in user is not Principal      
       if(staffMember.roleType !="Teacher" && this.staffDataFormGroup.value.principalId != null){
       staff_list.push({
           //gradeId: staffMember.gradeId,
-          schoolId:this.orgId,
-          //gradeId:this.orgId,
+          //schoolId:this.orgId,
+          gradeId:this.orgId,
           //schoolId:this.orgId,
           staffId: this.staffDataFormGroup.value.principalId,
           isPrimary: true,
@@ -293,17 +295,17 @@ export class StaffAssignmentComponent implements OnInit {
       if(staffMember.roleType != "Teacher" && this.staffDataFormGroup.value.vicePrincipalId!=null){
         staff_list.push({
           //gradeId: staffMember.gradeId,
-          schoolId:this.orgId,
-          //gradeId:this.orgId,
+          //schoolId:this.orgId,
+          gradeId:this.orgId,
           //schoolId:this.orgId,
           staffId: this.staffDataFormGroup.value.vicePrincipalId,
           isPrimary: true,
           roleType: "Sunday School Vice Principal"
         });
       }
-    // }
+    
      
-     /*
+     
      else if(this.rolesList.indexOf("Principal") !== -1){  // if logged in user is a Principal
       staff_list.push({
         gradeId: staffMember.gradeId,
@@ -312,20 +314,17 @@ export class StaffAssignmentComponent implements OnInit {
         roleType: "Principal"
       });
      }
-     */
+     
     }
    
-    console.log(staff_list);
-
     
    let payload = {
 
     //ssStartDate: this.staffDataFormGroup.value.schoolStartDate,
     //ssEndDate : this.staffDataFormGroup.value.schoolEndDate,
 
-    ssStartDate: this.staffDataFormGroup.value.schoolStartDate,
-    ssEndDate : this.staffDataFormGroup.value.schoolEndDate,
-
+    ssStartDate: this.schoolStartDate,
+    ssEndDate : this.schoolEndDate,
     schoolId: this.orgId,
 
     staffAssignment : staff_list
@@ -342,46 +341,20 @@ export class StaffAssignmentComponent implements OnInit {
       else
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
     });
-  
-  }
-
-  comparisonSchoolStartdateValidator(): any {
-
-    let schoolStartDate = this.staffDataFormGroup.value['schoolStartDate'];
-    let schoolEndDate = this.staffDataFormGroup.value['schoolEndDate'];
-
     
-
-    let eventstartnew = new Date(schoolStartDate);
-    let eventendnew = new Date(schoolEndDate);
-    if (eventstartnew > eventendnew) {
-      return this.staffDataFormGroup.controls['schoolStartDate'].setErrors({ 'invaliddaterange': true });
-    }
-    /*
-    var offsetMs = schoolStartDate.getTimezoneOffset() * 60000;
-      return new Date(schoolStartDate.getTime() - offsetMs);
-*/
   }
+  sundaySchoolSelChange(event:any){
+      // for getting start date and end date as per sunday school year 
+      
+      for(let i = 0 ; i <this.sundaySchoolTermsList.length ; i++){
 
-  comparisonSchoolEnddateValidator(): any {
-
-    let schoolStartDate = this.staffDataFormGroup.value['schoolStartDate'];
-    let schoolEndDate = this.staffDataFormGroup.value['schoolEndDate'];
-
-   
-
-    //let eventstartnew = new Date(schoolStartDate);
-    //let eventendnew = new Date(schoolEndDate);
-
-    if (schoolStartDate > schoolEndDate) {
-      return this.staffDataFormGroup.controls['schoolEndDate'].setErrors({ 'invaliddaterange1': true });
-    }
-    /*
-    var offsetMs = schoolEndDate.getTimezoneOffset() * 60000;
-    return new Date(schoolEndDate.getTime() - offsetMs);
-    */
-  }
-
-  
+        if(this.sundaySchoolTermsList[i].termDtlId ==event.value){
+          this.schoolStartDate = this.sundaySchoolTermsList[i].startDate;
+          this.schoolEndDate= this.sundaySchoolTermsList[i].endDate;
+        }
+      }
+      
+      
+  }  
 
 }

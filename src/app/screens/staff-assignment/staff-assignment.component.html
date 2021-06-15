@@ -43,41 +43,20 @@
                             </div>
                 
                             <div class="row">
-                                       
-                                        
-                                        <mat-form-field class="col-md-6">
-
-                                            <mat-label>Sunday School Year Start Date:</mat-label>
-                                            <input (dateChange)="comparisonSchoolStartdateValidator()" [min]="minDate"
-                                                matInput id="schoolStartDate" formControlName="schoolStartDate"
-                                                [matDatepicker]="startDatepicker" >
-                                            <mat-datepicker-toggle matSuffix [for]="startDatepicker">
-                                                <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-                                            </mat-datepicker-toggle>
-                                            <mat-datepicker #startDatepicker></mat-datepicker>
-                                            <mat-error
-                                                *ngIf="staffDataFormGroup.controls['schoolStartDate'].hasError('invaliddaterange')">
-                                               Start date cannot be greater than end date
-                                            </mat-error>
-                                        </mat-form-field>
-                                      
-                                    <mat-form-field class="col-md-6">
-
-                                        <mat-label>Sunday School Year End Date:</mat-label>
-                                        <input [min]="minDate" matInput id="schoolEndDate" formControlName="schoolEndDate"
-                                            (dateChange)="comparisonSchoolEnddateValidator()" [matDatepicker]="endDatepicker" >
-                                        <mat-datepicker-toggle matSuffix [for]="endDatepicker" >
-                                            <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-                                        </mat-datepicker-toggle>
-                                        <mat-datepicker #endDatepicker></mat-datepicker>
-    
-                                        <mat-error
-                                            *ngIf="staffDataFormGroup.controls['schoolEndDate'].hasError('invaliddaterange1')">
-                                             End date cannot be earlier than start date
-                                        </mat-error>
-    
-                                    </mat-form-field>
-                                    
+                                
+                                <mat-form-field class="col-md-6" >
+                                    <mat-select id="sundaySchoolTerm" (selectionChange)="sundaySchoolSelChange($event)" formControlName="sundaySchoolTerm" placeholder="Sunday School Year">
+                                      <mat-option  *ngFor = "let ssTerm of sundaySchoolTermsList" [value]="ssTerm.termDtlId">{{ssTerm.term}} </mat-option>
+                                    </mat-select>
+                                  </mat-form-field>
+                                   
+                                  <mat-form-field  class="col-md-6" >
+                                    <input id="sSchoolStartEndDate" placeholder="Sunday School Term Start And End Dates" formControlName="sSchoolStartEndDate"
+                                    readonly  matInput>
+                                      <!-- <span *ngIf="schoolStartDate != null"> </span> -->
+                                      {{schoolStartDate}} - {{schoolEndDate}}
+                                </mat-form-field>
+                                
                             </div>
                 
                             <div class="row" *ngIf="showHidePrincipal">

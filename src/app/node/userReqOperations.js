@@ -242,7 +242,7 @@ async function setStaffAssignment(staffData, loggedInUser) {
                     let insertRoleContext = ` INSERT INTO t_user_role_context (user_id, role_id, org_id, created_by, created_date, user_role_map_id)
                                             select $1, $2, $3, $4, $5, $6  
                                             WHERE NOT EXISTS (
-                                            SELECT 1 FROM t_user_role_mapping turm 
+                                            SELECT 1 FROM t_user_role_context turm 
                                                                 WHERE user_id = $1 
                                                                 and role_id = $2
                                                                 and org_id = $3
@@ -259,27 +259,24 @@ async function setStaffAssignment(staffData, loggedInUser) {
             /******************************  Upsert t_staff_school_assignment ****************************************/
   /******************************  Upsert t_staff_school_assignment ****************************************/
 
-            //  let updateStaffSchool = ` UPDATE t_staff_school_assignment
-            //                         SET is_primary = $1, updated_by = 0, updated_date = ''
-            //                         WHERE user_id=0 and school_id = 0 and role_type=  and ` ;
-
-            let insertStaffSchool = ` INSERT INTO t_organization_staff_assignment (org_id, user_id, role_id, role_type, is_primary, created_by, created_date,
-                effective_start_date, effective_end_date)
-                                                select $1, $2, $3, $4, $5, $6, $7, $8, $9 
-                                                WHERE NOT EXISTS (
-                                                SELECT 1 FROM t_organization_staff_assignment tssa 
-                                                                    WHERE school_id = $1
-                                                                    and user_id = $2
-                                                                    and role_id = $3
-                                                            ) returning staff_school_assignment_id;`
-             
-                //let insertStaffSchoolValues = [staffData.schoolId, staffMember.staffId, roles[staffMember.roleType], staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString()]
-                let insertStaffSchoolValues = [staffMember.gradeId, staffMember.staffId, roles[staffMember.roleType],
-                                                staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString(),
-                                                ssStartDate, ssEndDate]
-                //let insertStaffSchoolValues = [staffMember.gradeId, staffMember.staffId, roles[staffMember.roleType], staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString()]
-              
-                result = await client.query(insertStaffSchool, insertStaffSchoolValues);
+            let insertStaffSchool = ` INSERT INTO t_organization_staff_assignment (org_id, user_id, role_id, role_type, is_primary, created_by, created_date
+			)
+                                            select $1, $2, $3, $4, $5, $6, $7
+                                            WHERE NOT EXISTS (
+                                            SELECT 1 FROM t_organization_staff_assignment tssa 
+                                                                WHERE org_id = $1
+                                                                and user_id = $2
+                                                                and role_id = $3
+                                                        ) returning org_staff_assignment_id;`
+         
+            //let insertStaffSchoolValues = [staffData.schoolId, staffMember.staffId, roles[staffMember.roleType], staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString()]
+            let insertStaffSchoolValues = [staffMember.gradeId, staffMember.staffId, roles[staffMember.roleType],
+											staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString()
+											]
+            //let insertStaffSchoolValues = [staffMember.gradeId, staffMember.staffId, roles[staffMember.roleType], staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString()]
+          
+            result = await client.query(insertStaffSchool, insertStaffSchoolValues);
+           
 
         }
 

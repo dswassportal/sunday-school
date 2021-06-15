@@ -825,6 +825,27 @@ app.get('/api/getRegionWiseJudges', function (req, res) {
   }
 });
 
+app.get('/api/getStaffAssmtBySchool', function (req, res) {
+  console.log("getStaffAssmtBySchool called... to fetch " + req.query.schoolId);
+  //let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getStaffAssmtBySchool(req.query.schoolId,req.query.term, '')
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getStaffAssmtBySchool as : ' + error)
+  }
+});
+
+
+
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {
   let userId = reqContext.header('User').toString();
