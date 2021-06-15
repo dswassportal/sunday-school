@@ -7,7 +7,9 @@ const getGradeStaffAssBySchoolIdDefTerm = `select to2.org_id,
                                             tosa.role_type,
                                             case when tu.first_name is null then null else
                                                     concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name) end staff_name ,
-                                            tstd.school_term_detail_id 
+                                            tstd.school_term_detail_id,
+                                            to2."sequence",
+                                            tosa.org_staff_assignment_id 
                                             from t_organization to2
                                             left join t_organization_staff_assignment tosa on to2.org_id = tosa.org_id
                                             left join t_user tu on tosa.user_id = tu.user_id 
@@ -26,7 +28,7 @@ const getGradeStaffAssBySchoolIdDefTerm = `select to2.org_id,
                                                                 INNER JOIN child_orgs c
                                                                 ON         c.org_id = child_org.parent_org_id )
                                                                 SELECT * FROM   child_orgs))
-                                            and to2.is_deleted = false;`;
+                                            and to2.is_deleted = false order by to2."sequence";`;
 
 
 const getGradeStaffAssBySchoolIdReqTerm = `select to2.org_id,
@@ -37,7 +39,9 @@ const getGradeStaffAssBySchoolIdReqTerm = `select to2.org_id,
                                             tosa.role_type,
                                             case when tu.first_name is null then null else
                                                     concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name) end staff_name ,
-                                            tstd.school_term_detail_id 
+                                            tstd.school_term_detail_id,
+                                            to2."sequence",
+                                            tosa.org_staff_assignment_id 
                                             from t_organization to2
                                             left join t_organization_staff_assignment tosa on to2.org_id = tosa.org_id
                                             left join t_user tu on tosa.user_id = tu.user_id 
@@ -55,7 +59,7 @@ const getGradeStaffAssBySchoolIdReqTerm = `select to2.org_id,
                                                                 INNER JOIN child_orgs c
                                                                 ON         c.org_id = child_org.parent_org_id )
                                                                 SELECT * FROM   child_orgs))
-                                            and to2.is_deleted = false;`;
+                                            and to2.is_deleted = false order by to2."sequence";`;
 
                                                                                         
 
@@ -110,5 +114,4 @@ module.exports = {
     getCurretTerm,
     getParishesAndSchoolsByUserId,
     getAllTerms
-    
 }

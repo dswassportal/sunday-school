@@ -156,16 +156,18 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
                     if (row.org_type === 'Grade') {
                         let grdIndex = gradeArr.findIndex((item) => item.grade === row.org_name)
                         if (grdIndex < 0) {
-                            let temp1 = { grade: row.org_name }
+                            let temp1 = { grade: row.org_name, gradeId: row.org_id }
                             if (row.is_primary === true) {
                                 temp1.primary = [{
                                     staffName: row.staff_name,
-                                    staffId: row.user_id
+                                    staffId: row.user_id,
+                                    orgStaffAssId: row.org_staff_assignment_id
                                 }]
                             } else if (row.is_primary === false) {
                                 temp1.secondary = [{
                                     staffName: row.staff_name,
-                                    staffId: row.user_id
+                                    staffId: row.user_id,
+                                    orgStaffAssId: row.org_staff_assignment_id
                                 }]
                             }
                             gradeArr.push(temp1);
@@ -173,12 +175,14 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
                             if (row.is_primary === true) {
                                 gradeArr[grdIndex].primary = [{
                                     staffName: row.staff_name,
-                                    staffId: row.user_id
+                                    staffId: row.user_id,
+                                    orgStaffAssId: row.org_staff_assignment_id
                                 }]
                             } else if (row.is_primary === false) {
                                 gradeArr[grdIndex].secondary = [{
                                     staffName: row.staff_name,
-                                    staffId: row.user_id
+                                    staffId: row.user_id,
+                                    orgStaffAssId: row.org_staff_assignment_id
                                 }]
                             }
                         }
@@ -193,16 +197,15 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
         if (term == undefined || term == null) {
             let termRes = await client.query(queries.getCurretTerm);
             if (termRes.rowCount > 0) {
-                response.data.selectedTerm = [termRes.rows[0].term_data];
+                response.data.selectedTerm = termRes.rows[0].term_data;
+            }
+
+            //To get All terms 
+            let termRes2 = await client.query(queries.getAllTerms);
+            if (termRes2.rowCount > 0) {
+                response.data.allTerms = termRes2.rows[0].term_data;
             }
         }
-
-        //To get All terms 
-            let termRes = await client.query(queries.getAllTerms);
-            if (termRes.rowCount > 0) {
-                response.data.allTerms = termRes.rows[0].term_data;
-            }
-
 
         return response;
 
