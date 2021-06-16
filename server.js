@@ -7,9 +7,9 @@ const processScoreRequest = require(`./src/app/node/reqScoreOperations`)
 const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions`)
 const processSSRequest = require(`./src/app/node/reqSsOperations`)
 const processFileUpload = require(`./src/app/node/reqFileUpload`)
+const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOerations`) 
 
 const fileUpload = require('express-fileupload');
-const os = require('os');
 express = require('express')
 const cors = require('cors')
 var app = express();
@@ -843,6 +843,26 @@ app.get('/api/getStaffAssmtBySchool', function (req, res) {
     console.error('Error in getStaffAssmtBySchool as : ' + error)
   }
 });
+
+app.get('/api/getEventDef', function (req, res) {
+  console.log("getEventDef called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processRegRequests.getEventDef(req.query.eventId, loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getEventDef as : ' + error)
+  }
+});
+
 
 
 
