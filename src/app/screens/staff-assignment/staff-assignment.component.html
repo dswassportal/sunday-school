@@ -1,146 +1,173 @@
 <div class="container mt-3" style="overflow: hidden;">
 
-    <div class="form-group form-inline row m-0 p-0">
-        <input type="text" class="form-control col-9 search" placeholder="Search Here" [(ngModel)]="term">
-    </div>
+  <div class="form-group form-inline row m-0 p-0">
+    <input type="text" class="form-control col-9 search" placeholder="Search Here" [(ngModel)]="term">
+  </div>
 
-    <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3" 
-                    [rowData]="rowData | filter:term " [columnDefs]="columnDefs"
-                    (gridReady)="onGridReady($event)" (rowClicked)='onRowClicked($event)'
-            [pagination]="true" rowSelection='multiple' [checkboxSelection]="true" [gridOptions]="gridOptions">
-    </ag-grid-angular>
+  <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3" [rowData]="rowData | filter:term "
+    [columnDefs]="columnDefs" (gridReady)="onGridReady($event)" (rowClicked)='onRowClicked($event)' [pagination]="true"
+    rowSelection='multiple' [checkboxSelection]="true" [gridOptions]="gridOptions">
+  </ag-grid-angular>
 
 </div>
-    <div class="col-md-12">
-        <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
-            <div class="modal-dialog modal-dialog-scrollable modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2  id="myModalLabel">Sunday School - Staff Assignment</h2>
-                        <button mat-button class="ml-auto" data-dismiss="modal" (click)="resetForm()">
-                                <mat-icon>clear</mat-icon>
-                        </button>
-                    </div>
-                    <div class="modal-body p-4 border m-3 rounded">
-                        <form [formGroup]="staffDataFormGroup">
-                
-                            <div class="row">
-                               
-                                    <mat-form-field class="col-md-6" >
-                                       
-                                    <input readonly matInput id="parish" matInput
-                                                                formControlName="parish"
-                                                                placeholder="Parish Name">
-                                      </mat-form-field> 
-
-                                      <mat-form-field class="col-md-6" >
-                                       
-                                        <input readonly matInput id="name" matInput
-                                        formControlName="name"
-                                        placeholder="Sunday School Name">
-                                          </mat-form-field> 
-                                         
-                            </div>
-                
-                            <div class="row">
-                                
-                                <mat-form-field class="col-md-6" >
-                                    <mat-select id="sundaySchoolTerm" (selectionChange)="sundaySchoolSelChange($event)" formControlName="sundaySchoolTerm" placeholder="Sunday School Year">
-                                      <mat-option  *ngFor = "let ssTerm of sundaySchoolTermsList" [value]="ssTerm.termDtlId">{{ssTerm.term}} </mat-option>
-                                    </mat-select>
-                                  </mat-form-field>
-                                   
-                                  <mat-form-field  class="col-md-6" >
-                                    <input id="sSchoolStartEndDate" placeholder="Sunday School Term Start And End Dates" formControlName="sSchoolStartEndDate"
-                                    readonly  matInput>
-                                      <!-- <span *ngIf="schoolStartDate != null"> </span> -->
-                                      {{schoolStartDate}} - {{schoolEndDate}}
-                                </mat-form-field>
-                                
-                            </div>
-                
-                            <div class="row" *ngIf="showHidePrincipal">
-                                
-                                        <mat-form-field class="col-md-6" >
-                                            <mat-select  id="principalId" formControlName="principalId" placeholder="Principal">
-                                              <mat-option  *ngFor = "let principal of principalList" [value]=principal.userId>{{principal.title}}.  {{principal.firstName}}  {{principal.lastName}} </mat-option>
-                                            </mat-select>
-                                          </mat-form-field> 
-                                
-                            
-                                    <mat-form-field class="col-md-6" >
-                                        <mat-select id="vicePrincipalId" formControlName = "vicePrincipalId" placeholder="Vice Principal">
-                                          <mat-option *ngFor = "let principal of principalList" [value]=principal.userId>{{principal.title}}.  {{principal.firstName}}  {{principal.lastName}} </mat-option>
-                                        </mat-select>
-                                      </mat-form-field> 
-                                </div>
-                        
-                        </form>
-                
-                        <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
-                        </mat-divider>
-                        
-                            <h2>Teacher Assignment   </h2>
-                            <form [formGroup]="teacherGradeDataFormGroup">
-                                <div class="form-container">
-                                    <fieldset>
-                                        <div formArrayName="teacherGrades">
-                                            <div class="row"
-                                            *ngFor="let item of teacherGradeDataFormGroup.get('teacherGrades')['controls']; let i = index;">
-                                                    
-                                            <div class="container" style="padding-left: 2%;" [formGroupName]="i">
-                
-                                                <div class="row">
-                                                    
-                                                        <mat-form-field class="col-md-6">
-                                                            <input readonly matInput id="name" matInput
-                                                                formControlName="name"
-                                                                placeholder="School Grade">
-                                                        </mat-form-field>
-                                                    
-                                                </div>
-                                                
-                                                <div class="row">
-                                                    <mat-form-field class="col-md-6" >
-                                                        <mat-select id="staffId" formControlName = "staffId" placeholder="Teacher Name" >
-                                                          <mat-option *ngFor = "let teacher of teacherList" [value]=teacher.userId>{{teacher.title}}.  {{teacher.firstName}} {{teacher.lastName}}</mat-option>
-                                                        </mat-select>
-                                                      </mat-form-field> 
-                                                
-                
-                                                    <mat-form-field class="col-md-6" >
-                                                        <mat-select id="subStaffId" formControlName = "subStaffId" placeholder="Substitute Teacher Name" >
-                                                          <mat-option *ngFor = "let subteacher of teacherList" [value]=subteacher.userId>{{subteacher.title}}.  {{subteacher.firstName}} {{subteacher.lastName}}</mat-option>
-                                                        </mat-select>
-                                                      </mat-form-field> 
-                                                </div>
-                                                
-                                                <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
-                                                </mat-divider>
-                                                &nbsp;
-                                            </div>
-                                            
-                                        </div>
-                                        
-                                        </div>
-                                       
-                                    </fieldset>
-                                   
-                                </div>
-                                
-                                <div class="row" style="padding-top: 1%;">
-                                    <div class="col text-center">
-
-                                            <button mat-button type="submit"  mat-button class="mbutton"  (click)="saveStaffProfile()">
-                                                    Save</button>
-                                    </div>
-                            </div>
-
-                            </form>
-                           
-                    </div>
-                </div>
-            </div> 
+<div class="col-md-12">
+  <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+    data-backdrop="false">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="myModalLabel">Sunday School - Staff Assignment</h2>
+          <button mat-button class="ml-auto" data-dismiss="modal" (click)="resetForm()">
+            <mat-icon>clear</mat-icon>
+          </button>
         </div>
+        <div class="modal-body p-4 border m-3 rounded">
+          <form [formGroup]="staffDataFormGroup">
+
+            <div class="row">
+
+              <mat-form-field class="col-md-6">
+
+                <input readonly matInput id="parish" matInput formControlName="parish" placeholder="Parish Name">
+              </mat-form-field>
+
+              <mat-form-field class="col-md-6">
+
+                <input readonly matInput id="name" matInput formControlName="name" placeholder="Sunday School Name">
+              </mat-form-field>
+
+            </div>
+
+            <div class="row">
+
+              <!-- <mat-form-field class="col-md-6">
+                <mat-select id="sundaySchoolTerm" (selectionChange)="sundaySchoolSelChange($event)"
+                  formControlName="sundaySchoolTerm" placeholder="Sunday School Year">
+                  <mat-option *ngFor="let ssTerm of sundaySchoolTermsList" [value]="ssTerm.termDtlId">{{ssTerm.term}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field> -->
+
+              <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="sundaySchoolTerm"
+                placeholder="Sunday School Year" [settings]="dropdownSettingsSundaySchoolTermsList" [data]="sundaySchoolTermsList"
+                formControlName="sundaySchoolTerm" (onSelectAll)="onSelectAll($event)"
+                (onSelect)="sundaySchoolYearSelChange($event)">
+              </ng-multiselect-dropdown>
+
+              <mat-form-field class="col-md-6">
+                <input id="sSchoolStartEndDate" placeholder="Sunday School Term Start And End Dates"
+                  formControlName="sSchoolStartEndDate"  readonly matInput>
+                <!-- <span *ngIf="schoolStartDate != null"> </span> -->
+                <!-- {{selectedTermFromDropDown.startDate}} - {{selectedTermFromDropDown.endDate}} -->
+              </mat-form-field>
+
+            </div>
+
+            <div class="row" *ngIf="showHidePrincipal">
+
+            <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="principalId"
+              placeholder="Principal" [settings]="dropdownSettingsPrincipalId" [data]="principalList"
+              formControlName="principalId" (onSelectAll)="onSelectAll($event)">
+            </ng-multiselect-dropdown>
+
+              <!-- <mat-form-field class="col-md-6">
+                <mat-select id="principalId" formControlName="principalId" placeholder="Principal">
+                  <mat-option *ngFor="let principal of principalList" [value]=principal.userId>{{principal.title}}.
+                    {{principal.firstName}} {{principal.lastName}} </mat-option>
+                </mat-select>
+              </mat-form-field> -->
+
+
+            <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="vicePrincipalId"
+              placeholder="Vice Principal" [settings]="dropdownSettingsPrincipalId" [data]="principalList"
+              formControlName="vicePrincipalId" (onSelectAll)="onSelectAll($event)">
+            </ng-multiselect-dropdown>
+
+
+              <!-- <mat-form-field class="col-md-6">
+                <mat-select id="vicePrincipalId" formControlName="vicePrincipalId" placeholder="Vice Principal">
+                  <mat-option *ngFor="let principal of principalList" [value]=principal.userId>{{principal.title}}.
+                    {{principal.firstName}} {{principal.lastName}} </mat-option>
+                </mat-select>
+              </mat-form-field> -->
+            </div>
+
+          </form>
+
+          <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+          </mat-divider>
+
+          <h2>Teacher Assignment </h2>
+          <form [formGroup]="teacherGradeDataFormGroup">
+            <div class="form-container">
+              <fieldset>
+                <div formArrayName="teacherGrades">
+                  <div class="row"
+                    *ngFor="let item of teacherGradeDataFormGroup.get('teacherGrades')['controls']; let i = index;">
+
+                    <div class="container" style="padding-left: 2%;" [formGroupName]="i">
+
+                      <div class="row">
+
+                        <mat-form-field class="col-md-6">
+                          <input readonly matInput id="name" matInput formControlName="name" placeholder="School Grade">
+                        </mat-form-field>
+
+                      </div>
+
+                      <div class="row">
+
+                        <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="staffId"
+                          placeholder="Teacher Name" [settings]="dropdownSettingsTeacher" [data]="teacherList"
+                          formControlName="staffId" (onSelectAll)="onSelectAll($event)">
+                        </ng-multiselect-dropdown>
+
+
+                        <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="subStaffId"
+                          placeholder="Substitute Teacher Name" [settings]="dropdownSettingsSubstituteTeacher"
+                          [data]="teacherList" formControlName="subStaffId" (onSelectAll)="onSelectAll($event)">
+                        </ng-multiselect-dropdown>
+
+                        <!-- <mat-form-field class="col-md-6" >
+                                                        <mat-select id="staffId" formControlName = "staffId" placeholder="Teacher Name" >
+                                                          <mat-option *ngFor = "let teacher of teacherList" [value]=teacher.staffId>{{teacher.title}}.  {{teacher.firstName}} {{teacher.lastName}}</mat-option>
+                                                        </mat-select>
+                                                      </mat-form-field>  -->
+
+
+                        <!-- <mat-form-field class="col-md-6" >
+                                                        <mat-select id="subStaffId" formControlName = "subStaffId" placeholder="Substitute Teacher Name" >
+                                                          <mat-option *ngFor = "let subteacher of teacherList" [value]=subteacher.staffId>{{subteacher.title}}.  {{subteacher.firstName}} {{subteacher.lastName}}</mat-option>
+                                                        </mat-select>
+                                                      </mat-form-field>  -->
+                      </div>
+
+                      <mat-divider
+                        style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+                      </mat-divider>
+                      &nbsp;
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </fieldset>
+
+            </div>
+
+            <div class="row" style="padding-top: 1%;">
+              <div class="col text-center">
+
+                <button mat-button type="submit" mat-button class="mbutton" (click)="saveStaffProfile()">
+                  Save</button>
+              </div>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
     </div>
-    
+  </div>
+</div>
