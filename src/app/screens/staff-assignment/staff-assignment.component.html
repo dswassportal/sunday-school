@@ -33,7 +33,7 @@
 
               <mat-form-field class="col-md-6">
 
-                <input readonly matInput id="name" matInput formControlName="name" placeholder="Sunday School Name">
+                <input readonly matInput id="sundaySchoolName" matInput formControlName="sundaySchoolName" placeholder="Sunday School Name">
               </mat-form-field>
 
             </div>
@@ -67,7 +67,7 @@
 
             <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="principalId"
               placeholder="Principal" [settings]="dropdownSettingsPrincipalId" [data]="principalList"
-              formControlName="principalId" (onSelectAll)="onSelectAll($event)">
+              formControlName="principal" (onSelectAll)="onSelectAll($event)">
             </ng-multiselect-dropdown>
 
               <!-- <mat-form-field class="col-md-6">
@@ -80,7 +80,7 @@
 
             <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="vicePrincipalId"
               placeholder="Vice Principal" [settings]="dropdownSettingsPrincipalId" [data]="principalList"
-              formControlName="vicePrincipalId" (onSelectAll)="onSelectAll($event)">
+              formControlName="vicePrincipal" (onSelectAll)="onSelectAll($event)">
             </ng-multiselect-dropdown>
 
 
@@ -110,36 +110,25 @@
                       <div class="row">
 
                         <mat-form-field class="col-md-6">
-                          <input readonly matInput id="name" matInput formControlName="name" placeholder="School Grade">
+                          <input readonly matInput id="grade" matInput formControlName="grade" placeholder="School Grade">
                         </mat-form-field>
 
                       </div>
 
                       <div class="row">
 
-                        <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="staffId"
+                        <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="teacher"
                           placeholder="Teacher Name" [settings]="dropdownSettingsTeacher" [data]="teacherList"
-                          formControlName="staffId" (onSelectAll)="onSelectAll($event)">
+                          formControlName="teacher" (onSelectAll)="onSelectAll($event)">
                         </ng-multiselect-dropdown>
 
 
-                        <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="subStaffId"
+                        <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="substituteTeacher"
                           placeholder="Substitute Teacher Name" [settings]="dropdownSettingsSubstituteTeacher"
-                          [data]="teacherList" formControlName="subStaffId" (onSelectAll)="onSelectAll($event)">
+                          [data]="teacherList" formControlName="substituteTeacher" (onSelectAll)="onSelectAll($event)">
                         </ng-multiselect-dropdown>
 
-                        <!-- <mat-form-field class="col-md-6" >
-                                                        <mat-select id="staffId" formControlName = "staffId" placeholder="Teacher Name" >
-                                                          <mat-option *ngFor = "let teacher of teacherList" [value]=teacher.staffId>{{teacher.title}}.  {{teacher.firstName}} {{teacher.lastName}}</mat-option>
-                                                        </mat-select>
-                                                      </mat-form-field>  -->
-
-
-                        <!-- <mat-form-field class="col-md-6" >
-                                                        <mat-select id="subStaffId" formControlName = "subStaffId" placeholder="Substitute Teacher Name" >
-                                                          <mat-option *ngFor = "let subteacher of teacherList" [value]=subteacher.staffId>{{subteacher.title}}.  {{subteacher.firstName}} {{subteacher.lastName}}</mat-option>
-                                                        </mat-select>
-                                                      </mat-form-field>  -->
+            
                       </div>
 
                       <mat-divider
@@ -159,8 +148,21 @@
             <div class="row" style="padding-top: 1%;">
               <div class="col text-center">
 
-                <button mat-button type="submit" mat-button class="mbutton" (click)="saveStaffProfile()">
-                  Save</button>
+               
+
+                 
+               
+                  <button mat-button type="submit" mat-button class="mbutton" (click)="saveStaffProfile()">
+                    Save</button>
+
+                    &nbsp; 
+
+                    <button mat-button type="submit" mat-button class="mbutton"  data-dismiss="modal" (click)="resetForm()">
+                      Cancel</button>
+
+               
+             
+           
               </div>
             </div>
 

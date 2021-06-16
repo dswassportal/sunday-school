@@ -48,9 +48,7 @@ export class StaffAssignmentComponent implements OnInit {
 
   schoolStartDate: any;
   schoolEndDate: any;
-  principalId: any;
-  staffId: any;
-  subStaffId: any;
+  principal: any;
   sundaySchoolTermsList: any;
   startDateEndDateData: any;
   TermStartDate: any;
@@ -176,22 +174,12 @@ export class StaffAssignmentComponent implements OnInit {
 
 
     this.staffDataFormGroup = this.formBuilder.group({
-
-      name: new FormControl('', [Validators.required]),
-      gradeId: new FormControl('', [Validators.required]),
-      schoolStartDate: new FormControl('', [Validators.required]),
-      schoolEndDate: new FormControl('', [Validators.required]),
-      principalId: new FormControl(''),
-      vicePrincipalId: new FormControl(''),
-
       parish: new FormControl(''),
-      //roles: this.formBuilder.array([this.adduserroles()], [Validators.required]),
-
-      // staffId: new FormControl(''),
-      // subStaffId: new FormControl(''),
+      sundaySchoolName: new FormControl('', [Validators.required]),
+      principal: new FormControl(''),
+      vicePrincipal: new FormControl(''),
       sundaySchoolTerm: new FormControl('', [Validators.required]),
       sSchoolStartEndDate: new FormControl('')
-
     });
 
   }
@@ -201,9 +189,9 @@ export class StaffAssignmentComponent implements OnInit {
     teacherGradeData.forEach((e: any) => {
       formArray.push(this.formBuilder.group({
         gradeId: e.gradeId,
-        name: e.grade,
-        staffId: [e.primary],
-        subStaffId: [e.secondary],
+        grade: e.grade,
+        teacher: [e.primary],
+        substituteTeacher: [e.secondary],
         isPrimary: 'true',
         roleType: 'Teacher'
       }));
@@ -225,11 +213,11 @@ export class StaffAssignmentComponent implements OnInit {
   addTeachersData(): FormGroup {
     return this.formBuilder.group({
       gradeId: '',
-      name: '',
-      staffId: '',
+      grade: '',
+      teacher: '',
       isPrimary: '',
       roleType: '',
-      subStaffId: ''
+      substituteTeacher: ''
     });
   }
 
@@ -255,7 +243,7 @@ export class StaffAssignmentComponent implements OnInit {
     if (this.rolesList.indexOf("Principal") !== -1) { // if logged in user is Principal
       //alert("Value exists!")
       this.showHidePrincipal = false;
-      this.staffDataFormGroup.value.principalId = this.loggedInUser;
+      this.staffDataFormGroup.value.principal = this.loggedInUser;
     }
     let rowData = event;
     this.selectedUserData = event.data;
@@ -303,20 +291,15 @@ export class StaffAssignmentComponent implements OnInit {
 
 
       this.staffDataFormGroup.patchValue({
-        name: this.selectedUserData.name,
+        sundaySchoolName: this.selectedUserData.name,
         parish: this.selectedUserData.parishName,
-        principalId: this.staffDataFormGroup.principalName,
+        //principal: this.staffDataFormGroup.principalName,
         sundaySchoolTerm: this.selectedTerm,
-        // schoolStartDate: this.staffDataFormGroup.schoolStartDate,
-        // schoolEndDate: this.staffDataFormGroup.schoolEndDate,
-        //principalId:this.staffDataFormGroup.principalId,
-        staffId: this.staffDataFormGroup.staffId,
-        subStaffId: this.staffDataFormGroup.subStaffId
+        teacher: this.staffDataFormGroup.teacher,
+        substituteTeacher: this.staffDataFormGroup.substituteTeacher
       });
 
-      this.selectedUserRole = this.selectedUserData.roles;
-
-
+      //this.selectedUserRole = this.selectedUserData.roles;
       this.sundaySchoolYearSelChange({ termDtlId: this.selectedTerm[0].termDtlId });
 
 
@@ -399,89 +382,7 @@ export class StaffAssignmentComponent implements OnInit {
     console.log({ ...this.staffDataFormGroup.value, ...this.teacherGradeDataFormGroup.value });
 
 
-    // let staff_list = [];
-
-    // for (let staffMember of this.teacherGradeDataFormGroup.value.teacherGrades) {
-
-    //   if (staffMember.roleType == "Teacher") {
-
-    //     staff_list.push({
-    //       gradeId: staffMember.gradeId,
-    //       staffId: staffMember.staffId,
-    //       isPrimary: true,
-    //       roleType: "Teacher"
-    //     });
-
-    //     staff_list.push({
-    //       gradeId: staffMember.gradeId,
-    //       staffId: staffMember.subStaffId,
-    //       isPrimary: false,
-    //       roleType: "Teacher"
-    //     });
-
-    //   }
-    //   // if logged in user is not Principal      
-    //   if (staffMember.roleType != "Teacher" && this.staffDataFormGroup.value.principalId != null) {
-    //     staff_list.push({
-    //       //gradeId: staffMember.gradeId,
-    //       //schoolId:this.orgId,
-    //       gradeId: this.orgId,
-    //       //schoolId:this.orgId,
-    //       staffId: this.staffDataFormGroup.value.principalId,
-    //       isPrimary: true,
-    //       roleType: "Sunday School Principal"
-    //     });
-
-    //   }
-    //   if (staffMember.roleType != "Teacher" && this.staffDataFormGroup.value.vicePrincipalId != null) {
-    //     staff_list.push({
-    //       //gradeId: staffMember.gradeId,
-    //       //schoolId:this.orgId,
-    //       gradeId: this.orgId,
-    //       //schoolId:this.orgId,
-    //       staffId: this.staffDataFormGroup.value.vicePrincipalId,
-    //       isPrimary: true,
-    //       roleType: "Sunday School Vice Principal"
-    //     });
-    //   }
-
-
-
-    //   else if (this.rolesList.indexOf("Principal") !== -1) {  // if logged in user is a Principal
-    //     staff_list.push({
-    //       gradeId: staffMember.gradeId,
-    //       subStaffId: this.loggedInUser,
-    //       isPrimary: true,
-    //       roleType: "Principal"
-    //     });
-    //   }
-
-    // }
-
-
-    // let payload = {
-
-    //   //ssStartDate: this.staffDataFormGroup.value.schoolStartDate,
-    //   //ssEndDate : this.staffDataFormGroup.value.schoolEndDate,
-
-    //   ssStartDate: this.schoolStartDate,
-    //   ssEndDate: this.schoolEndDate,
-    //   schoolId: this.orgId,
-
-    //   staffAssignment: staff_list
-
-    // }
-    // console.log("payLoad is " + payload);
-
-
-
-    // this.apiService.callPostService('setStaffAssignment', payload).subscribe((res: any) => {
-    //   if (res.data.status == "success") {
-    //     this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
-    //   }
-    //   else
-    //     this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-    // });
+   
 
   }
 
