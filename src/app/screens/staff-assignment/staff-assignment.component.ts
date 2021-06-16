@@ -15,6 +15,7 @@ export class StaffAssignmentComponent implements OnInit {
   parishList!: any[];
   teacherList: any = [];
   subtituteTeacherList!: any[];
+  schoolId: any;
 
   teacherGradeDataFormGroup: any;
   substituteTeacherGradeDataFormGroup: any;
@@ -66,6 +67,8 @@ export class StaffAssignmentComponent implements OnInit {
   dropdownSettingsPrincipalId: any;
   selectedTerm: any;
 
+  
+
 
   constructor(private apiService: ApiService,
     private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils,) { }
@@ -76,8 +79,8 @@ export class StaffAssignmentComponent implements OnInit {
 
   dropdownSettingsForPrincipalId: IDropdownSettings = {
     singleSelection: true,
-    idField: 'userId',
-    textField: 'name',
+    idField: 'staffId',
+    textField: 'staffName',
     selectAllText: 'Select All',
     unSelectAllText: 'UnSelect All',
     itemsShowLimit: 1,
@@ -176,6 +179,7 @@ export class StaffAssignmentComponent implements OnInit {
     this.staffDataFormGroup = this.formBuilder.group({
       parish: new FormControl(''),
       sundaySchoolName: new FormControl('', [Validators.required]),
+      schoolId: new FormControl(''),
       principal: new FormControl(''),
       vicePrincipal: new FormControl(''),
       sundaySchoolTerm: new FormControl('', [Validators.required]),
@@ -247,9 +251,9 @@ export class StaffAssignmentComponent implements OnInit {
     }
     let rowData = event;
     this.selectedUserData = event.data;
-
+    this.schoolId = event.data.orgId;
     let i = rowData.rowIndex;
-    this.orgId = this.selectedUserData.orgId;
+    //this.orgId = this.selectedUserData.orgId;
 
 
 
@@ -265,14 +269,14 @@ export class StaffAssignmentComponent implements OnInit {
           name = row.title + ' ' + row.firstName + ' ' + row.lastName
         }
         let payload: any = {
-          "userId": row.userId,
-          "name": name
+          "staffId": row.userId,
+          "staffName": name
         }
         this.principalList.push(payload);
       }
     });
 
-    this.apiService.callGetService(`getStaffAssmtBySchool?schoolId=${this.orgId}`).subscribe((res: any) => {
+    this.apiService.callGetService(`getStaffAssmtBySchool?schoolId=${this.schoolId}`).subscribe((res: any) => {
 
 
       this.sundaySchoolTermsList = res.data.allTerms;
@@ -291,8 +295,9 @@ export class StaffAssignmentComponent implements OnInit {
 
 
       this.staffDataFormGroup.patchValue({
-        sundaySchoolName: this.selectedUserData.name,
         parish: this.selectedUserData.parishName,
+        sundaySchoolName: this.selectedUserData.name,
+        schoolId: this.schoolId,
         //principal: this.staffDataFormGroup.principalName,
         sundaySchoolTerm: this.selectedTerm,
         teacher: this.staffDataFormGroup.teacher,
@@ -362,6 +367,16 @@ export class StaffAssignmentComponent implements OnInit {
         sSchoolStartEndDate: `${selectedTermFromDropDown.startDate} - ${selectedTermFromDropDown.endDate}`
       });
     }
+
+    this.apiService.callGetService(`getStaffAssmtBySchool?schoolId=${this.schoolId}&term=${event.termDtlId}`).subscribe((res: any) => {   
+
+      this.teacherGradeData = res.data.staffAssignment;
+      this.teacherGradeDataFormGroup.setControl('teacherGrades', this.setTeacherAndGrades(this.teacherGradeData));
+
+    });
+
+
+
 
     // for getting start date and end date as per sunday school year 
 
