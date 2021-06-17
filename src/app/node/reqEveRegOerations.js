@@ -12,7 +12,6 @@ async function getEventDef(eventId, loggedInUserId) {
     try {
         let response = {};
         let result = await client.query(queries.getEventData, [eventId, loggedInUserId]);
-        console.log('Rows recived...' + result.rowCount)
         if (result.rowCount > 0) {
             for (let row of result.rows) {
                 if (response.eventId == undefined) {
@@ -102,6 +101,19 @@ async function getEventDef(eventId, loggedInUserId) {
                 }
             }
         }
+
+
+        //Code to get roles from t_lookup
+        response.participantRoles = [];
+        let lookupRes = await client.query(queries.getParticipantRolesFormLookup);
+            if(lookupRes.rowCount > 0)
+                response.participantRoles = lookupRes.rows[0].parti_role;
+
+        //Get event section config.
+        response.sectionConfig = {};
+        let eveConfigRes = await client.query(queries.getEventSectionConfigByEveType, [response.eventType]);
+            if(eveConfigRes.rowCount > 0)
+                response.sectionConfig = eveConfigRes.rows[0].event_sec_config
 
         return {
             data: {

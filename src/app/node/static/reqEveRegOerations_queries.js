@@ -35,8 +35,37 @@ const getEventData = `select distinct te.event_id,
                         left join t_event_questionnaire teq on teq.event_id = $1
                         where te.event_id = $1;`;
 
+const getParticipantRolesFormLookup = `select jsonb_agg(
+                                            jsonb_build_object(
+                                                'roleDesc', tl.description,
+                                                'code', tl.code 
+                                                ) order by "sequence"
+                                            ) parti_role
+                                        from t_lookup tl where "type" = 'Participant Role' 
+                                        and is_deleted != true;`;
+
+const getEventSectionConfigByEveType = `select
+                                            jsonb_build_object(
+                                                'eventTypeId', tet.event_type_id,
+                                                'isVenueRequired', tet.is_venue_required,
+                                                'isProctorRequired', tet.is_proctor_required,
+                                                'isJudgeRequired', tet.is_judge_required,
+                                                'isSchoolGradeRequired', tet.is_school_grade_required,
+                                                'isCategoryRequired', tet.is_category_required,
+                                                'isSingleDayEvent', tet.is_single_day_event,
+                                                'isSchoolGroupRequired', tet.is_school_group_required,
+                                                'isEvaluatorRequired', tet.is_evaluator_required,
+                                                'isQuestionnaireRequired', tet.is_questionnaire_required,
+                                                'isAttachmentRequired', tet.is_attachment_required,
+                                                'isUrlRequired', tet.is_url_required
+                                            ) event_sec_config
+                                            from t_event_type tet where tet."name" = $1 
+                                            and tet.is_deleted != true;`;                                        
+
 module.exports = {
-    getEventData
+    getEventData,
+    getParticipantRolesFormLookup,
+    getEventSectionConfigByEveType
 }                            
 
 
