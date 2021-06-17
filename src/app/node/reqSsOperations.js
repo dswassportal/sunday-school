@@ -142,6 +142,8 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
         
         // To get grade wise teacher and sub-teachers list for given schoolId
         let gradeArr = [];
+        let principal = []
+        let vicePrincipal = [];
         if (schoolId) {
 
             //if term not provided then retrun default current term's data.
@@ -187,12 +189,28 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
                             }
                         }
 
+                    }else if(row.org_type === 'Sunday School' && row.role_type === 'Sunday School Principal'){
+                        if(row.org_type !== null || row.org_type !== undefined)
+                        principal.push({
+                                staffName: row.staff_name,
+                                staffId: row.user_id,
+                                orgStaffAssId: row.org_staff_assignment_id
+                        });
+                    }else if(row.org_type === 'Sunday School' && row.role_type === 'Sunday School Vice Principal'){
+                        if(row.org_type !== null || row.org_type !== undefined)
+                        vicePrincipal.push({
+                                staffName: row.staff_name,
+                                staffId: row.user_id,
+                                orgStaffAssId: row.org_staff_assignment_id
+                        })
                     }
                 }
             }
         }
 
         response.data.staffAssignment = gradeArr;
+        response.data.principal = principal;
+        response.data.vicePrincipal = vicePrincipal;
 
         if (term == undefined || term == null) {
             let termRes = await client.query(queries.getCurretTerm);

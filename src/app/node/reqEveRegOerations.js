@@ -66,7 +66,7 @@ async function getEventDef(eventId, loggedInUserId) {
                 } else {
 
                     let catIndex = response.categories.findIndex((item) => item.catMapId == row.event_cat_map_id);
-                    if (catIndex === -1 && row.catId != null )
+                    if (catIndex === -1 && row.event_cat_map_id != null )
                         response.categories.push({
                             catName: row.cat_name,
                             catMapId: row.event_cat_map_id,

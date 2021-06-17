@@ -38,8 +38,11 @@ export class StaffAssignmentComponent implements OnInit {
   orgName: any;
   teacherGradeData!: any[];
   subteacherGradeData: any;
-  principalData: any;
+
+  selPrincipalData: any;
+  selVicePrincipalData: any;
   principalList: any = [];
+
 
   sundaySchoolName: any;
 
@@ -67,7 +70,7 @@ export class StaffAssignmentComponent implements OnInit {
   dropdownSettingsPrincipalId: any;
   selectedTerm: any;
 
-  
+
 
 
   constructor(private apiService: ApiService,
@@ -263,9 +266,9 @@ export class StaffAssignmentComponent implements OnInit {
       tempPrincipalList = res.data.metaData;
 
       this.principalList = [];
-      for(let row of tempPrincipalList){ 
+      for (let row of tempPrincipalList) {
         let name = row.title + ' ' + row.firstName + ' ' + row.middleNmae + ' ' + row.lastName
-        if(row.middleNmae == null){
+        if (row.middleNmae == null) {
           name = row.title + ' ' + row.firstName + ' ' + row.lastName
         }
         let payload: any = {
@@ -298,10 +301,12 @@ export class StaffAssignmentComponent implements OnInit {
         parish: this.selectedUserData.parishName,
         sundaySchoolName: this.selectedUserData.name,
         schoolId: this.schoolId,
-        //principal: this.staffDataFormGroup.principalName,
+        principal: res.data.principal,
+        vicePrincipal: res.data.vicePrincipal,
         sundaySchoolTerm: this.selectedTerm,
         teacher: this.staffDataFormGroup.teacher,
-        substituteTeacher: this.staffDataFormGroup.substituteTeacher
+        substituteTeacher: this.staffDataFormGroup.substituteTeacher,
+        
       });
 
       //this.selectedUserRole = this.selectedUserData.roles;
@@ -330,7 +335,7 @@ export class StaffAssignmentComponent implements OnInit {
 
       for (let row of teacherListTemp) {
         let name = row.title + ' ' + row.firstName + ' ' + row.middleNmae + ' ' + row.lastName
-        if(row.middleNmae == null){
+        if (row.middleNmae == null) {
           name = row.title + ' ' + row.firstName + ' ' + row.lastName
         }
         let teachers: any = {
@@ -350,7 +355,6 @@ export class StaffAssignmentComponent implements OnInit {
   }
 
 
-
   sundaySchoolYearSelChange(event: any) {
 
 
@@ -368,10 +372,17 @@ export class StaffAssignmentComponent implements OnInit {
       });
     }
 
-    this.apiService.callGetService(`getStaffAssmtBySchool?schoolId=${this.schoolId}&term=${event.termDtlId}`).subscribe((res: any) => {   
+    this.apiService.callGetService(`getStaffAssmtBySchool?schoolId=${this.schoolId}&term=${event.termDtlId}`).subscribe((res: any) => {
 
       this.teacherGradeData = res.data.staffAssignment;
+
       this.teacherGradeDataFormGroup.setControl('teacherGrades', this.setTeacherAndGrades(this.teacherGradeData));
+
+      
+      this.staffDataFormGroup.patchValue({
+        principal: res.data.principal,
+        vicePrincipal: res.data.vicePrincipal,
+      });
 
     });
 
@@ -394,10 +405,13 @@ export class StaffAssignmentComponent implements OnInit {
   saveStaffProfile() {
 
 
-    console.log({ ...this.staffDataFormGroup.value, ...this.teacherGradeDataFormGroup.value });
-
-
-   
+    this.apiService.callPostService('setStaffAssignment', { ...this.staffDataFormGroup.value, ...this.teacherGradeDataFormGroup.value }).subscribe((res: any) => {
+      if (res.data.status == "success") {
+        this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
+      }
+      else
+        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+    });
 
   }
 
