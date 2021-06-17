@@ -11,7 +11,7 @@ const getGradeStaffAssBySchoolIdDefTerm = `select to2.org_id,
                                             to2."sequence",
                                             tosa.org_staff_assignment_id 
                                             from t_organization to2
-                                            left join t_organization_staff_assignment tosa on to2.org_id = tosa.org_id
+                                            left join t_organization_staff_assignment tosa on to2.org_id = tosa.org_id and tosa.is_deleted != true
                                             left join t_user tu on tosa.user_id = tu.user_id 
                                             left join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
                                             and current_date > tstd.term_start_date 
@@ -28,7 +28,7 @@ const getGradeStaffAssBySchoolIdDefTerm = `select to2.org_id,
                                                                 INNER JOIN child_orgs c
                                                                 ON         c.org_id = child_org.parent_org_id )
                                                                 SELECT * FROM   child_orgs))
-                                            and to2.is_deleted = false order by to2."sequence";`;
+                                            and to2.is_deleted != true  order by to2."sequence";`;
 
 
 const getGradeStaffAssBySchoolIdReqTerm = `select to2.org_id,
@@ -43,7 +43,9 @@ const getGradeStaffAssBySchoolIdReqTerm = `select to2.org_id,
                                             to2."sequence",
                                             tosa.org_staff_assignment_id 
                                             from t_organization to2
-                                            left join t_organization_staff_assignment tosa on to2.org_id = tosa.org_id
+                                            left join t_organization_staff_assignment tosa on to2.org_id = tosa.org_id 
+                                                    and tosa.is_deleted != true
+                                                    and tosa.school_term_detail_id = $2
                                             left join t_user tu on tosa.user_id = tu.user_id 
                                             left join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
                                             and tstd.school_term_detail_id = $2 
@@ -59,7 +61,7 @@ const getGradeStaffAssBySchoolIdReqTerm = `select to2.org_id,
                                                                 INNER JOIN child_orgs c
                                                                 ON         c.org_id = child_org.parent_org_id )
                                                                 SELECT * FROM   child_orgs))
-                                            and to2.is_deleted = false order by to2."sequence";`;
+                                            and to2.is_deleted != true  order by to2."sequence";`;
 
                                                                                         
 

@@ -543,7 +543,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                     vu.role_id, vu.user_org_type org_type, membership_type, vu.user_org parish_name, tepr.ttc_exam_date 
                                 from v_user vu 
                                 left join t_event_participant_registration tepr on vu.user_id = tepr.user_id 
-                                where vu.role_name = 'Teacher' or vu.role_name = 'Sunday School Principal'
+                                where vu.role_name = 'Sunday School Teacher' or vu.role_name = 'Sunday School Principal'
                                 and tepr.event_id != ${eventId}
                                 and vu.is_approved = true 
                                 and vu.org_id in  ${hierarchicalQry}
