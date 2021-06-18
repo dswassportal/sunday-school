@@ -7,6 +7,7 @@ const getEventData = `select distinct te.event_id,
                         tepr.enrollment_id,
                         tepr.user_id,
                         te.description,
+                        tepr.role,
                         tepr.event_venue_id selected_event_venue_id,
                         te.start_date,
                         te.end_date,
@@ -87,7 +88,30 @@ const insertRegCatMapping = `INSERT INTO t_participant_event_reg_cat
                             
 const insertRegQueResp = `INSERT INTO t_event_question_response
                             (event_participant_registration_id, question_id, answer, created_by, created_date)
-                            VALUES $1  returning question_response_id;`;                            
+                            VALUES $1  returning question_response_id;`; 
+                            
+const updateEventRegistration = `UPDATE t_event_participant_registration
+                                SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4 
+                                WHERE event_participant_registration_id=$5;`;      
+                                
+const updateEventRegCatMapping = `INSERT INTO t_participant_event_reg_cat(event_participant_registration_id, event_category_id, user_id, is_deleted, updated_by, updated_date)               
+                                    SELECT $1, $2, $3, $4, $5, $6 
+                                    WHERE NOT EXISTS (
+                                        SELECT 1 FROM t_participant_event_reg_cat  
+                                                                WHERE event_participant_registration_id = $1
+                                                                and event_category_id = $2
+                                                                and user_id = $3
+                                                                and is_deleted != true
+                                                                ) returning participant_event_reg_cat_id;`;      
+ 
+const deleteCatMapping = `update t_participant_event_reg_cat 
+                                set is_deleted= $1, updated_by= $2, updated_date= $3 
+                                where event_participant_registration_id= $4 and event_category_id not in ($5) returning participant_event_reg_cat_id;`;    
+                                
+const updateRegQuestionRes = `UPDATE t_event_question_response
+                                SET answer=$1, updated_by=$2, updated_date=$3
+                                WHERE event_participant_registration_id=$4 and question_id=$5 returning question_response_id;`;                                
+                                                                
 
 module.exports = {
     getEventData,
@@ -96,7 +120,11 @@ module.exports = {
     checkGeneratedEnrollmentNoExists,
     newRegistration,
     insertRegCatMapping,
-    insertRegQueResp
+    insertRegQueResp,
+    updateEventRegistration,
+    updateEventRegCatMapping,
+    deleteCatMapping,
+    updateRegQuestionRes
 }                            
 
 

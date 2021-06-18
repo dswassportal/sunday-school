@@ -1,3 +1,4 @@
+const { query } = require('@angular/animations');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
@@ -17,6 +18,7 @@ async function getEventDef(eventId, loggedInUserId) {
                 if (response.eventId == undefined) {
                     response.name = row.event_name;
                     response.eventId = row.event_id;
+                    response.role = row.role;
                     response.eventPartiRegId = row.event_participant_registration_id;
                     response.eventType = row.event_type;
                     response.enrollmentId = row.enrollment_id;
@@ -190,7 +192,6 @@ async function eventRegistration(eventData, loggedInUser) {
 
                     if (registerEvtCatQueryValues.length > 0) {
                         let tempQuery = queries.insertRegCatMapping.replace('$1', registerEvtCatQueryValues.join(','))
-                        //console.log(tempQuery);
                         let regCatRes = await client.query(tempQuery);
                         if (regCatRes.rowCount > 0)
                             console.debug(`for participant ${eventData.participantId} categories mapped , participant_event_reg_cat_ids are : ${JSON.stringify(regCatRes.rows)}`);
@@ -211,8 +212,56 @@ async function eventRegistration(eventData, loggedInUser) {
                     } else console.log(" No questionnaire were found to process.");
                 }
             }
-        } else  if (eventData.enrollmentId !== null || eventData.enrollmentId !== undefined){
+        } else if (eventData.enrollmentId !== null || eventData.enrollmentId !== undefined) {
+
             console.log(`Updating event registration for ${eventData.enrollmentId} enrollmentId`);
+            //Updating existing event registration.(t_event_participant_registration)
+            if (eventData.eventPartiRegId && eventData.registrationStatus) {
+                let regUpdateRes = await client.query(queries.updateEventRegistration,
+                    [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus, eventData.eventPartiRegId]);
+
+                if (regUpdateRes.rowCount > 0)
+                    console.debug(`Event registration updated for ${eventData.eventPartiRegId} event_participant_registration_id.`);
+            } else throw `For registred event ${eventData.eventId} and pariticipant ${eventData.participantId}, eventPartiRegId Or registrationStatus not recived from the payload JSON.`
+
+            //Updating categories of registration.(t_participant_event_reg_cat)
+            if (eventData.categories) {
+                if (eventData.categories.length > 0) {
+                    let tempQuery = queries.deleteCatMapping.replace('$5', eventData.categories)
+                    let delCatRes = await client.query(tempQuery,
+                        [true, loggedInUser, new Date().toUTCString(), eventData.eventPartiRegId]);
+
+                    if (delCatRes.rowCount > 0)
+                        console.log(`for ${eventData.participantId}, deleted categories are ${delCatRes.rows}`);
+
+                    let newAddCats = [];
+                    for (let eventCatId of eventData.categories) {
+                        let regCatRes = await client.query(queries.updateEventRegCatMapping,
+                            [eventData.eventPartiRegId, eventCatId, eventData.participantId, false, loggedInUser, new Date().toUTCString()]);
+                        if (regCatRes.rowCount > 0)
+                            newAddCats.push(regCatRes.rows[0].participant_event_reg_cat_id);
+                    }
+                    console.debug(`for ${eventData.participantId}, newly selected category mappings are ${newAddCats}`)
+                }
+
+                //Updating questionnaire for registration.(t_event_question_response)
+                if (eventData.questionnaire) {
+                    if (eventData.questionnaire.length > 0) {
+                        let udtedQueRes = [];
+                        for (let question of eventData.questionnaire) {
+                            let queResUpdtdRes = await client.query(queries.updateRegQuestionRes,
+                                [question.answer, loggedInUser, new Date().toUTCString(), eventData.eventPartiRegId, question.questionId]);
+                            if (queResUpdtdRes.rowCount > 0)
+                                udtedQueRes.push(queResUpdtdRes.rows[0].question_response_id);
+                        }
+                        console.debug(`for ${eventData.participantId}, updated question responces!, question_response_ids are ${udtedQueRes}`)
+
+                    }
+                }
+
+            }
+
+
         }
 
 
