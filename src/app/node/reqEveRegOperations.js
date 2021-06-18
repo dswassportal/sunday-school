@@ -220,7 +220,7 @@ async function eventRegistration(eventData, loggedInUser) {
             //Updating existing event registration.(t_event_participant_registration)
             if (eventData.eventPartiRegId && eventData.registrationStatus) {
                 let regUpdateRes = await client.query(queries.updateEventRegistration,
-                    [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus, eventData.eventPartiRegId]);
+                    [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus, eventData.role. eventData.eventPartiRegId]);
 
                 if (regUpdateRes.rowCount > 0)
                     console.debug(`Event registration updated for ${eventData.eventPartiRegId} event_participant_registration_id.`);

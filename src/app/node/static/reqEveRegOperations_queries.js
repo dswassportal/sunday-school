@@ -91,8 +91,8 @@ const insertRegQueResp = `INSERT INTO t_event_question_response
                             VALUES $1  returning question_response_id;`; 
                             
 const updateEventRegistration = `UPDATE t_event_participant_registration
-                                SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4 
-                                WHERE event_participant_registration_id=$5;`;      
+                                SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4, role=$5 
+                                WHERE event_participant_registration_id=$6;`;      
                                 
 const updateEventRegCatMapping = `INSERT INTO t_participant_event_reg_cat(event_participant_registration_id, event_category_id, user_id, is_deleted, updated_by, updated_date)               
                                     SELECT $1, $2, $3, $4, $5, $6 
