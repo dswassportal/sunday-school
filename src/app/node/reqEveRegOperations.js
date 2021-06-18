@@ -34,7 +34,8 @@ async function getEventDef(eventId, loggedInUserId) {
                         response.categories.push({
                             catName: row.cat_name,
                             catMapId: row.event_cat_map_id,
-                            catId: row.event_category_id
+                            catId: row.event_category_id,
+                            hasSelected : row.has_cat_selected
                         })
                     }
 
@@ -67,15 +68,6 @@ async function getEventDef(eventId, loggedInUserId) {
                         })
                     }
 
-                    response.selectedVenue = []
-                    if (row.selected_event_venue_id !== null) {
-                        response.selectedVenue.push({
-                            venueId: row.venue_id,
-                            venueMapId: row.event_venue_id,
-                            venueName: row.venue_name
-                        })
-                    }
-
                     response.selectedCats = []
                     if (row.selected_cat !== null) {
                         response.selectedCats.push({
@@ -91,7 +83,8 @@ async function getEventDef(eventId, loggedInUserId) {
                         response.categories.push({
                             catName: row.cat_name,
                             catMapId: row.event_cat_map_id,
-                            catId: row.event_category_id
+                            catId: row.event_category_id,
+                            hasSelected : row.has_cat_selected
                         })
 
                     let attIndex = response.attachments.findIndex((item) => item.attId == row.event_attachment_id);
@@ -119,15 +112,6 @@ async function getEventDef(eventId, loggedInUserId) {
                             answerType: row.answer_type,
                             answer: row.answer
                         })
-
-                    let selCatIndex = response.selectedCats.findIndex((item) => item.catMapId == row.selected_cat);
-                    if (selCatIndex === -1 && row.selected_cat != null)
-                        response.selectedCats.push({
-                            catName: row.cat_name,
-                            catMapId: row.event_cat_map_id,
-                            catId: row.event_category_id
-                        })
-
 
                 }
             }
@@ -220,7 +204,7 @@ async function eventRegistration(eventData, loggedInUser) {
             //Updating existing event registration.(t_event_participant_registration)
             if (eventData.eventPartiRegId && eventData.registrationStatus) {
                 let regUpdateRes = await client.query(queries.updateEventRegistration,
-                    [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus, eventData.role. eventData.eventPartiRegId]);
+                    [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus, eventData.role, eventData.eventPartiRegId]);
 
                 if (regUpdateRes.rowCount > 0)
                     console.debug(`Event registration updated for ${eventData.eventPartiRegId} event_participant_registration_id.`);

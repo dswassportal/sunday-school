@@ -19,7 +19,7 @@ const getEventData = `select distinct te.event_id,
                         tea.event_attachment_id,
                         tea.file_name,
                         tv.venue_id,
-                        tperc.event_category_id selected_cat,
+                        case when tperc.event_category_id is null then false else true end has_cat_selected,
                         tv."name" venue_name,
                         tec."name" cat_name, 
                         tec.event_category_id,
@@ -28,7 +28,8 @@ const getEventData = `select distinct te.event_id,
                         teq.question_id,
                         teq.question,
                         teq.answer_type,
-                        teqr.answer   
+                        teqr.answer ,
+                        tec."sequence"  
                         from t_event te 
                         left join t_event_participant_registration tepr on tepr.event_id = te.event_id 
                             and tepr.user_id = $2 and tepr.event_id = $1 and tepr.is_deleted != true
@@ -45,7 +46,7 @@ const getEventData = `select distinct te.event_id,
                         left join t_event_question_response teqr 
                         	on teqr.event_participant_registration_id = tepr.event_participant_registration_id 
                             and teq.question_id = teqr.question_id
-                        where te.event_id = $1;`;
+                        where te.event_id = $1 order by tec."sequence";`;
 
 const getParticipantRolesFormLookup = `select jsonb_agg(
                                             jsonb_build_object(
