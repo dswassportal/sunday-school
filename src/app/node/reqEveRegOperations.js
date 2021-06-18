@@ -68,14 +68,15 @@ async function getEventDef(eventId, loggedInUserId) {
                         })
                     }
 
-                    response.selectedCats = []
-                    if (row.selected_cat !== null) {
-                        response.selectedCats.push({
-                            catName: row.cat_name,
-                            catMapId: row.event_cat_map_id,
-                            catId: row.event_category_id
+                    response.selectedVenue = []
+                    if (row.selected_event_venue_id !== null) {
+                        response.selectedVenue.push({
+                            venueId: row.venue_id,
+                            venueMapId: row.event_venue_id,
+                            venueName: row.venue_name
                         })
                     }
+                    
                 } else {
 
                     let catIndex = response.categories.findIndex((item) => item.catMapId == row.event_cat_map_id);
