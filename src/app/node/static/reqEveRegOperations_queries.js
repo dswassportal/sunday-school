@@ -79,8 +79,8 @@ const checkGeneratedEnrollmentNoExists = `select case when count(enrollment_id) 
                                             where enrollment_id =$1;`
                                             
 const newRegistration = `INSERT INTO t_event_participant_registration
-                            (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status)
-                            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) returning event_participant_registration_id;`
+                            (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status. $role)
+                            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning event_participant_registration_id;`
                             
 const insertRegCatMapping = `INSERT INTO t_participant_event_reg_cat
                             (event_participant_registration_id, event_category_id, user_id, is_deleted, created_by, created_date)

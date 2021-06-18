@@ -171,13 +171,15 @@ async function eventRegistration(eventData, loggedInUser) {
         let eventType = eventData.eventType;
         let registrationId = eventData.enrollmentId;
 
+        if(!eventData.registrationStatus) throw 'Registration status was not provided.'
+        
         if (eventData.enrollmentId === null || eventData.enrollmentId === undefined) {
             //Case when there is a new registration.(t_event_participant_registration)
             registrationId = await generateUniqueEnrollmentId(client);
             let newRegRes = await client.query(queries.newRegistration,
                 [eventData.eventId, eventData.participantId, eventData.group,
                     false, loggedInUser, new Date().toUTCString(),
-                    registrationId, eventData.eveVenueId, eventData.registrationStatus]);
+                    registrationId, eventData.eveVenueId, eventData.registrationStatus, eventData.role]);
 
             if (newRegRes.rowCount > 0) {
 
