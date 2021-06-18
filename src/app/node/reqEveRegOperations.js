@@ -19,6 +19,7 @@ async function getEventDef(eventId, loggedInUserId) {
                     response.name = row.event_name;
                     response.eventId = row.event_id;
                     response.role = row.role;
+                    response.registrationStatus = row.registration_status;
                     response.eventPartiRegId = row.event_participant_registration_id;
                     response.eventType = row.event_type;
                     response.enrollmentId = row.enrollment_id;
@@ -76,7 +77,7 @@ async function getEventDef(eventId, loggedInUserId) {
                             venueName: row.venue_name
                         })
                     }
-                    
+
                 } else {
 
                     let catIndex = response.categories.findIndex((item) => item.catMapId == row.event_cat_map_id);

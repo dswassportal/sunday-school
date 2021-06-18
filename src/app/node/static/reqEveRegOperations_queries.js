@@ -3,6 +3,7 @@
 const getEventData = `select distinct te.event_id,
                         te."name" event_name,
                         te.event_type,
+                        tepr.registration_status,
                         tepr.event_participant_registration_id,
                         tepr.enrollment_id,
                         tepr.user_id,
