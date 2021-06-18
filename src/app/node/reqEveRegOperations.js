@@ -59,10 +59,28 @@ async function getEventDef(eventId, loggedInUserId) {
                         response.questionnaire.push({
                             queId: row.question_id,
                             question: row.question,
-                            answerType: row.answer_type
+                            answerType: row.answer_type,
+                            answer: row.answer
                         })
                     }
 
+                    response.selectedVenue = []
+                    if (row.selected_event_venue_id !== null) {
+                        response.selectedVenue.push({
+                            venueId: row.venue_id,
+                            venueMapId: row.event_venue_id,
+                            venueName: row.venue_name
+                        })
+                    }
+
+                    response.selectedCats = []
+                    if (row.selected_cat !== null) {
+                        response.selectedCats.push({
+                            catName: row.cat_name,
+                            catMapId: row.event_cat_map_id,
+                            catId: row.event_category_id
+                        })
+                    }
                 } else {
 
                     let catIndex = response.categories.findIndex((item) => item.catMapId == row.event_cat_map_id);
@@ -95,8 +113,18 @@ async function getEventDef(eventId, loggedInUserId) {
                         response.questionnaire.push({
                             queId: row.question_id,
                             question: row.question,
-                            answerType: row.answer_type
+                            answerType: row.answer_type,
+                            answer: row.answer
                         })
+
+                    let selCatIndex = response.selectedCats.findIndex((item) => item.catMapId == row.selected_cat);
+                    if (selCatIndex === -1 && row.selected_cat != null)
+                        response.selectedCats.push({
+                            catName: row.cat_name,
+                            catMapId: row.event_cat_map_id,
+                            catId: row.event_category_id
+                        })
+
 
                 }
             }
@@ -138,13 +166,13 @@ async function eventRegistration(eventData, loggedInUser) {
     try {
         await client.query('begin;');
         let eventType = eventData.eventType;
-
+        let registrationId = eventData.enrollmentId; 
         if (eventType === 'CWC') {
 
             //Case when there is a new registration.(t_event_participant_registration)
-            if (eventData.registrationId !== null || eventData.registrationId !== null) {
+            if (eventData.enrollmentId !== null || eventData.enrollmentId !== undefined) {
 
-                let registrationId = await generateUniqueEnrollmentId(client);
+                 registrationId = await generateUniqueEnrollmentId(client);
                 let newRegRes = await client.query(queries.newRegistration,
                     [eventData.eventId, eventData.participantId, eventData.group,
                         false, loggedInUser, new Date().toUTCString(),
@@ -153,33 +181,36 @@ async function eventRegistration(eventData, loggedInUser) {
                 if (newRegRes.rowCount > 0) {
 
                     let participantRegId = newRegRes.rows[0].event_participant_registration_id;
-                    console.log(`Participant ${eventData.participantId} registering for event ${loggedInUser}, 
-                                    event_participant_registration_id  is ${participantRegId}`);
+                    console.log(`Participant ${eventData.participantId} registering for event ${loggedInUser}, event_participant_registration_id  is ${participantRegId}`);
 
                     // inserting categories selected by the participant.  (t_participant_event_reg_cat)       
                     if (eventData.categories) {
                         let registerEvtCatQueryValues = []
                         for (let catId of eventData.categories)
-                            registerEvtCatQueryValues.push(`( ${participantRegId}, ${catId}, ${eventData.participantId}, ${false}, ${loggedInUser}, ${new Date().toUTCString()} )`);
+                            registerEvtCatQueryValues.push(`( ${participantRegId}, ${catId}, ${eventData.participantId}, ${false}, ${loggedInUser}, '${new Date().toUTCString()}' )`);
 
-                        let tempQuery = queries.insertRegCatMapping.replace('$1', registerEvtCatQueryValues.join(','))
-                        let regCatRes = await client.query(tempQuery);
-                        if (regCatRes.rowCount > 0)
-                            console.debug(`for participant ${participantId} categories mapped , participant_event_reg_cat_ids are : ${JSON.stringify(regCatRes.rows)}`);
+                        if (registerEvtCatQueryValues.length > 0) {
+                            let tempQuery = queries.insertRegCatMapping.replace('$1', registerEvtCatQueryValues.join(','))
+                            //console.log(tempQuery);
+                            let regCatRes = await client.query(tempQuery);
+                            if (regCatRes.rowCount > 0)
+                                console.debug(`for participant ${eventData.participantId} categories mapped , participant_event_reg_cat_ids are : ${JSON.stringify(regCatRes.rows)}`);
+                        } else console.log("No categories were found to process.");
                     }
-                }
 
-                // inserting question and their responses filled by the participant.  (t_event_question_response) 
-                if (eventData.questionnaire) {
-                    let insertQueRespValues = [];
-                    for (let question of eventData.questionnaire)
-                        insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, ${question.answer}, ${eventData.participantId}, ${new Date().toUTCString()})`);
+                    // inserting question and their responses filled by the participant.  (t_event_question_response) 
+                    if (eventData.questionnaire) {
+                        let insertQueRespValues = [];
+                        for (let question of eventData.questionnaire)
+                            insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, '${question.answer}', ${eventData.participantId}, '${new Date().toUTCString()}')`);
 
-
-                    let tempQuery = queries.insertRegQueResp.replace('$1', insertQueRespValues.join(','))
-                    let regQueRes = await client.query(tempQuery);
-                    if (regQueRes.rowCount > 0)
-                        console.debug(`for participant ${participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regCatRes.rows)}`);
+                        if (insertQueRespValues.length > 0) {
+                            let tempQuery = queries.insertRegQueResp.replace('$1', insertQueRespValues.join(','))
+                            let regQueRes = await client.query(tempQuery);
+                            if (regQueRes.rowCount > 0)
+                                console.debug(`for participant ${eventData.participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regQueRes.rows)}`);
+                        } else console.log(" No questionnaire were found to process.");
+                    }
                 }
             }
 
@@ -231,7 +262,8 @@ async function eventRegistration(eventData, loggedInUser) {
         }
         return {
             "data": {
-                status: 'success'
+                status: 'success',
+                enrollmentId : registrationId
             }
         }
 

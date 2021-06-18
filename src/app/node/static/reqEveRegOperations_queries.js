@@ -6,6 +6,7 @@ const getEventData = `select distinct te.event_id,
                         tepr.enrollment_id,
                         tepr.user_id,
                         te.description,
+                        tepr.event_venue_id selected_event_venue_id,
                         te.start_date,
                         te.end_date,
                         te.registration_start_date,
@@ -16,6 +17,7 @@ const getEventData = `select distinct te.event_id,
                         tea.event_attachment_id,
                         tea.file_name,
                         tv.venue_id,
+                        tperc.event_category_id selected_cat,
                         tv."name" venue_name,
                         tec."name" cat_name, 
                         tec.event_category_id,
@@ -23,7 +25,8 @@ const getEventData = `select distinct te.event_id,
                         tev.event_venue_id,
                         teq.question_id,
                         teq.question,
-                        teq.answer_type  
+                        teq.answer_type,
+                        teqr.answer   
                         from t_event te 
                         left join t_event_participant_registration tepr on tepr.event_id = te.event_id 
                             and tepr.user_id = $2 and tepr.event_id = $1
@@ -32,7 +35,14 @@ const getEventData = `select distinct te.event_id,
                         left join t_venue tv on tv.venue_id = tev.venue_id
                         left join t_event_category_map tecm on tecm.event_id = $1
                         left join t_event_category tec on tecm.event_category_id = tec.event_category_id
+                        left join t_participant_event_reg_cat tperc 
+                        	on tperc.event_participant_registration_id = tepr.event_participant_registration_id 
+                            and  tecm.event_cat_map_id = tperc.event_category_id 
+                        	and tperc.is_deleted != true
                         left join t_event_questionnaire teq on teq.event_id = $1
+                        left join t_event_question_response teqr 
+                        	on teqr.event_participant_registration_id = tepr.event_participant_registration_id 
+                            and teq.question_id = teqr.question_id
                         where te.event_id = $1;`;
 
 const getParticipantRolesFormLookup = `select jsonb_agg(
@@ -74,9 +84,9 @@ const insertRegCatMapping = `INSERT INTO t_participant_event_reg_cat
                             (event_participant_registration_id, event_category_id, user_id, is_deleted, created_by, created_date)
                             VALUES $1 returning participant_event_reg_cat_id;`; 
                             
-const insertRegQueResp = `INSERT INTO question_response_id
+const insertRegQueResp = `INSERT INTO t_event_question_response
                             (event_participant_registration_id, question_id, answer, created_by, created_date)
-                            VALUES $1 returning participant_event_reg_cat_id;`;                            
+                            VALUES $1  returning question_response_id;`;                            
 
 module.exports = {
     getEventData,
