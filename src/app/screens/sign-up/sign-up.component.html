@@ -58,11 +58,20 @@
                 </div>
                 <div class="row">
                     <mat-form-field class="form-field col col-md">
-                        <mat-label style="padding-left: 23%;">Mobile Number</mat-label>
+                        <!-- <mat-label style="padding-left: 23%;">Mobile Number</mat-label>
                         <input matInput type="text" ng2TelInput (ng2TelOutput)="getNumber($event)" formControlName="mobileNo" id="mobileNo" maxLength="10" (keypress)="keyPress($event)" required style="width: fit-content;"/>
                         <mat-error *ngIf="signUpForm.controls.mobileNo.touched && signUpForm.controls.mobileNo.invalid">
                             <span *ngIf="signUpForm.controls.mobileNo.errors.required">This field is mandatory.</span>
                             <span *ngIf="signUpForm.controls.mobileNo.errors.pattern">Enter 10 digit number.</span>
+                        </mat-error> -->
+                        <mat-label style="padding-left: 23%;">Mobile Number *</mat-label>
+                        <ngx-mat-intl-tel-input id="mobileNo" matInput (keypress)="keyPress($event)" [onlyCountries]="['us','in','ca']"
+                            [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']" [enableAutoCountrySelect]="true"
+                            name="mobileNo" formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true">
+                        </ngx-mat-intl-tel-input>
+                        <mat-error *ngIf="signUpForm.controls.mobileNo.touched && signUpForm.controls.mobileNo.invalid">
+                            <span *ngIf="signUpForm.controls['mobileNo']?.errors?.required">This field is mandatory.</span>
+                            <span *ngIf="signUpForm.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span>
                         </mat-error>
                     </mat-form-field>
 

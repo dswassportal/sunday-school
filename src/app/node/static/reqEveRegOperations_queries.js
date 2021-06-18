@@ -60,12 +60,32 @@ const getEventSectionConfigByEveType = `select
                                                 'isUrlRequired', tet.is_url_required
                                             ) event_sec_config
                                             from t_event_type tet where tet."name" = $1 
-                                            and tet.is_deleted != true;`;                                        
+                                            and tet.is_deleted != true;`;       
+                                            
+const checkGeneratedEnrollmentNoExists = `select case when count(enrollment_id) = 0 then false
+                                            else true end ran_no from t_event_participant_registration 
+                                            where enrollment_id =$1;`
+                                            
+const newRegistration = `INSERT INTO t_event_participant_registration
+                            (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id)
+                            VALUES($1, $2, $3, $4, $5, $6, $7, $8) returning event_participant_registration_id;`
+                            
+const insertRegCatMapping = `INSERT INTO t_participant_event_reg_cat
+                            (event_participant_registration_id, event_category_id, user_id, is_deleted, created_by, created_date)
+                            VALUES $1 returning participant_event_reg_cat_id;`; 
+                            
+const insertRegQueResp = `INSERT INTO question_response_id
+                            (event_participant_registration_id, question_id, answer, created_by, created_date)
+                            VALUES $1 returning participant_event_reg_cat_id;`;                            
 
 module.exports = {
     getEventData,
     getParticipantRolesFormLookup,
-    getEventSectionConfigByEveType
+    getEventSectionConfigByEveType,
+    checkGeneratedEnrollmentNoExists,
+    newRegistration,
+    insertRegCatMapping,
+    insertRegQueResp
 }                            
 
 

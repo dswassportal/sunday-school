@@ -59,7 +59,7 @@ export class SignUpComponent implements OnInit {
       dob: new FormControl(''),
       password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
       cnfmpwd: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
-      mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
+      mobileNo: new FormControl('', [Validators.required]),
       memberType : new FormControl('',Validators.required),
       orgId: new FormControl('',Validators.required),
       abtyrslf: new FormControl('')
@@ -94,7 +94,7 @@ export class SignUpComponent implements OnInit {
         return
       }
       else {
-        this.signUpForm.value.mobileNo = this.contactNo;
+        //this.signUpForm.value.mobileNo = this.contactNo;
         this.signUpForm.value.middleName = null;
          this.AuthService.SignUp(this.signUpForm.value).then((data)=>{
           console.log(JSON.stringify(data));
@@ -127,10 +127,10 @@ export class SignUpComponent implements OnInit {
     this.router.navigate(['/signin']);
   }
 
-  getNumber(event: any) {
-    console.log(event);
-    this.contactNo = event;
-  }
+  // getNumber(event: any) {
+  //   console.log(event);
+  //   this.contactNo = event;
+  // }
 
   validateDOB(event:any){
     let year = new Date(event).getFullYear();

@@ -7,7 +7,7 @@ const processScoreRequest = require(`./src/app/node/reqScoreOperations`)
 const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions`)
 const processSSRequest = require(`./src/app/node/reqSsOperations`)
 const processFileUpload = require(`./src/app/node/reqFileUpload`)
-const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOerations`) 
+const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOperations`) 
 
 const fileUpload = require('express-fileupload');
 express = require('express')
@@ -596,7 +596,7 @@ app.post('/api/registerEvent', function (req, res) {
   console.log("registerEvent called...");
   let loggedInUser = decodeUser(req)
   try {
-    processEventTemp.eventRegistration(req.body.data, loggedInUser)
+    processRegRequests.eventRegistration(req.body.data, loggedInUser)
       .then((data) => {
         res.send(data);
         res.end();
