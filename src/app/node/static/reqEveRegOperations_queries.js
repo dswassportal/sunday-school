@@ -3,6 +3,7 @@
 const getEventData = `select distinct te.event_id,
                         te."name" event_name,
                         te.event_type,
+                        tepr.event_participant_registration_id,
                         tepr.enrollment_id,
                         tepr.user_id,
                         te.description,
@@ -29,7 +30,7 @@ const getEventData = `select distinct te.event_id,
                         teqr.answer   
                         from t_event te 
                         left join t_event_participant_registration tepr on tepr.event_id = te.event_id 
-                            and tepr.user_id = $2 and tepr.event_id = $1
+                            and tepr.user_id = $2 and tepr.event_id = $1 and tepr.is_deleted != true
                         left join t_event_attachment tea on tea.event_id = tepr.event_id
                         left join t_event_venue tev on tev.event_id = $1
                         left join t_venue tv on tv.venue_id = tev.venue_id
@@ -77,8 +78,8 @@ const checkGeneratedEnrollmentNoExists = `select case when count(enrollment_id) 
                                             where enrollment_id =$1;`
                                             
 const newRegistration = `INSERT INTO t_event_participant_registration
-                            (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id)
-                            VALUES($1, $2, $3, $4, $5, $6, $7, $8) returning event_participant_registration_id;`
+                            (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status)
+                            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) returning event_participant_registration_id;`
                             
 const insertRegCatMapping = `INSERT INTO t_participant_event_reg_cat
                             (event_participant_registration_id, event_category_id, user_id, is_deleted, created_by, created_date)

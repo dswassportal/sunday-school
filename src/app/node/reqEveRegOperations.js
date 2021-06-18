@@ -17,6 +17,7 @@ async function getEventDef(eventId, loggedInUserId) {
                 if (response.eventId == undefined) {
                     response.name = row.event_name;
                     response.eventId = row.event_id;
+                    response.eventPartiRegId = row.event_participant_registration_id;
                     response.eventType = row.event_type;
                     response.enrollmentId = row.enrollment_id;
                     response.description = row.description;
@@ -166,56 +167,57 @@ async function eventRegistration(eventData, loggedInUser) {
     try {
         await client.query('begin;');
         let eventType = eventData.eventType;
-        let registrationId = eventData.enrollmentId; 
-        if (eventType === 'CWC') {
+        let registrationId = eventData.enrollmentId;
 
+        if (eventData.enrollmentId === null || eventData.enrollmentId === undefined) {
             //Case when there is a new registration.(t_event_participant_registration)
-            if (eventData.enrollmentId !== null || eventData.enrollmentId !== undefined) {
+            registrationId = await generateUniqueEnrollmentId(client);
+            let newRegRes = await client.query(queries.newRegistration,
+                [eventData.eventId, eventData.participantId, eventData.group,
+                    false, loggedInUser, new Date().toUTCString(),
+                    registrationId, eventData.eveVenueId, eventData.registrationStatus]);
 
-                 registrationId = await generateUniqueEnrollmentId(client);
-                let newRegRes = await client.query(queries.newRegistration,
-                    [eventData.eventId, eventData.participantId, eventData.group,
-                        false, loggedInUser, new Date().toUTCString(),
-                        registrationId, eventData.eveVenueId]);
+            if (newRegRes.rowCount > 0) {
 
-                if (newRegRes.rowCount > 0) {
+                let participantRegId = newRegRes.rows[0].event_participant_registration_id;
+                console.log(`Participant ${eventData.participantId} registering for event ${loggedInUser}, event_participant_registration_id  is ${participantRegId}`);
 
-                    let participantRegId = newRegRes.rows[0].event_participant_registration_id;
-                    console.log(`Participant ${eventData.participantId} registering for event ${loggedInUser}, event_participant_registration_id  is ${participantRegId}`);
+                // inserting categories selected by the participant.  (t_participant_event_reg_cat)       
+                if (eventData.categories) {
+                    let registerEvtCatQueryValues = []
+                    for (let catId of eventData.categories)
+                        registerEvtCatQueryValues.push(`( ${participantRegId}, ${catId}, ${eventData.participantId}, ${false}, ${loggedInUser}, '${new Date().toUTCString()}' )`);
 
-                    // inserting categories selected by the participant.  (t_participant_event_reg_cat)       
-                    if (eventData.categories) {
-                        let registerEvtCatQueryValues = []
-                        for (let catId of eventData.categories)
-                            registerEvtCatQueryValues.push(`( ${participantRegId}, ${catId}, ${eventData.participantId}, ${false}, ${loggedInUser}, '${new Date().toUTCString()}' )`);
+                    if (registerEvtCatQueryValues.length > 0) {
+                        let tempQuery = queries.insertRegCatMapping.replace('$1', registerEvtCatQueryValues.join(','))
+                        //console.log(tempQuery);
+                        let regCatRes = await client.query(tempQuery);
+                        if (regCatRes.rowCount > 0)
+                            console.debug(`for participant ${eventData.participantId} categories mapped , participant_event_reg_cat_ids are : ${JSON.stringify(regCatRes.rows)}`);
+                    } else console.log("No categories were found to process.");
+                }
 
-                        if (registerEvtCatQueryValues.length > 0) {
-                            let tempQuery = queries.insertRegCatMapping.replace('$1', registerEvtCatQueryValues.join(','))
-                            //console.log(tempQuery);
-                            let regCatRes = await client.query(tempQuery);
-                            if (regCatRes.rowCount > 0)
-                                console.debug(`for participant ${eventData.participantId} categories mapped , participant_event_reg_cat_ids are : ${JSON.stringify(regCatRes.rows)}`);
-                        } else console.log("No categories were found to process.");
-                    }
+                // inserting question and their responses filled by the participant.  (t_event_question_response) 
+                if (eventData.questionnaire) {
+                    let insertQueRespValues = [];
+                    for (let question of eventData.questionnaire)
+                        insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, '${question.answer}', ${eventData.participantId}, '${new Date().toUTCString()}')`);
 
-                    // inserting question and their responses filled by the participant.  (t_event_question_response) 
-                    if (eventData.questionnaire) {
-                        let insertQueRespValues = [];
-                        for (let question of eventData.questionnaire)
-                            insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, '${question.answer}', ${eventData.participantId}, '${new Date().toUTCString()}')`);
-
-                        if (insertQueRespValues.length > 0) {
-                            let tempQuery = queries.insertRegQueResp.replace('$1', insertQueRespValues.join(','))
-                            let regQueRes = await client.query(tempQuery);
-                            if (regQueRes.rowCount > 0)
-                                console.debug(`for participant ${eventData.participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regQueRes.rows)}`);
-                        } else console.log(" No questionnaire were found to process.");
-                    }
+                    if (insertQueRespValues.length > 0) {
+                        let tempQuery = queries.insertRegQueResp.replace('$1', insertQueRespValues.join(','))
+                        let regQueRes = await client.query(tempQuery);
+                        if (regQueRes.rowCount > 0)
+                            console.debug(`for participant ${eventData.participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regQueRes.rows)}`);
+                    } else console.log(" No questionnaire were found to process.");
                 }
             }
+        } else  if (eventData.enrollmentId !== null || eventData.enrollmentId !== undefined){
+            console.log(`Updating event registration for ${eventData.enrollmentId} enrollmentId`);
+        }
 
-            await client.query('commit;')
-        } else if (eventType === 'TTC') {
+
+        await client.query('commit;')
+        if (eventType === 'TTC') {
             console.log("999");
             for (let ttcParticipant of eventData.participants) {
 
@@ -263,7 +265,7 @@ async function eventRegistration(eventData, loggedInUser) {
         return {
             "data": {
                 status: 'success',
-                enrollmentId : registrationId
+                enrollmentId: registrationId
             }
         }
 
