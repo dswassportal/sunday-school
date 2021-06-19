@@ -324,7 +324,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         dob: new FormControl(''),
         password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
         cnfmpwd: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@]!@#$%&*)(?=.*?[0-9]).{8,}$')]),
-        mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
+        mobileNo: new FormControl('', [Validators.required]),
         memberType: new FormControl('', Validators.required),
         orgId: new FormControl('', Validators.required),
         abtyrslf: new FormControl('')
@@ -434,7 +434,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       relationship: new FormControl('', Validators.required),
       baptismalName: new FormControl(''),
       dob: new FormControl('',),
-      mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
+      mobileNo: new FormControl('', [Validators.required]),
       emailId: new FormControl('', [Validators.required, Validators.email]),
     });
   }
@@ -448,11 +448,11 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   }
 
   updateUserProfile() {
-     if (this.myprofileform.invalid) {
-       this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
-    //   return
-     }
-     else //{
+    if ((this.myprofileform.invalid && this.isApprovedUserLoggedIn == true) ) {
+      this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
+   //   return
+    }
+    else //{
     if (this.isApprovedUserLoggedIn == true) {
       this.myprofileform.value.userId = this.userId;
       this.myprofileform.value.updatedBy = this.userId;
