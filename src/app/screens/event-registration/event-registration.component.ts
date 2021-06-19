@@ -32,7 +32,6 @@ export class EventRegistrationComponent implements OnInit {
 
     this.userMetaData = this.uiCommonUtils.getUserMetaDataJson();
     this.loggedInUser = this.userMetaData.userId;
-    this.getAllEventsData('upcoming_events');
     
     
     this.columnDefs = [
@@ -52,7 +51,10 @@ export class EventRegistrationComponent implements OnInit {
     ];
     
 
-    this.getEventDataForRegistration();
+
+
+    this.onFilteringRadioButtonChange({value: 'upcoming_events' });
+
 
     this.gridOptions = {
       columnDefs: this.columnDefs,
@@ -72,6 +74,8 @@ export class EventRegistrationComponent implements OnInit {
     this.selectedEventType = event.value;
     console.log("event type is : " + this.selectedEventType);
     this.getAllEventsData(event.value);
+
+    
     
   }
 
