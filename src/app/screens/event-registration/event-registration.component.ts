@@ -81,10 +81,7 @@ export class EventRegistrationComponent implements OnInit {
 
   getAllEventsData(eventType:string){
      this.apiService.callGetService('getEventData?eventType='+eventType).subscribe((res) => {
-      //console.log(res);
       this.rowData = res.data.metaData.eventData;
-      console.log("rowData is:: " + this.rowData);
-      //console.log("this.rowData.event type :: " + this.rowData.value)
     });
 
 
