@@ -1,12 +1,12 @@
 <div class="container mt-4">
     <mat-card class="shadow">
         <div class="row">
-            <h1 class="col-md-11" style="text-align: center; font-family: poppins; ">Registration For  
+            <h1 class="col-md-11" style="text-align: center; font-family: poppins; ">Registration For
                 <label><b>{{selectedRowJson.name}}</b></label>
             </h1>
 
             <button mat-button class="col-md-1" style="padding-bottom: 2%;" class="ml-auto" data-dismiss="modal"
-                (click)="onCancelRegistrationClick()">
+                (click)="onCancelClick()">
                 <mat-icon>clear</mat-icon>
             </button>
 
@@ -34,9 +34,27 @@
             </div>
 
 
-            <div class="row">
-                <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event Date :</h3> &nbsp;&nbsp;
-                <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventStartDate}}</label>
+            <div *ngIf="isSingleDayEvent">
+                <div class="row">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventStartDate}}</label>
+                </div>
+            </div>
+
+            <div *ngIf="!isSingleDayEvent">
+
+                <div class="row" style="margin-bottom: -1%;">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event Start Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventStartDate}}</label>
+                </div>
+
+                <div class="row">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event End Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventEndDate}}</label>
+                </div>
             </div>
 
         </div>
@@ -44,7 +62,7 @@
 
 
 
-        <form [formGroup]="venuesDataFormGroup">
+        <form *ngIf="isVenueRequired" [formGroup]="venuesDataFormGroup">
 
 
             <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
@@ -140,35 +158,31 @@
             </div>
 
 
+            <div *ngIf="isCategoryRequired">
 
-            <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 1px;margin-top:1%;">
-            </mat-divider>
+                <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 1px;margin-top:1%;">
+                </mat-divider>
 
 
-            <div style="padding-left: 1%; padding-right: 1%;">
-                <h3 style="padding-top: 1%;">Event Categories : (Select all applicable categories)</h3>
-            </div>
-            <fieldset>
+                <div style="padding-left: 1%; padding-right: 1%;">
+                    <h3 style="padding-top: 1%;">Event Categories : (Select all applicable categories)</h3>
+                </div>
+                <fieldset>
 
-                <div *ngFor="let category of eventCategoriesData" class=" example-margin text-black-50">
-                    <div>
-                        <!-- [checked]="areCategoriesChecked" -->
-                        <mat-checkbox [checked]="category.hasSelected" (change)="onChange({ 
+                    <div *ngFor="let category of eventCategoriesData" class=" example-margin text-black-50">
+                        <div>
+                            <!-- [checked]="areCategoriesChecked" -->
+                            <mat-checkbox [checked]="category.hasSelected" (change)="onChange({ 
                                     'event' : $event,
                                     'item' : category
                                 })" class="example-margin">
-                            {{category.catName}} </mat-checkbox>
+                                {{category.catName}} </mat-checkbox>
+                        </div>
                     </div>
-                </div>
 
 
-            </fieldset>
-
-
-
-
-
-
+                </fieldset>
+            </div>
 
         </form>
 
@@ -176,7 +190,7 @@
 
 
 
-        <form [formGroup]="questionnaireDataFormGroup">
+        <form *ngIf="isQuestionnaireRequired" [formGroup]="questionnaireDataFormGroup">
 
 
             <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 1px;margin-top:1%;">
@@ -192,27 +206,28 @@
                     <div class="container" [formGroupName]="i">
 
 
-                        <div class="row" style="padding-left: 1%; padding-right: 1%;">
+                        <div class="row" style="padding-left: 1%; padding-right: 1%;margin-bottom: -1%;">
                             <h4 class="col-md-1" style="padding-top: 1.5%;">Question:</h4>
                             <mat-form-field class="col-md-11">
-                                    <input id="question" matInput formControlName="question"
-                                        readonly />
+                                <input id="question" matInput formControlName="question" readonly />
                             </mat-form-field>
                         </div>
-                      
+
 
                         <mat-form-field class="row" [hidden]="true">
                             <input matInput #responseType matInput formControlName="responseType" placeholder="Answer">
                         </mat-form-field>
 
-                        <div class="row" style="padding-right: 1%; margin-bottom: -2%;margin-top: -1%;" *ngIf="item.value.responseType == 'Text'">
-                            <h4 class="col-md-1" style="padding-top: 1.5%;padding-left: 2.4%;">Answer:</h4>
+                        <div class="row" style="padding-right: 1%; margin-bottom: -2%;margin-top: -1%;"
+                            *ngIf="item.value.responseType == 'Text'">
+                            <h4 class="col-md-1" style="padding-top: 1.3%;padding-left: 2.4%;">Answer:</h4>
                             <mat-form-field class="col-md-11" style="padding-left: 2.3%;">
                                 <input matInput formControlName="answer" required>
                             </mat-form-field>
                         </div>
 
-                        <div class="row" style="padding-left: 3%; margin-bottom: -2%;" *ngIf="item.value.responseType == 'Yes/No'">
+                        <div class="row" style="padding-left: 3%; margin-bottom: -2%;padding-top: 1%;"
+                            *ngIf="item.value.responseType == 'Yes/No'">
                             <h4 class="col-md-1" style="margin-left: -1.9%;">Answer:</h4>
                             <mat-radio-group class="col-md-11" formControlName="answer" aria-label="Select an option">
                                 <mat-radio-button value="true">Yes</mat-radio-button>&nbsp;
@@ -221,7 +236,8 @@
                         </div>
 
 
-                        <div class="row" style="padding-right: 1%; margin-top: -1%;" *ngIf="item.value.responseType == 'Date Range'">
+                        <div class="row" style="padding-right: 1%; margin-top: -1%; margin-bottom: -2%;"
+                            *ngIf="item.value.responseType == 'Date Range'">
                             <h4 class="col-md-1" style="padding-top: 1.5%;padding-left: 2.4%;">Answer:</h4>
                             <mat-form-field style="padding-left: 2.3%;" class="col-md-11">
                                 <mat-date-range-input [rangePicker]="picker">
@@ -242,61 +258,44 @@
         </form>
 
 
-
-
-        <form [formGroup]="ttcFormGroup" *ngIf="isTtcEvent">
+        <div *ngIf="isUpdateBtnRequired">
 
             <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
             </mat-divider>
 
-            <h2 style="padding-top: 1%;">Teacher's Registration</h2>
-
-
-
-            <div class="row">
-                <mat-form-field class="col-md-12">
-                    <mat-select required multiple id="partId" formControlName="partId"
-                        placeholder="Add Members (Teacher's/Principal)" (selectionChange)="addMemOnChange($event)">
-                        <mat-option *ngFor="let partId of partIds" [value]="partId.userId">
-                            {{partId.title}}.&nbsp;{{partId.firstName}}&nbsp;{{partId.middleNmae}}&nbsp;{{partId.lastName}}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
+            <div class="row" style="margin-bottom: -1%; padding-top: 1%;">
+                <h3 style="text-align: left; font-family: poppins; padding-left: 2.4%;">Registration Status :</h3>
+                &nbsp;&nbsp;
+                <label
+                    style="text-align: left; font-family: poppins; padding-top: 0.4%;"><b><u>{{eventData.registrationStatus}}</u></b></label>
             </div>
+        </div>
 
-
-            <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3"
-                [rowData]="rowData | filter:term " [columnDefs]="columnDefs" [pagination]="true" rowSelection='multiple'
-                [gridOptions]="gridOptions">
-            </ag-grid-angular>
-
-
-            <!-- [checkboxSelection]="true" -->
-            <!-- (gridReady)="onGridReady($event)" -->
-            <!-- (rowClicked)='onRowClicked($event)' -->
-        </form>
 
         <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
         </mat-divider>
-
-
-
 
         <div class="row" style="padding-top: 2%;">
 
             <div class="col text-center" style="padding-top:1%">
 
-                <button style="float: center;" type="submit" mat-button class="mbutton"
+
+                <button style="float: center;" *ngIf="isCancelRegiBtnRequired" type="submit" mat-button class="mbutton"
                     (click)="onCancelRegistrationClick()">
                     Cancel Registration
                 </button>&nbsp;
+
                 <button style="float: center;" *ngIf="!isUpdateBtnRequired" (click)="onRegisterEventClick()" mat-button
                     type="submit" mat-button class="mbutton">
                     Register
                 </button>
                 <button style="float: center;" *ngIf="isUpdateBtnRequired" type="submit" mat-button class="mbutton"
                     (click)="onUpdateRegistrationClick()">
-                    Update
+                    <span *ngIf="isCancelRegiBtnRequired">Update</span>
+                    <span *ngIf="!isCancelRegiBtnRequired">Register</span>
+                </button>&nbsp;
+                <button style="float: center;" type="submit" mat-button class="mbutton" (click)="onCancelClick()">
+                    Cancel
                 </button>
             </div>
         </div>
@@ -308,3 +307,35 @@
 
 
 
+
+<!-- <form [formGroup]="ttcFormGroup" *ngIf="isTtcEvent">
+
+    <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+    </mat-divider>
+
+    <h2 style="padding-top: 1%;">Teacher's Registration</h2>
+
+
+
+    <div class="row">
+        <mat-form-field class="col-md-12">
+            <mat-select required multiple id="partId" formControlName="partId"
+                placeholder="Add Members (Teacher's/Principal)" (selectionChange)="addMemOnChange($event)">
+                <mat-option *ngFor="let partId of partIds" [value]="partId.userId">
+                    {{partId.title}}.&nbsp;{{partId.firstName}}&nbsp;{{partId.middleNmae}}&nbsp;{{partId.lastName}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+
+
+    <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3"
+        [rowData]="rowData | filter:term " [columnDefs]="columnDefs" [pagination]="true" rowSelection='multiple'
+        [gridOptions]="gridOptions">
+    </ag-grid-angular>
+
+
+    <!-- [checkboxSelection]="true" -->
+<!-- (gridReady)="onGridReady($event)" -->
+<!-- (rowClicked)='onRowClicked($event)' 
+</form> -->

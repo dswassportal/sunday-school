@@ -36,6 +36,15 @@ export class CwcregistrationComponent implements OnInit {
   areCategoriesChecked: any;
   isUpdateBtnRequired: any;
   registrationId: any;
+  isCancelRegiBtnRequired: any;
+  eventEndDate: any;
+
+  isVenueRequired: any;
+  isCategoryRequired: any;
+  isSchoolGroupRequired: any;
+  isQuestionnaireRequired: any;
+  isAttachmentRequired: any;
+  isSingleDayEvent: any;
 
 
 
@@ -141,7 +150,7 @@ export class CwcregistrationComponent implements OnInit {
 
     this.participantDataFormGroup = this.formBuilder.group({
       role: new FormControl(''),
-      group:  new FormControl('')
+      group: new FormControl('')
     });
 
     this.questionnaireDataFormGroup = this.formBuilder.group({
@@ -181,45 +190,66 @@ export class CwcregistrationComponent implements OnInit {
       this.eventData = res.data.eventData;
       this.regEndDate = this.eventData.regEndDate;
       this.eventStartDate = this.eventData.eventStartDate;
+      this.eventEndDate = this.eventData.eventEndDate;
       this.participantRoles = res.data.eventData.participantRoles;
       this.eventCategoriesData = res.data.eventData.categories;
 
+
+      this.isVenueRequired = this.eventData.sectionConfig.isVenueRequired;
+      this.isCategoryRequired = this.eventData.sectionConfig.isCategoryRequired;
+      this.isSchoolGroupRequired = this.eventData.sectionConfig.isSchoolGroupRequired;
+      this.isQuestionnaireRequired = this.eventData.sectionConfig.isQuestionnaireRequired;
+      this.isAttachmentRequired = this.eventData.sectionConfig.isAttachmentRequired;
+      this.isSingleDayEvent = this.eventData.sectionConfig.isSingleDayEvent;
+
+
+
+
+      if (this.eventData.registrationStatus == "Registered") {
+        this.isCancelRegiBtnRequired = true;
+      }
+      else {
+        this.isCancelRegiBtnRequired = false;
+      }
+
+
+
       this.regEndDate = new Date(this.regEndDate).toLocaleDateString("en-us");
       this.eventStartDate = new Date(this.eventStartDate).toLocaleDateString("en-us");
+      this.eventEndDate = new Date(this.eventEndDate).toLocaleDateString("en-us");
 
-      if(this.selectedEventType === 'registered_events'){
+      if (this.selectedEventType === 'registered_events') {
 
         this.isUpdateBtnRequired = true;
         this.registrationId = res.data.eventData.enrollmentId;
 
-        let roleDataArray: any =[];
-        let roleData: any ={
-          "code": res.data.eventData.role,
-          "roleDesc": res.data.eventData.role
+        let roleDataArray: any = [];
+        if (res.data.eventData.role != null) {
+          let roleData: any = {
+            "code": res.data.eventData.role,
+            "roleDesc": res.data.eventData.role
+          }
+          roleDataArray.push(roleData);
         }
 
-        roleDataArray.push(roleData);
 
         this.participantDataFormGroup.patchValue({
           role: roleDataArray
         });
-        
+
         this.venuesDataFormGroup.patchValue({
-            venues: res.data.eventData.selectedVenue
+          venues: res.data.eventData.selectedVenue
         });
 
-        //this.eventCategoriesData = res.data.eventData.selectedCats;
-        //this.areCategoriesChecked = true;
-
         this.questionnaireData = res.data.eventData.questionnaire;
-        this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));  
+        this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));
 
       }
-      else{
-       
+      else {
+
         this.areCategoriesChecked = false;
         this.questionnaireData = res.data.eventData.questionnaire;
-        this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));  
+        this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));
 
       }
 
@@ -294,22 +324,11 @@ export class CwcregistrationComponent implements OnInit {
     const formArray = new FormArray([]);
     eventQuestionnaireData.forEach((e: any) => {
 
-      // let data: any = [];
-      // if(this.selectedEventType === 'registered_events'){
-      //   if(e.answerType == 'Date Range'){
-      //     const dates = e.answer;
-      //     data = dates.split(',');
-      //     console.log(data);
-      //   }
-      // }
-      // data[0],
-      // data[1],
-     
       formArray.push(this.formBuilder.group({
         questionId: e.queId,
         answer: e.answer,
-        answerStartDate: (e.answerType === 'Date Range' && e.answer != null) ? formatDate(e.answer.split(',')[0].trim(), 'yyyy-MM-dd', 'en'):"",
-        answerEndDate: (e.answerType === 'Date Range' && e.answer != null) ? formatDate(e.answer.split(',')[1].trim(), 'yyyy-MM-dd', 'en'):"",
+        answerStartDate: (e.answerType === 'Date Range' && e.answer != null) ? formatDate(e.answer.split(',')[0].trim(), 'yyyy-MM-dd', 'en') : "",
+        answerEndDate: (e.answerType === 'Date Range' && e.answer != null) ? formatDate(e.answer.split(',')[1].trim(), 'yyyy-MM-dd', 'en') : "",
         question: e.question,
         responseType: e.answerType
       }));
@@ -322,16 +341,16 @@ export class CwcregistrationComponent implements OnInit {
 
 
 
-  addenrollmentId(): FormGroup {
-    return this.formBuilder.group({
-      enrollmentId: ''
-    });
-  }
+  // addenrollmentId(): FormGroup {
+  //   return this.formBuilder.group({
+  //     enrollmentId: ''
+  //   });
+  // }
 
 
 
 
-  
+
   /*
     updateCheckedOptions(categories:any, event:any) {
       this.categoriesDataFormGroup[categories] = event.target.checked;
@@ -382,53 +401,48 @@ export class CwcregistrationComponent implements OnInit {
     let queData: any = [];
     queData = this.questionnaireDataFormGroup.value;
 
-    for(let row of queData.questionnaire) {
-      if(row.answerStartDate == ""){
+    for (let row of queData.questionnaire) {
+      if (row.answerStartDate == "") {
         let quePayload = {
           "questionId": row.questionId,
           "answer": row.answer
         }
         questionnaireData.push(quePayload);
       }
-      else{
+      else {
         let quePayloadstartEndDate = {
           "questionId": row.questionId,
-          "answer": row.answerStartDate +' , '+ row.answerEndDate
+          "answer": row.answerStartDate + ' , ' + row.answerEndDate
         }
         questionnaireData.push(quePayloadstartEndDate);
-      }     
+      }
     }
 
 
     let payload: any = {
-    
-        "registrationStatus": "Active",
-        "eventId": this.selectedRowJson.event_Id,
-        "participantId": this.loggedInUser,
-        "eventType": this.selectedRowJson.event_type,
-        "group": "Group 1",
-        "eveVenueId": this.venuesDataFormGroup.value.venues[0].venueId,
-        "role": this.participantDataFormGroup.value.role[0].code,
-        "categories": this.catArray,
-        "questionnaire": questionnaireData
-     
+
+      "registrationStatus": "Registered",
+      "eventId": this.selectedRowJson.event_Id,
+      "participantId": this.loggedInUser,
+      "eventType": this.selectedRowJson.event_type,
+      "group": "Group 1",
+      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueId,
+      "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
+      "categories": this.catArray,
+      "questionnaire": questionnaireData
+
     }
 
     this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
       if (res.data.status == "success") {
-        console.log("res",res);
+        console.log("res", res);
         this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
+      }
+      else {
+        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
       }
 
     });
-
-
-
-
-
-
-    console.log("payload", payload);
-   
 
     // if(this.isTtcEvent = true){
 
@@ -490,63 +504,118 @@ export class CwcregistrationComponent implements OnInit {
 
   }
 
-  onCancelRegistrationClick() {
-    this.router.navigate(['/dashboard/eventRegistration/']);
-
-  }
-
-  onUpdateRegistrationClick(){
+  onUpdateRegistrationClick() {
 
 
     let questionnaireData: any = [];
     let queData: any = [];
     queData = this.questionnaireDataFormGroup.value;
 
-    for(let row of queData.questionnaire) {
-      if(row.answerStartDate == ""){
+    for (let row of queData.questionnaire) {
+      if (row.answerStartDate == "") {
         let quePayload = {
           "questionId": row.questionId,
           "answer": row.answer
         }
         questionnaireData.push(quePayload);
       }
-      else{
+      else {
         let quePayloadstartEndDate = {
           "questionId": row.questionId,
-          "answer": row.answerStartDate +' , '+ row.answerEndDate
+          "answer": row.answerStartDate + ' , ' + row.answerEndDate
         }
         questionnaireData.push(quePayloadstartEndDate);
-      }     
+      }
     }
 
 
     let payload: any = {
-    
-        "registrationStatus": "Active",
-        "eventId": this.selectedRowJson.event_Id,
-        "participantId": this.loggedInUser,
-        "enrollmentId": this.registrationId,  
-        "eventPartiRegId": this.eventData.eventPartiRegId, 
-        "eventType": this.selectedRowJson.event_type,
-        "group": "Group 1",
-        "eveVenueId": this.venuesDataFormGroup.value.venues[0].venueId,
-        "role": this.participantDataFormGroup.value.role[0].code,
-        "categories": this.catArray,
-        "questionnaire": questionnaireData
-     
+
+      "registrationStatus": "Registered",
+      "eventId": this.selectedRowJson.event_Id,
+      "participantId": this.loggedInUser,
+      "enrollmentId": this.registrationId,
+      "eventPartiRegId": this.eventData.eventPartiRegId,
+      "eventType": this.selectedRowJson.event_type,
+      "group": "Group 1",
+      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueId,
+      "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
+      "categories": this.catArray,
+      "questionnaire": questionnaireData
+
     }
 
     this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
       if (res.data.status == "success") {
-        console.log("res",res);
+        console.log("res", res);
         this.uiCommonUtils.showSnackBar("Event registration updated successfully!", "success", 3000);
+      }
+      else {
+        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
       }
 
     });
 
 
 
-    
+
+  }
+
+  onCancelRegistrationClick() {
+
+    let questionnaireData: any = [];
+    let queData: any = [];
+    queData = this.questionnaireDataFormGroup.value;
+
+    for (let row of queData.questionnaire) {
+      if (row.answerStartDate == "") {
+        let quePayload = {
+          "questionId": row.questionId,
+          "answer": row.answer
+        }
+        questionnaireData.push(quePayload);
+      }
+      else {
+        let quePayloadstartEndDate = {
+          "questionId": row.questionId,
+          "answer": row.answerStartDate + ' , ' + row.answerEndDate
+        }
+        questionnaireData.push(quePayloadstartEndDate);
+      }
+    }
+
+
+    let payload: any = {
+
+      "registrationStatus": "Canceled",
+      "eventId": this.selectedRowJson.event_Id,
+      "participantId": this.loggedInUser,
+      "enrollmentId": this.registrationId,
+      "eventPartiRegId": this.eventData.eventPartiRegId,
+      "eventType": this.selectedRowJson.event_type,
+      "group": "Group 1",
+      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueId,
+      "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
+      "categories": this.catArray,
+      "questionnaire": questionnaireData
+
+    }
+
+    this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
+      if (res.data.status == "success") {
+        console.log("res", res);
+        this.uiCommonUtils.showSnackBar("Event registration canceled successfully!", "success", 3000);
+      }
+      else {
+        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+      }
+
+    });
+
+  }
+
+  onCancelClick() {
+    this.router.navigate(['/dashboard/eventRegistration/']);
   }
 
 
