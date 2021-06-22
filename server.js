@@ -196,7 +196,7 @@ app.get('/api/getEventCategory', function (req, res) {
 app.get('/api/getEventData', function (req, res) {
   console.log("getEventData called with : " + req.query.user);
   let loggedInUser = decodeUser(req)
-  try {
+  try { 
     processRequest.getEventData(loggedInUser, req.query.eventType)
       .then((data) => {
         //     console.log(`Returning with response : ${JSON.stringify(data)}`)
@@ -493,9 +493,10 @@ app.get('/api/getEventQuestionnaireData', function (req, res) {
 
 
 app.get('/api/getEventForRegistration', function (req, res) {
-  console.log("getEventForRegistration called with : " + JSON.stringify(req.query.fbuid));
+  console.log("getEventForRegistration called with ");
+  let loggedInUser = decodeUser(req)
   try {
-    processEventRequest.getEventForRegistration()
+    processEventRequest.getEventForRegistration(loggedInUser)
       .then((data) => {
         // console.log(`Returning with response : ${JSON.stringify(data)}`)
         res.send(data);
@@ -579,7 +580,7 @@ app.get('/api/getEvent', function (req, res) {
   console.log("getEvent called...");
   let loggedInUser = decodeUser(req)
   try {
-    processEventTemp.getEventById(req.query.id, req.query.isParticipant, loggedInUser)
+    processEventRequest.getEventById(req.query.id, req.query.isParticipant, loggedInUser)
       .then((data) => {
         res.send(data);
         res.end();

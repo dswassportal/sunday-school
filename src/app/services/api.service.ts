@@ -239,6 +239,5 @@ export class ApiService {
     return this.http.post(`${this._baseUrl}/uploadfile?eventId=1234`, formData);
   }
 
-
 }
 
