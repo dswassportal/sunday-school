@@ -1,9 +1,8 @@
-const { query } = require('@angular/animations');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
 const queries = require('./static/reqEveRegOperations_queries');
-
+const common = require('./dbCommonUtills');
 
 
 async function getEventDef(eventId, loggedInUserId) {
@@ -36,7 +35,7 @@ async function getEventDef(eventId, loggedInUserId) {
                             catName: row.cat_name,
                             catMapId: row.event_cat_map_id,
                             catId: row.event_category_id,
-                            hasSelected : row.has_cat_selected
+                            hasSelected: row.has_cat_selected
                         })
                     }
 
@@ -86,7 +85,7 @@ async function getEventDef(eventId, loggedInUserId) {
                             catName: row.cat_name,
                             catMapId: row.event_cat_map_id,
                             catId: row.event_category_id,
-                            hasSelected : row.has_cat_selected
+                            hasSelected: row.has_cat_selected
                         })
 
                     let attIndex = response.attachments.findIndex((item) => item.attId == row.event_attachment_id);
@@ -132,6 +131,18 @@ async function getEventDef(eventId, loggedInUserId) {
         if (eveConfigRes.rowCount > 0)
             response.sectionConfig = eveConfigRes.rows[0].event_sec_config
 
+        response.familyMembers = []    
+        //code to get family members of logged in User
+        await common.getFamilyTreeByFHeadID(loggedInUserId, client).then((houseHoldData) => {
+            for(let member of houseHoldData){
+                response.familyMembers.push({
+                        'userId': member.user_id,
+                        'name':  `${member.title}. ${member.first_name} ${member.middle_name} ${member.last_name}`,
+                        'relationship': member.relationship
+                })
+            }
+        });
+
         return {
             data: {
                 status: "success",
@@ -157,8 +168,8 @@ async function eventRegistration(eventData, loggedInUser) {
         let eventType = eventData.eventType;
         let registrationId = eventData.enrollmentId;
 
-        if(!eventData.registrationStatus) throw 'Registration status was not provided.'
-        
+        if (!eventData.registrationStatus) throw 'Registration status was not provided.'
+
         if (eventData.enrollmentId === null || eventData.enrollmentId === undefined) {
             //Case when there is a new registration.(t_event_participant_registration)
             registrationId = await generateUniqueEnrollmentId(client);
