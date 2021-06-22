@@ -998,24 +998,36 @@ async function getEventData(userId, eventType) {
 
         }
 
+        let res;
 
-        if (eventType === 'upcoming_events' || eventType === 'registered_events' || eventType === 'completed_events') {
-            getEventData =
-                `select distinct event_id, event_name "name", event_type, 
-                            event_desciption description, event_start_date start_date, event_end_date end_date, 
-                            registration_start_date, registration_end_date
-                            from v_event ve
-                            where
-                            ve.event_id ${condition} (select event_id 
-                                    from t_event_participant_registration tepr 
-                                    where tepr.user_id = ${userId}
-                                )
-                            ${condition2}
-                            and  ve.is_deleted = false;`;
+        if (eventType === 'upcoming_events'){
+            res = await client.query(reqOpQueries.getUpcomingEvents, [userId]);
+        } else if(eventType === 'registered_events'){
+            res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [ userId ]);
+        }else if(eventType === 'completed_events'){
+
+        }
+
+            // getEventData =
+            //     `select distinct event_id, event_name "name", event_type, 
+            //                 event_desciption description, event_start_date start_date, event_end_date end_date, 
+            //                 registration_start_date, registration_end_date
+            //                 from v_event ve
+            //                 where
+            //                 ve.event_id ${condition} (select event_id 
+            //                         from t_event_participant_registration tepr 
+            //                         where tepr.user_id = ${userId}
+            //                     )
+            //                 ${condition2}
+            //                 and  ve.is_deleted = false;`;
+
+
+        else{
+             res = await client.query(getEventData);
         }
 
 
-        let res = await client.query(getEventData);
+        
 
         if (eventType === 'attendance') {
 
@@ -1062,6 +1074,10 @@ async function getEventData(userId, eventType) {
                     events.registrationStartDate = row.registration_start_date;
                     events.registrationEndDate = row.registration_end_date;
                     events.orgId = row.org_id;
+                    events.participantId = row.participant_id;
+                    events.participantName = row.participant_name;
+                    events.registrationId = row.enrollment_id;
+                    events.registrationStatus = row.registration_status;
                     events.isScoreSubmitted = row.is_score_submitted,
                         eventData.push(events);
                 }
