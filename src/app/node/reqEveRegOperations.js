@@ -5,13 +5,13 @@ const queries = require('./static/reqEveRegOperations_queries');
 const common = require('./dbCommonUtills');
 
 
-async function getEventDef(eventId, loggedInUserId) {
+async function getEventDef(eventId, loggedInUserId, participantId) {
 
     if (!eventId || !loggedInUserId) throw "getEventDef::invalid query parameters recived in request.";
     let client = await dbConnections.getConnection();
     try {
         let response = {};
-        let result = await client.query(queries.getEventData, [eventId, loggedInUserId]);
+        let result = await client.query(queries.getEventData, [eventId, participantId]);
         if (result.rowCount > 0) {
             for (let row of result.rows) {
                 if (response.eventId == undefined) {
