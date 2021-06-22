@@ -1315,7 +1315,7 @@ async function getEventById(eventId) {
         }
 
         event.coordinators = eventCoordinator;
-        event.orgIds = orgIds;
+        event.executedBy = orgIds;
         //  To get Attachments if they exists in system
         let attRes = await client.query(queries.getAttachmentsByEveId, [eventId]);
 
