@@ -124,13 +124,12 @@ const getFamTreeWithEventRegStatus = `with family_tree as (select family_member_
                                     select distinct vu.user_id, 
                                     tepr.event_participant_registration_id,
                                     case when tepr.event_participant_registration_id is not null then true else false end has_registred,
-                                    vu.title,
+                                    concat(vu.title,'. ',vu.first_name,' ', vu.middle_name, ' ', vu.last_name) "name",
                                     tepr.registration_status, 
-                                    vu.first_name, vu.middle_name, vu.last_name,
                                     ft.relationship from v_user vu
                                     join family_tree ft on vu.user_id = ft.user_id
                                     left join t_event_participant_registration tepr on tepr.user_id = ft.user_id
-                                    and tepr.event_id = $1;`;                                        
+                                    and tepr.event_id = $1 where vu.is_approved != false;`;                                        
                                                                 
 
 module.exports = {

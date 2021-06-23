@@ -138,7 +138,7 @@ async function getEventDef(eventId, loggedInUserId, participantId) {
             for (let member of famMemRes.rows) {
                 response.familyMembers.push({
                     'userId': member.user_id,
-                    'name': `${member.title}. ${member.first_name} ${member.middle_name} ${member.last_name}`,
+                    'name': member.name,
                     'relationship': member.relationship,
                     'hasRegistered' : member.has_registred,
                     'registrationStatus' : member.registration_status
