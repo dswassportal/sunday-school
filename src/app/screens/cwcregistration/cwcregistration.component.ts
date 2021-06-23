@@ -24,6 +24,7 @@ export class CwcregistrationComponent implements OnInit {
   venuesDataFormGroup: any;
   participantDataFormGroup: any;
   dropdownSettingsVenues: any;
+  dropdownSettingsFamilyMembers: any;
   dropdownSettingsRoles: any;
   dropdownSettingsGroup: any;
   venueList: any;
@@ -33,11 +34,13 @@ export class CwcregistrationComponent implements OnInit {
   eventStartDate: any;
   eventCategoriesData: any;
   questionnaireData: any;
-  areCategoriesChecked: any;
+
   isUpdateBtnRequired: any;
   registrationId: any;
   isCancelRegiBtnRequired: any;
   eventEndDate: any;
+  familyMembersData: any;
+  isPraticipantNameReadonly: boolean = false;
 
   isVenueRequired: any;
   isCategoryRequired: any;
@@ -112,6 +115,17 @@ export class CwcregistrationComponent implements OnInit {
     maxHeight: 100
   };
 
+  dropdownSettingsForFamilyMembers: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'userId',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 1,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
 
   ngOnInit(): void {
 
@@ -137,6 +151,7 @@ export class CwcregistrationComponent implements OnInit {
       this.isTtcEvent = false;
     }
 
+    this.dropdownSettingsFamilyMembers = this.dropdownSettingsForFamilyMembers;
     this.dropdownSettingsVenues = this.dropdownSettingsForVenues;
     this.dropdownSettingsRoles = this.dropdownSettingsForRoles;
 
@@ -149,6 +164,7 @@ export class CwcregistrationComponent implements OnInit {
     });
 
     this.participantDataFormGroup = this.formBuilder.group({
+      participantName: new FormControl(''),
       role: new FormControl(''),
       group: new FormControl('')
     });
@@ -181,19 +197,31 @@ export class CwcregistrationComponent implements OnInit {
     if (this.selectedEventType === 'registered_events' || this.selectedEventType === 'completed_events')
       addQParam = true;
 
+    let participantIdOrLoggedInUserId: any;
+    if (this.selectedRowJson.participantId) {
+      participantIdOrLoggedInUserId = this.selectedRowJson.participantId;
+    }
+    else {
+      participantIdOrLoggedInUserId = this.loggedInUser;
+    }
 
-    this.apiService.callGetService(`getEventDef?eventId=${this.selectedRowJson.event_Id}`).subscribe((res) => {
+    this.apiService.callGetService(`getEventDef?eventId=${this.selectedRowJson.event_Id}&participantId=${participantIdOrLoggedInUserId}`).subscribe((res) => {
 
 
       this.isUpdateBtnRequired = false;
-      this.venueList = res.data.eventData.venues;
       this.eventData = res.data.eventData;
+      this.venueList = res.data.eventData.venues;
+   
       this.regEndDate = this.eventData.regEndDate;
       this.eventStartDate = this.eventData.eventStartDate;
       this.eventEndDate = this.eventData.eventEndDate;
-      this.participantRoles = res.data.eventData.participantRoles;
-      this.eventCategoriesData = res.data.eventData.categories;
+      this.regEndDate = new Date(this.regEndDate).toLocaleDateString("en-us");
+      this.eventStartDate = new Date(this.eventStartDate).toLocaleDateString("en-us");
+      this.eventEndDate = new Date(this.eventEndDate).toLocaleDateString("en-us");
 
+      this.participantRoles = res.data.eventData.participantRoles;
+      this.familyMembersData = res.data.eventData.familyMembers;
+    
 
       this.isVenueRequired = this.eventData.sectionConfig.isVenueRequired;
       this.isCategoryRequired = this.eventData.sectionConfig.isCategoryRequired;
@@ -203,9 +231,7 @@ export class CwcregistrationComponent implements OnInit {
       this.isSingleDayEvent = this.eventData.sectionConfig.isSingleDayEvent;
 
 
-
-
-      if (this.eventData.registrationStatus == "Registered") {
+      if (this.eventData.registrationStatus == "Registered" && this.selectedEventType === 'registered_events') {
         this.isCancelRegiBtnRequired = true;
       }
       else {
@@ -213,11 +239,7 @@ export class CwcregistrationComponent implements OnInit {
       }
 
 
-
-      this.regEndDate = new Date(this.regEndDate).toLocaleDateString("en-us");
-      this.eventStartDate = new Date(this.eventStartDate).toLocaleDateString("en-us");
-      this.eventEndDate = new Date(this.eventEndDate).toLocaleDateString("en-us");
-
+     
       if (this.selectedEventType === 'registered_events') {
 
         this.isUpdateBtnRequired = true;
@@ -232,8 +254,18 @@ export class CwcregistrationComponent implements OnInit {
           roleDataArray.push(roleData);
         }
 
+        let participantName: any = [];
+        if (this.selectedRowJson.participantId != null) {
+          let participantData: any = {
+            "userId": this.selectedRowJson.participantId,
+            "name": this.selectedRowJson.participantName
+          }
+          participantName.push(participantData);
+        }
+
 
         this.participantDataFormGroup.patchValue({
+          participantName: participantName,
           role: roleDataArray
         });
 
@@ -241,14 +273,41 @@ export class CwcregistrationComponent implements OnInit {
           venues: res.data.eventData.selectedVenue
         });
 
+        this.isPraticipantNameReadonly = true;
+
+       
+          // hasRegistered: true
+          // name: "Mr. Mark hick Day"
+          // registrationStatus: "Registered"
+          // relationship: "Family Head"
+          // userId: 1358
+
+        this.eventCategoriesData = res.data.eventData.categories;
         this.questionnaireData = res.data.eventData.questionnaire;
         this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));
 
       }
-      else {
+      if (this.selectedEventType === 'upcoming_events') {
 
-        this.areCategoriesChecked = false;
+        this.isPraticipantNameReadonly = false;
+
+        this.eventCategoriesData = res.data.eventData.categories;
+        for(let row of this.eventCategoriesData){
+          row.hasSelected = false;
+        }
+
+        let tempFamilyMembersdata: any;
+        for(let row of this.familyMembersData){
+          if(row.hasRegistered == false){
+            tempFamilyMembersdata.push(row);
+          }
+        }
+        this.familyMembersData = tempFamilyMembersdata;
+
         this.questionnaireData = res.data.eventData.questionnaire;
+        for(let row of this.questionnaireData){
+          row.answer = null;
+        }
         this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));
 
       }
@@ -386,14 +445,6 @@ export class CwcregistrationComponent implements OnInit {
 
 
 
-
-
-
-
-
-
-
-
   onRegisterEventClick() {
 
 
@@ -418,12 +469,18 @@ export class CwcregistrationComponent implements OnInit {
       }
     }
 
+    let participantId: any;
+    let participantNameData = this.participantDataFormGroup.value.participantName;
+    for (let row of participantNameData) {
+      participantId = row.userId;
+    }
+
 
     let payload: any = {
 
       "registrationStatus": "Registered",
       "eventId": this.selectedRowJson.event_Id,
-      "participantId": this.loggedInUser,
+      "participantId": participantId,
       "eventType": this.selectedRowJson.event_type,
       "group": "Group 1",
       "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueId,
@@ -439,7 +496,7 @@ export class CwcregistrationComponent implements OnInit {
         this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
       }
       else {
-        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+        this.uiCommonUtils.showSnackBar("Please fill all mandatory fields!", "error", 3000);
       }
 
     });
@@ -528,12 +585,18 @@ export class CwcregistrationComponent implements OnInit {
       }
     }
 
+    let participantId: any;
+    let participantNameData = this.participantDataFormGroup.value.participantName;
+    for (let row of participantNameData) {
+      participantId = row.userId;
+    }
+
 
     let payload: any = {
 
       "registrationStatus": "Registered",
       "eventId": this.selectedRowJson.event_Id,
-      "participantId": this.loggedInUser,
+      "participantId": participantId,
       "enrollmentId": this.registrationId,
       "eventPartiRegId": this.eventData.eventPartiRegId,
       "eventType": this.selectedRowJson.event_type,
@@ -584,12 +647,18 @@ export class CwcregistrationComponent implements OnInit {
       }
     }
 
+    let participantId: any;
+    let participantNameData = this.participantDataFormGroup.value.participantName;
+    for (let row of participantNameData) {
+      participantId = row.userId;
+    }
+
 
     let payload: any = {
 
       "registrationStatus": "Canceled",
       "eventId": this.selectedRowJson.event_Id,
-      "participantId": this.loggedInUser,
+      "participantId": participantId,
       "enrollmentId": this.registrationId,
       "eventPartiRegId": this.eventData.eventPartiRegId,
       "eventType": this.selectedRowJson.event_type,

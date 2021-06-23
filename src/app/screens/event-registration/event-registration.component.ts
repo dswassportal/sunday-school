@@ -13,47 +13,48 @@ import { uiCommonUtils } from '../../common/uiCommonUtils';
 export class EventRegistrationComponent implements OnInit {
 
   term: any;
-  columnDefs!:any[];
+  columnDefs!: any[];
   rowData: any;
-  gridOptions:any;
-  eventId:any;
-  parentValue: any ;
-  gridApi:any;
-  data:any;
-  params:any;
+  gridOptions: any;
+  eventId: any;
+  parentValue: any;
+  gridApi: any;
+  data: any;
+  params: any;
   loggedInUser: any;
   userMetaData: any;
-  selectedEventType:any;
+  selectedEventType: any;
 
-  constructor(private router : Router,private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
-              private eventRegistrationDataService:EventRegistrationDataService) { }
+  constructor(private router: Router, private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
+    private eventRegistrationDataService: EventRegistrationDataService) { }
 
   ngOnInit(): void {
 
     this.userMetaData = this.uiCommonUtils.getUserMetaDataJson();
     this.loggedInUser = this.userMetaData.userId;
-    
-    
+
+
     this.columnDefs = [
-      { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true },
-      { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true},
-      { headerName: 'Description', field: 'description', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true,  },
-      { headerName: 'Event Start Date', field: 'startDate', suppressSizeToFit: true, flex:1,resizable: true,sortable: true, filter: true, 
-          cellRenderer: (data:any) => {
+      { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+      { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+      {
+        headerName: 'Event Start Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+        cellRenderer: (data: any) => {
           return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-            }
+        }
       },
-      { headerName: 'Event End Date', field: 'endDate', suppressSizeToFit:true,flex:1,resizable: true, sortable: true, filter: true,
-          cellRenderer: (data:any) => {
-            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-            },
+      {
+        headerName: 'Event End Date', field: 'endDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+        cellRenderer: (data: any) => {
+          return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+        },
       },
     ];
-    
 
 
 
-    this.onFilteringRadioButtonChange({value: 'upcoming_events' });
+
+    this.onFilteringRadioButtonChange({ value: 'upcoming_events' });
 
 
     this.gridOptions = {
@@ -75,12 +76,79 @@ export class EventRegistrationComponent implements OnInit {
     console.log("event type is : " + this.selectedEventType);
     this.getAllEventsData(event.value);
 
-    
-    
+
+
+    if (event.value == "upcoming_events") {
+      this.columnDefs = [
+        { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        {
+          headerName: 'Registration Deadline', field: 'registrationEndDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          cellRenderer: (data: any) => {
+            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+          },
+        },
+        {
+          headerName: 'Event Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          cellRenderer: (data: any) => {
+            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+          }
+        },
+      ];
+    }
+    if (event.value == "registered_events") {
+      this.columnDefs = [
+        { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        {
+          headerName: 'Registration Deadline', field: 'registrationEndDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          cellRenderer: (data: any) => {
+            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+          },
+        },
+        {
+          headerName: 'Event Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          cellRenderer: (data: any) => {
+            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+          }
+        },
+        {
+          headerName: 'Registered On', field: 'registeredOn', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          cellRenderer: (data: any) => {
+            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+          }
+        },
+        { headerName: 'Registered By', field: 'registeredBy', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Registration Id', field: 'registrationId', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Registration Status', field: 'registrationStatus', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Participant Name', field: 'participantName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+
+      ];
+    }
+    if (event.value == "completed_events") {
+      this.columnDefs = [
+        { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        {
+          headerName: 'Event Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          cellRenderer: (data: any) => {
+            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+          }
+        },
+        { headerName: 'Registration Id', field: 'registrationId', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Participant Name', field: 'participantName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Result', field: '', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+      ];
+
+    }
+
+
+
+
   }
 
-  getAllEventsData(eventType:string){
-     this.apiService.callGetService('getEventData?eventType='+eventType).subscribe((res) => {
+  getAllEventsData(eventType: string) {
+    this.apiService.callGetService('getEventData?eventType=' + eventType).subscribe((res) => {
       this.rowData = res.data.metaData.eventData;
     });
 
@@ -91,32 +159,32 @@ export class EventRegistrationComponent implements OnInit {
     this.data = params.value;
   }
 
-  getEventDataForRegistration(){
+  getEventDataForRegistration() {
     this.apiService.callGetService('getEventForRegistration').subscribe((res) => {
       console.log('These are all the events from database For Registration : ');
       console.log(res.data.metaData);
       this.rowData = res.data.metaData.eventData;
       this.eventId = res.data.metaData.eventData[0].event_Id;
-      console.log("Event Id is : " +this.eventId);
+      console.log("Event Id is : " + this.eventId);
 
       //this.events = this.rowData
     });
   }
-  onGridReady(params:any) {
+  onGridReady(params: any) {
     this.gridApi = params.api;
   }
 
-  onRowClicked(event:any){    
+  onRowClicked(event: any) {
     //this.router.navigate(['/dashboard/editevent']);
     //this.router.navigate(['/dashboard/createevent/',event]);
     console.log("Event data : " + event.data);
     this.eventRegistrationDataService.getDataService().setSelectedRowData(event.data);
-    this.parentValue = this.router.navigate(['/dashboard/cwcregistration/',this.selectedEventType]);
+    this.parentValue = this.router.navigate(['/dashboard/cwcregistration/', this.selectedEventType]);
 
     //this.eventRegistrationDataService.getDataService().setselectedEventData(event.value);
     //this.parentValue = this.router.navigate(['/dashboard/cwcregistration/']);
     //this.parentValue = 'this.child';
-    
+
   }
 
 
