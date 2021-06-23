@@ -1286,7 +1286,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             ];
 
             let result = await client.query(updateStdntAcaDtl, updateStdntAcaDtlValues);
-            console.log("result", result.rowCount);
+            // console.log("result", result.rowCount);
 
             if (result.rowCount == 0) {
                 const insertStdntAcaDtl = `INSERT INTO t_student_academic_dtl 
@@ -1319,7 +1319,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                 ];
                 await client.query(insertStdntAcaDtl, insertStdntAcaDtlValues);
             }
-            console.log("111");
+            // console.log("111");
         }
 
 
@@ -1342,7 +1342,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
 
 
             let result1 = await client.query(updateSundaySchoolDtls, updateSundaySchoolDtlsValues);
-            console.log("result1.rowCount", result1.rowCount);
+            // console.log("result1.rowCount", result1.rowCount);
 
             if (result1.rowCount == 0) {
                 const insertSundaySchoolDtls = `INSERT INTO t_student_sundayschool_dtl 
@@ -1388,10 +1388,26 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                     if (details.userId !== undefined && details.userId !== null && details.userId !== '') {
                         console.log("Member already exists, Updating  user general information...");
 
+                        //To update t_user Table
+                        let tUserRes = await client.query(reqOpQueries.updateTUserForMember,
+                            [details.title, details.firstName, details.middleName, details.lastName,
+                            userData.updatedBy, new Date().toUTCString(), details.userId]);
+                        if (tUserRes.rowCount > 0)
+                            console.debug(` ${details.userId} member details has been updated(in t_user table)`);
+
+                        //To update t_person Table
+                        let tPersonRes = await client.query(reqOpQueries.updateTPersonForMember,
+                            [details.dob == '' ? null : details.dob, details.mobileNo,
+                            details.baptismalName, userData.updatedBy, new Date().toUTCString(), details.userId]);
+                        if (tPersonRes.rowCount > 0)
+                            console.debug(` ${details.userId} member details has been updated(in t_person table)`);
+
                         let updatePerRelRes = await client.query(reqOpQueries.updateRelationship,
-                            [details.relationship, false, userData.updatedBy, new Date().toUTCString(), details.userId, userData.userId]);
+                            [details.relationship, false, userData.updatedBy, new Date().toUTCString(),
+                            details.userId, userData.userId]);
                         if (updatePerRelRes.rowCount > 0)
-                            console.debug(` ${details.userId} member relation has been updated!`)
+                            console.debug(` ${details.userId} member relation has been updated(in t_person_relationship table)`)
+
                     } else {
 
                         //query and condition to check whether the given first name, last name, email, and relation to that family already exists or not.
@@ -1428,7 +1444,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                         console.debug(`Member role assigned to new member, user_role_map_id is ${roleAssignment.rows[0].user_role_map_id}`);
 
                                     let tPerRelMap = await client.query(reqOpQueries.insertPersonRelationship,
-                                        [userData.userId, newUserId, details.relationship, userData.updatedBy, new Date().toISOString()]);
+                                        [userData.userId, newUserId, details.relationship, userData.updatedBy, new Date().toUTCString()]);
 
                                     if (tPerRelMap.rowCount > 0)
                                         console.debug(`New member's '${details.relationship}' relationship inserted,  relationship_id is ${tPerRelMap.rows[0].relationship_id}`);
@@ -1451,7 +1467,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                     let tUserRes = await client.query(reqOpQueries.insertMemberIntoUserTbl,
                                         [userData.orgId, details.emailId, fbuid, details.title,
                                         details.firstName, details.middleName, details.lastName,
-                                        userData.updatedBy, new Date().toISOString(), 'member', false]);
+                                        userData.updatedBy, new Date().toUTCString(), 'member', false]);
 
                                     if (tUserRes.rowCount > 0) {
                                         let newUserId = tUserRes.rows[0].user_id;
@@ -1460,7 +1476,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                         //inserting member details into t_person table
                                         let tPersonres = await client.query(reqOpQueries.insertMemberIntoPersonTbl,
                                             [newUserId, details.dob == '' ? null : details.dob,
-                                                details.mobileNo, userData.updatedBy, new Date().toISOString(), details.baptismalName])
+                                                details.mobileNo, userData.updatedBy, new Date().toUTCString(), details.baptismalName])
                                         if (tPersonres.rowCount > 0)
                                             console.debug(`New member's data inserted in t_person table for user_is ${newUserId}.`);
 
@@ -1470,7 +1486,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                             console.debug(`Member role assigned to new member, user_role_map_id is ${roleAssignment.rows[0].user_role_map_id}`);
 
                                         let tPerRelMap = await client.query(reqOpQueries.insertPersonRelationship,
-                                            [userData.userId, newUserId, details.relationship, userData.updatedBy, new Date().toISOString()]);
+                                            [userData.userId, newUserId, details.relationship, userData.updatedBy, new Date().toUTCString()]);
 
                                         if (tPerRelMap.rowCount > 0)
                                             console.debug(`New member's '${details.relationship}' relationship inserted,  relationship_id is ${tPerRelMap.rows[0].relationship_id}`);

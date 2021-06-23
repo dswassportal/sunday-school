@@ -80,7 +80,15 @@ const insertPersonRelationship = `INSERT INTO t_person_relationship(
                                       
  const deleteMemberRelationship = `UPDATE t_person_relationship
                                     SET  is_deleted=$1, updated_by=$2, updated_date=$3
-                                    WHERE family_head_id= $4 and family_member_id not in ($5) returning relationship_id;`;                                     
+                                    WHERE family_head_id= $4 and family_member_id not in ($5) returning relationship_id;`; 
+                                    
+const updateTUserForMember = `UPDATE t_user
+                            SET title=$1, first_name=$2, middle_name=$3, last_name=$4, updated_by=$5, updated_date=$6
+                            WHERE user_id= $7;`;            
+                            
+const updateTPersonForMember = `UPDATE t_person
+                                SET  dob=$1, mobile_no=$2, baptismal_name=$3, updated_by=$4, updated_date=$5
+                                WHERE user_id= $6;`;                            
 
 
 module.exports= {
@@ -94,5 +102,7 @@ module.exports= {
     insertMemberIntoPersonTbl,
     assignMemberRoleToUsr,
     insertPersonRelationship,
-    deleteMemberRelationship
+    deleteMemberRelationship,
+    updateTUserForMember,
+    updateTPersonForMember
 }                                                
