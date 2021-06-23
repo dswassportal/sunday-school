@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -393,7 +392,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         baptismalName: e.baptismalName,
         dob: e.dob,
         mobileNo: e.mobileNo,
-        emailId: e.emailId
+        emailId: e.emailId,
+        userId : e.userId
       }));
     });
     return formArray;
@@ -436,6 +436,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       dob: new FormControl('',),
       mobileNo: new FormControl('', [Validators.required]),
       emailId: new FormControl('', [Validators.required, Validators.email]),
+      userId : new FormControl(''),
     });
   }
   //event handler for the select element's change event
