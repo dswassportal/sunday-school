@@ -131,17 +131,20 @@ async function getEventDef(eventId, loggedInUserId, participantId) {
         if (eveConfigRes.rowCount > 0)
             response.sectionConfig = eveConfigRes.rows[0].event_sec_config
 
-        response.familyMembers = []    
+        response.familyMembers = []
         //code to get family members of logged in User
-        await common.getFamilyTreeByFHeadID(loggedInUserId, client).then((houseHoldData) => {
-            for(let member of houseHoldData){
+        let famMemRes = await client.query(queries.getFamTreeWithEventRegStatus, [eventId, participantId]);
+        if (famMemRes.rowCount > 0) {
+            for (let member of famMemRes.rows) {
                 response.familyMembers.push({
-                        'userId': member.user_id,
-                        'name':  `${member.title}. ${member.first_name} ${member.middle_name} ${member.last_name}`,
-                        'relationship': member.relationship
+                    'userId': member.user_id,
+                    'name': `${member.title}. ${member.first_name} ${member.middle_name} ${member.last_name}`,
+                    'relationship': member.relationship,
+                    'hasRegistered' : member.has_registred,
+                    'registrationStatus' : member.registration_status
                 })
             }
-        });
+        }
 
         return {
             data: {

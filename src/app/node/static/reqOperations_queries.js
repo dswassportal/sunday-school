@@ -13,7 +13,8 @@ const getAllregisteredEventsWithFamilyMemrs = `select distinct  te.event_id, te.
                                                     tepr.enrollment_id, tepr.registration_status, 
                                                     tu.user_id participant_id,
                                                     concat(tu.title,'. ', tu.first_name,' ',tu.middle_name, ' ', tu.last_name) participant_name,
-                                                    tepr.enrollment_id, tepr.registration_status
+                                                    concat(tu2.title,'. ', tu2.first_name,' ',tu2.middle_name, ' ', tu2.last_name) registered_by,
+                                                    tepr.created_date registered_on
                                                 from t_event te join t_event_organization teo on te.event_id = teo.event_id                
                                                 and teo.org_id in ( with recursive child_orgs as (
                                                                          select org_id org_id, parent_org_id parent_id from t_organization parent_org
@@ -28,7 +29,8 @@ const getAllregisteredEventsWithFamilyMemrs = `select distinct  te.event_id, te.
                                                 and tepr.is_deleted != true 
                                                 and tepr.user_id in (select family_member_id from t_person_relationship tpr 
                                                     where tpr.family_head_id = $1 union select $1 ) 
-                                                join	t_user tu on tepr.user_id = tu.user_id and tu.is_deleted != true; `;
+                                                join	t_user tu on tepr.user_id = tu.user_id and tu.is_deleted != true
+                                                join	t_user tu2 on tepr.created_by = tu2.user_id ; `;
                                                 
 const getUpcomingEvents = `select distinct te.event_id, te."name", te.event_type, 
                            te.start_date, te.end_date, 

@@ -112,7 +112,25 @@ const deleteCatMapping = `update t_participant_event_reg_cat
                                 
 const updateRegQuestionRes = `UPDATE t_event_question_response
                                 SET answer=$1, updated_by=$2, updated_date=$3
-                                WHERE event_participant_registration_id=$4 and question_id=$5 returning question_response_id;`;                                
+                                WHERE event_participant_registration_id=$4 and question_id=$5 returning question_response_id;`;        
+                                
+                              
+const getFamTreeWithEventRegStatus = `with family_tree as (select family_member_id user_id, relationship  
+                                    from t_person_relationship tpr 
+                                    where tpr.family_head_id = $2
+                                    and is_deleted != true
+                                    union select $2, 'Family Head'
+                                    )
+                                    select distinct vu.user_id, 
+                                    tepr.event_participant_registration_id,
+                                    case when tepr.event_participant_registration_id is not null then true else false end has_registred,
+                                    vu.title,
+                                    tepr.registration_status, 
+                                    vu.first_name, vu.middle_name, vu.last_name,
+                                    ft.relationship from v_user vu
+                                    join family_tree ft on vu.user_id = ft.user_id
+                                    left join t_event_participant_registration tepr on tepr.user_id = ft.user_id
+                                    and tepr.event_id = $1;`;                                        
                                                                 
 
 module.exports = {
@@ -126,7 +144,8 @@ module.exports = {
     updateEventRegistration,
     updateEventRegCatMapping,
     deleteCatMapping,
-    updateRegQuestionRes
+    updateRegQuestionRes,
+    getFamTreeWithEventRegStatus
 }                            
 
 

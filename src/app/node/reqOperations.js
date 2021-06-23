@@ -1078,7 +1078,9 @@ async function getEventData(userId, eventType) {
                     events.participantName = row.participant_name;
                     events.registrationId = row.enrollment_id;
                     events.registrationStatus = row.registration_status;
-                    events.isScoreSubmitted = row.is_score_submitted,
+                    events.isScoreSubmitted = row.is_score_submitted;
+                    events.registeredBy = row.registered_by;
+                    events.registeredOn = row.registered_on;
                         eventData.push(events);
                 }
                 metadata.eventData = eventData;
