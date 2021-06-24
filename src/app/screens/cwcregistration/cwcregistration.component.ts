@@ -296,7 +296,7 @@ export class CwcregistrationComponent implements OnInit {
           row.hasSelected = false;
         }
 
-        let tempFamilyMembersdata: any;
+        let tempFamilyMembersdata = [];
         for(let row of this.familyMembersData){
           if(row.hasRegistered == false){
             tempFamilyMembersdata.push(row);
