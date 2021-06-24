@@ -231,12 +231,12 @@ export class ApiService {
   }
 
 
-  uploadfiles(formData: any){
+  uploadfiles(url: string,formData: any){
     let headerObj = new HttpHeaders({
       'Authorization': localStorage.getItem('chUserToken')!,
       'Content-Type': 'multipart/form-data'
     });
-    return this.http.post(`${this._baseUrl}/uploadfile?eventId=1234`, formData);
+    return this.http.post(`${this._baseUrl}/${url}`, formData);
   }
 
 }
