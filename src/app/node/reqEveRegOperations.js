@@ -140,8 +140,8 @@ async function getEventDef(eventId, loggedInUserId, participantId) {
                     'userId': member.user_id,
                     'name': member.name,
                     'relationship': member.relationship,
-                    'hasRegistered' : member.has_registred,
-                    'registrationStatus' : member.registration_status
+                    'hasRegistered': member.has_registred,
+                    'registrationStatus': member.registration_status
                 })
             }
         }
@@ -334,7 +334,8 @@ async function eventRegistration(eventData, loggedInUser) {
 async function generateUniqueEnrollmentId(client) {
 
     for (let i = 0; i < 50; i++) {
-        let generatedNo = Math.floor(Math.random() * (999999 - 100000 + 1) + 100000);
+        //let generatedNo = Math.floor(Math.random() * (999999 - 100000 + 1) + 100000);
+        let generatedNo = common.generateRandomString(6);
         let ranNoResult = await client.query(queries.checkGeneratedEnrollmentNoExists,
             [generatedNo]);
         if (ranNoResult.rows[0].ran_no == false) {

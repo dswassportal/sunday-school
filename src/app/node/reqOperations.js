@@ -297,21 +297,20 @@ async function processGetUserMetaDataRequest(uid) {
                 for (let row of res.rows) {
 
                     let index = menus.findIndex((item => item.name == row.menu_name))
-                    if (index == -1) {
-                        let tempJson = {
+                    if (index === -1 && row.menu_name !== null) {
+                        menus.push({
                             name: row.menu_name,
                             url: row.menu_url,
                             icon: row.menu_icon
-                        };
-                        menus.push(tempJson);
-
-                        if (roles.indexOf(row.role_name) < 0)
+                        });
+                        
+                        if (roles.indexOf(row.role_name)  === -1 && row.role_name !== null)
                             roles.push(row.role_name)
                     }
 
                     // if (menus.indexOf(row.menu_name) < 0)
                     //     menus.push(row.menu_name)
-                    if (permissions.indexOf(row.perm_name) < 0) {
+                    if (permissions.indexOf(row.perm_name) === -1 && row.perm_name !== null) {
                         permissions.push(row.perm_name)
                     }
 

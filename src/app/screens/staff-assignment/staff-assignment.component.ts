@@ -70,6 +70,7 @@ export class StaffAssignmentComponent implements OnInit {
   dropdownSettingsPrincipalId: any;
   selectedTerm: any;
 
+  canAssignPrincipal:boolean = false;
 
 
 
@@ -131,6 +132,8 @@ export class StaffAssignmentComponent implements OnInit {
     this.userMetaData = this.uiCommonUtils.getUserMetaDataJson();
     this.loggedInUser = this.userMetaData.userId;
     this.rolesList = this.userMetaData.roles;
+
+    this.canAssignPrincipal = this.uiCommonUtils.hasPermissions("can_assign_principal");
 
     this.dropdownSettingsSundaySchoolTermsList = this.dropdownSettingForSundaySchoolTermsList;
     this.dropdownSettingsTeacher = this.dropdownSettingForTeacher;
@@ -247,11 +250,12 @@ export class StaffAssignmentComponent implements OnInit {
 
 
     //if(this.rolesList)
-    if (this.rolesList.indexOf("Principal") !== -1) { // if logged in user is Principal
-      //alert("Value exists!")
-      this.showHidePrincipal = false;
-      this.staffDataFormGroup.value.principal = this.loggedInUser;
-    }
+    // if (this.rolesList.indexOf("Principal") !== -1) { // if logged in user is Principal
+    //   //alert("Value exists!")
+    //   this.showHidePrincipal = false;
+    //   this.staffDataFormGroup.value.principal = this.loggedInUser;
+    // }
+
     let rowData = event;
     this.selectedUserData = event.data;
     this.schoolId = event.data.orgId;

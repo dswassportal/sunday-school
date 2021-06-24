@@ -63,11 +63,10 @@
 
             </div>
 
-            <div class="row" *ngIf="showHidePrincipal">
-
+            <div class="row">
             <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="principalId"
               placeholder="Principal" [settings]="dropdownSettingsPrincipalId" [data]="principalList"
-              formControlName="principal" (onSelectAll)="onSelectAll($event)">
+              formControlName="principal" (onSelectAll)="onSelectAll($event)" [disabled]="!canAssignPrincipal">
             </ng-multiselect-dropdown>
 
               <!-- <mat-form-field class="col-md-6">
@@ -80,7 +79,7 @@
 
             <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="vicePrincipalId"
               placeholder="Vice Principal" [settings]="dropdownSettingsPrincipalId" [data]="principalList"
-              formControlName="vicePrincipal" (onSelectAll)="onSelectAll($event)">
+              formControlName="vicePrincipal" (onSelectAll)="onSelectAll($event)" [disabled]="!canAssignPrincipal">
             </ng-multiselect-dropdown>
 
 

@@ -1,5 +1,5 @@
 const queries = require(`${__dirname}/static/dbCommonUtils_queries.js`);
-
+const randomstring = require("randomstring");
 
 
 async function getFamilyTreeByFHeadID(fhId, client) {
@@ -11,6 +11,19 @@ async function getFamilyTreeByFHeadID(fhId, client) {
     }
 }
 
+
+function generateRandomString(length) {
+
+    return randomstring.generate({
+        length: length,
+        charset: 'alphanumeric',
+        readable: true,
+        capitalization: 'uppercase'
+    });
+
+}
+
 module.exports = {
-    getFamilyTreeByFHeadID
+    getFamilyTreeByFHeadID,
+    generateRandomString
 }
