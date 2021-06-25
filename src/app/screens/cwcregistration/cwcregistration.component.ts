@@ -211,7 +211,7 @@ export class CwcregistrationComponent implements OnInit {
       this.isUpdateBtnRequired = false;
       this.eventData = res.data.eventData;
       this.venueList = res.data.eventData.venues;
-   
+
       this.regEndDate = this.eventData.regEndDate;
       this.eventStartDate = this.eventData.eventStartDate;
       this.eventEndDate = this.eventData.eventEndDate;
@@ -221,7 +221,7 @@ export class CwcregistrationComponent implements OnInit {
 
       this.participantRoles = res.data.eventData.participantRoles;
       this.familyMembersData = res.data.eventData.familyMembers;
-    
+
 
       this.isVenueRequired = this.eventData.sectionConfig.isVenueRequired;
       this.isCategoryRequired = this.eventData.sectionConfig.isCategoryRequired;
@@ -239,7 +239,7 @@ export class CwcregistrationComponent implements OnInit {
       }
 
 
-     
+
       if (this.selectedEventType === 'registered_events') {
 
         this.isUpdateBtnRequired = true;
@@ -275,14 +275,12 @@ export class CwcregistrationComponent implements OnInit {
 
         this.isPraticipantNameReadonly = true;
 
-       
-          // hasRegistered: true
-          // name: "Mr. Mark hick Day"
-          // registrationStatus: "Registered"
-          // relationship: "Family Head"
-          // userId: 1358
-
         this.eventCategoriesData = res.data.eventData.categories;
+        for (let row of this.eventCategoriesData) {
+          if (row.hasSelected == true) {
+            this.catArray.push(row.catMapId);
+          }
+        }
         this.questionnaireData = res.data.eventData.questionnaire;
         this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));
 
@@ -292,20 +290,20 @@ export class CwcregistrationComponent implements OnInit {
         this.isPraticipantNameReadonly = false;
 
         this.eventCategoriesData = res.data.eventData.categories;
-        for(let row of this.eventCategoriesData){
+        for (let row of this.eventCategoriesData) {
           row.hasSelected = false;
         }
 
         let tempFamilyMembersdata = [];
-        for(let row of this.familyMembersData){
-          if(row.hasRegistered == false){
+        for (let row of this.familyMembersData) {
+          if (row.hasRegistered == false) {
             tempFamilyMembersdata.push(row);
           }
         }
         this.familyMembersData = tempFamilyMembersdata;
 
         this.questionnaireData = res.data.eventData.questionnaire;
-        for(let row of this.questionnaireData){
+        for (let row of this.questionnaireData) {
           row.answer = null;
         }
         this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));
@@ -313,9 +311,6 @@ export class CwcregistrationComponent implements OnInit {
       }
 
     });
-
-
-
 
   }
 
@@ -396,34 +391,9 @@ export class CwcregistrationComponent implements OnInit {
   }
 
 
-
-
-
-
-  // addenrollmentId(): FormGroup {
-  //   return this.formBuilder.group({
-  //     enrollmentId: ''
-  //   });
-  // }
-
-
-
-
-
-  /*
-    updateCheckedOptions(categories:any, event:any) {
-      this.categoriesDataFormGroup[categories] = event.target.checked;
-   }
-   */
-  /*
-   checked(item:Boolean){
-    if(this.categoriesDataFormGroup.indexOf(item) != -1){
-      return true;
-    }
-  }
-  */
   catArray: any = [];
   onChange(event: any) {
+
     console.log("Inside the on Change " + JSON.stringify(event.item) + "Seletion : " + event.event.checked);
     if (event.event.checked == true) {
       // if(this.catArray.indexOf(event.item.eventCategoryID) < 0)
@@ -434,14 +404,6 @@ export class CwcregistrationComponent implements OnInit {
     console.log("catArray : " + this.catArray);
 
   }
-
-
-
-
-
-
-
-
 
 
 
