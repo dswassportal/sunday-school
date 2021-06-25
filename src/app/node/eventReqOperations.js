@@ -1154,13 +1154,12 @@ async function getProctorData(userData) {
     try {
         let metadata = {};
         console.log("userData", JSON.stringify(userData));
-        let rolesData = [];
-
+        
         var roles = "'" + userData.rolesData.join("','") + "'";
 
-        let getProctorData = `select distinct user_id, concat(first_name ,' ', last_name) as name 
-        from v_user 
-        where role_name  in (${roles});`
+        let getProctorData = `select distinct user_id, 
+		concat(title,'. ', first_name ,' ',middle_name,' ',last_name,'(', user_org, ')') "name"
+		from v_user where role_name  in (${roles});`;
 
         let res = await client.query(getProctorData);
         if (res && res.rowCount > 0) {
