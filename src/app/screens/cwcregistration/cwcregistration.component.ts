@@ -281,6 +281,7 @@ export class CwcregistrationComponent implements OnInit {
             this.catArray.push(row.catMapId);
           }
         }
+        
         this.questionnaireData = res.data.eventData.questionnaire;
         this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));
 
