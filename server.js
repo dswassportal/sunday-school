@@ -790,9 +790,9 @@ app.get('/api/getRolesByUserId', function (req, res) {
 
 app.post('/api/setStaffAssignment', function (req, res) {
   console.log("setStaffAssignment called...");
-  // let loggedInUser = decodeUser(req)
+  let loggedInUser = decodeUser(req)
   try {
-    processUserRequest.setStaffAssignment(req.body.data)
+    processUserRequest.setStaffAssignment(req.body.data, loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
