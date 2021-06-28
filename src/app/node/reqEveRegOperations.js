@@ -5,146 +5,40 @@ const queries = require('./static/reqEveRegOperations_queries');
 const common = require('./dbCommonUtills');
 
 
-async function getEventDef(eventId, loggedInUserId, participantId) {
+async function getEventDef(eventId, loggedInUserId, participantId, regMethod) {
 
     if (!eventId || !loggedInUserId) throw "getEventDef::invalid query parameters recived in request.";
     let client = await dbConnections.getConnection();
+
     try {
-        let response = {};
-        let result = await client.query(queries.getEventData, [eventId, participantId]);
-        if (result.rowCount > 0) {
-            for (let row of result.rows) {
-                if (response.eventId == undefined) {
-                    response.name = row.event_name;
-                    response.eventId = row.event_id;
-                    response.role = row.role;
-                    response.registrationStatus = row.registration_status;
-                    response.eventPartiRegId = row.event_participant_registration_id;
-                    response.eventType = row.event_type;
-                    response.enrollmentId = row.enrollment_id;
-                    response.description = row.description;
-                    response.eventStartDate = row.start_date;
-                    response.eventEndDate = row.end_date;
-                    response.regStartDate = row.registration_start_date;
-                    response.regEndDate = row.registration_end_date;
-                    response.eventURL = row.event_url;
-
-                    response.categories = []
-                    if (row.event_cat_map_id) {
-                        response.categories.push({
-                            catName: row.cat_name,
-                            catMapId: row.event_cat_map_id,
-                            catId: row.event_category_id,
-                            hasSelected: row.has_cat_selected
-                        })
-                    }
-
-                    response.attachments = []
-                    if (row.event_attachment_id) {
-                        response.attachments.push({
-                            attName: row.attachment_name,
-                            attType: row.attachment_type,
-                            attId: row.event_attachment_id,
-                            attFileName: row.file_name
-                        })
-                    }
-
-                    response.venues = []
-                    if (row.event_venue_id) {
-                        response.venues.push({
-                            venueId: row.venue_id,
-                            venueMapId: row.event_venue_id,
-                            venueName: row.venue_name
-                        })
-                    }
-
-                    response.questionnaire = []
-                    if (row.question_id) {
-                        response.questionnaire.push({
-                            queId: row.question_id,
-                            question: row.question,
-                            answerType: row.answer_type,
-                            answer: row.answer
-                        })
-                    }
-
-                    response.selectedVenue = []
-                    if (row.selected_event_venue_id !== null) {
-                        response.selectedVenue.push({
-                            venueId: row.venue_id,
-                            venueMapId: row.event_venue_id,
-                            venueName: row.venue_name
-                        })
-                    }
-
-                } else {
-
-                    let catIndex = response.categories.findIndex((item) => item.catMapId == row.event_cat_map_id);
-                    if (catIndex === -1 && row.event_cat_map_id != null)
-                        response.categories.push({
-                            catName: row.cat_name,
-                            catMapId: row.event_cat_map_id,
-                            catId: row.event_category_id,
-                            hasSelected: row.has_cat_selected
-                        })
-
-                    let attIndex = response.attachments.findIndex((item) => item.attId == row.event_attachment_id);
-                    if (attIndex === -1 && row.event_attachment_id != null)
-                        response.attachments.push({
-                            attName: row.attachment_name,
-                            attType: row.attachment_type,
-                            attId: row.event_attachment_id,
-                            attFileName: row.file_name
-                        })
-
-                    let venIndex = response.venues.findIndex((item) => item.venueMapId == row.event_venue_id);
-                    if (venIndex === -1)
-                        response.venues.push({
-                            venueId: row.venue_id,
-                            venueMapId: row.event_venue_id,
-                            venueName: row.venue_name
-                        });
-
-                    let queIndex = response.questionnaire.findIndex((item) => item.queId == row.question_id);
-                    if (queIndex === -1)
-                        response.questionnaire.push({
-                            queId: row.question_id,
-                            question: row.question,
-                            answerType: row.answer_type,
-                            answer: row.answer
-                        })
-
-                }
-            }
-        }
-
-
-        //Code to get roles from t_lookup
-        response.participantRoles = [];
-        let lookupRes = await client.query(queries.getParticipantRolesFormLookup);
-        if (lookupRes.rowCount > 0)
-            response.participantRoles = lookupRes.rows[0].parti_role;
 
         //Get event section config.
-        response.sectionConfig = {};
-        let eveConfigRes = await client.query(queries.getEventSectionConfigByEveType, [response.eventType]);
+        let response = {};
+        let temp = {};
+        let eveConfigRes = await client.query(queries.getEventSectionConfigByEveType, [eventId]);
         if (eveConfigRes.rowCount > 0)
-            response.sectionConfig = eveConfigRes.rows[0].event_sec_config
+            temp = eveConfigRes.rows[0].event_sec_config
 
-        response.familyMembers = []
-        //code to get family members of logged in User
-        let famMemRes = await client.query(queries.getFamTreeWithEventRegStatus, [eventId, participantId]);
-        if (famMemRes.rowCount > 0) {
-            for (let member of famMemRes.rows) {
-                response.familyMembers.push({
-                    'userId': member.user_id,
-                    'name': member.name,
-                    'relationship': member.relationship,
-                    'hasRegistered': member.has_registred,
-                    'registrationStatus': member.registration_status
-                })
-            }
+        if ((temp.eventType === 'TTC'
+            || temp.eventType === 'Sunday School Midterm Exam'
+            || temp.eventType === 'Sunday School Final Exam') && regMethod === 'bulk') {
+
+            //in case of Bulk registration
+            console.debug(`Fetching data for bulk event registration on of event type '${temp.eventType}' for event ${eventId}`);
+            await bulkRegistration(client, loggedInUserId, eventId)
+                .then(data => response = data)
+                .catch(error => { throw 'Error in reqEveRegOperations.js::bulkRegistration() as ' + error });;
+
+        } else {
+            //in case of indivisual registration
+            console.debug(`Fetching data for indivisual event registration on of event type '${temp.eventType}' for event ${eventId}`);
+            await getEventDefinationForIndivisualUser(client, eventId, participantId)
+                .then(data => response = data)
+                .catch(error => { throw 'Error in reqEveRegOperations.js::getEventDefinationForIndivisualUser() as ' + error });
         }
+
+        response.sectionConfig = temp;
+
 
         return {
             data: {
@@ -161,6 +55,230 @@ async function getEventDef(eventId, loggedInUserId, participantId) {
     }
 
 }
+
+async function getEventDefinationForIndivisualUser(client, eventId, participantId) {
+
+    let response = {};
+    let result = await client.query(queries.getEventData, [eventId, participantId]);
+    if (result.rowCount > 0) {
+        for (let row of result.rows) {
+            if (response.eventId == undefined) {
+                response.name = row.event_name;
+                response.eventId = row.event_id;
+                response.role = row.role;
+                response.registrationStatus = row.registration_status;
+                response.eventPartiRegId = row.event_participant_registration_id;
+                response.eventType = row.event_type;
+                response.enrollmentId = row.enrollment_id;
+                response.description = row.description;
+                response.eventStartDate = row.start_date;
+                response.eventEndDate = row.end_date;
+                response.regStartDate = row.registration_start_date;
+                response.regEndDate = row.registration_end_date;
+                response.eventURL = row.event_url;
+
+                response.categories = []
+                if (row.event_cat_map_id) {
+                    response.categories.push({
+                        catName: row.cat_name,
+                        catMapId: row.event_cat_map_id,
+                        catId: row.event_category_id,
+                        hasSelected: row.has_cat_selected
+                    })
+                }
+
+                response.attachments = []
+                if (row.event_attachment_id) {
+                    response.attachments.push({
+                        attName: row.attachment_name,
+                        attType: row.attachment_type,
+                        attId: row.event_attachment_id,
+                        attFileName: row.file_name
+                    })
+                }
+
+                response.venues = []
+                if (row.event_venue_id) {
+                    response.venues.push({
+                        venueId: row.venue_id,
+                        venueMapId: row.event_venue_id,
+                        venueName: row.venue_name
+                    })
+                }
+
+                response.questionnaire = []
+                if (row.question_id) {
+                    response.questionnaire.push({
+                        queId: row.question_id,
+                        question: row.question,
+                        answerType: row.answer_type,
+                        answer: row.answer
+                    })
+                }
+
+                response.selectedVenue = []
+                if (row.selected_event_venue_id !== null) {
+                    response.selectedVenue.push({
+                        venueId: row.venue_id,
+                        venueMapId: row.event_venue_id,
+                        venueName: row.venue_name
+                    })
+                }
+
+            } else {
+
+                let catIndex = response.categories.findIndex((item) => item.catMapId == row.event_cat_map_id);
+                if (catIndex === -1 && row.event_cat_map_id != null)
+                    response.categories.push({
+                        catName: row.cat_name,
+                        catMapId: row.event_cat_map_id,
+                        catId: row.event_category_id,
+                        hasSelected: row.has_cat_selected
+                    })
+
+                let attIndex = response.attachments.findIndex((item) => item.attId == row.event_attachment_id);
+                if (attIndex === -1 && row.event_attachment_id != null)
+                    response.attachments.push({
+                        attName: row.attachment_name,
+                        attType: row.attachment_type,
+                        attId: row.event_attachment_id,
+                        attFileName: row.file_name
+                    })
+
+                let venIndex = response.venues.findIndex((item) => item.venueMapId == row.event_venue_id);
+                if (venIndex === -1)
+                    response.venues.push({
+                        venueId: row.venue_id,
+                        venueMapId: row.event_venue_id,
+                        venueName: row.venue_name
+                    });
+
+                let queIndex = response.questionnaire.findIndex((item) => item.queId == row.question_id);
+                if (queIndex === -1)
+                    response.questionnaire.push({
+                        queId: row.question_id,
+                        question: row.question,
+                        answerType: row.answer_type,
+                        answer: row.answer
+                    })
+
+            }
+        }
+    }
+
+    //Code to get roles from t_lookup
+    response.participantRoles = [];
+    let lookupRes = await client.query(queries.getParticipantRolesFormLookup);
+    if (lookupRes.rowCount > 0)
+        response.participantRoles = lookupRes.rows[0].parti_role;
+
+    response.familyMembers = []
+    //code to get family members of logged in User
+    let famMemRes = await client.query(queries.getFamTreeWithEventRegStatus, [eventId, participantId]);
+    if (famMemRes.rowCount > 0) {
+        for (let member of famMemRes.rows) {
+            response.familyMembers.push({
+                'userId': member.user_id,
+                'name': member.name,
+                'relationship': member.relationship,
+                'hasRegistered': member.has_registred,
+                'registrationStatus': member.registration_status
+            })
+        }
+    }
+    return response;
+}
+
+async function bulkRegistration(client, loggedInUser, eventId) {
+
+    let staffData = [];
+    let response = {}
+    let result = await client.query(queries.getTTCEventData, [loggedInUser, eventId]);
+    if (result.rowCount > 0) {
+
+        for (let row of result.rows) {
+            if (response.eventId === undefined) {
+                response.name = row.event_name;
+                response.eventId = row.event_id;
+                response.eventType = row.event_type;
+                response.description = row.description;
+                response.eventStartDate = row.start_date;
+                response.eventEndDate = row.end_date;
+                response.regStartDate = row.registration_start_date;
+                response.regEndDate = row.registration_end_date;
+            }
+            if (row.org_type === 'Parish') {
+                staffData.push({
+                    'orgName': row.org_name,
+                    'orgId': row.org_id,
+                    sundaySchools: []
+                })
+            }
+        }
+
+        for (let row of result.rows) {
+            if (row.org_type === 'Sunday School') {
+                let pIndex = staffData.findIndex(item => item.orgId === row.parent_org_id)
+                let sIndex = staffData[pIndex].sundaySchools.findIndex(item => item.schoolId === row.org_id)
+                console.debug(`sIndex : ${sIndex}`);
+                if (sIndex === -1) {
+                    let temp = {
+                        schoolName: row.org_name,
+                        schoolId: row.org_id,
+                        staff: []
+                    };
+
+                    if (row.role_type === 'Sunday School Principal') {
+                        temp.principalName = row.user_name;
+                        temp.principalEmailId = row.email_id;
+                        temp.principalId = row.user_id;
+                        temp.principalMobileNo = row.mobile_no;
+                    } else if (row.role_type === 'Sunday School Vice Principal') {
+                        temp.vicePrincipalName = row.user_name;
+                        temp.vicePrincipalEmailId = row.email_id;
+                        temp.vicePrincipalId = row.user_id;
+                        temp.vicePrincipalMobileNo = row.mobile_no;
+                    }
+
+                    for (let innrow of result.rows) {
+                        if (innrow.parent_org_id === row.org_id && innrow.org_type === 'Grade' && innrow.user_id !== null) {
+                            temp.staff.push({
+                                staffName: innrow.user_name,
+                                staffId: innrow.user_id,
+                                grade: innrow.org_type,
+                                emailId: innrow.email_id,
+                                mobileNo: innrow.mobile_no,
+                                isPrimary: innrow.is_primary,
+                                registrationId: innrow.enrollment_id,
+                                evePartiRegId: innrow.event_participant_registration_id,
+                                registrationStatus: innrow.registration_status,
+                                hasRegistered: innrow.has_registered
+                            })
+                        }
+                    }
+                } else if (sIndex >= 0) {
+                    if (row.role_type === 'Sunday School Principal') {
+                        staffData[pIndex].sundaySchools[sIndex].principalName = row.user_name;
+                        staffData[pIndex].sundaySchools[sIndex].principalEmailId = row.email_id;
+                        staffData[pIndex].sundaySchools[sIndex].principalId = row.user_id;
+                        staffData[pIndex].sundaySchools[sIndex].principalMobileNo = row.mobile_no;
+                    } else if (row.role_type === 'Sunday School Vice Principal') {
+                        staffData[pIndex].sundaySchools[sIndex].vicePrincipalName = row.user_name;
+                        staffData[pIndex].sundaySchools[sIndex].vicePrincipalEmailId = row.email_id;
+                        staffData[pIndex].sundaySchools[sIndex].vicePrincipalId = row.user_id;
+                        staffData[pIndex].sundaySchools[sIndex].vicePrincipalMobileNo = row.mobile_no;
+                    }
+                }
+            }
+        }
+
+    } else throw `No data data found for event ${eventId}.`
+    response.staffData = staffData;
+    return response;
+}
+
+
+
 
 
 async function eventRegistration(eventData, loggedInUser) {

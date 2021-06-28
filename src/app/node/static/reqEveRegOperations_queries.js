@@ -49,6 +49,64 @@ const getEventData = `select distinct te.event_id,
                             and teq.question_id = teqr.question_id
                         where te.event_id = $1 order by tec."sequence";`;
 
+const getTTCEventData = `    select distinct
+                                te.event_id,
+                                te."name" event_name,
+                                te.description,
+                                te.registration_start_date, 
+                                te.registration_end_date, 
+                                te.start_date,
+                                te.end_date,
+                                tu.email_id,
+                                concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) user_name,
+                                tp.mobile_no,
+                                tepr.enrollment_id,
+                                tepr.event_participant_registration_id,
+                                tepr.registration_status,
+                                case when tepr.event_participant_registration_id is null 
+                                    then false else true end  has_registered,
+                                tosa.role_type,
+                                tosa.user_id,
+                                tosa.is_primary,
+                                to2.name org_name,
+                                to2.org_type,
+                                to2.org_id,
+                                to2.parent_org_id,
+                                to2."level"
+                                from
+                                t_organization to2
+                                        join (WITH recursive child_orgs 
+                                                            AS (
+                                                                SELECT org_id
+                                                                FROM   t_organization parent_org 
+                                                                WHERE  org_id IN
+                                                                        (
+                                                                            SELECT a.org_id
+                                                                        FROM   t_user_role_context a, t_user b
+                                                                        WHERE  b.user_id = $1 
+                                                                        and a.is_deleted = false 
+                                                                        and b.is_approved = true 
+                                                                        and b.is_deleted = false
+                                                                        AND    a.user_id = b.user_id  )                                                    
+                                                                UNION
+                                                                SELECT     child_org.org_id child_id
+                                                                FROM       t_organization child_org
+                                                                INNER JOIN child_orgs c
+                                                                ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                            FROM   child_orgs) hir_query on hir_query.org_id = to2.org_id
+                                            left join t_organization_staff_assignment tosa on hir_query.org_id = tosa.org_id 
+                                                 and tosa.is_deleted = false                           
+                                            left join t_school_term_detail tstd  on tstd.school_term_detail_id = tosa.school_term_detail_id
+                                                and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+                                                and tstd.is_deleted = false
+                                            join t_event te on te.event_id = $2 	
+                                            left join t_event_participant_registration tepr on tepr.user_id = tosa.user_id
+                                                and tepr.is_deleted = false
+                                            left join t_user tu on tu.user_id = tosa.user_id 
+                                                and tu.is_approved = true 
+                                                and tu.is_deleted = false
+                                            left join t_person tp on tp.user_id = tosa.user_id order by to2."level";`                        
+
 const getParticipantRolesFormLookup = `select jsonb_agg(
                                             jsonb_build_object(
                                                 'roleDesc', tl.description,
@@ -61,6 +119,7 @@ const getParticipantRolesFormLookup = `select jsonb_agg(
 const getEventSectionConfigByEveType = `select
                                             jsonb_build_object(
                                                 'eventTypeId', tet.event_type_id,
+                                                'eventType', tet.name,
                                                 'isVenueRequired', tet.is_venue_required,
                                                 'isProctorRequired', tet.is_proctor_required,
                                                 'isJudgeRequired', tet.is_judge_required,
@@ -73,7 +132,8 @@ const getEventSectionConfigByEveType = `select
                                                 'isAttachmentRequired', tet.is_attachment_required,
                                                 'isUrlRequired', tet.is_url_required
                                             ) event_sec_config
-                                            from t_event_type tet where tet."name" = $1 
+                                            from t_event_type tet where tet."name" = 
+                                                (select te.event_type from t_event te where event_id = $1)
                                             and tet.is_deleted != true;`;       
                                             
 const checkGeneratedEnrollmentNoExists = `select case when count(enrollment_id) = 0 then false
@@ -144,7 +204,8 @@ module.exports = {
     updateEventRegCatMapping,
     deleteCatMapping,
     updateRegQuestionRes,
-    getFamTreeWithEventRegStatus
+    getFamTreeWithEventRegStatus,
+    getTTCEventData
 }                            
 
 
