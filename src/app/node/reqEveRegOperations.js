@@ -220,7 +220,6 @@ async function bulkRegistration(client, loggedInUser, eventId) {
             if (row.org_type === 'Sunday School') {
                 let pIndex = staffData.findIndex(item => item.orgId === row.parent_org_id)
                 let sIndex = staffData[pIndex].sundaySchools.findIndex(item => item.schoolId === row.org_id)
-                console.debug(`sIndex : ${sIndex}`);
                 if (sIndex === -1) {
                     let temp = {
                         schoolName: row.org_name,
@@ -256,6 +255,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                             })
                         }
                     }
+                    staffData[pIndex].sundaySchools.push(temp);
                 } else if (sIndex >= 0) {
                     if (row.role_type === 'Sunday School Principal') {
                         staffData[pIndex].sundaySchools[sIndex].principalName = row.user_name;
