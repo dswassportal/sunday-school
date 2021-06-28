@@ -57,7 +57,6 @@ export class EventRegistrationComponent implements OnInit {
     this.getAllEventsData(event.value);
 
 
-
     if (event.value == "upcoming_events") {
       this.columnDefs = [
         { headerName: 'Event Name', field: 'name', width:440, resizable: true, sortable: true, filter: true },
