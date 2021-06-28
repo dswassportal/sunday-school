@@ -34,22 +34,22 @@ export class EventRegistrationComponent implements OnInit {
     this.loggedInUser = this.userMetaData.userId;
 
 
-    this.columnDefs = [
-      { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-      { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-      {
-        headerName: 'Event Start Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
-        cellRenderer: (data: any) => {
-          return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-        }
-      },
-      {
-        headerName: 'Event End Date', field: 'endDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
-        cellRenderer: (data: any) => {
-          return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-        },
-      },
-    ];
+    // this.columnDefs = [
+    //   { headerName: 'Event Name', field: 'name', flex: 1, resizable: true, sortable: true, filter: true },
+    //   { headerName: 'Event Type', field: 'event_type', flex: 1, resizable: true, sortable: true, filter: true },
+    //   {
+    //     headerName: 'Event Start Date', field: 'startDate', flex: 1, resizable: true, sortable: true, filter: true,
+    //     cellRenderer: (data: any) => {
+    //       return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+    //     }
+    //   },
+    //   {
+    //     headerName: 'Event End Date', field: 'endDate', flex: 1, resizable: true, sortable: true, filter: true,
+    //     cellRenderer: (data: any) => {
+    //       return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+    //     },
+    //   },
+    // ];
 
 
 
@@ -68,6 +68,9 @@ export class EventRegistrationComponent implements OnInit {
         filter: 'agTextColumnFilter'
       }
     };
+
+    this.gridOptions.api.sizeColumnsToFit();
+  
   }
 
   onFilteringRadioButtonChange(event: any) {
@@ -80,16 +83,16 @@ export class EventRegistrationComponent implements OnInit {
 
     if (event.value == "upcoming_events") {
       this.columnDefs = [
-        { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-        { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Name', field: 'name', width:440, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Type', field: 'event_type', width:200, resizable: true, sortable: true, filter: true },
         {
-          headerName: 'Registration Deadline', field: 'registrationEndDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          headerName: 'Registration Deadline', field: 'registrationEndDate',width:200, resizable: true, sortable: true, filter: true,
           cellRenderer: (data: any) => {
             return data.value ? (new Date(data.value)).toLocaleDateString() : '';
           },
         },
         {
-          headerName: 'Event Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          headerName: 'Event Date', field: 'startDate',  resizable: true,width:200, sortable: true, filter: true,
           cellRenderer: (data: any) => {
             return data.value ? (new Date(data.value)).toLocaleDateString() : '';
           }
@@ -98,62 +101,58 @@ export class EventRegistrationComponent implements OnInit {
     }
     if (event.value == "registered_events") {
       this.columnDefs = [
-        { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-        { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Name', field: 'name', width:200, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Type', field: 'event_type',  width:200, resizable: true, sortable: true, filter: true },
         {
-          headerName: 'Registration Deadline', field: 'registrationEndDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          headerName: 'Registration Deadline', field: 'registrationEndDate', width:200, resizable: true, sortable: true, filter: true,
           cellRenderer: (data: any) => {
             return data.value ? (new Date(data.value)).toLocaleDateString() : '';
           },
         },
         {
-          headerName: 'Event Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          headerName: 'Event Date', field: 'startDate', width:200,  resizable: true, sortable: true, filter: true,
           cellRenderer: (data: any) => {
             return data.value ? (new Date(data.value)).toLocaleDateString() : '';
           }
         },
         {
-          headerName: 'Registered On', field: 'registeredOn', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          headerName: 'Registered On', field: 'registeredOn', width:200,  resizable: true, sortable: true, filter: true,
           cellRenderer: (data: any) => {
             return data.value ? (new Date(data.value)).toLocaleDateString() : '';
           }
         },
-        { headerName: 'Registered By', field: 'registeredBy', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-        { headerName: 'Registration Id', field: 'registrationId', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-        { headerName: 'Registration Status', field: 'registrationStatus', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-        { headerName: 'Participant Name', field: 'participantName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-
+        { headerName: 'Registered By', field: 'registeredBy', width:200, resizable: true, sortable: true, filter: true },
+        { headerName: 'Registration Id', field: 'registrationId', width:200, resizable: true, sortable: true, filter: true },
+        { headerName: 'Registration Status', field: 'registrationStatus', width:200, resizable: true, sortable: true, filter: true },
+        { headerName: 'Participant Name', field: 'participantName', width:200, resizable: true, sortable: true, filter: true },
       ];
     }
     if (event.value == "completed_events") {
       this.columnDefs = [
-        { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-        { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Name', field: 'name', width:200, resizable: true, sortable: true, filter: true },
+        { headerName: 'Event Type', field: 'event_type', width:200,resizable: true, sortable: true, filter: true },
         {
-          headerName: 'Event Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+          headerName: 'Event Date', field: 'startDate', width:200, resizable: true, sortable: true, filter: true,
           cellRenderer: (data: any) => {
             return data.value ? (new Date(data.value)).toLocaleDateString() : '';
           }
         },
-        { headerName: 'Registration Id', field: 'registrationId', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-        { headerName: 'Participant Name', field: 'participantName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-        { headerName: 'Result', field: '', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+        { headerName: 'Registration Id', width:200, field: 'registrationId', resizable: true, sortable: true, filter: true },
+        { headerName: 'Participant Name', width:200, field: 'participantName',  resizable: true, sortable: true, filter: true },
+        { headerName: 'Result', field: '', width:200,  resizable: true, sortable: true, filter: true },
       ];
 
     }
-
-
-
-
   }
+
+
 
   getAllEventsData(eventType: string) {
     this.apiService.callGetService('getEventData?eventType=' + eventType).subscribe((res) => {
       this.rowData = res.data.metaData.eventData;
     });
-
-
   }
+
   agInit(params: any) {
     this.params = params;
     this.data = params.value;
@@ -170,6 +169,7 @@ export class EventRegistrationComponent implements OnInit {
       //this.events = this.rowData
     });
   }
+  
   onGridReady(params: any) {
     this.gridApi = params.api;
   }
