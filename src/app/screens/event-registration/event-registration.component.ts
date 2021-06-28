@@ -33,27 +33,6 @@ export class EventRegistrationComponent implements OnInit {
     this.userMetaData = this.uiCommonUtils.getUserMetaDataJson();
     this.loggedInUser = this.userMetaData.userId;
 
-
-    // this.columnDefs = [
-    //   { headerName: 'Event Name', field: 'name', flex: 1, resizable: true, sortable: true, filter: true },
-    //   { headerName: 'Event Type', field: 'event_type', flex: 1, resizable: true, sortable: true, filter: true },
-    //   {
-    //     headerName: 'Event Start Date', field: 'startDate', flex: 1, resizable: true, sortable: true, filter: true,
-    //     cellRenderer: (data: any) => {
-    //       return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-    //     }
-    //   },
-    //   {
-    //     headerName: 'Event End Date', field: 'endDate', flex: 1, resizable: true, sortable: true, filter: true,
-    //     cellRenderer: (data: any) => {
-    //       return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-    //     },
-    //   },
-    // ];
-
-
-
-
     this.onFilteringRadioButtonChange({ value: 'upcoming_events' });
 
 
@@ -68,8 +47,6 @@ export class EventRegistrationComponent implements OnInit {
         filter: 'agTextColumnFilter'
       }
     };
-
-    this.gridOptions.api.sizeColumnsToFit();
   
   }
 
