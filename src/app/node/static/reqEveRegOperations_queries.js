@@ -97,7 +97,7 @@ const getTTCEventData = `    select distinct
                                                                 INNER JOIN child_orgs c
                                                                 ON         c.org_id = child_org.parent_org_id ) SELECT *
                                             FROM   child_orgs) hir_query on hir_query.org_id = to2.org_id
-                                             join t_organization_staff_assignment tosa on hir_query.org_id = tosa.org_id 
+                                             left join t_organization_staff_assignment tosa on hir_query.org_id = tosa.org_id 
                                                  and tosa.is_deleted = false                           
                                             left join t_school_term_detail tstd  on tstd.school_term_detail_id = tosa.school_term_detail_id
                                                 and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
