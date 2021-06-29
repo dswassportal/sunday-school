@@ -19,30 +19,35 @@ import { ScoreComponent } from './screens/score/score.component';
 import { ScoreReviewComponent } from './screens/score-review/score-review.component';
 import { EventAttendanceComponent } from './screens/event-attendance/event-attendance.component'
 import { StaffAssignmentComponent } from './screens/staff-assignment/staff-assignment.component';
+import { EventBulkRegistrationComponent } from './screens/event-bulk-registration/event-bulk-registration.component';
+import { BulkRegistrationComponent } from './screens/bulk-registration/bulk-registration.component';
 
 const routes: Routes = [
   { path: 'signup', component: SignUpComponent },
-  { path: 'signin', component: SignInComponent},
-  { path: 'loginAccList', component: LoginAccListComponent},
-  { path: '', component:HomePageComponent},
-  { path: 'landingpage', component:LandingPageComponent},
-  { path: 'dashboard', component:UserProfileComponent,
-  children: [
-    { path: 'ovbsregistration', component: OvbsRegistrationComponent },
-    { path: 'users',component:LandingPageComponent},
-    { path: 'events', component: EventsComponent},
-    { path: 'requests', component:ApprovalRequestsComponent},
-    {path : 'myprofile', component:MyProfileComponent, canDeactivate:[DirtycheckGuard]},
-    { path : 'createevent', component: EventCreationComponent },
-    { path : 'cwcregistration/:selectedEventType', component :CwcregistrationComponent},
-    { path : 'eventRegistration', component:EventRegistrationComponent},
-    { path : 'score', component:ScoreComponent},
-    { path : 'scoreReview', component:ScoreReviewComponent},
-    { path : 'attendance', component:EventAttendanceComponent},
-    { path : 'staffAssignment', component:StaffAssignmentComponent}
-    // { path: 'testEvent',component:UserProfileComponent},
-  ]
-},
+  { path: 'signin', component: SignInComponent },
+  { path: 'loginAccList', component: LoginAccListComponent },
+  { path: '', component: HomePageComponent },
+  { path: 'landingpage', component: LandingPageComponent },
+  {
+    path: 'dashboard', component: UserProfileComponent,
+    children: [
+      { path: 'ovbsregistration', component: OvbsRegistrationComponent },
+      { path: 'users', component: LandingPageComponent },
+      { path: 'events', component: EventsComponent },
+      { path: 'requests', component: ApprovalRequestsComponent },
+      { path: 'myprofile', component: MyProfileComponent, canDeactivate: [DirtycheckGuard] },
+      { path: 'createevent', component: EventCreationComponent },
+      { path: 'cwcregistration/:selectedEventType', component: CwcregistrationComponent },
+      { path: 'eventRegistration', component: EventRegistrationComponent },
+      { path: 'score', component: ScoreComponent },
+      { path: 'scoreReview', component: ScoreReviewComponent },
+      { path: 'attendance', component: EventAttendanceComponent },
+      { path: 'staffAssignment', component: StaffAssignmentComponent },
+      { path: 'eventBulkRegistration', component: EventBulkRegistrationComponent },
+      { path: 'bulkRegistration', component: BulkRegistrationComponent },
+      // { path: 'testEvent',component:UserProfileComponent},
+    ]
+  },
   //{ path: 'landingpage/ovbsregistration', component:OvbsRegistrationComponent},
 ];
 
@@ -51,4 +56,4 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
-export const routingComponents =[OvbsRegistrationComponent,UserProfileComponent]
+export const routingComponents = [OvbsRegistrationComponent, UserProfileComponent]

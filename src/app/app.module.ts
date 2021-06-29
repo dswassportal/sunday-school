@@ -75,6 +75,8 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { NgxMatIntlTelInputModule } from 'ngx-mat-intl-tel-input';
+import { EventBulkRegistrationComponent } from './screens/event-bulk-registration/event-bulk-registration.component';
+import { BulkRegistrationComponent } from './screens/bulk-registration/bulk-registration.component';
 
 
 @NgModule({
@@ -99,7 +101,13 @@ import { NgxMatIntlTelInputModule } from 'ngx-mat-intl-tel-input';
     EventRegistrationComponent,
      ScoreComponent, 
      ScoreUploadComponent,
-      ScoreUploadInputComponent, ScoreReviewComponent, EventAttendanceComponent, DatePickerRendererComponent, StaffAssignmentComponent
+      ScoreUploadInputComponent, 
+      ScoreReviewComponent, 
+      EventAttendanceComponent,
+       DatePickerRendererComponent,
+        StaffAssignmentComponent,
+        EventBulkRegistrationComponent,
+        BulkRegistrationComponent
     //UserProfileComponent,
     //OvbsRegistrationComponent
   ],
