@@ -65,6 +65,7 @@ const getTTCEventData = `    select distinct
                                 tepr.registration_status,
                                 case when tepr.event_participant_registration_id is null 
                                     then false else true end  has_registered,
+                                tepr.event_venue_id, 
                                 tosa.role_type,
                                 tosa.user_id,
                                 tosa.is_primary,
@@ -203,6 +204,8 @@ const getVicarDetails = `select distinct
                         join t_user tu on tu.org_id = turc.org_id and tu.user_id = $1
                         join t_user tu2  on turc.user_id = tu2.user_id;`;                                    
                                                                 
+const getVenuesByEventId = `select distinct event_venue_id, name from t_event_venue tev 
+                                join t_venue tv on tev.venue_id = tv.venue_id and event_id = $1;`;                        
 
 module.exports = {
     getEventData,
@@ -218,7 +221,8 @@ module.exports = {
     updateRegQuestionRes,
     getFamTreeWithEventRegStatus,
     getTTCEventData,
-    getVicarDetails
+    getVicarDetails,
+    getVenuesByEventId
 }                            
 
 

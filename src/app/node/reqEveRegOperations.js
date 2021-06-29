@@ -213,6 +213,16 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                     response.vicaId = vicarRes.rows[0].user_id;
                 }
 
+                response.venues = [];
+                let venueRes = await client.query(queries.getVenuesByEventId, [eventId])
+                if (venueRes.rowCount > 0) {
+                    for (let row of venueRes.rows) {
+                        response.venues.push({
+                            name: row.name,
+                            eventVenueId: row.event_venue_id
+                        })
+                    }
+                }
             }
             if (row.org_type === 'Parish') {
                 staffData.push({
@@ -269,8 +279,9 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                                 evePartiRegId: innrow.event_participant_registration_id,
                                 registrationStatus: innrow.registration_status,
                                 hasRegistered: innrow.has_registered,
-                                registeredBy : innrow.registered_by,
-                                registeredOn :   innrow.registered_on
+                                registeredBy: innrow.registered_by,
+                                registeredOn: innrow.registered_on,
+                                eventVenueId: innrow.event_venue_id
                             })
                         }
                     }
@@ -402,18 +413,18 @@ async function eventRegistration(eventData, loggedInUser) {
             }
             await client.query('commit;')
         } else {
-            // if (eventType === 'TTC') {
-            //     for (let staff of eventData.staffRegistration) {
+            if (eventType === 'TTC') {
+                for (let staff of eventData.staffRegistration) {
 
-            //        let  registrationId = await generateUniqueEnrollmentId(client);
-            //         let newRegRes = await client.query(queries.newRegistration,
-            //             [eventData.eventId, staff.staffId, null,
-            //                 false, loggedInUser, new Date().toUTCString(),
-            //                 registrationId, eventData.eveVenueId, eventData.registrationStatus, eventData.role]);
+                    let registrationId = await generateUniqueEnrollmentId(client);
+                    let newRegRes = await client.query(queries.newRegistration,
+                        [eventData.eventId, staff.staffId, null,
+                            false, loggedInUser, new Date().toUTCString(),
+                            registrationId, eventData.eveVenueId, eventData.registrationStatus, eventData.role]);
 
-            //         await client.query("COMMIT");
-            //     }
-            // }
+                    await client.query("COMMIT");
+                }
+            }
         }
         return {
             "data": {
