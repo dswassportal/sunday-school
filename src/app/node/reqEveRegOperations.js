@@ -319,9 +319,11 @@ async function eventRegistration(eventData, loggedInUser) {
         let eventType = eventData.eventType;
         let registrationId = eventData.enrollmentId;
 
-        if (!eventData.registrationStatus) throw 'Registration status was not provided.'
-
         if (eventData.regMethod !== 'bulk') {
+
+            if (!eventData.registrationStatus) throw 'Registration status was not provided.'
+
+            console.debug(`Registering for an event of type '${eventType}' and regMethod is '${eventData.regMethod}'.`);
 
             if (eventData.enrollmentId === null || eventData.enrollmentId === undefined) {
                 //Case when there is a new registration.(t_event_participant_registration)
@@ -413,18 +415,56 @@ async function eventRegistration(eventData, loggedInUser) {
             }
             await client.query('commit;')
         } else {
-            if (eventType === 'TTC') {
+            console.debug(`Registering for an event of type '${eventType}' and regMethod is '${eventData.regMethod}'.`);
+            if (eventType === 'TTC' && eventData.regMethod === 'bulk') {
+
+                let bulkRegister = [];
+                let eventPartiArr = [];
+
                 for (let staff of eventData.staffRegistration) {
 
-                    let registrationId = await generateUniqueEnrollmentId(client);
-                    let newRegRes = await client.query(queries.newRegistration,
-                        [eventData.eventId, staff.staffId, null,
-                            false, loggedInUser, new Date().toUTCString(),
-                            registrationId, eventData.eveVenueId, eventData.registrationStatus, eventData.role]);
+                    if (staff.evePartiRegId !== undefined && staff.evePartiRegId !== null) eventPartiArr.push(staff.evePartiRegId);
 
-                    await client.query("COMMIT");
+                    if (staff.evePartiRegId === undefined || staff.evePartiRegId === '') {
+                        let registrationId = await generateUniqueEnrollmentId(client);
+                        bulkRegister.push(`( ${eventData.eventId}, ${staff.staffId}, ${null}, ${false}, ${loggedInUser},
+                                                             '${new Date().toUTCString()}', '${registrationId}', ${eventData.eventVenueId}, 'Registered', ${null})`);
+                    }
                 }
+
+                // Update event registration
+                if (eventPartiArr.length > 0) {
+
+                    let regIdString = eventPartiArr.join(',');
+                    //To handle unselected teacher's bulk registration
+                    let tempQ1 = queries.cancelTTCRegistation.replace('$5', regIdString);
+                    let cancelBulkTTCRes = await client.query(tempQ1, [loggedInUser, new Date().toUTCString(), 'Canceled', eventData.eventId]);
+                    // console.debug(tempQ1);
+                    // console.debug('data : ', [loggedInUser, new Date().toUTCString(), 'Canceled', eventData.eventId]);
+                    // console.debug('cancelBulkTTCRes.rowCount:' + cancelBulkTTCRes.rowCount)
+                    if (cancelBulkTTCRes.rowCount > 0)
+                        console.debug(`for event ${eventData.eventId}, canceled event_participant_registration_ids are: ${JSON.stringify(cancelBulkTTCRes.rows)}`);
+
+                    // to handele update of registration
+                    let tempQ2 = queries.updateTTCRegistration.replace('$5', regIdString);
+                    let updateBulkTTCRes = await client.query(tempQ2, [loggedInUser, new Date().toUTCString(), eventData.eventVenueId, 'Registered']);
+                    if (updateBulkTTCRes.rowCount > 0)
+                        console.debug(`for event ${eventData.eventId}, Updated event_participant_registration_ids are: ${JSON.stringify(updateBulkTTCRes.rows)}`);
+
+                }
+
+                // Create new  event registration
+                if (bulkRegister.length > 0) {
+                    let tempQuery = queries.bulkInsertNewRegistration.replace('$1', bulkRegister.join(','))
+                    console.debug(tempQuery);
+                    let regBulkTTCRes = await client.query(tempQuery);
+                    if (regBulkTTCRes.rowCount > 0)
+                        console.debug(`for event ${eventData.eventId}, performed bulk registration and event_participant_registration_ids are : ${JSON.stringify(regBulkTTCRes.rows)}`);
+                }
+
+                await client.query("COMMIT");
             }
+
         }
         return {
             "data": {

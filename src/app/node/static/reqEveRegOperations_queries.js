@@ -109,7 +109,7 @@ const getTTCEventData = `    select distinct
                                                 and tu.is_approved = true 
                                                 and tu.is_deleted = false
                                             left join t_person tp on tp.user_id = tosa.user_id
-                                            left join t_user tu2 on tu2.user_id = tepr.created_by order by to2."level";`                        
+                                            left join t_user tu2 on tu2.user_id = tepr.created_by order by to2."level";`
 
 const getParticipantRolesFormLookup = `select jsonb_agg(
                                             jsonb_build_object(
@@ -138,28 +138,28 @@ const getEventSectionConfigByEveType = `select
                                             ) event_sec_config
                                             from t_event_type tet where tet."name" = 
                                                 (select te.event_type from t_event te where event_id = $1)
-                                            and tet.is_deleted != true;`;       
-                                            
+                                            and tet.is_deleted != true;`;
+
 const checkGeneratedEnrollmentNoExists = `select case when count(enrollment_id) = 0 then false
                                             else true end ran_no from t_event_participant_registration 
                                             where enrollment_id =$1;`
-                                            
+
 const newRegistration = `INSERT INTO t_event_participant_registration
                             (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
                             VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning event_participant_registration_id;`
-                            
+
 const insertRegCatMapping = `INSERT INTO t_participant_event_reg_cat
                             (event_participant_registration_id, event_category_id, user_id, is_deleted, created_by, created_date)
-                            VALUES $1 returning participant_event_reg_cat_id;`; 
-                            
+                            VALUES $1 returning participant_event_reg_cat_id;`;
+
 const insertRegQueResp = `INSERT INTO t_event_question_response
                             (event_participant_registration_id, question_id, answer, created_by, created_date)
-                            VALUES $1  returning question_response_id;`; 
-                            
+                            VALUES $1  returning question_response_id;`;
+
 const updateEventRegistration = `UPDATE t_event_participant_registration
                                 SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4, role=$5 
-                                WHERE event_participant_registration_id=$6;`;      
-                                
+                                WHERE event_participant_registration_id=$6;`;
+
 const updateEventRegCatMapping = `INSERT INTO t_participant_event_reg_cat(event_participant_registration_id, event_category_id, user_id, is_deleted, updated_by, updated_date)               
                                     SELECT $1, $2, $3, $4, $5, $6 
                                     WHERE NOT EXISTS (
@@ -168,17 +168,17 @@ const updateEventRegCatMapping = `INSERT INTO t_participant_event_reg_cat(event_
                                                                 and event_category_id = $2
                                                                 and user_id = $3
                                                                 and is_deleted != true
-                                                                ) returning participant_event_reg_cat_id;`;      
- 
+                                                                ) returning participant_event_reg_cat_id;`;
+
 const deleteCatMapping = `update t_participant_event_reg_cat 
                                 set is_deleted= $1, updated_by= $2, updated_date= $3 
-                                where event_participant_registration_id= $4 and event_category_id not in ($5) returning participant_event_reg_cat_id;`;    
-                                
+                                where event_participant_registration_id= $4 and event_category_id not in ($5) returning participant_event_reg_cat_id;`;
+
 const updateRegQuestionRes = `UPDATE t_event_question_response
                                 SET answer=$1, updated_by=$2, updated_date=$3
-                                WHERE event_participant_registration_id=$4 and question_id=$5 returning question_response_id;`;        
-                                
-                              
+                                WHERE event_participant_registration_id=$4 and question_id=$5 returning question_response_id;`;
+
+
 const getFamTreeWithEventRegStatus = `with family_tree as (select family_member_id user_id, relationship  
                                     from t_person_relationship tpr 
                                     where tpr.family_head_id = $2
@@ -193,8 +193,8 @@ const getFamTreeWithEventRegStatus = `with family_tree as (select family_member_
                                     ft.relationship from v_user vu
                                     join family_tree ft on vu.user_id = ft.user_id
                                     left join t_event_participant_registration tepr on tepr.user_id = ft.user_id
-                                    and tepr.event_id = $1 where vu.is_approved != false;`;                       
-                                    
+                                    and tepr.event_id = $1 where vu.is_approved != false;`;
+
 const getVicarDetails = `select distinct 
                         concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) user_name,
                         tu2.user_id 
@@ -202,10 +202,23 @@ const getVicarDetails = `select distinct
                         on turc.role_id = tr.role_id and tr."name" = 'Vicar'
                         and tr.is_deleted = false and turc.is_deleted = false 
                         join t_user tu on tu.org_id = turc.org_id and tu.user_id = $1
-                        join t_user tu2  on turc.user_id = tu2.user_id;`;                                    
-                                                                
+                        join t_user tu2  on turc.user_id = tu2.user_id;`;
+
 const getVenuesByEventId = `select distinct event_venue_id, name from t_event_venue tev 
-                                join t_venue tv on tev.venue_id = tv.venue_id and event_id = $1;`;                        
+                                join t_venue tv on tev.venue_id = tv.venue_id and event_id = $1;`;
+
+const bulkInsertNewRegistration = `INSERT INTO t_event_participant_registration
+                                    (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
+                                    VALUES $1 returning event_participant_registration_id;`;
+
+const updateTTCRegistration = `	UPDATE t_event_participant_registration
+                                SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4
+                                WHERE event_participant_registration_id in ($5) returning event_participant_registration_id`; 
+
+const cancelTTCRegistation = `UPDATE t_event_participant_registration
+                                SET updated_by=$1, updated_date=$2, registration_status=$3
+                                WHERE event_id= $4 and event_participant_registration_id not in ($5) returning event_participant_registration_id;`;                                    
+
 
 module.exports = {
     getEventData,
@@ -222,7 +235,10 @@ module.exports = {
     getFamTreeWithEventRegStatus,
     getTTCEventData,
     getVicarDetails,
-    getVenuesByEventId
-}                            
+    getVenuesByEventId,
+    bulkInsertNewRegistration,
+    updateTTCRegistration,
+    cancelTTCRegistation
+}
 
 
