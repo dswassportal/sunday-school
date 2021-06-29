@@ -58,13 +58,14 @@ const getTTCEventData = `    select distinct
                                 te.start_date,
                                 te.end_date,
                                 tu.email_id,
-                                case when tu.first_name is null then null else concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) end user_name,
+                                    case when tu.first_name is null then null else concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) end user_name,
                                 tp.mobile_no,
                                 tepr.enrollment_id,
                                 tepr.event_participant_registration_id,
                                 tepr.registration_status,
-                                case when tepr.event_participant_registration_id is null 
-                                    then false else true end  has_registered,
+                                    case when tepr.event_participant_registration_id is null then false 
+                                    when tepr.event_participant_registration_id is not null and tepr.registration_status = 'Canceled' then false
+                                    else true end  has_registered,
                                 tepr.event_venue_id, 
                                 tosa.role_type,
                                 tosa.user_id,
@@ -74,7 +75,7 @@ const getTTCEventData = `    select distinct
                                 to2.org_id,
                                 to2.parent_org_id,
                                 to2."level",
-                                case when tu2.first_name is null then null else concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) end registered_by,
+                                  case when tu2.first_name is null then null else concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) end registered_by,
                                 tepr.created_date registered_on
                                 from
                                 t_organization to2

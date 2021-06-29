@@ -271,7 +271,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                             temp.staff.push({
                                 staffName: innrow.user_name,
                                 staffId: innrow.user_id,
-                                grade: innrow.org_type,
+                                grade: innrow.org_name,
                                 emailId: innrow.email_id,
                                 mobileNo: innrow.mobile_no,
                                 isPrimary: innrow.is_primary,
@@ -439,9 +439,6 @@ async function eventRegistration(eventData, loggedInUser) {
                     //To handle unselected teacher's bulk registration
                     let tempQ1 = queries.cancelTTCRegistation.replace('$5', regIdString);
                     let cancelBulkTTCRes = await client.query(tempQ1, [loggedInUser, new Date().toUTCString(), 'Canceled', eventData.eventId]);
-                    // console.debug(tempQ1);
-                    // console.debug('data : ', [loggedInUser, new Date().toUTCString(), 'Canceled', eventData.eventId]);
-                    // console.debug('cancelBulkTTCRes.rowCount:' + cancelBulkTTCRes.rowCount)
                     if (cancelBulkTTCRes.rowCount > 0)
                         console.debug(`for event ${eventData.eventId}, canceled event_participant_registration_ids are: ${JSON.stringify(cancelBulkTTCRes.rows)}`);
 
