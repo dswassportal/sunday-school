@@ -94,7 +94,7 @@ const getTTCEventData = `    select distinct
                                                                 INNER JOIN child_orgs c
                                                                 ON         c.org_id = child_org.parent_org_id ) SELECT *
                                             FROM   child_orgs) hir_query on hir_query.org_id = to2.org_id
-                                            left join t_organization_staff_assignment tosa on hir_query.org_id = tosa.org_id 
+                                             join t_organization_staff_assignment tosa on hir_query.org_id = tosa.org_id 
                                                  and tosa.is_deleted = false                           
                                             left join t_school_term_detail tstd  on tstd.school_term_detail_id = tosa.school_term_detail_id
                                                 and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
@@ -189,7 +189,16 @@ const getFamTreeWithEventRegStatus = `with family_tree as (select family_member_
                                     ft.relationship from v_user vu
                                     join family_tree ft on vu.user_id = ft.user_id
                                     left join t_event_participant_registration tepr on tepr.user_id = ft.user_id
-                                    and tepr.event_id = $1 where vu.is_approved != false;`;                                        
+                                    and tepr.event_id = $1 where vu.is_approved != false;`;                       
+                                    
+const getVicarDetails = `select distinct 
+                        concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) user_name,
+                        tu2.user_id 
+                        from t_role tr join t_user_role_context turc 
+                        on turc.role_id = tr.role_id and tr."name" = 'Vicar'
+                        and tr.is_deleted = false and turc.is_deleted = false 
+                        join t_user tu on tu.org_id = turc.org_id and tu.user_id = $1
+                        join t_user tu2  on turc.user_id = tu2.user_id;`;                                    
                                                                 
 
 module.exports = {
@@ -205,7 +214,8 @@ module.exports = {
     deleteCatMapping,
     updateRegQuestionRes,
     getFamTreeWithEventRegStatus,
-    getTTCEventData
+    getTTCEventData,
+    getVicarDetails
 }                            
 
 

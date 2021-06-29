@@ -206,6 +206,13 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                 response.eventEndDate = row.end_date;
                 response.regStartDate = row.registration_start_date;
                 response.regEndDate = row.registration_end_date;
+
+                let vicarRes = await client.query(queries.getVicarDetails, [loggedInUser])
+                if(vicarRes.rowCount > 0){
+                    response.vicarName = vicarRes.rows[0].user_name;
+                    response.vicaId = vicarRes.rows[0].user_id;
+                }  
+
             }
             if (row.org_type === 'Parish') {
                 staffData.push({
@@ -218,9 +225,19 @@ async function bulkRegistration(client, loggedInUser, eventId) {
 
         for (let row of result.rows) {
             if (row.org_type === 'Sunday School') {
+                if (staffData.length === 0) {
+                    staffData.push({
+                        sundaySchools: []
+                    })
+                }
                 let pIndex = staffData.findIndex(item => item.orgId === row.parent_org_id)
-                let sIndex = staffData[pIndex].sundaySchools.findIndex(item => item.schoolId === row.org_id)
-                if (sIndex === -1) {
+                 let sIndex = -1;
+                if (pIndex === -1) {
+                    // sIndex = 0
+                    pIndex = 0
+                } else sIndex = staffData[pIndex].sundaySchools.findIndex(item => item.schoolId === row.org_id)
+              
+               if (sIndex === -1) {
                     let temp = {
                         schoolName: row.org_name,
                         schoolId: row.org_id,
