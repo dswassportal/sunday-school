@@ -215,7 +215,7 @@ export class BulkRegistrationComponent implements OnInit {
       "eventId": this.eventId,
       "eventType": this.selectedRowJson.event_type,
       "regMethod": "bulk",
-      "eventVenueId": this.parishDetailsFormGroup.value.parishName[0].orgId,
+      "eventVenueId": this.venuesDataFormGroup.value.venues[0].eventVenueId,
       "staffRegistration": staffRegistration
 
     }
