@@ -194,6 +194,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
     let staffData = [];
     let response = {}
     let result = await client.query(queries.getTTCEventData, [loggedInUser, eventId]);
+
     if (result.rowCount > 0) {
 
         for (let row of result.rows) {
@@ -226,8 +227,8 @@ async function bulkRegistration(client, loggedInUser, eventId) {
             }
             if (row.org_type === 'Parish') {
                 staffData.push({
-                    'orgName': row.org_name,
-                    'orgId': row.org_id,
+                    'orgName': row.org_name[0],
+                    'orgId': row.org_id[0],
                     sundaySchools: []
                 })
             }
@@ -249,8 +250,8 @@ async function bulkRegistration(client, loggedInUser, eventId) {
 
                 if (sIndex === -1) {
                     let temp = {
-                        schoolName: row.org_name,
-                        schoolId: row.org_id,
+                        schoolName: row.org_name[0],
+                        schoolId: row.org_id[0],
                         staff: []
                     };
 
@@ -267,14 +268,13 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                     }
 
                     for (let innrow of result.rows) {
-                        if (innrow.parent_org_id === row.org_id && innrow.org_type === 'Grade' && innrow.user_id !== null) {
+                        if (innrow.parent_org_id === row.org_id[0] && innrow.org_type === 'Grade' && innrow.user_id !== null) {
                             temp.staff.push({
                                 staffName: innrow.user_name,
                                 staffId: innrow.user_id,
                                 grade: innrow.org_name,
                                 emailId: innrow.email_id,
                                 mobileNo: innrow.mobile_no,
-                                isPrimary: innrow.is_primary,
                                 registrationId: innrow.enrollment_id,
                                 evePartiRegId: innrow.event_participant_registration_id,
                                 registrationStatus: innrow.registration_status,

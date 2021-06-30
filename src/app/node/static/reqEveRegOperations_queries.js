@@ -69,12 +69,10 @@ const getTTCEventData = `    select distinct
                                 tepr.event_venue_id, 
                                 tosa.role_type,
                                 tosa.user_id,
-                                tosa.is_primary,
-                                to2.name org_name,
+                                array_agg(to2.name) org_name,
                                 to2.org_type,
-                                to2.org_id,
+                                array_agg(to2.org_id) org_id,
                                 to2.parent_org_id,
-                                to2."level",
                                   case when tu2.first_name is null then null else concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) end registered_by,
                                 tepr.created_date registered_on
                                 from
@@ -105,12 +103,17 @@ const getTTCEventData = `    select distinct
                                                 and tstd.is_deleted = false
                                             join t_event te on te.event_id = $2 	
                                             left join t_event_participant_registration tepr on tepr.user_id = tosa.user_id
-                                                and tepr.is_deleted = false
+                                                and tepr.is_deleted = false and tepr.event_id = $2
                                             left join t_user tu on tu.user_id = tosa.user_id 
                                                 and tu.is_approved = true 
                                                 and tu.is_deleted = false
                                             left join t_person tp on tp.user_id = tosa.user_id
-                                            left join t_user tu2 on tu2.user_id = tepr.created_by order by to2."level";`
+                                            left join t_user tu2 on tu2.user_id = tepr.created_by 
+                                            group by  te.event_id,  tu.email_id, tu.first_name,
+                                                tu.title, tu.middle_name, tu.last_name, tp.mobile_no,  tepr.enrollment_id,
+                                                tepr.event_participant_registration_id, to2.org_type,
+                                                tepr.registration_status,  tosa.role_type, tosa.user_id, to2.parent_org_id,
+                                                tu2.title, tu2.first_name, tu2.middle_name, tu2.last_name;`
 
 const getParticipantRolesFormLookup = `select jsonb_agg(
                                             jsonb_build_object(
