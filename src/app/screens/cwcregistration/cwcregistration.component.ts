@@ -106,7 +106,7 @@ export class CwcregistrationComponent implements OnInit {
 
   dropdownSettingsForVenues: IDropdownSettings = {
     singleSelection: true,
-    idField: 'venueId',
+    idField: 'venueMapId',
     textField: 'venueName',
     selectAllText: 'Select All',
     unSelectAllText: 'UnSelect All',
@@ -262,7 +262,7 @@ export class CwcregistrationComponent implements OnInit {
             this.catArray.push(row.catMapId);
           }
         }
-        
+
         this.questionnaireData = res.data.eventData.questionnaire;
         this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionnairesData(this.questionnaireData));
 
@@ -424,7 +424,7 @@ export class CwcregistrationComponent implements OnInit {
       "participantId": participantId,
       "eventType": this.selectedRowJson.event_type,
       "group": "Group 1",
-      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueId,
+      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueMapId,
       "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
       "categories": this.catArray,
       "questionnaire": questionnaireData
@@ -435,6 +435,7 @@ export class CwcregistrationComponent implements OnInit {
       if (res.data.status == "success") {
         console.log("res", res);
         this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
+        this.router.navigate(['/dashboard/eventRegistration/']);
       }
       else {
         this.uiCommonUtils.showSnackBar("Please fill all mandatory fields!", "error", 3000);
@@ -442,7 +443,6 @@ export class CwcregistrationComponent implements OnInit {
 
     });
 
-    this.router.navigate(['/dashboard/eventRegistration/']);
   }
 
   onUpdateRegistrationClick() {
@@ -485,7 +485,7 @@ export class CwcregistrationComponent implements OnInit {
       "eventPartiRegId": this.eventData.eventPartiRegId,
       "eventType": this.selectedRowJson.event_type,
       "group": "Group 1",
-      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueId,
+      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueMapId,
       "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
       "categories": this.catArray,
       "questionnaire": questionnaireData
@@ -496,6 +496,7 @@ export class CwcregistrationComponent implements OnInit {
       if (res.data.status == "success") {
         console.log("res", res);
         this.uiCommonUtils.showSnackBar("Event registration updated successfully!", "success", 3000);
+        this.router.navigate(['/dashboard/eventRegistration/']);
       }
       else {
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
@@ -547,7 +548,7 @@ export class CwcregistrationComponent implements OnInit {
       "eventPartiRegId": this.eventData.eventPartiRegId,
       "eventType": this.selectedRowJson.event_type,
       "group": "Group 1",
-      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueId,
+      "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueMapId,
       "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
       "categories": this.catArray,
       "questionnaire": questionnaireData
@@ -558,6 +559,7 @@ export class CwcregistrationComponent implements OnInit {
       if (res.data.status == "success") {
         console.log("res", res);
         this.uiCommonUtils.showSnackBar("Event registration canceled successfully!", "success", 3000);
+        this.router.navigate(['/dashboard/eventRegistration/']);
       }
       else {
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
