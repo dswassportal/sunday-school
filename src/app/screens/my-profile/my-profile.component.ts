@@ -92,6 +92,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   titles!: any[];
   memberships!: any[];
   error = { validatePhoneNumber: true };
+  isFamilyMember :any;
 
 
   //, Validators.required
@@ -124,7 +125,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       userId: new FormControl(''),
       isFamilyHead: new FormControl(''),
       orgId: new FormControl(''),
-      isStudent: new FormControl('')
+      isStudent: new FormControl(''),
+      isFamilyMember: new FormControl('')
     });
 
 
@@ -169,6 +171,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       this.userId = this.alluserdata.userId;
       this.fbUid = this.alluserdata.fbUid;
+      this.isFamilyMember=this.alluserdata.isFamilyMember;
       this.isFamilyHead = this.alluserdata.isFamilyHead;
       if(this.isFamilyHead == true){
         this.isReadOnly = false;
@@ -476,6 +479,10 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       else if (currisStudentValue === '')
         this.myprofileform.value.isStudent = this.alluserdata.isStudent
 
+
+        
+
+
       if (this.alluserdata.emailId.toLowerCase() !== this.myprofileform.value.emailId.toLowerCase()) {
         let confmMsgSt = 'You have changed your email address, You need to complete email verfication process for new email otherwise your account will be locked. Press OK to continue';
         if (confirm(confmMsgSt)) {
@@ -631,4 +638,4 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       alert("Select Date in Past");
     }
   }
-}
+}        
