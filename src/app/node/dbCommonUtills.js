@@ -20,7 +20,14 @@ function generateRandomString(length) {
         readable: true,
         capitalization: 'uppercase'
     });
+}
 
+async function getRegionOfuser(client, userId) {
+
+    let result = await client.query(queries.getRegionOfuser, [userId]);
+    if (result.rowCount > 0) {
+
+    }
 }
 
 module.exports = {

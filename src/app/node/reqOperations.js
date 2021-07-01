@@ -919,18 +919,6 @@ async function getEventData(userId, eventType) {
         console.log(`Fetching event data for ${userId} user.`)
         if (eventType === 'for_judgement') {
 
-            // getEventData = ` select distinct   event_id,
-            //                                     event_name "name",
-            //                                     event_type, 
-            //                                     to_char(event_start_date, 'DD-MM-YYYY') start_date,
-            //                                     to_char(event_end_date, 'DD-MM-YYYY') end_date,
-            //                                     event_end_date
-            //                             from v_event  
-            //                             where judge_id = ${userId}
-            //                             and is_deleted = false
-            //                             and is_attendance_submitted  = true
-            //                             order by event_end_date desc;`
-
             getEventData = ` select distinct 
                         te.event_id,
                         te."name",
@@ -941,8 +929,8 @@ async function getEventData(userId, eventType) {
                 join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
                 join t_event te on te.event_id = tecsm.event_id 
                     where user_id = ${userId}
-                    and  tecm.is_attendance_submitted = true
                     and te.is_deleted = false;`
+                    // and  tecm.is_attendance_submitted = true
         }
         if (eventType === 'review_pending') {
 
@@ -982,13 +970,14 @@ async function getEventData(userId, eventType) {
         if (eventType === 'attendance') {
 
             getEventData = `
+            
                         select distinct 
                                 to_char(event_start_date, 'DD-MM-YYYY') startDate,
                                 to_char(event_end_date, 'DD-MM-YYYY') endDate,
                                  event_type eventType,
                                  event_id eventId,
                                  event_name eventName, 
-                                 event_category_id catId, 
+                                 event_cat_map_id catId, 
                                  category_name catName 
                         from v_event ve 
                         where proctor_id = ${userId} 

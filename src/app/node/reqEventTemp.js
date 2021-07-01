@@ -2,6 +2,7 @@
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
+const queries = require(`${__dirname}/static/reqScoreOperations_queries.js`);
 
 
 
@@ -13,27 +14,48 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
         let getPaticipantQuery;
         if (action == 'upload') {
             getPaticipantQuery = ` select jsonb_agg(
-                                                    jsonb_build_object(
-                                                    'regId', res.event_participant_registration_id,
-                                                    'enrollmentId',  res.enrollment_id,
-                                                    'category', res.event_category_name,
-                                                    'score', res.score,
-                                                    'categoryId', res.event_category_id,
-                                                    'catStaffMapId',res.event_cat_staff_map_id,
-                                                    'scoreRefId' , res.participant_event_score_id,
-                                                    'partEveRegCatId', res.participant_event_reg_cat_id,
-                                                    'isScoreSubmitted', res.is_score_submitted              
-                                                    ) 
-                                            ) participants from (
-                                                select distinct event_participant_registration_id,
-                                                event_category_id, score, event_cat_staff_map_id, participant_event_reg_cat_id,
-                                                event_category_name, enrollment_id, participant_event_score_id, 
-                                                is_score_submitted, is_attendance_submitted 
-                                                from v_event_participant vep
-                                                where event_id = ${eventId}
-                                                and is_attendance_submitted = true
-                                                and has_attended = true
-                                                and staff_id = ${userId} order by event_category_id, enrollment_id asc) res;`;
+                                                jsonb_build_object(
+                                                'regId', tepr.event_participant_registration_id,
+                                                'enrollmentId',  tepr.enrollment_id,
+                                                'category', tec."name",
+                                                'score',tpes.score,
+                                                'eventCatId', tecm.event_category_id,
+                                                'catStaffMapId',tecsm2.event_cat_staff_map_id,
+                                                'scoreRefId' , tpes.participant_event_score_id,
+                                                'partEveRegCatId', tperc.participant_event_reg_cat_id,
+                                                'isScoreSubmitted', tecsm2.is_score_submitted              
+                                                )
+                                            ) participants			
+                                            from t_event_participant_registration tepr
+                                            join t_user tu on tepr.user_id = tu.user_id 
+                                            and tepr.event_id = ${eventId} 
+                                            and tepr.registration_status != 'Canceled'
+                                            and tepr.is_deleted = false
+                                            and tepr.has_attended = true
+                                            and tu.org_id in
+                                            (WITH recursive child_orgs 
+                                                        AS (
+                                                            SELECT org_id
+                                                            FROM   t_organization parent_org 
+                                                            WHERE  org_id IN
+                                                                    ( select tersm.org_id 
+                                                                            from t_event_cat_staff_map tecsm 
+                                                                            join t_event_region_staff_map tersm on tersm.event_region_staff_map_id = tecsm.event_region_staff_map_id 
+                                                                            and tecsm.event_id = ${eventId} and tecsm.user_id = ${userId})                                                    
+                                                            UNION
+                                                            SELECT     child_org.org_id child_id
+                                                            FROM       t_organization child_org
+                                                            INNER JOIN child_orgs c
+                                                            ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                            FROM   child_orgs)
+                                            join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id 
+                                            join t_event_category_map tecm on tecm.event_cat_map_id = tperc.event_category_id
+                                            join t_event_category tec on tec.event_category_id = tecm.event_category_id 
+                                            join t_event_cat_staff_map tecsm2 on tecsm2.event_category_map_id =  tecm.event_cat_map_id
+                                            and tecsm2.user_id = ${userId}
+                                            left join t_participant_event_score tpes on tpes.event_cat_staff_map_id = tecsm2.event_cat_staff_map_id 
+                                            and tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id;`;
+
         } else if (action == 'approve') {
 
             getPaticipantQuery = `select jsonb_agg(
@@ -70,22 +92,28 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
         } else if (action === 'attendance') {
 
             getPaticipantQuery = ` select jsonb_agg(
-                                                    jsonb_build_object(
-                                                        'enrollmentId', res.enrollment_id,
-                                                        'eventCategoryId', res.event_category_id,
-                                                        'eventCategoryName', res.event_category_name,
-                                                        'hasAttended', res.has_attended,
-                                                        'participantId', res.participant_id,
-                                                        'eventPartRegId', res.event_participant_registration_id,
-                                                        'isAttendanceSubmitted', res.is_attendance_submitted
-                                                    ) 
-                                                ) participants
-                                                from (select distinct is_attendance_submitted, event_participant_registration_id, participant_id, enrollment_id, event_category_name, event_category_id,has_attended 
-                                                        from v_event_participant vep 
-                                                        where event_id = ${eventId}
-                                                        and event_category_id = ${catId}
-                                                        order by enrollment_id asc
-                                                        ) res;`
+                                        jsonb_build_object(
+                                            'enrollmentId', tepr.enrollment_id,
+                                            'isAttendanceSubmitted', tev.is_attendance_submitted,
+                                            'hasAttended',  tepr.has_attended ,
+                                            'grade', tepr.school_grade,
+                                            'role', tepr."role", 
+                                            'participantId', tepr.user_id ,
+                                            'eventPartRegId', tepr.event_participant_registration_id,
+                                            'participantName', concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name),
+                                            'participantParish', to2."name"
+                                        ) order by tepr.enrollment_id
+                                    ) participants	
+                                from t_event_participant_registration tepr
+                                join t_user tu on tu.user_id = tepr.user_id 
+                                        and tu.is_deleted = false 
+                                        and tepr.registration_status != 'Canceled'
+                                        and tepr.event_id = ${eventId}
+                                join t_organization to2 on to2.org_id = tu.org_id 
+                                join t_event_venue tev on  tepr.event_venue_id = tev.event_venue_id 
+                                and tev.proctor_id = ${userId}
+                                and tev.event_id = ${eventId}
+                                and tev.is_deleted = false;`
 
         } else {
             console.log('Invalid action sent to getParticipant api, action recived to process  : ' + action);
@@ -95,7 +123,7 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
         return {
             data: {
                 status: 'success',
-                paticipants: result.rows[0] == undefined ? [] : result.rows[0].participants
+                paticipants: result.rowCount  > 0 ?  result.rows[0].participants : []
             }
         }
 

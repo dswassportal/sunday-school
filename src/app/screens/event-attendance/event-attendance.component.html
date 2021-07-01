@@ -30,7 +30,7 @@
                     </div>
                     <div class="modal-body border rounded">
 
-                        <div class="row" style="padding: 0px;justify-content: space-evenly;">
+                        <!-- <div class="row" style="padding: 0px;justify-content: space-evenly;">
                             <mat-form-field>
                                 <mat-label>Category</mat-label>
                                 <mat-select (selectionChange)="onDropdowwnSelChange($event)"
@@ -41,7 +41,7 @@
                                 </mat-select>
                             </mat-form-field>
                         </div>
-                     
+                      -->
                         <ag-grid-angular style="width: auto; height: 425px;" class="ag-theme-alpine mt-3"
                                 [rowData]="attendanceRowData | filter:term " [columnDefs]="attendanceColDef" [pagination]="true"
                                  [gridOptions]="attendanceGridOption" (gridReady)="onGridReady($event)">
