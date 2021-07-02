@@ -140,19 +140,31 @@ async function getEventCatsAndStaffById(eventId) {
 
     let client = await dbConnections.getConnection();
     try {
-        let queryStmt = `select         
+        let queryStmt = ` select         
                                 jsonb_agg(
-                                        distinct jsonb_build_object('categoryId', res.event_category_id,
-                                                                    'categoryName', res.event_category_name ) 		
+                                        distinct jsonb_build_object('categoryId', vep.event_cat_map_id,
+                                                                    'categoryName', vep.event_category_name  ) 		
                                             ) catarr,
                                 jsonb_agg(
-                                        distinct jsonb_build_object('judgeId', res.staff_id,
-                                                                    'judgeName', res.judge_name ) 		
+                                        distinct jsonb_build_object('judgeId', vep.staff_id,
+                                                                    'judgeName', concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) ) 		
                                             ) judgearr 		                                    
-                        from  
-                            ( select distinct staff_id, concat(staff_first_name, ' ', staff_last_name ) judge_name,
-                                event_category_id, event_category_name from v_event_participant 
-                                where event_id = ${eventId}) res;`;
+                                from v_event_participant vep 
+                                join t_user tu on vep.staff_id = tu.user_id 
+                                and vep.event_id = ${eventId}
+                                and tu.org_id in (WITH recursive child_orgs 
+                                                AS (
+                                                    SELECT org_id
+                                                    FROM   t_organization parent_org 
+                                                    WHERE  org_id = 2  
+                                    --                                         in (select turc.org_id from t_user tu join t_user_role_context turc 
+                                    --						 									on tu.user_id = turc.user_id and turc.user_id = 1301) 
+                                                    UNION
+                                                    SELECT     child_org.org_id child_id
+                                                    FROM       t_organization child_org
+                                                    INNER JOIN child_orgs c
+                                                    ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                    FROM   child_orgs);`;
 
         let result = await client.query(queryStmt);
 

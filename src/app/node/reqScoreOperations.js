@@ -292,23 +292,43 @@ async function getScoreByCategory(eventId, eventCategoryId) {
     try {
 
         /********************** scores *******************************************************************************************/
+        // const eventQuery = `select distinct  tecm.event_category_id
+        //                             , tepr.enrollment_id
+        //                             , tecsm.user_id staff_id
+        //                             , tu.first_name , tu.last_name 
+        //                             , tpes.score 
+        //                             ,concat(tu2.title,'.',' ',tu2.first_name,' ', tu2.middle_name, ' ',tu2.last_name) participant_name
+        //                             ,to2."name" parish_name
+        //                         from t_event_category_map tecm 
+        //                         join t_event_cat_staff_map tecsm on tecsm.event_id = tecm.event_id and tecsm.event_category_map_id = tecm.event_cat_map_id 
+        //                         join t_event_participant_registration tepr on tepr.event_id = tecm.event_id 
+        //                         join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
+        //                              and tperc.event_category_id = tecm.event_category_id  and tperc.has_attended = true 
+        //                         left join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id and tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
+        //                         join t_user tu on tu.user_id = tecsm.user_id
+        //                         join t_user tu2 on tepr.user_id = tu2.user_id
+        //                         join t_organization to2 on to2.org_id = tu2.org_id 
+        //                         where tecm.event_id = ${eventId} and tecm.event_category_id = ${eventCategoryId} order by 1,2,3 ;`
+
+
         const eventQuery = `select distinct  tecm.event_category_id
                                     , tepr.enrollment_id
                                     , tecsm.user_id staff_id
-                                    , tu.first_name , tu.last_name 
+                                    , concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ',tu.last_name) 
                                     , tpes.score 
                                     ,concat(tu2.title,'.',' ',tu2.first_name,' ', tu2.middle_name, ' ',tu2.last_name) participant_name
                                     ,to2."name" parish_name
-                                from t_event_category_map tecm 
+                            from t_event_category_map tecm 
                                 join t_event_cat_staff_map tecsm on tecsm.event_id = tecm.event_id and tecsm.event_category_map_id = tecm.event_cat_map_id 
-                                join t_event_participant_registration tepr on tepr.event_id = tecm.event_id 
+                                join t_event_participant_registration tepr on tepr.event_id = tecm.event_id and tepr.event_id =  ${eventId}
                                 join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
-                                     and tperc.event_category_id = tecm.event_category_id  and tperc.has_attended = true 
-                                left join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id and tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
+                                    and tperc.event_category_id = tecm.event_cat_map_id and tperc.has_attended = true 
+                                left join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id 
+                                and tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
                                 join t_user tu on tu.user_id = tecsm.user_id
                                 join t_user tu2 on tepr.user_id = tu2.user_id
                                 join t_organization to2 on to2.org_id = tu2.org_id 
-                                where tecm.event_id = ${eventId} and tecm.event_category_id = ${eventCategoryId} order by 1,2,3 ;`
+                                where tecm.event_id = ${eventId}  and tecm.event_cat_map_id = ${eventCategoryId} order by 1,2,3;`;
 
         let result = await client.query(eventQuery);
 
