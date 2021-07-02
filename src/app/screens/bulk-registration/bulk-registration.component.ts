@@ -125,6 +125,11 @@ export class BulkRegistrationComponent implements OnInit {
     this.apiService.callGetService(`getEventDef?eventId=${this.selectedRowJson.event_Id}&participantId=${this.loggedInUser}&regMethod=bulk`).subscribe((res) => {
       this.eventData = res.data.eventData;
       this.venueList = res.data.eventData.venues;
+
+      this.venuesDataFormGroup.patchValue({
+        venues : res.data.eventData.selectedVenue
+      });
+      
       this.parishNameData = this.eventData.staffData;
 
       this.regEndDate = this.eventData.regEndDate;
