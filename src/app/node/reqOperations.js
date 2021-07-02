@@ -1399,7 +1399,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                 let tUserRes = await client.query(reqOpQueries.insertMemberIntoUserTbl,
                                     [userData.orgId, userData.emailId, '', details.title,
                                     details.firstName, details.middleName, details.lastName,
-                                    userData.updatedBy, new Date().toUTCString(), 'member', false]);
+                                    userData.updatedBy, new Date().toUTCString(), 'Member', false]);
 
                                 if (tUserRes.rowCount > 0) {
                                     let newUserId = tUserRes.rows[0].user_id;
@@ -1441,7 +1441,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                     let tUserRes = await client.query(reqOpQueries.insertMemberIntoUserTbl,
                                         [userData.orgId, details.emailId, fbuid, details.title,
                                         details.firstName, details.middleName, details.lastName,
-                                        userData.updatedBy, new Date().toUTCString(), 'member', false]);
+                                        userData.updatedBy, new Date().toUTCString(), 'Member', false]);
 
                                     if (tUserRes.rowCount > 0) {
                                         let newUserId = tUserRes.rows[0].user_id;
