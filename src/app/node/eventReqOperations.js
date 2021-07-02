@@ -786,53 +786,6 @@ async function insertEvents(eventsData, loggedInUser) {
     }
 }
 
-async function validateAndDeleteMappings(client, eventData) {
-    console.log('validateAndDeleteMappings called.')
-    switch (eventData.sectionCode) {
-
-        case "event_categories": {
-
-            let listOfCatIds = []
-            eventData.categories.forEach((item) => { if (item.catId) listOfCatIds.push(item.catId) });
-            if (listOfCatIds.length <= 0)
-                return { isError: false }
-
-            // validations if category has mapped to grade   
-            let tempQuery = queries.checkIsCategoryAllowedToDelete.replace('$2', listOfCatIds.join(','))
-            let result1 = await client.query(tempQuery, [eventData.eventId]);
-            //validation if category has been mapped to staff(Judge)
-            tempQuery = queries.checkIsCategoryMappedToStaff.replace('$2', listOfCatIds.join(','))
-            let result2 = await client.query(tempQuery, [eventData.eventId]);
-            console.log("validating selected categories : " + listOfCatIds.join(','))
-            console.log(`[Validation] : are unselected categories mapped to group? ${!result1.rows[0].allowed_to_delete}`);
-            console.log(`[Validation] : are unselected categories mapped to staff(Judge)? ${!result2.rows[0].allowed_to_delete}`);
-
-            if (result1.rows[0].allowed_to_delete === false) {
-                return {
-                    isError: true,
-                    error: errorHandling.handleDBError('cat_grp_map_error')
-                }
-            } else if (result2.rows[0].allowed_to_delete === false) {
-                return {
-                    isError: true,
-                    error: errorHandling.handleDBError('cat_staff_map_error')
-                }
-            } else if (
-                result1.rows[0].allowed_to_delete === true &&
-                result2.rows[0].allowed_to_delete === true
-            ) {
-
-                tempQuery = queries.deleteCategoryMapping.replace('$2', listOfCatIds.join(','))
-                result = await client.query(tempQuery, [eventData.eventId]);
-                console.log(`for event ${eventData.eventId}, row deleted for categories: ${result.rowCount}`);
-            }
-            return { isError: false }
-        }
-    }
-
-}
-
-
 
 async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType, client) {
 
@@ -1201,13 +1154,12 @@ async function getProctorData(userData) {
     try {
         let metadata = {};
         console.log("userData", JSON.stringify(userData));
-        let rolesData = [];
-
+        
         var roles = "'" + userData.rolesData.join("','") + "'";
 
-        let getProctorData = `select distinct user_id, concat(first_name ,' ', last_name) as name 
-        from v_user 
-        where role_name  in (${roles});`
+        let getProctorData = `select distinct user_id, 
+		concat(title,'. ', first_name ,' ',middle_name,' ',last_name,'(', user_org, ')') "name"
+		from v_user where role_name  in (${roles});`;
 
         let res = await client.query(getProctorData);
         if (res && res.rowCount > 0) {
@@ -1271,7 +1223,7 @@ async function getEventQuestionnaireData() {
     }
 }
 /*............get all Events from db for registration purpose........*/
-async function getEventForRegistration() {
+async function getEventForRegistration(loggedInUser) {
     let client = await dbConnections.getConnection();
     try {
         let metadata = {};
@@ -1280,7 +1232,7 @@ async function getEventForRegistration() {
                                         where
                                         ve.event_id not in (select event_id 
                                                                 from t_event_participant_registration tepr 
-                                                                where tepr.user_id = 1223
+                                                                where tepr.user_id = ${loggedInUser}
                                                             )
                                         and  ve.registration_start_date <= current_date
                                         and  ve.registration_end_date >= current_date
@@ -1321,6 +1273,81 @@ async function getEventForRegistration() {
 
 }
 
+async function getEventById(eventId) {
+
+    console.log('getEventById called, Fetching event data for : ' + eventId);
+
+    let client = await dbConnections.getConnection();
+    try {
+        let orgIds = [];
+        let event = {};
+        let eventCoordinator = [];
+
+        let result = await client.query(queries.getEventDefForUpdateEvent, [eventId]);
+
+        if (result && result.rowCount > 0) {
+            event.eventId = result.rows[0].event_id;
+            event.name = result.rows[0].event_name;
+            event.description = result.rows[0].event_desciption;
+            event.eventType = result.rows[0].event_type;
+            event.registrationStartDate = result.rows[0].registration_start_date;
+            event.registrationEndDate = result.rows[0].registration_end_date;
+            event.startDate = result.rows[0].event_start_date;
+            event.endDate = result.rows[0].event_end_date;
+            event.orgType = result.rows[0].org_type;
+            event.eventUrl = result.rows[0].event_url;
+
+            for (let row of result.rows) {
+                // Get list of org ids
+                if (row.org_id != null) {
+                    let orgIndex = orgIds.findIndex((item) => item.orgId == row.org_id);
+                    if (orgIndex === -1)
+                        orgIds.push({ orgId: row.org_id, orgName: row.org_name })
+                }
+
+                if (row.coordinator_id != null) {
+                    let cooIndex = eventCoordinator.findIndex((item) => item.id == row.coordinator_id);
+                    if (cooIndex === -1)
+                        eventCoordinator.push({ id: row.coordinator_id, name: row.coo_name });
+                }
+            }
+        }
+
+        event.coordinators = eventCoordinator;
+        event.executedBy = orgIds;
+        //  To get Attachments if they exists in system
+        let attRes = await client.query(queries.getAttachmentsByEveId, [eventId]);
+
+        event.attachments = []
+        if (attRes.rowCount > 0) {
+            for (let row of attRes.rows) {
+                let attIndex = event.attachments.findIndex((item) => item.attId == row.event_attachment_id);
+                if (attIndex === -1)
+                    event.attachments.push({
+                        attName: row.attachment_name,
+                        attType: row.attachment_type,
+                        attId: row.event_attachment_id,
+                        attFileName: row.file_name
+                    })
+            }
+        }
+
+        return ({
+            data: {
+                status: 'success',
+                eventData: event
+            }
+        })
+
+    } catch (err) {
+
+        console.error(`reqOperations.js::insertevents() inner try block --> error : ${err}`)
+        console.log("Transaction ROLLBACK called");
+        return (errorHandling.handleDBError('transactionError'));
+    } finally {
+        client.release(false);
+    }
+}
 
 
 
@@ -1335,5 +1362,6 @@ module.exports = {
     getEventQuestionnaireData,
     getEventForRegistration,
     deleteEvents,
-    getRegionWiseJudges
+    getRegionWiseJudges,
+    getEventById
 }

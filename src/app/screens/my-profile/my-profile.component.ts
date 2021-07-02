@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -93,6 +92,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   titles!: any[];
   memberships!: any[];
   error = { validatePhoneNumber: true };
+  isFamilyMember :any;
 
 
   //, Validators.required
@@ -125,7 +125,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       userId: new FormControl(''),
       isFamilyHead: new FormControl(''),
       orgId: new FormControl(''),
-      isStudent: new FormControl('')
+      isStudent: new FormControl(''),
+      isFamilyMember: new FormControl('')
     });
 
 
@@ -170,6 +171,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       this.userId = this.alluserdata.userId;
       this.fbUid = this.alluserdata.fbUid;
+      this.isFamilyMember=this.alluserdata.isFamilyMember;
       this.isFamilyHead = this.alluserdata.isFamilyHead;
       if(this.isFamilyHead == true){
         this.isReadOnly = false;
@@ -324,7 +326,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         dob: new FormControl(''),
         password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
         cnfmpwd: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@]!@#$%&*)(?=.*?[0-9]).{8,}$')]),
-        mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
+        mobileNo: new FormControl('', [Validators.required]),
         memberType: new FormControl('', Validators.required),
         orgId: new FormControl('', Validators.required),
         abtyrslf: new FormControl('')
@@ -393,7 +395,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         baptismalName: e.baptismalName,
         dob: e.dob,
         mobileNo: e.mobileNo,
-        emailId: e.emailId
+        emailId: e.emailId,
+        userId : e.userId
       }));
     });
     return formArray;
@@ -434,8 +437,9 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       relationship: new FormControl('', Validators.required),
       baptismalName: new FormControl(''),
       dob: new FormControl('',),
-      mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
+      mobileNo: new FormControl('', [Validators.required]),
       emailId: new FormControl('', [Validators.required, Validators.email]),
+      userId : new FormControl(''),
     });
   }
   //event handler for the select element's change event
@@ -448,11 +452,11 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   }
 
   updateUserProfile() {
-     if (this.myprofileform.invalid) {
-       this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
-    //   return
-     }
-     else //{
+    if ((this.myprofileform.invalid && this.isApprovedUserLoggedIn == true) ) {
+      this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
+   //   return
+    }
+    else //{
     if (this.isApprovedUserLoggedIn == true) {
       this.myprofileform.value.userId = this.userId;
       this.myprofileform.value.updatedBy = this.userId;
@@ -474,6 +478,10 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         this.myprofileform.value.isStudent = false;
       else if (currisStudentValue === '')
         this.myprofileform.value.isStudent = this.alluserdata.isStudent
+
+
+        
+
 
       if (this.alluserdata.emailId.toLowerCase() !== this.myprofileform.value.emailId.toLowerCase()) {
         let confmMsgSt = 'You have changed your email address, You need to complete email verfication process for new email otherwise your account will be locked. Press OK to continue';
@@ -630,4 +638,4 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       alert("Select Date in Past");
     }
   }
-}
+}        

@@ -2,8 +2,8 @@
 
     <div class="row ml-1 mt-2 d-flex" style="justify-content: center;margin: 5px;">
         <mat-radio-group (change)='onFilteringRadioButtonChange($event)' aria-label="Select User Types to filter">
-            <mat-radio-button  value="upcoming_events" >Upcoming Events</mat-radio-button>&nbsp;&nbsp;&nbsp;&nbsp;
-            <mat-radio-button  value="registered_events">Registered Events</mat-radio-button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-radio-button checked value="upcoming_events" >Upcoming Events</mat-radio-button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <mat-radio-button  value="registered_events">Registered / Canceled Events</mat-radio-button>&nbsp;&nbsp;&nbsp;&nbsp;
             <mat-radio-button  value="completed_events">Completed Events</mat-radio-button>
         </mat-radio-group>
     </div>

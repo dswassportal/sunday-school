@@ -71,7 +71,7 @@ async function setUserApprovalState(userData, loggedInUser) {
 
                         }
                         break;
-                    }else  randomMemId = (Math.random() * (9999999 - 1000000) + 1000000).toFixed(0);
+                    } else randomMemId = (Math.random() * (9999999 - 1000000) + 1000000).toFixed(0);
                 }
             }
 
@@ -195,93 +195,77 @@ async function setStaffAssignment(staffData, loggedInUser) {
         await client.query("BEGIN");
         // Preparing roles json so we dont need to query it again and again
         let roles = {};
-        let getRoleIds = `select tr."name" role_name , tr.role_id from t_role tr where name = 'Teacher' or name = 'Sunday School Principal' or name = 'Sunday School Vice Principal';`
-        let result = await client.query(getRoleIds);
-        for (let row of result.rows) {
-            roles[row.role_name] = row.role_id;
-            console.log("role name and id is : " + row.role_name + " " + row.role_id)
-        }
+        let getSSRoles = await client.query(queries.getSchoolRoleIds);
+        if (getSSRoles.rowCount > 0) {
+            for (let row of getSSRoles.rows)
+                roles[row.role_name] = row.role_id;
+        } else throw "Roles not found in db associated to sunday school.";
 
-        let ssStartDate = staffData.ssStartDate;
-        let ssEndDate = staffData.ssEndDate;
+        let ssStartDate;
+        let ssEndDate;
+        let termDtlId;
 
-        for (let staffMember of staffData.staffAssignment) {
-
-            /****************************** Upsert t_user_role_mapping ************************************/
-            let updateRoleMappingQuery = `UPDATE t_user_role_mapping
-                                            SET role_id=$1, user_id=$2, role_start_date=$3, role_end_date=$4 
-                                            WHERE role_id=$1 and user_id=$2 and is_deleted = false`;
-
-            let updateRoleMappingValues = [roles[staffMember.roleType], staffMember.staffId, ssStartDate, ssEndDate]
-            let result = await client.query(updateRoleMappingQuery, updateRoleMappingValues);
-            let insertRoleMappingQuery = ` INSERT INTO t_user_role_mapping (user_id, role_id, role_start_date, role_end_date)
-                                            select $1, $2, $3, $4  
-                                            WHERE NOT EXISTS (
-                                            SELECT 1 FROM t_user_role_mapping turm 
-                                                                WHERE user_id = $1 
-                                                                and role_id = $2
-                                                                and is_deleted = false
-                                                        ) returning user_role_map_id;`
-
-            let insertRoleMappingValues = [staffMember.staffId, roles[staffMember.roleType], ssStartDate, ssEndDate]
-
-            // and role_start_date = ${ssStartDate}
-            // and role_end_data = ${ssEndDate}
-            result = await client.query(insertRoleMappingQuery, insertRoleMappingValues);
-            if (result.rowCount > 0) {
-                let userRoleMapId = result.rows[0].user_role_map_id;
-                console.log(' Rows inserted into t_user_role_mapping  : ' + result.rowCount + ' and newly generated user_role_map_id is : ' + userRoleMapId);
-
-                /******************************  Upsert t_user_role_context ****************************************/
-                // let updateRoleContext = `UPDATE t_user_role_context
-                //                                 SET org_id = $1 
-                //                                     updated_by = $2, 
-                //                                     updated_date = $3
-                //                                 where  role_id = $4, user_id = $5, is_deleted = false;`;                                              
-                if (staffMember.gradeId > 0 && staffMember.staffId > 0) {
-                    let insertRoleContext = ` INSERT INTO t_user_role_context (user_id, role_id, org_id, created_by, created_date, user_role_map_id)
-                                            select $1, $2, $3, $4, $5, $6  
-                                            WHERE NOT EXISTS (
-                                            SELECT 1 FROM t_user_role_mapping turm 
-                                                                WHERE user_id = $1 
-                                                                and role_id = $2
-                                                                and org_id = $3
-                                                                and is_deleted = false
-                                                        );`
+        if (staffData.sundaySchoolTerm) {
+            if (staffData.sundaySchoolTerm.length > 0) {
+                ssStartDate = staffData.sundaySchoolTerm[0].startDate;
+                ssEndDate = staffData.sundaySchoolTerm[0].endDate;
+                termDtlId = staffData.sundaySchoolTerm[0].termDtlId;;
+            } else throw "Term details not provided."
+        } else throw "Term details not provided."
 
 
-                    let insertRoleContextvValues = [staffMember.staffId, roles[staffMember.roleType], staffMember.gradeId, loggedInUser, new Date().toUTCString(), userRoleMapId]
 
-                    result = await client.query(insertRoleContext, insertRoleContextvValues);
+        // Operate on Teachers Data
+        await assignRoleWiseGradeStaff({
+            roleType: "teacher",
+            parentObj: "teacherGrades",
+            isPrimary: true
+        },
+            {
+                ssStartDate: ssStartDate,
+                ssEndDate: ssEndDate,
+                termDtlId: termDtlId
+            },
+            roles, staffData, client, loggedInUser);
 
-                }
-            }
-            /******************************  Upsert t_staff_school_assignment ****************************************/
-  /******************************  Upsert t_staff_school_assignment ****************************************/
+        // Operate on Sub-Teachers Data            
+        await assignRoleWiseGradeStaff({
+            roleType: "substituteTeacher",
+            parentObj: "teacherGrades",
+            isPrimary: false
+        },
+            {
+                ssStartDate: ssStartDate,
+                ssEndDate: ssEndDate,
+                termDtlId: termDtlId
+            },
+            roles, staffData, client, loggedInUser);
 
-            //  let updateStaffSchool = ` UPDATE t_staff_school_assignment
-            //                         SET is_primary = $1, updated_by = 0, updated_date = ''
-            //                         WHERE user_id=0 and school_id = 0 and role_type=  and ` ;
 
-            let insertStaffSchool = ` INSERT INTO t_organization_staff_assignment (org_id, user_id, role_id, role_type, is_primary, created_by, created_date,
-                effective_start_date, effective_end_date)
-                                                select $1, $2, $3, $4, $5, $6, $7, $8, $9 
-                                                WHERE NOT EXISTS (
-                                                SELECT 1 FROM t_organization_staff_assignment tssa 
-                                                                    WHERE school_id = $1
-                                                                    and user_id = $2
-                                                                    and role_id = $3
-                                                            ) returning staff_school_assignment_id;`
-             
-                //let insertStaffSchoolValues = [staffData.schoolId, staffMember.staffId, roles[staffMember.roleType], staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString()]
-                let insertStaffSchoolValues = [staffMember.gradeId, staffMember.staffId, roles[staffMember.roleType],
-                                                staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString(),
-                                                ssStartDate, ssEndDate]
-                //let insertStaffSchoolValues = [staffMember.gradeId, staffMember.staffId, roles[staffMember.roleType], staffMember.roleType, staffMember.isPrimary, loggedInUser, new Date().toUTCString()]
-              
-                result = await client.query(insertStaffSchool, insertStaffSchoolValues);
+        //to process principal and vice principal data
 
-        }
+        await assignRoleWisePrincipalStaff({
+            roleType: 'Sunday School Principal',
+            parenObj: 'principal',
+            isPrimary: true
+        },
+            {
+                ssStartDate: ssStartDate,
+                ssEndDate: ssEndDate,
+                termDtlId: termDtlId
+            }, roles, staffData, client, loggedInUser);
+
+        await assignRoleWisePrincipalStaff({
+            roleType: 'Sunday School Vice Principal',
+            parenObj: 'vicePrincipal',
+            isPrimary: true
+        },
+            {
+                ssStartDate: ssStartDate,
+                ssEndDate: ssEndDate,
+                termDtlId: termDtlId
+            }, roles, staffData, client, loggedInUser);
+
 
         await client.query("COMMIT;");
 
@@ -303,6 +287,177 @@ async function setStaffAssignment(staffData, loggedInUser) {
         client.release();
     }
 
+}
+
+
+async function assignRoleWisePrincipalStaff(config, termData, roles, staffData, client, loggedInUser) {
+
+    console.log(`****** Processing  \"${config.roleType}\" data from provided payload. ******`);
+
+    if (!staffData.schoolId) throw `School ID not found while inserting ${config.roleType}`;
+    let schoolId = staffData.schoolId
+
+    let crtedRoles = [];
+    if (staffData[config['parenObj']]) {
+        if (staffData[config['parenObj']].length > 0) {
+            let staffObj = staffData[config['parenObj']][0];
+            //  if (!staffObj.orgStaffAssId) {
+            // To insert mapping into t_user_role_mapping
+            let roleInsRes = await client.query(queries.insertStaffRole,
+                [staffObj.staffId, roles[config.roleType], termData.ssStartDate, termData.ssEndDate]);
+
+            if (roleInsRes.rowCount > 0) {
+                // To insert role context into t_user_role_context
+                let contxInsRes = await client.query(queries.insertRoleContext,
+                    [staffObj.staffId, roles[config.roleType], schoolId,
+                      false,  loggedInUser, new Date().toUTCString(), roleInsRes.rows[0].user_role_map_id]);
+                if (contxInsRes.rowCount > 0)
+                    crtedRoles.push(roleInsRes.rows[0].user_role_map_id)
+            }
+
+            let existingOrgStaffIds = [];
+
+            //To checek wether the staff assignment exists or not for given grade, user, teacher type and with the term
+            let staffExistanceCheck = await client.query(queries.checkIsStaffAlreadyAssigned,
+                [schoolId, staffObj.staffId, roles[config.roleType], false, config.isPrimary, termData.termDtlId]);
+
+            if (staffExistanceCheck.rowCount > 0) {
+                existingOrgStaffIds.push(staffExistanceCheck.rows[0].org_staff_assignment_id)
+            } else {
+
+                //if assignment dosent exist then insert the staff member.
+                let staffAssRes = await client.query(queries.insertStaffAssignmt,
+                    [schoolId, staffObj.staffId, roles[config.roleType], config.roleType, config.isPrimary,
+                        loggedInUser, new Date().toUTCString(), termData.termDtlId]);
+
+                if (staffAssRes.rowCount > 0) {
+                    existingOrgStaffIds.push(staffAssRes.rows[0].org_staff_assignment_id);
+                }
+
+                console.debug(' Staff mapping Ids are for school  ' + schoolId + " are " + JSON.stringify(existingOrgStaffIds));
+                if (existingOrgStaffIds.length > 0) {
+                    // ro remove old staff assignment if there exists any for given grade, user, teacher type and with term
+                    let tempQuery = queries.deleteStaffOrgMapping.replace('$5', existingOrgStaffIds.join(','));
+                    let delResult = await client.query(tempQuery,
+                        [schoolId, roles[config.roleType], config.isPrimary, termData.termDtlId])
+                    if (delResult.rowCount > 0) {
+                        console.debug("Deleted(soft) mapping: " + JSON.stringify(delResult.rows));
+                    }
+                }
+                //}
+            }
+            await doStaffMappingRoleCleanUp(client, loggedInUser, schoolId, termData.termDtlId, roles[config.roleType]);
+        }
+
+    }
+
+    console.debug(`Roles created t_user_role_mapping, t_user_role_context : ${JSON.stringify(crtedRoles)} `);
+    //Clean activity(marking deleted all other teachers and if their assignment rmoved );
+
+
+
+
+}
+
+async function assignRoleWiseGradeStaff(config, termData, roles, staffData, client, loggedInUser) {
+
+    let updtedRoles = [];
+    let crtedRoles = [];
+    let staffAssigned = [];
+    let staffAssDeleted = [];
+
+    console.log(` ***** Processing  \"${config.roleType}\" data from provided payload. *****`);
+
+    //console.log()
+    //if (staffData.teacherGrades){
+    for (let assObj of staffData[config["parentObj"]]) {
+        if (assObj[config["roleType"]]) {
+            if (assObj[config["roleType"]].length > 0) {
+                let staffObj = assObj[config["roleType"]][0];
+                //  console.debug("Processing teacher : " + JSON.stringify(staffObj) + ' and school id is : ' + assObj.gradeId)
+                if (!staffObj.orgStaffAssId) {
+                    // To insert mapping into t_user_role_mapping
+                    let roleInsRes = await client.query(queries.insertStaffRole,
+                        [staffObj.staffId, roles['Sunday School Teacher'], termData.ssStartDate, termData.ssEndDate]);
+                    if (roleInsRes.rowCount > 0) {
+                        // To insert role context into t_user_role_context
+                        let contxInsRes = await client.query(queries.insertRoleContext,
+                            [staffObj.staffId, roles['Sunday School Teacher'], assObj.gradeId,
+                               false, loggedInUser, new Date().toUTCString(), roleInsRes.rows[0].user_role_map_id]);
+                        if (contxInsRes.rowCount > 0)
+                            crtedRoles.push(roleInsRes.rows[0].user_role_map_id)
+                    }
+
+                    let existingOrgStaffIds = [];
+
+                    //To checek wether the staff assignment exists or not for given grade, user, teacher type and with the term
+                    let staffExistanceCheck = await client.query(queries.checkIsStaffAlreadyAssigned,
+                        [assObj.gradeId, staffObj.staffId, roles['Sunday School Teacher'], false, config.isPrimary, termData.termDtlId]);
+
+                    if (staffExistanceCheck.rowCount > 0) {
+                        existingOrgStaffIds.push(staffExistanceCheck.rows[0].org_staff_assignment_id)
+                    } else {
+
+                        //if assignment dosent exist then insert the staff member.
+                        let staffAssRes = await client.query(queries.insertStaffAssignmt,
+                            [assObj.gradeId, staffObj.staffId, roles['Sunday School Teacher'], 'Sunday School Teacher', config.isPrimary,
+                                loggedInUser, new Date().toUTCString(), termData.termDtlId]);
+
+                        if (staffAssRes.rowCount > 0) {
+                            existingOrgStaffIds.push(staffAssRes.rows[0].org_staff_assignment_id);
+                        }
+
+                        console.debug(' Staff mapping Ids are for grade  ' + assObj.gradeId + " are " + JSON.stringify(existingOrgStaffIds));
+                        if (existingOrgStaffIds.length > 0) {
+                            // ro remove old staff assignment if there exists any for given grade, user, teacher type and with term
+                            let tempQuery = queries.deleteStaffOrgMapping.replace('$5', existingOrgStaffIds.join(','));
+                            let delResult = await client.query(tempQuery,
+                                [assObj.gradeId, roles['Sunday School Teacher'], config.isPrimary, termData.termDtlId])
+                            if (delResult.rowCount > 0) {
+                                console.debug("Deleted(soft) mapping: " + JSON.stringify(delResult.rows));
+                            }
+                        }
+                    }
+                }
+                //doing roles cleanup activity---(marking deleted all other teachers and if their assignment rmoved );
+                await doStaffMappingRoleCleanUp(client, loggedInUser, assObj.gradeId, termData.termDtlId, roles['Sunday School Teacher'])
+
+            }
+        }
+
+    }
+    console.debug(`Roles created t_user_role_mapping, t_user_role_context : ${JSON.stringify(crtedRoles)} `);
+}
+
+async function doStaffMappingRoleCleanUp(client, loggedInUser, orgId, termDtlId, roleId) {
+
+    //console.log("Cleaning up previous roles for " + orgId + " org.");
+    let assTeachersRes = await client.query(queries.getTeachersBySchoolIdAndTermId,
+        [orgId, termDtlId]);
+
+    if (assTeachersRes.rowCount > 0) {
+        let teacherIds = [];
+        assTeachersRes.rows.forEach(item => { if (item.user_id !== null) teacherIds.push(item.user_id) });
+        let tempQuery = queries.deleteFromContextTbl.replace('$7', teacherIds.join(","));
+
+        let delRes = await client.query(tempQuery,
+            [true, loggedInUser, new Date().toUTCString(), orgId, roleId, false]);
+        console.debug(`${delRes.rowCount} user's roles has been marked deleted and ended in role context for ${orgId} org.`);
+        let listOfUserRoleMapIds = [];
+        if (delRes.rowCount > 0) {
+            delRes.rows.forEach((item) => {
+                if (item.user_role_map_id !== 0 && item.user_role_map_id !== null)
+                    listOfUserRoleMapIds.push(item.user_role_map_id)
+            });
+
+            // console.log(`user_role_map_ids will be marked as deleted in role mapping: ${listOfUserRoleMapIds}`);
+            if (listOfUserRoleMapIds.length > 0) {
+                let tempQuery = queries.deleteFromRoleMapping.replace('$3', listOfUserRoleMapIds.join(','));
+                let roleDelRes = await client.query(tempQuery, [true, new Date().toUTCString()]);
+                console.debug(`${roleDelRes.rowCount} user's roles has been marked deleted and ended in role mapping for ${orgId} org.`);
+            }
+        }
+    }
 }
 
 module.exports = {

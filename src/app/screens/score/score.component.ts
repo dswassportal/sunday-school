@@ -123,7 +123,7 @@ export class ScoreComponent implements OnInit {
   getParticipantDefArr(isEditable: boolean) {
 
     return ([
-      { headerName: 'Enrollment Id', field: 'enrollmentId', flex: 1, suppressSizeToFit: true, resizable: true, sortable: true, filter: true },
+      { headerName: 'Registration Id', field: 'enrollmentId', flex: 1, suppressSizeToFit: true, resizable: true, sortable: true, filter: true },
       { headerName: 'Category', field: 'category', suppressSizeToFit: true, flex: 1, sortable: true, resizable: true, filter: true, },
       {
         headerName: 'Score', field: 'score', suppressSizeToFit: true, flex: 1, editable: isEditable, resizable: true,

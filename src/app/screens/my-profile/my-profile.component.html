@@ -260,12 +260,21 @@
     
        <!-- <div *ngIf="hasAddMemPerm"> -->
          <div>
+           <div *ngIf="hasAddMemPerm || isFamilyMember">
         <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
         </mat-divider>
+      </div>
         <div class="row" style="padding-top: 1%;">
-          <div class="col-md-6">
+          <div *ngIf="hasAddMemPerm " class="col-md-6">
+           
             <h2>Family Member Assignment</h2>
           </div>
+
+          <div *ngIf="isFamilyMember" class="col-md-6">
+           
+            <h2>Family Member's </h2>
+          </div>
+          
           <div class="col-md-6 col text-right">
             <button mat-raised-button *ngIf="!isReadOnly" (click)="onaddbtnclick()">
               <mat-icon>add</mat-icon>
@@ -372,13 +381,21 @@
                 </mat-form-field>
 
                 <mat-form-field class="col-md-4">
-                  <mat-label style="padding-left: 15%;">Mobile Number</mat-label>
+                  <mat-label style="padding-left: 15%;">Mobile Number *</mat-label>
                   <!-- <input id="mobileNo" matInput formControlName="mobileNo" placeholder="Enter Mobile No" ng2TelInput length="10"/>                  -->
-                  <input [readonly]="isReadOnly" matInput type="text" ng2TelInput formControlName="mobileNo" id="mobileNo" maxLength="10"
+                  <!-- <input [readonly]="isReadOnly" matInput type="text" ng2TelInput formControlName="mobileNo" id="mobileNo" maxLength="10"
                     minLength="10" required style="width: fit-content;" />
                     <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
                       <span *ngIf="myprofileform.controls.mobileNo.errors.required">This field is mandatory.</span>
                       <span *ngIf="myprofileform.controls.mobileNo.errors.pattern">Enter 10 digit number.</span>
+                  </mat-error> -->
+                  <ngx-mat-intl-tel-input id="mobileNo" matInput (keypress)="keyPress($event)" [onlyCountries]="['us','in','ca']"
+                    [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']" [enableAutoCountrySelect]="true" name="mobileNo"
+                    formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true">
+                  </ngx-mat-intl-tel-input>
+                  <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
+                    <span *ngIf="myprofileform.controls['mobileNo']?.errors?.required">This field is mandatory.</span>
+                    <span *ngIf="myprofileform.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span>
                   </mat-error>
                 </mat-form-field>
 
@@ -391,6 +408,12 @@
                 </mat-error>
                 </mat-form-field>
               </div>
+                <div *ngIf="isFamilyHead || isFamilyMember" class="col text-center">
+         
+                <mat-divider style="position: relative;background-color:rgba(252, 168, 59, 0.863);height: 2px;margin-top: 12px; margin-bottom: 12px;">
+                </mat-divider>
+              
+                </div>
             </div>
           </div>
         </fieldset>
@@ -401,7 +424,7 @@
           </mat-divider>
           
             <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
-          <button mat-button type="submit" mat-button class="mbutton"
+          <button mat-button type="submit" mat-button class="mbutton" style="margin-top: 2%;"
            (click)="updateUserProfile()">
             Update</button>
         </div>
@@ -466,18 +489,18 @@
                 <!--[(ngModel)]="acadmicGradeSelection" (ngModelChange)="onAcadmicGradeChange($event)"-->
                 <mat-select required matNativeControl 
                 (selectionChange)="gradeChange()" [value]="schoolGrade" id="schoolGrade" formControlName="schoolGrade">
-                  <mat-option value="Grade1">Grade 1</mat-option>
-                  <mat-option value="Grade2">Grade 2</mat-option>
-                  <mat-option value="Grade3">Grade 3</mat-option>
-                  <mat-option value="Grade4">Grade 4</mat-option>
-                  <mat-option value="Grade5">Grade 5</mat-option>
-                  <mat-option value="Grade6">Grade 6</mat-option>
-                  <mat-option value="Grade7">Grade 7</mat-option>
-                  <mat-option value="Grade8">Grade 8</mat-option>
-                  <mat-option value="Grade9">Grade 9</mat-option>
-                  <mat-option value="Grade10">Grade 10</mat-option>
-                  <mat-option value="Grade11">Grade 11</mat-option>
-                  <mat-option value="Grade12">Grade 12</mat-option>
+                  <mat-option value="Grade 1">Grade 1</mat-option>
+                  <mat-option value="Grade 2">Grade 2</mat-option>
+                  <mat-option value="Grade 3">Grade 3</mat-option>
+                  <mat-option value="Grade 4">Grade 4</mat-option>
+                  <mat-option value="Grade 5">Grade 5</mat-option>
+                  <mat-option value="Grade 6">Grade 6</mat-option>
+                  <mat-option value="Grade 7">Grade 7</mat-option>
+                  <mat-option value="Grade 8">Grade 8</mat-option>
+                  <mat-option value="Grade 9">Grade 9</mat-option>
+                  <mat-option value="Grade 10">Grade 10</mat-option>
+                  <mat-option value="Grade 11">Grade 11</mat-option>
+                  <mat-option value="Grade 12">Grade 12</mat-option>
                 </mat-select>
               </mat-form-field>
           </div>
@@ -609,18 +632,18 @@
                     <!--[(ngModel)]="sundaySchoolGradeSelect"-->
                     <mat-select required  matNativeControl 
                     id="sunSchoolGrade" formControlName="sunSchoolGrade">
-                    <mat-option value="Grade1">Grade 1</mat-option>
-                      <mat-option value="Grade2">Grade 2</mat-option>
-                      <mat-option value="Grade3">Grade 3</mat-option>
-                      <mat-option value="Grade4">Grade 4</mat-option>
-                      <mat-option value="Grade5">Grade 5</mat-option>
-                      <mat-option value="Grade6">Grade 6</mat-option>
-                      <mat-option value="Grade7">Grade 7</mat-option>
-                      <mat-option value="Grade8">Grade 8</mat-option>
-                      <mat-option value="Grade9">Grade 9</mat-option>
-                      <mat-option value="Grade10">Grade 10</mat-option>
-                      <mat-option value="Grade11">Grade 11</mat-option>
-                      <mat-option value="Grade12">Grade 12</mat-option>
+                      <mat-option value="Grade 1">Grade 1</mat-option>
+                      <mat-option value="Grade 2">Grade 2</mat-option>
+                      <mat-option value="Grade 3">Grade 3</mat-option>
+                      <mat-option value="Grade 4">Grade 4</mat-option>
+                      <mat-option value="Grade 5">Grade 5</mat-option>
+                      <mat-option value="Grade 6">Grade 6</mat-option>
+                      <mat-option value="Grade 7">Grade 7</mat-option>
+                      <mat-option value="Grade 8">Grade 8</mat-option>
+                      <mat-option value="Grade 9">Grade 9</mat-option>
+                      <mat-option value="Grade 10">Grade 10</mat-option>
+                      <mat-option value="Grade 11">Grade 11</mat-option>
+                      <mat-option value="Grade 12">Grade 12</mat-option>
                      <!--  <option *ngFor = "let schoolGrade of schoolDataList[0].grades"
                        [value]=schoolGrade.orgId>{{schoolGrade.name}} </option>-->
                     </mat-select>
@@ -720,12 +743,20 @@
         <div class="row">
 
             <mat-form-field class="form-field col col-md">
-                <mat-label style="padding-left: 23%;">Mobile Number</mat-label>
-                <input matInput type="text" ng2TelInput (ng2TelOutput)="getNumber($event)" formControlName="mobileNo" id="mobileNo" maxlength="12" (keypress)="keyPress($event)" required style="width: fit-content;"/>
+                <mat-label style="padding-left: 23%;">Mobile Number *</mat-label>
+                <!-- <input matInput type="text" ng2TelInput (ng2TelOutput)="getNumber($event)" formControlName="mobileNo" id="mobileNo" maxlength="12" (keypress)="keyPress($event)" required style="width: fit-content;"/>
                 <mat-error *ngIf="signUpForm.controls.mobileNo.touched && signUpForm.controls.mobileNo.invalid">
                     <span *ngIf="signUpForm.controls.mobileNo.errors.required">This field is mandatory.</span>
                     <span *ngIf="signUpForm.controls.mobileNo.errors.pattern">Enter 10 digit number.</span>
-                </mat-error>
+                </mat-error> -->
+                <ngx-mat-intl-tel-input id="mobileNo" matInput (keypress)="keyPress($event)" [onlyCountries]="['us','in','ca']"
+                [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']" [enableAutoCountrySelect]="true" name="mobileNo"
+                formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true">
+              </ngx-mat-intl-tel-input>
+              <mat-error *ngIf="signUpForm.controls.mobileNo.touched && signUpForm.controls.mobileNo.invalid">
+                <span *ngIf="signUpForm.controls['mobileNo']?.errors?.required">This field is mandatory.</span>
+                <span *ngIf="signUpForm.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span>
+              </mat-error>
             </mat-form-field>
            
 
@@ -743,11 +774,13 @@
 
         <div class="form-group row">
                 <mat-form-field class="form-field col-md">
-                        <mat-select required formControlName="memberType" id="memberType" placeholder="Member Type">
-                                <mat-option value="member">Member</mat-option>
+                         <mat-select required formControlName="memberType" id="memberType" placeholder="Member Type">
+                                <!-- <mat-option value="member">Member</mat-option>
                                 <mat-option value="non-member">Non-member</mat-option>
-                                <mat-option value="guest">Guest</mat-option>
-                        </mat-select>
+                                <mat-option value="guest">Guest</mat-option> -->
+                        <mat-option *ngFor = "let membership of memberships; index as i" [value]=membership>{{membership}}</mat-option>
+                        </mat-select> 
+                        
                 </mat-form-field>
                 <mat-form-field class="form-field col-md" >
                   

@@ -424,8 +424,8 @@ export class LandingPageComponent implements OnInit{
       this.updateuserinfo.value.userId = this.userId;
       this.updateuserinfo.value.updatedBy = this.loggedInUser;
       this.updateuserinfo.value.orgId = this.selectedUserData.orgId;
-      this.updateuserinfo.value.mobileNo = this.mobileNumber;
-      this.updateuserinfo.value.homePhoneNo = this.homePhoneNumber;
+      //this.updateuserinfo.value.mobileNo = this.mobileNumber;
+      //this.updateuserinfo.value.homePhoneNo = this.homePhoneNumber;
       let dob = this.updateuserinfo.value.dob;
       this.apiService.callPostService(`updateUserRoles`, this.updateuserinfo.value ).subscribe((res: any) => {
         if (res.data.status = "success") {

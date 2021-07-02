@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { uiCommonUtils } from '../../common/uiCommonUtils'
 import { ApiService } from '../../services/api.service'
-import { CheckboxRendererComponent } from '../renderers/checkbox-renderer/checkbox-renderer.component'
 
 declare let $: any;
 
@@ -28,6 +27,7 @@ export class EventAttendanceComponent implements OnInit {
   attendanceGridOption: any;
   gridApi: any;
   disableSaveSubmitBtn: boolean = false;
+
 
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils) { }
 
@@ -68,9 +68,11 @@ export class EventAttendanceComponent implements OnInit {
     ];
 
     this.attendanceColDef = [
-      { headerName: 'Enrollment Id', field: 'enrollmentId', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
-      { headerName: 'Category', field: 'eventCategoryName', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
-      { headerName: 'Mark Here', headerCheckboxSelection: true, checkboxSelection: true, },
+      { headerName: 'Registration Id', field: 'enrollmentId', headerCheckboxSelection: true, checkboxSelection: true, suppressSizeToFit: true, resizable: true, sortable: true, filter: true, },
+      { headerName: 'Participant Name', field : 'participantName', resizable: true, flex : 1 },
+      { headerName: 'Group', field : 'grade', resizable: true, suppressSizeToFit: true},
+      { headerName: 'Role', field : 'role', resizable: true, suppressSizeToFit: true},
+      { headerName: 'Participant Parish', field : 'participantParish', resizable: true, flex : 1 },
     ];
 
     //cellRendererFramework: CheckboxRendererComponent, field: 'hasAttended', editable: false 
@@ -85,7 +87,7 @@ export class EventAttendanceComponent implements OnInit {
       }
 
       if (respData.data.metaData) {
-        this.eventRowData = respData.data.metaData.events        
+        this.eventRowData = respData.data.metaData.events
       } else
         this.eventRowData = [];
 
@@ -123,10 +125,17 @@ export class EventAttendanceComponent implements OnInit {
 
     payload.eventId = this.selectedEvent.eventid;
     payload.category = this.selectedCategory;
-    payload.attendance = this.getParicipantAttendaneArr();
+    payload.present = this.getParicipantAttendaneArr();
+
+    //logic to create unselected users array 
+    let tempArr = this.getUnselectedParicipantIdsArr();
+    payload.absent = [];
+    tempArr.forEach((item: number) => {
+      if (payload.present.indexOf(item) < 0)
+        payload.absent.push(item);
+    });
 
     this.apiService.callPostService('postAttendance', payload).subscribe((response) => {
-
       if (response.data.status == 'failed') {
         this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
         return;
@@ -135,13 +144,12 @@ export class EventAttendanceComponent implements OnInit {
         this.getParicipantData(this.selectedEvent.eventid, this.selectedCategory);
       }
     })
-
   }
 
-  onDropdowwnSelChange(event: any) {
-    this.getParicipantData(this.selectedEvent.eventid, this.selectedCategory);
+  // onDropdowwnSelChange(event: any) {
+  //   this.getParicipantData(this.selectedEvent.eventid, this.selectedCategory);
 
-  }
+  // }
 
   getParicipantData(eventId: any, category: any) {
 
@@ -153,21 +161,22 @@ export class EventAttendanceComponent implements OnInit {
         this.uiCommonUtils.showSnackBar('Something  went wrong!', 'error', 3000);
         return;
       } else {
-        this.attendanceRowData = respData.data.paticipants
+        //  this.attendanceRowData = respData.data.paticipants
+        this.gridApi.setRowData(respData.data.paticipants);
+        this.gridApi.forEachNode(
+          (node: any) => {
+            if (node.data.isSelected !== null)
+              node.setSelected(node.data.hasAttended)
+          });
         if (this.attendanceRowData == null) {
           this.uiCommonUtils.showSnackBar('No one participated in this category!', 'error', 3000);
           this.disableSaveSubmitBtn = true;
         } else {
-          if (this.attendanceRowData[0].isAttendanceSubmitted)
+          if (respData.data.paticipants[0].isAttendanceSubmitted)
             this.disableSaveSubmitBtn = true;
           else
             this.disableSaveSubmitBtn = false;
         }
-        this.gridApi.forEachNodeAfterFilter((node: any) => {
-          node.setSelected(node.data.hasAttended, node.data.hasAttended);
-          //node.selectThisNode(node.data.hasAttended)
-          console.log('Setting up Node :' + node.data.enrollmentId  )
-          });
       }
     });
 
@@ -180,15 +189,24 @@ export class EventAttendanceComponent implements OnInit {
 
   getParicipantAttendaneArr(): any[] {
 
-    let participants = [];
-    for (let part of this.attendanceRowData) {
-      let temp: any = {};
-      temp.participantId = part.participantId;
-      temp.eventPartRegId = part.eventPartRegId;
-      temp.hasAttended = part.hasAttended;
-      participants.push(temp)
-    }
+    let selectedEvePartIds: any = [];
 
-    return participants;
+    for (let part of this.gridApi.getSelectedNodes())
+      if (part.data.eventPartRegId)
+        selectedEvePartIds.push(part.data.eventPartRegId);
+
+    return selectedEvePartIds;
+  }
+
+  getUnselectedParicipantIdsArr(): any[] {
+
+    let unselectedEvePartIds: any = [];
+    this.gridApi.forEachNode(
+      (node: any) => {
+        if (node.data.eventPartRegId)
+          unselectedEvePartIds.push(node.data.eventPartRegId)
+      });
+
+    return unselectedEvePartIds;
   }
 }

@@ -38,22 +38,43 @@
 
                             <div class="row">
 
-                                <mat-form-field class="col-md-6">
+
+                                <!-- [disabled]="evntTypedisabled" -->
+
+                                
+                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="eventType" 
+                                    placeholder="Event Type" [settings]="dropdownSettingsEventType"
+                                    [data]="eventList" formControlName="eventType" (onSelect)="eventTypeSelChange()"
+                                    (onSelectAll)="onSelectAll($event)">
+                                </ng-multiselect-dropdown>
+                               
+
+
+                                <!-- <mat-form-field class="col-md-6">
                                     <mat-select required id="eventType" (selectionChange)="eventTypeSelChange()"
                                         formControlName="eventType" placeholder="Event Type">
                                         <mat-option [disabled]="evntTypedisabled" *ngFor="let event of eventList"
                                             [value]="event.eventType">
                                             {{event.eventType}}</mat-option>
                                     </mat-select>
-                                </mat-form-field>
+                                </mat-form-field> -->
 
-                                <mat-form-field class="col-md-6">
+
+                               
+                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="eventCoordinator"
+                                    placeholder="Event Co-ordinator"
+                                    [settings]="dropdownSettingsEventCoordinator" [data]="proctorData"
+                                    formControlName="eventCoordinator" (onSelectAll)="onSelectAll($event)">
+                                </ng-multiselect-dropdown>
+                           
+
+                                <!-- <mat-form-field class="col-md-6">
                                     <mat-select required multiple id="eventCoordinator"
                                         formControlName="eventCoordinator" placeholder="Event Co-ordinator">
                                         <mat-option *ngFor="let proctor of proctorData" [value]="proctor.userId">
                                             {{proctor.name}}</mat-option>
                                     </mat-select>
-                                </mat-form-field>
+                                </mat-form-field> -->
 
 
                             </div>
@@ -62,23 +83,45 @@
 
                             <div class="row">
 
-                                <mat-form-field class="col-md-6">
-                                    <!-- <mat-label>Event Level Type</mat-label> -->
+
+                                <!-- [disabled]="evntTypedisabled" -->
+                             
+                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgType" placeholder="Event Level"
+                                     [settings]="dropdownSettingsEventLevel" [data]="orgs"
+                                    (onSelect)="onOrgSelect($event)" formControlName="orgType"
+                                    (onSelectAll)="onSelectAll($event)">
+                                </ng-multiselect-dropdown>
+                               
+
+                                <!-- <mat-form-field class="col-md-6">
+                                       <mat-label>Event Level Type</mat-label> 
                                     <mat-select matNativeControl required formControlName="orgType"
                                         placeholder="Event Level" (selectionChange)="onOrgSelect($event)">
-                                        <mat-option *ngFor="let org of orgs" [disabled]="evntTypedisabled" [value]="org.orgtype">{{org.orgtype}}
+                                        <mat-option *ngFor="let org of orgs" [disabled]="evntTypedisabled"
+                                            [value]="org.orgtype">{{org.orgtype}}
                                         </mat-option>
                                     </mat-select>
-                                </mat-form-field>
+                                </mat-form-field> -->
 
-                                <mat-form-field class="col-md-6">
-                                    <!-- <mat-label>Event Level ID</mat-label> -->
+                                <!-- <mat-form-field class="col-md-6">
+                                    <!-- <mat-label>Event Level ID</mat-label> 
                                     <mat-select multiple matNativeControl required formControlName="orgId"
                                         placeholder="Event Executed By">
-                                        <mat-option *ngFor="let orgDetail of orgDetails" [disabled]="evntTypedisabled" [value]=orgDetail.id>
+                                        <mat-option *ngFor="let orgDetail of orgDetails" [disabled]="evntTypedisabled"
+                                            [value]=orgDetail.id>
                                             {{orgDetail.name}}</mat-option>
                                     </mat-select>
-                                </mat-form-field>
+                                </mat-form-field> -->
+
+
+                               
+                                <!-- [disabled]="evntTypedisabled" -->
+                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgId" placeholder="Event Executed By"
+                                     [settings]="dropdownSettingsEventExecutedBy" [data]="orgDetails"
+                                    formControlName="orgId"
+                                    (onSelectAll)="onSelectAll($event)">
+                                </ng-multiselect-dropdown>
+                               
 
                             </div>
 
@@ -94,9 +137,7 @@
                                     <!-- (dateChange)="comparisonEventStartdateValidator()" -->
                                     <!-- (dateChange)="comparisonEventStartandRegiStartdateValidator()"
                                         (dateChange)="comparisonEventStartandRegiEnddateValidator()" -->
-                                    <input 
-                                         [min]="minDate"
-                                        matInput id="startDate" formControlName="startDate"
+                                    <input [min]="minDate" matInput id="startDate" formControlName="startDate"
                                         [matDatepicker]="startatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="startatpicker">
                                     </mat-datepicker-toggle>
@@ -122,7 +163,7 @@
                                     <!-- (dateChange)="comparisonEventEnddateValidator()" -->
                                     <mat-label>Event End Date</mat-label>
                                     <input [min]="minDate" matInput id="endDate" formControlName="endDate"
-                                         [matDatepicker]="endatpicker">
+                                        [matDatepicker]="endatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="endatpicker">
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #endatpicker></mat-datepicker>
@@ -144,7 +185,7 @@
                                     <!-- (dateChange)="comparisonRegiStartdatedateValidator()"
                                         (dateChange)="comparisontRegiStartdateandEventStarValidator()" -->
                                     <mat-label>Registration Start Date</mat-label>
-                                    <input matInput id="registrationStartDate" formControlName="registrationStartDate"    
+                                    <input matInput id="registrationStartDate" formControlName="registrationStartDate"
                                         [matDatepicker]="registrationStartatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationStartatpicker">
                                     </mat-datepicker-toggle>
@@ -168,8 +209,8 @@
                                     <!-- (dateChange)="comparisonRegiEnddateandEventStartValidator()" -->
 
                                     <mat-label>Registration End Date</mat-label>
-                                    <input (dateChange)="comparisonRegiEnddateValidator()" [min]="minDate"
-                                        matInput id="registrationEndDate" formControlName="registrationEndDate"
+                                    <input (dateChange)="comparisonRegiEnddateValidator()" [min]="minDate" matInput
+                                        id="registrationEndDate" formControlName="registrationEndDate"
                                         [matDatepicker]="registrationEndatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationEndatpicker">
                                     </mat-datepicker-toggle>
@@ -204,13 +245,18 @@
                                 </mat-form-field>
                             </div>
 
-                            
+
                             <div class="row col-md-12" *ngIf="isAttachmentRequired"
                                 style="justify-content: space-between;">
-                                <label for="file">Event Documents:</label>
-                                <input style="margin-bottom: 15px!important;" type="file"
-                                    placeholder="Upload Flyer/Poster" id="file"
-                                    (change)="handleEventFlyerFileInput($event)" multiple>
+
+
+                                <label>Event Documents:</label>
+
+                                <form enctype="multipart/form-data">
+                                    <input type="file" name="documents" (change)="onSelectedFile($event)" required multiple>
+                                </form>
+
+
                             </div>
 
                             <div class="row">
@@ -235,7 +281,7 @@
             </mat-step>
 
 
-            <mat-step *ngIf ="isCategoryRequired" [stepControl]="eventCategoriesFormGroup">
+            <mat-step *ngIf="isCategoryRequired" [stepControl]="eventCategoriesFormGroup">
                 <div class="container">
 
                     <form [formGroup]="eventCategoriesFormGroup">
@@ -306,7 +352,7 @@
 
                             <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3"
                                 [rowData]="rowDataCat" [columnDefs]="columnDefsCat" [pagination]="true"
-                                rowSelection='multiple' [gridOptions]="gridOptionsCat" 
+                                rowSelection='multiple' [gridOptions]="gridOptionsCat"
                                 (gridReady)="onCatGridReady($event)">
                             </ag-grid-angular>
 
@@ -579,25 +625,26 @@
 
                                             <div class="row">
                                                 <div class="col-md-6" style="padding-left: 4%; padding-right: 0%;">
-                                                <mat-form-field class="col-md-12" style="padding-left: 4%;padding-left: 0%;">
-                                                    <input readonly matInput id="categoryName" matInput
-                                                        formControlName="categoryName" placeholder="Category Name">
-                                                </mat-form-field>
-                                            </div>
+                                                    <mat-form-field class="col-md-12"
+                                                        style="padding-left: 4%;padding-left: 0%;">
+                                                        <input readonly matInput id="categoryName" matInput
+                                                            formControlName="categoryName" placeholder="Category Name">
+                                                    </mat-form-field>
+                                                </div>
 
-                                            <div class="col-md-2">
+                                                <div class="col-md-2">
 
-                                            </div>
-
-
-                                            <div class="col-md-2" style="padding-left: 8%;">
+                                                </div>
 
 
-                                                <button mat-raised-button (click)="addRegionAndJudges(i)">
-                                                    <mat-icon>add</mat-icon>
-                                                    <span style="font-family: poppins;">Add Region And Judges</span>
-                                                </button>
-                                            </div>
+                                                <div class="col-md-2" style="padding-left: 8%;">
+
+
+                                                    <button mat-raised-button (click)="addRegionAndJudges(i)">
+                                                        <mat-icon>add</mat-icon>
+                                                        <span style="font-family: poppins;">Add Region And Judges</span>
+                                                    </button>
+                                                </div>
                                             </div>
 
 
@@ -631,14 +678,15 @@
                                                                         </ng-multiselect-dropdown>
 
 
-                                                                    </div>   
-                                                                    
+                                                                    </div>
+
                                                                     <div class="col-md-5">
 
                                                                     </div>
 
 
-                                                                    <div class="col-md-1" style="padding-top: 1.6%; padding-left: 0%;">
+                                                                    <div class="col-md-1"
+                                                                        style="padding-top: 1.6%; padding-left: 0%;">
                                                                         <button mat-raised-button
                                                                             (click)="removeRegionsAndJudges(i,regIndex)">
                                                                             <mat-icon>delete</mat-icon>
@@ -655,7 +703,7 @@
                                                                             placeholder="Select Judges"
                                                                             [settings]="dropdownSettingsJudges"
                                                                             [data]="fnRegionDropdownValues(region)"
-                                                                            formControlName="judges"                                                                            
+                                                                            formControlName="judges"
                                                                             (onSelect)="onItemSelect($event)"
                                                                             (onSelectAll)="onSelectAll($event)">
                                                                         </ng-multiselect-dropdown>
@@ -712,15 +760,12 @@
 
 
                             <div class="row" style="padding-top: 2%; padding-bottom: 16%;">
-                                
-                                <ng-multiselect-dropdown class="col-md-12"
-                                id="evaluators" placeholder="Select Evaluators"
-                                [settings]="dropdownSettingsEvaluator"
-                                [data]="evaluatorDropdownValues"
-                                formControlName="evaluators"
-                                [(ngModel)]="selectedEvaluatorsDropdown"
-                                (onSelect)="onItemSelect($event)"
-                                (onSelectAll)="onSelectAll($event)">
+
+                                <ng-multiselect-dropdown class="col-md-12" id="evaluators"
+                                    placeholder="Select Evaluators" [settings]="dropdownSettingsEvaluator"
+                                    [data]="evaluatorDropdownValues" formControlName="evaluators"
+                                    [(ngModel)]="selectedEvaluatorsDropdown" (onSelect)="onItemSelect($event)"
+                                    (onSelectAll)="onSelectAll($event)">
                                 </ng-multiselect-dropdown>
 
 
@@ -733,7 +778,8 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 2%;">
-                                <button *ngIf = "isEvalSecNextButtonRequired" (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                <button *ngIf="isEvalSecNextButtonRequired"
+                                    (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
                                     <span style="font-family: poppins;">Next</span>
                                 </button>
                             </div>
@@ -763,7 +809,7 @@
                                     *ngFor="let item of questionnaireDataFormGroup.get('questionnaire')['controls']; let i = index;">
 
                                     <div class="container" style="padding-left: 2%;" [formGroupName]="i">
-                                       
+
 
                                         <div class="row" style="padding-top:2%">
                                             <mat-form-field class="col-md-8">
@@ -771,14 +817,12 @@
                                                     formControlName="question" placeholder="Enter Question" />
                                             </mat-form-field>
 
-                                        <ng-multiselect-dropdown class="col-md-4"
-                                            id="responseType" placeholder="Select Response Type"
-                                            [settings]="dropdownSettingsResponseType"
-                                            [data]="responseTypeDropdownValues"
-                                            formControlName="responseType"
-                                            (onSelect)="onItemSelect($event)"
-                                            (onSelectAll)="onSelectAll($event)">
-                                        </ng-multiselect-dropdown>
+                                            <ng-multiselect-dropdown class="col-md-4" id="responseType"
+                                                placeholder="Select Response Type"
+                                                [settings]="dropdownSettingsResponseType"
+                                                [data]="responseTypeDropdownValues" formControlName="responseType"
+                                                (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)">
+                                            </ng-multiselect-dropdown>
 
                                             <!-- <mat-form-field class="col-md-4">
                                                 <mat-select matNativeControl required id="responseType"
@@ -819,7 +863,7 @@
                 </div>
             </mat-step>
 
-           
+
 
         </mat-vertical-stepper>
 
@@ -832,17 +876,9 @@
         <div class="row" style="padding-top: 1%;">
             <div class="col text-center">
                 <button mat-raised-button type="submit" class="mbutton" (click)="createEvent()">
-                   <span style="font-family: poppins;"> Save</span></button>
+                    <span style="font-family: poppins;"> Save</span></button>
             </div>
         </div>
-
-        <!-- <div *ngIf="eventFormLabel" class="row" style="padding-top: 1%;">
-            <div class="col text-center">
-                <button mat-raised-button type="submit" class="mbutton" (click)="updateEvent()">
-                    Update Event</button>
-            </div>
-        </div> -->
-
 
 
     </mat-card>

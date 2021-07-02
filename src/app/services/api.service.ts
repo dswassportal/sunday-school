@@ -231,5 +231,13 @@ export class ApiService {
   }
 
 
+  uploadfiles(url: string,formData: any){
+    let headerObj = new HttpHeaders({
+      'Authorization': localStorage.getItem('chUserToken')!,
+      'Content-Type': 'multipart/form-data'
+    });
+    return this.http.post(`${this._baseUrl}/${url}`, formData);
+  }
+
 }
 

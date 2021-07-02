@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CwcRegistrationComponent } from './cwc-registration.component';
+import { BulkRegistrationComponent } from './bulk-registration.component';
 
-describe('CwcRegistrationComponent', () => {
-  let component: CwcRegistrationComponent;
-  let fixture: ComponentFixture<CwcRegistrationComponent>;
+describe('BulkRegistrationComponent', () => {
+  let component: BulkRegistrationComponent;
+  let fixture: ComponentFixture<BulkRegistrationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CwcRegistrationComponent ]
+      declarations: [ BulkRegistrationComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CwcRegistrationComponent);
+    fixture = TestBed.createComponent(BulkRegistrationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,12 +1,8 @@
-const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
 
-async function persistParticipantScore(userScoreData, userId) {
-
-    let eventId = userScoreData.eventId;
-    let scoreData = userScoreData.scoreData
+async function persistParticipantScore(userScoreData, loggedInUser) {
 
     let client = await dbConnections.getConnection();
 
@@ -20,14 +16,14 @@ async function persistParticipantScore(userScoreData, userId) {
 
             // First create the temp table
             let tempTable = `create temporary table t_temp_score(
-                                enrollment_id int,
+                                enrollment_id varchar,
                                 event_category_name varchar,
                                 score int
                               );`;
 
             let insertIntoTempTable = `INSERT INTO t_temp_score (enrollment_id, event_category_name, score)
                               SELECT enrollmentid, category, score 
-                              FROM jsonb_to_recordset($1::jsonb) AS t (enrollmentid int, category text, score int)`;
+                              FROM jsonb_to_recordset($1::jsonb) AS t (enrollmentid text, category text, score int)`;
 
             await client.query(tempTable);
 
@@ -36,43 +32,40 @@ async function persistParticipantScore(userScoreData, userId) {
             let tRes = await client.query('select * from t_temp_score');
             console.log(` enrollment_id \t|\t event_category_name \t|\t score`)
             for (let row of tRes.rows) {
-                console.log(` ${row.enrollment_id} \t|\t ${row.event_category_name} \t|\t ${row.score}`)
+                console.log(` ${row.enrollment_id} \t|\t ${row.event_category_name} \t\t\t|\t\t ${row.score}`)
 
             }
 
             console.log('Data inserted into temp table', result.rowCount);
 
             // Delete existing records if any
-            let deleteFromScoreTable = `delete from t_participant_event_score tpes1
-                            where exists (
-                            select 1
-                            from t_temp_score tts 
-                            join t_event_participant_registration tepr on tepr.enrollment_id = cast(tts.enrollment_id as varchar) 
-                            join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id 
-                            join t_event_category tec on tec.event_category_id = tperc.event_category_id and tec.name = tts.event_category_name 
-                            join t_event_category_map tecm on tecm.event_id = tepr.event_id and tecm.event_category_id = tec.event_category_id 
-                            join t_event_cat_staff_map tecsm on tecsm.event_category_map_id  = tecm.event_cat_map_id and tecsm.event_id = tecm.event_id 
-                            where tepr.event_id = ${score.eventId}  
-                            and tecsm.user_id = ${score.judge}
-                            and tpes1.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id 
-                            and tpes1.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
-                            )`;
+            let deleteFromScoreTable = `delete from t_participant_event_score where participant_event_score_id in (
+                                        select tpes.participant_event_score_id  from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
+                                                    join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
+                                                    and tecm.event_id = ${score.eventId} 
+                                                    join t_event_participant_registration tepr on tts.enrollment_id  = tepr.enrollment_id 
+                                                    join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
+                                                        and tperc.event_category_id = tecm.event_cat_map_id 
+                                                    join t_event_cat_staff_map tecsm on  tecsm.event_category_map_id = tecm.event_cat_map_id 
+                                                        and tecsm.user_id = ${score.judge} 
+                                                    join t_participant_event_score tpes on tpes.participant_event_reg_cat_id  = tperc.participant_event_reg_cat_id 
+                                                        and  tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id);`;
 
 
             let insertIntoScoreTable = `insert into t_participant_event_score (participant_event_reg_cat_id, event_cat_staff_map_id, score, created_by, created_date)
-                                select tperc.participant_event_reg_cat_id ,tecsm.event_cat_staff_map_id, tts.score, tecsm.user_id , current_timestamp 
-                                from t_temp_score tts 
-                                join t_event_participant_registration tepr on tepr.enrollment_id = cast(tts.enrollment_id as varchar) 
-                                join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id 
-                                join t_event_category tec on tec.event_category_id = tperc.event_category_id and tec.name = tts.event_category_name 
-                                join t_event_category_map tecm on tecm.event_id = tepr.event_id and tecm.event_category_id = tec.event_category_id 
-                                join t_event_cat_staff_map tecsm on tecsm.event_category_map_id  = tecm.event_cat_map_id and tecsm.event_id = tecm.event_id 
-                                where tepr.event_id = ${score.eventId}	and tecsm.user_id = ${score.judge}`;
+                                            select tperc.participant_event_reg_cat_id, tecsm.event_cat_staff_map_id, tts.score, ${loggedInUser}, current_timestamp  from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
+                                            join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
+                                            and tecm.event_id = ${score.eventId} 
+                                            join t_event_participant_registration tepr on tts.enrollment_id  = tepr.enrollment_id 
+                                        join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
+                                            and tperc.event_category_id = tecm.event_cat_map_id 
+                                        join t_event_cat_staff_map tecsm on  tecsm.event_category_map_id = tecm.event_cat_map_id 
+                                            and tecsm.user_id = ${score.judge}` ;
 
 
-            let deleteResult = await client.query(deleteFromScoreTable);
+           let deleteResult = await client.query(deleteFromScoreTable);
 
-            console.log('No. of rows deleted :: ', deleteResult.rowCount);
+           console.log('No. of rows deleted :: ', deleteResult.rowCount);
             let insertedResult = await client.query(insertIntoScoreTable);
             console.log('No. of rows inserted :: ', insertedResult.rowCount);
 
@@ -299,23 +292,43 @@ async function getScoreByCategory(eventId, eventCategoryId) {
     try {
 
         /********************** scores *******************************************************************************************/
+        // const eventQuery = `select distinct  tecm.event_category_id
+        //                             , tepr.enrollment_id
+        //                             , tecsm.user_id staff_id
+        //                             , tu.first_name , tu.last_name 
+        //                             , tpes.score 
+        //                             ,concat(tu2.title,'.',' ',tu2.first_name,' ', tu2.middle_name, ' ',tu2.last_name) participant_name
+        //                             ,to2."name" parish_name
+        //                         from t_event_category_map tecm 
+        //                         join t_event_cat_staff_map tecsm on tecsm.event_id = tecm.event_id and tecsm.event_category_map_id = tecm.event_cat_map_id 
+        //                         join t_event_participant_registration tepr on tepr.event_id = tecm.event_id 
+        //                         join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
+        //                              and tperc.event_category_id = tecm.event_category_id  and tperc.has_attended = true 
+        //                         left join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id and tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
+        //                         join t_user tu on tu.user_id = tecsm.user_id
+        //                         join t_user tu2 on tepr.user_id = tu2.user_id
+        //                         join t_organization to2 on to2.org_id = tu2.org_id 
+        //                         where tecm.event_id = ${eventId} and tecm.event_category_id = ${eventCategoryId} order by 1,2,3 ;`
+
+
         const eventQuery = `select distinct  tecm.event_category_id
                                     , tepr.enrollment_id
                                     , tecsm.user_id staff_id
-                                    , tu.first_name , tu.last_name 
+                                    , concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ',tu.last_name) 
                                     , tpes.score 
                                     ,concat(tu2.title,'.',' ',tu2.first_name,' ', tu2.middle_name, ' ',tu2.last_name) participant_name
                                     ,to2."name" parish_name
-                                from t_event_category_map tecm 
+                            from t_event_category_map tecm 
                                 join t_event_cat_staff_map tecsm on tecsm.event_id = tecm.event_id and tecsm.event_category_map_id = tecm.event_cat_map_id 
-                                join t_event_participant_registration tepr on tepr.event_id = tecm.event_id 
+                                join t_event_participant_registration tepr on tepr.event_id = tecm.event_id and tepr.event_id =  ${eventId}
                                 join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
-                                     and tperc.event_category_id = tecm.event_category_id  and tperc.has_attended = true 
-                                left join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id and tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
+                                    and tperc.event_category_id = tecm.event_cat_map_id and tperc.has_attended = true 
+                                left join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id 
+                                and tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
                                 join t_user tu on tu.user_id = tecsm.user_id
                                 join t_user tu2 on tepr.user_id = tu2.user_id
                                 join t_organization to2 on to2.org_id = tu2.org_id 
-                                where tecm.event_id = ${eventId} and tecm.event_category_id = ${eventCategoryId} order by 1,2,3 ;`
+                                where tecm.event_id = ${eventId}  and tecm.event_cat_map_id = ${eventCategoryId} order by 1,2,3;`;
 
         let result = await client.query(eventQuery);
 

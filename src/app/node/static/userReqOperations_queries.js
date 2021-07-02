@@ -30,10 +30,89 @@ const isUserAlreadyMember = `select case when count(user_id) > 0 then true else 
 const markUserApproved = `UPDATE t_user SET is_approved = true where user_id = $1;`            
 
 const isMemberIdExists = `  select case when count(user_id) > 0 then true else false end is_mem_id_exists 
-                            from t_user_parish where membership_no = $1`;;
+                            from t_user_parish where membership_no = $1`;
 
 
 
+////////////////////////////////////////////// Set Staff Assignment \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+const getSchoolRoleIds = `select 
+                            tr."name" role_name , tr.role_id from t_role tr 
+                            where name = 'Sunday School Teacher' 
+                            or name = 'Sunday School Principal' 
+                            or name = 'Sunday School Vice Principal';`;
+
+const updateStaffRole =  `UPDATE t_user_role_mapping
+                            SET role_id=$1, user_id=$2, role_start_date=$3, role_end_date=$4 
+                            WHERE role_id=$1 and user_id=$2 and is_deleted = false returning user_role_map_id`; 
+                            
+
+const insertStaffRole = `INSERT INTO t_user_role_mapping (user_id, role_id, role_start_date, role_end_date)
+                                                        select $1, $2,
+                                                            (select case when to_timestamp($3, 'YYYY-MM-DD HH24:MI:SS')::timestamp > current_date 
+                                                            then to_timestamp($3, 'YYYY-MM-DD HH24:MI:SS') 
+                                                            else current_date end)
+                                                        , $4  
+                                                        WHERE NOT EXISTS (
+                                                        SELECT 1 FROM t_user_role_mapping turm 
+                                                                            WHERE user_id = $1 
+                                                                            and role_id = $2
+                                                                            and is_deleted != true
+                                                                    ) returning user_role_map_id;`;
+
+
+const insertRoleContext = ` INSERT INTO t_user_role_context (user_id, role_id, org_id, is_deleted, created_by, created_date, user_role_map_id)
+                                    select $1, $2, $3, $4, $5, $6, $7  
+                                    WHERE NOT EXISTS (
+                                    SELECT 1 FROM t_user_role_context turm 
+                                                        WHERE user_id = $1 
+                                                        and role_id = $2
+                                                        and org_id = $3
+                                                        and is_deleted = false
+                                                );`
+
+const insertStaffAssignmt =` INSERT INTO t_organization_staff_assignment (org_id, user_id, role_id, role_type, is_primary, created_by, created_date, school_term_detail_id)
+                                    select $1, $2, $3, $4, $5, $6, $7, $8
+                                    WHERE NOT EXISTS (
+                                    SELECT 1 FROM t_organization_staff_assignment tssa 
+                                                        WHERE org_id = $1
+                                                        and user_id = $2
+                                                        and role_id = $3
+                                                        and is_primary = $5
+                                                        and school_term_detail_id = $8
+                                                ) returning org_staff_assignment_id;`     
+
+const updateStaffAssignment = `UPDATE t_organization_staff_assignment
+                                SET org_id=$1, user_id=$2, updated_by=$3, updated_date=$4
+                                WHERE school_term_detail_id=$5 and org_staff_assignment_id= $6 and is_primary= $7;`;
+                                
+const checkIsStaffAlreadyAssigned = `select org_staff_assignment_id 
+                                        from t_organization_staff_assignment 
+                                        where org_id=$1
+                                        and user_id=$2
+                                        and role_id=$3 
+                                        and is_deleted=$4 
+                                        and is_primary =$5
+	                                    and school_term_detail_id=$6    `;                              
+                                                                                    
+const deleteStaffOrgMapping = `update t_organization_staff_assignment set is_deleted = true
+                        WHERE org_id = $1 and role_id =$2 
+                        and  is_primary= $3 
+                        and school_term_detail_id= $4 
+                        and org_staff_assignment_id not in ($5) 
+                        returning org_staff_assignment_id; `
+                        
+const getTeachersBySchoolIdAndTermId = `select user_id from t_organization_staff_assignment 
+                                        where org_id = $1 and school_term_detail_id = $2
+                                        and is_deleted != true;`;
+
+const deleteFromContextTbl = `UPDATE t_user_role_context
+                                SET is_deleted= $1,  updated_by=$2, updated_date=$3 
+                                WHERE org_id=$4 and  role_id=$5 and is_deleted=$6 and user_id not in ($7) returning user_role_map_id;`;
+
+const deleteFromRoleMapping = `UPDATE t_user_role_mapping
+                                    SET is_deleted=$1, role_end_date=$2
+                                    WHERE user_role_map_id in ($3);`;                                
 
 module.exports = {
     toMarkMembershipDelted,
@@ -42,5 +121,17 @@ module.exports = {
     insertOpLogTable,
     isUserAlreadyMember,
     markUserApproved,
-    isMemberIdExists
+    isMemberIdExists,
+    //Set Staff Assignment
+    getSchoolRoleIds,
+    updateStaffRole,
+    insertStaffRole,
+    insertRoleContext,
+    insertStaffAssignmt,
+    updateStaffAssignment,
+    checkIsStaffAlreadyAssigned,
+    deleteStaffOrgMapping,
+    getTeachersBySchoolIdAndTermId,
+    deleteFromContextTbl,
+    deleteFromRoleMapping
 }                                

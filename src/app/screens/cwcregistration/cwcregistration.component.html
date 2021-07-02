@@ -1,179 +1,260 @@
 <div class="container mt-4">
     <mat-card class="shadow">
         <div class="row">
-            <h2 class="col-md-9" style="text-align: center; "><label>{{selectedRowJson.name}}</label> Event Registration
-            </h2>
+            <h1 class="col-md-11" style="text-align: center; font-family: poppins; ">Registration For
+                <label><b>{{selectedRowJson.name}}</b></label>
+            </h1>
 
-            <button mat-button class="col-md-1" class="ml-auto" data-dismiss="modal"
-                (click)="onCancelRegistrationClick()">
+            <button mat-button class="col-md-1" style="padding-bottom: 2%;" class="ml-auto" data-dismiss="modal"
+                (click)="onCancelClick()">
                 <mat-icon>clear</mat-icon>
             </button>
-            <!--
-            <button mat-button class="ml-auto" data-dismiss="modal" (click)="onCancelRegistrationClick()">
-                <mat-icon>clear</mat-icon>
-            </button>
-            -->
+
+
+
         </div>
-        <div>
-            <div class="row">
-                <div class="col-md-2" style="text-align: right;">
-                    Name :
-                </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{userMetaData.title}}.&nbsp;</label>
-                    <label> {{userMetaData.firstName}}&nbsp;</label>
-                    <label *ngIf="userMetaData.middleName"> {{userMetaData.middleName}}&nbsp;</label>
-                    <label>{{userMetaData.lastName}}</label>
-                </div>
-                <div class="col-md-2" *ngIf="userMetaData.emailId" style="text-align: right;">
-                    Email :
-                </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{userMetaData.emailId}}</label>
-                </div>
 
+
+        <div style="padding-left: 1%; padding-right: 1%;">
+            <div class="row">
+                <h3 class="col-md-12" style="text-align: left; font-family: poppins;margin-bottom: 0%;">Event
+                    Description :</h3>
             </div>
 
             <div class="row">
-                <div class="col-md-2" style="text-align: right;">
-                    Event Name :
-                </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{selectedRowJson.name}}</label>
-                </div>
-                <div class="col-md-2" style="text-align: right;">
-                    Event Type :
-                </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{selectedRowJson.event_type}}</label>
+                <label
+                    style="text-align: left; font-family: poppins; padding-left: 1.4%;">{{eventData.description}}</label>
+            </div>
+
+
+            <div class="row" style="margin-bottom: -1%;">
+                <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Registration Deadline :</h3>
+                &nbsp;&nbsp;
+                <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{regEndDate}}</label>
+            </div>
+
+
+            <div *ngIf="isSingleDayEvent">
+                <div class="row">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventStartDate}}</label>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-2" style="text-align: right;">
-                    Event Start Date :
-                </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{startDate}}</label>
-                </div>
-                <div class="col-md-2" style="text-align: right;">
-                    Event End Date :
-                </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{endDate}}</label>
-                </div>
-            </div>
+            <div *ngIf="!isSingleDayEvent">
 
-            <div class="row">
-                <div class="col-md-2" style="text-align: right;">
-                    Registration Start Date :
+                <div class="row" style="margin-bottom: -1%;">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event Start Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventStartDate}}</label>
                 </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{registrationStartDate}}</label>
-                </div>
-                <div class="col-md-2" style="text-align: right;">
-                    Registration End Date :
-                </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{registrationEndDate}}</label>
-                </div>
-            </div>
-            <div class="row">
 
-                <div class="col-md-2" *ngIf="enrollmentId" style="text-align: right;">
-                    EnrollmentId :
-                </div>
-                <div class="col-md-4" style="text-align: left;">
-                    <label>{{enrollmentId}}</label>
+                <div class="row">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event End Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventEndDate}}</label>
                 </div>
             </div>
 
         </div>
 
-        <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
-        </mat-divider>
-        <form [formGroup]="categoriesDataFormGroup">
-            <h2>Categories</h2>
-            <fieldset>
-                <div class="col-md-12">
 
-                    <fieldset>
-                        <!--
-                                <div  *ngFor="let category of eventcategorydata" 
-                                class=" example-margin text-black-50">
-                                <mat-checkbox  
-                                (change)="onChange({ 
+
+
+        <form *ngIf="isVenueRequired" [formGroup]="venuesDataFormGroup">
+
+
+            <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+            </mat-divider>
+
+            <h2 style="font-family: poppins; padding-top: 1%;">Venue</h2>
+            <div class="row" style="padding-right: 1%; padding-bottom:2%; padding-left: 1%;">
+                <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins;" id="venues"
+                    placeholder="Select Venue" [settings]="dropdownSettingsVenues" [data]="venueList"
+                    formControlName="venues" (onSelectAll)="onSelectAll($event)">
+                </ng-multiselect-dropdown>
+            </div>
+
+
+
+
+        </form>
+
+
+        <form [formGroup]="participantDataFormGroup">
+
+
+            <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+            </mat-divider>
+
+            <div class="row">
+                <div class="col-md-9">
+                    <h2 style="font-family: poppins;padding-top: 1%;">Participant Details</h2>
+                </div>
+                <div *ngIf="isUpdateBtnRequired" class="col-md-3" style="padding-top: 1%;padding-left: 5%;">
+
+                    <b>
+                        <span>
+                            <label style="padding-top: 0.4%; font-family: poppins; font-size: medium;">Registration ID
+                                :</label>&nbsp;
+                            <label style="padding-top: 0.4%; font-family: poppins;"><u>{{registrationId}}</u></label>
+                        </span>
+                    </b>
+
+
+                </div>
+
+            </div>
+
+
+            <div style="padding-left: 1%; padding-right: 1%;">
+                <div class="row" style="padding-bottom: 1%;">
+
+                    <h3 class="col-md-2" style="text-align: left; font-family: poppins;">Participant Name*:</h3>
+
+                    <ng-multiselect-dropdown required class="col-md-6" style="font-family: poppins;" id="role"
+                        [data]="familyMembersData" placeholder="Select Participant Name" [disabled]="isPraticipantNameReadonly"
+                        [settings]="dropdownSettingsFamilyMembers" formControlName="participantName" (onSelectAll)="onSelectAll($event)">
+                    </ng-multiselect-dropdown>
+
+
+                    <!-- <div class="col-md-2" style="padding-left: 1.9%;padding-top: 0.4%;">
+                        <b>
+                            <label
+                                style="padding-top: 0.4%; font-family: poppins;">{{userMetaData.title}}.&nbsp;</label>
+                            <label style="padding-top: 0.4%; font-family: poppins;">
+                                {{userMetaData.firstName}}&nbsp;</label>
+                            <label style="padding-top: 0.4%; font-family: poppins;" *ngIf="userMetaData.middleName">
+                                {{userMetaData.middleName}}&nbsp;</label>
+                            <label style="padding-top: 0.4%; font-family: poppins;">{{userMetaData.lastName}}</label>
+                        </b>
+                    </div> -->
+
+                </div>
+
+
+
+                <div class="row" style="padding-bottom: 1%;">
+
+                    <h3 class="col-md-2">Participant Role :</h3>
+
+
+                    <ng-multiselect-dropdown class="col-md-6" style="font-family: poppins;" id="role"
+                        [data]="participantRoles" placeholder="Select Participant Role"
+                        [settings]="dropdownSettingsRoles" formControlName="role" (onSelectAll)="onSelectAll($event)">
+                    </ng-multiselect-dropdown>
+
+                </div>
+
+
+
+                <div class="row" style="padding-bottom: 1%;">
+
+                    <h3 class="col-md-2">Participant Group :</h3>
+
+
+                    <ng-multiselect-dropdown class="col-md-6" style="font-family: poppins;" id="group"
+                        placeholder="Select Participant Group" [settings]="dropdownSettingsGroup"
+                        formControlName="group" (onSelectAll)="onSelectAll($event)">
+                    </ng-multiselect-dropdown>
+
+                </div>
+            </div>
+
+
+            <div *ngIf="isCategoryRequired">
+
+                <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 1px;margin-top:1%;">
+                </mat-divider>
+
+
+                <div style="padding-left: 1%; padding-right: 1%;">
+                    <h3 style="padding-top: 1%;">Event Categories : (Select all applicable categories)</h3>
+                </div>
+                <fieldset>
+
+                    <div *ngFor="let category of eventCategoriesData" class=" example-margin text-black-50">
+                        <div>
+                          
+                            <mat-checkbox [checked]="category.hasSelected" (change)="onChange({ 
                                     'event' : $event,
                                     'item' : category
-                                })"
-                                         class="example-margin">
-                                        {{category.name}} </mat-checkbox>
-                            </div>
-                                -->
-                        <div *ngFor="let category of eventcategorydata" class=" example-margin text-black-50">
-                            <div *ngIf="category.eventCatMapId">
-                                <mat-checkbox (change)="onChange({ 
-                                            'event' : $event,
-                                            'item' : category
-                                        })" class="example-margin">
-                                    {{category.name}} </mat-checkbox>
-                            </div>
+                                })" class="example-margin">
+                                {{category.catName}} </mat-checkbox>
                         </div>
+                    </div>
 
 
-                    </fieldset>
+                </fieldset>
+            </div>
 
-
-                </div>
-            </fieldset>
         </form>
-        <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
-        </mat-divider>
 
-        <form [formGroup]="questionnaireDataFormGroup">
-            <h2>Questionnaire </h2>
+
+
+
+
+        <form *ngIf="isQuestionnaireRequired" [formGroup]="questionnaireDataFormGroup">
+
+
+            <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 1px;margin-top:1%;">
+            </mat-divider>
+
+            <div style="padding-left: 1%; padding-right: 1%;">
+                <h3 style="padding-top: 1%; margin-bottom: 0%;">Event Questionnaire :</h3>
+            </div>
             <fieldset>
                 <div class="row" formArrayName="questionnaire"
                     *ngFor="let item of questionnaireDataFormGroup.get('questionnaire')['controls']; let i = index;">
 
                     <div class="container" [formGroupName]="i">
 
-                        <div class="row">
 
-                            <mat-form-field class="col-md-12">
-
-                                <label>
-                                    <input required id="question" matInput formControlName="question"
-                                        placeholder="Question" readonly />
-
-                                </label>
+                        <div class="row" style="padding-left: 1%; padding-right: 1%;margin-bottom: -1%;">
+                            <h4 class="col-md-1" style="padding-top: 1.5%;">Question&nbsp;{{i+1}}:</h4>
+                            <mat-form-field class="col-md-11">
+                                <input id="question" matInput formControlName="question" readonly />
                             </mat-form-field>
-
-                            <mat-form-field class="col-md-12" [hidden]="true">
-                                <input matInput id="responseType" #responseType matInput formControlName="responseType"
-                                    placeholder="Answer ">
-                            </mat-form-field>
-                            <div class="row" class="col-md-12" *ngIf="responseType.value == 'Text'">
-                                <mat-form-field class="col-md-12">
-                                    <mat-label>Please enter your answer </mat-label>
-                                    <input matInput formControlName="answer" placeholder="Enter your answer" required>
-                                </mat-form-field>
-                            </div>
-
-                            <div class="row" class="col-md-12" *ngIf="responseType.value == 'Yes/No'">
-                                <mat-radio-group formControlName="answer" aria-label="Select an option">
-                                    <mat-radio-button [checked]=answer value="true">Yes</mat-radio-button>&nbsp;
-                                    <mat-radio-button [checked]=!answer value="false">No</mat-radio-button>
-                                </mat-radio-group>
-                            </div>
-                            <div class="row" class="col-md-12" *ngIf="responseType.value == 'Date Range'">
-                                <mat-form-field class="col-md-12">
-                                    <input matInput formControlName="answer" ngxDaterangepickerMd [(ngModel)]="selected"
-                                        class="form-control" placeholder="Select Date Range" />
-                                </mat-form-field>
-                            </div>
-
                         </div>
+
+
+                        <mat-form-field class="row" [hidden]="true">
+                            <input matInput #responseType matInput formControlName="responseType" placeholder="Answer">
+                        </mat-form-field>
+
+                        <div class="row" style="padding-right: 1%; margin-bottom: -3%;margin-top: -1%;"
+                            *ngIf="item.value.responseType == 'Text'">
+                            <h4 class="col-md-1" style="padding-top: 1%;padding-left: 2.4%;">Answer:</h4>
+                            <mat-form-field class="col-md-11" style="padding-left: 2.3%;">
+                                <input matInput formControlName="answer" required>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="row" style="padding-left: 3%; margin-bottom: -3%;padding-top: 1%;"
+                            *ngIf="item.value.responseType == 'Yes/No'">
+                            <h4 class="col-md-1" style="margin-left: -1.9%;">Answer:</h4>
+                            <mat-radio-group class="col-md-11" formControlName="answer" aria-label="Select an option">
+                                <mat-radio-button value="true">Yes</mat-radio-button>&nbsp;
+                                <mat-radio-button value="false">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+
+                        <div class="row" style="padding-right: 1%; margin-top: -1%; margin-bottom: -3%;"
+                            *ngIf="item.value.responseType == 'Date Range'">
+                            <h4 class="col-md-1" style="padding-top: 1%;padding-left: 2.4%;">Answer:</h4>
+                            <mat-form-field style="padding-left: 2.3%;" class="col-md-11">
+                                <mat-date-range-input [rangePicker]="picker">
+                                    <input matStartDate formControlName="answerStartDate" placeholder="Start date">
+                                    <input matEndDate formControlName="answerEndDate" placeholder="End date">
+                                </mat-date-range-input>
+                                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-date-range-picker #picker></mat-date-range-picker>
+                            </mat-form-field>
+                        </div>
+
+
 
                     </div>
                 </div>
@@ -181,51 +262,45 @@
             </fieldset>
         </form>
 
-       
-        
 
-        <form [formGroup]="ttcFormGroup"  *ngIf="isTtcEvent">
+        <div *ngIf="isUpdateBtnRequired">
 
             <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
             </mat-divider>
 
-            <h2 style="padding-top: 1%;">Teacher's Registration</h2>
-
-
-
-        <div class="row">
-            <mat-form-field class="col-md-12">
-                <mat-select required multiple id="partId" formControlName="partId"
-                    placeholder="Add Members (Teacher's/Principal)" (selectionChange)="addMemOnChange($event)">
-                    <mat-option *ngFor="let partId of partIds" [value]="partId.userId">
-                        {{partId.title}}.&nbsp;{{partId.firstName}}&nbsp;{{partId.middleNmae}}&nbsp;{{partId.lastName}}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
+            <div class="row" style="margin-bottom: -1%; padding-top: 1%;">
+                <h3 style="text-align: left; font-family: poppins; padding-left: 2.4%;">Registration Status :</h3>
+                &nbsp;&nbsp;
+                <label
+                    style="text-align: left; font-family: poppins; padding-top: 0.4%;"><b><u>{{eventData.registrationStatus}}</u></b></label>
+            </div>
         </div>
 
 
-            <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3"
-            [rowData]="rowData | filter:term " [columnDefs]="columnDefs"
-             [pagination]="true" rowSelection='multiple'
-             [gridOptions]="gridOptions">
-            </ag-grid-angular>
-
-
-        <!-- [checkboxSelection]="true" -->
-        <!-- (gridReady)="onGridReady($event)" -->
-        <!-- (rowClicked)='onRowClicked($event)' -->
-        </form>
+        <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+        </mat-divider>
 
         <div class="row" style="padding-top: 2%;">
-            <div class="col text-center">
-                <button style="float: center;" type="submit" mat-button class="mbutton"
+
+            <div class="col text-center" style="padding-top:1%">
+
+
+                <button style="float: center;" *ngIf="isCancelRegiBtnRequired" type="submit" mat-button class="mbutton"
                     (click)="onCancelRegistrationClick()">
-                    Cancel
+                    Cancel Registration
                 </button>&nbsp;
-                <button style="float: center;" *ngIf="selectedEventType" (click)="registerEvent()" mat-button
+
+                <button style="float: center;" *ngIf="!isUpdateBtnRequired" (click)="onRegisterEventClick()" mat-button
                     type="submit" mat-button class="mbutton">
                     Register
+                </button>
+                <button style="float: center;" *ngIf="isUpdateBtnRequired" type="submit" mat-button class="mbutton"
+                    (click)="onUpdateRegistrationClick()">
+                    <span *ngIf="isCancelRegiBtnRequired">Update</span>
+                    <span *ngIf="!isCancelRegiBtnRequired">Register</span>
+                </button>&nbsp;
+                <button style="float: center;" type="submit" mat-button class="mbutton" (click)="onCancelClick()">
+                    Cancel
                 </button>
             </div>
         </div>
@@ -234,3 +309,38 @@
 
     </mat-card>
 </div>
+
+
+
+
+<!-- <form [formGroup]="ttcFormGroup" *ngIf="isTtcEvent">
+
+    <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+    </mat-divider>
+
+    <h2 style="padding-top: 1%;">Teacher's Registration</h2>
+
+
+
+    <div class="row">
+        <mat-form-field class="col-md-12">
+            <mat-select required multiple id="partId" formControlName="partId"
+                placeholder="Add Members (Teacher's/Principal)" (selectionChange)="addMemOnChange($event)">
+                <mat-option *ngFor="let partId of partIds" [value]="partId.userId">
+                    {{partId.title}}.&nbsp;{{partId.firstName}}&nbsp;{{partId.middleNmae}}&nbsp;{{partId.lastName}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+
+
+    <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3"
+        [rowData]="rowData | filter:term " [columnDefs]="columnDefs" [pagination]="true" rowSelection='multiple'
+        [gridOptions]="gridOptions">
+    </ag-grid-angular>
+
+
+    <!-- [checkboxSelection]="true" -->
+<!-- (gridReady)="onGridReady($event)" -->
+<!-- (rowClicked)='onRowClicked($event)' 
+</form> -->

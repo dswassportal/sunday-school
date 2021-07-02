@@ -51,7 +51,7 @@ export class ApprovalRequestsComponent implements OnInit {
   states!: any[];
   selectedCountry: any;
   gridApi: any;
-
+  memberships!: any[];
   constructor(private apiService: ApiService, private formBuilder: FormBuilder,
     private uiCommonUtils: uiCommonUtils, private router: Router) { }
 
@@ -69,8 +69,8 @@ export class ApprovalRequestsComponent implements OnInit {
       nickName: new FormControl('',),
       batismalName: new FormControl(''),
       dob: new FormControl('', [Validators.required]),
-      mobileNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
-      homePhoneNo: new FormControl('', [Validators.required, Validators.pattern('[0-9].{9}')]),
+      mobileNo: new FormControl('', [Validators.required]),
+      homePhoneNo: new FormControl('', [Validators.required]),
       emailAddress: new FormControl('', [Validators.required, Validators.email]),
       addressLine1: new FormControl('', Validators.required),
       addressLine2: new FormControl(''),
@@ -84,6 +84,7 @@ export class ApprovalRequestsComponent implements OnInit {
       dateofMarriage: new FormControl(''),
       aboutYourself: new FormControl(''),
       isFamilyHead: new FormControl(''),
+      memberType: new FormControl('', Validators.required),
     })
 
     this.approveReqForm = this.formBuilder.group({
@@ -99,6 +100,10 @@ export class ApprovalRequestsComponent implements OnInit {
     //   this.countries = res.data.countryState;
     //   console.log("Countries", this.countries);
     // })
+
+    this.apiService.callGetService('getLookupMasterData?types=membership').subscribe((res: any) => {
+      this.memberships = res.data.memberships;
+    })
 
   }
 
@@ -173,7 +178,8 @@ export class ApprovalRequestsComponent implements OnInit {
       maritalStatus: this.selectedUserData.maritalStatus,
       dateofMarriage: this.selectedUserData.dateofMarriage,
       aboutYourself: this.selectedUserData.aboutYourself,
-      isFamilyHead: this.selectedUserData.isFamilyHead
+      isFamilyHead: this.selectedUserData.isFamilyHead,
+      memberType: this.selectedUserData.memberType,
     })
   }
 
@@ -212,6 +218,21 @@ export class ApprovalRequestsComponent implements OnInit {
       if (this.countries[i].countryName == country.target.value) {
         console.log(this.countries[i].states);
         this.states = this.countries[i].states;
+      }
+    }
+  }
+
+  isStateDataSet = false;
+  keyPress(event: any) {
+    this.isStateDataSet = false;
+    const pattern = /[0-9\+\-\ ]/;
+
+    let inputChar = String.fromCharCode(event.charCode);
+    if (event.keyCode != 5 && !pattern.test(inputChar)) {
+      event.preventDefault();
+      if (event.keyCode == 13) {
+        //this.change(event);
+        console.log("keyCode == 13");
       }
     }
   }
