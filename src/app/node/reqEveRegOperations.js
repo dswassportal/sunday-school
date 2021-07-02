@@ -207,6 +207,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                 response.eventEndDate = row.end_date;
                 response.regStartDate = row.registration_start_date;
                 response.regEndDate = row.registration_end_date;
+                response.selectedVenue = []
 
                 let vicarRes = await client.query(queries.getVicarDetails, [loggedInUser])
                 if (vicarRes.rowCount > 0) {
@@ -232,7 +233,16 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                     sundaySchools: []
                 })
             }
+
+        if (row.venue_id !== null && response.selectedVenue.length == 0) {
+            response.selectedVenue.push({
+                venueId: row.venue_id,
+                venueMapId: row.event_venue_id,
+                venueName: row.venue_name
+            })
         }
+        }
+
 
         for (let row of result.rows) {
             if (row.org_type === 'Sunday School') {

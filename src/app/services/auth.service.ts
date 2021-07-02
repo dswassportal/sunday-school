@@ -1,8 +1,7 @@
-import { state, trigger } from '@angular/animations';
 import { Injectable, NgZone } from '@angular/core';
 // import { auth } from 'firebase/app';
 import { AngularFireAuth } from "@angular/fire/auth";
-import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
 import { Router } from "@angular/router";
 import { uiCommonUtils } from '../common/uiCommonUtils'
 import { ApiService } from '../services/api.service'
@@ -22,7 +21,6 @@ export class AuthService {
     throw new Error('Method not implemented.');
   }
   userData: any; // Save logged in user data
-
 
   constructor(
     public afs: AngularFirestore,   // Inject Firestore service
