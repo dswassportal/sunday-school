@@ -237,8 +237,8 @@ async function bulkRegistration(client, loggedInUser, eventId) {
         if (row.venue_id !== null && response.selectedVenue.length == 0) {
             response.selectedVenue.push({
                 venueId: row.venue_id,
-                venueMapId: row.event_venue_id,
-                venueName: row.venue_name
+                eventVenueId: row.event_venue_id,
+                name: row.venue_name
             })
         }
         }
