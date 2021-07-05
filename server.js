@@ -864,11 +864,11 @@ app.get('/api/getEventDef', function (req, res) {
   }
 });
 
-app.get('/api/getAttendance', function (req, res) {
-  console.log("getAttendance called... ");
+app.get('/api/getAssignedGrades', function (req, res) {
+  console.log("getAssignedGrades called... ");
   let loggedInUser = decodeUser(req)
   try {
-    processSSRequest.getAttendance(req.query.type, req.query.schoolId, loggedInUser,)
+    processSSRequest.getAssignedGrades(loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -879,7 +879,47 @@ app.get('/api/getAttendance', function (req, res) {
         res.end();
       })
   } catch (error) {
-    console.error('Error in getAttendance as : ' + error)
+    console.error('Error in getAssignedGrades as : ' + error)
+  }
+});
+
+
+app.get('/api/getGradeAttendance', function (req, res) {
+  console.log("getGradeAttendance called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getGradeAttendance(loggedInUser, req.query.schoolId, req.query.grade)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getGradeAttendance as : ' + error)
+  }
+});
+
+
+app.post('/api/postAttendance', function (req, res) {
+  console.log("postAttendance called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.postAttendance(req.body.data, loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in postAttendance as : ' + error)
   }
 });
 

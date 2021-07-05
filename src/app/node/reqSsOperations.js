@@ -236,52 +236,37 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
     }
 }
 
-async function getAttendance(type,schoolId, loggedInUser) {
+async function getAssignedGrades(loggedInUser) {
 
     let client = await dbConnections.getConnection();
     try {
 
         let response = {
-            grades: [],
-            // schoolId: 0,
-            // schoolName: '',
             schools: [],
             status: 'success'
         }
-        if (type.toLowerCase() === 'schools') {
 
-            let result = await client.query(queries.getAllSchoolsOfTeacher, [loggedInUser]);
-            if (result.rowCount > 0) {
-                for (let row of result.rows) {
-                    response.schools.push({
-                        schoolId: row.org_id,
-                        schoolName: row.name
-                    });
+        let result = await client.query(queries.getAllSchoolsOfTeacher, [loggedInUser]);
+        if (result.rowCount > 0) {
+            for (let i = 0; i < result.rows.length; i++) {
+                response.schools[i] = {
+                    schoolId: result.rows[i].org_id,
+                    schoolName: result.rows[i].name,
+                    grades: []
+                };
+
+                let gradesRes = await client.query(queries.getUserGrades, [result.rows[i].org_id, loggedInUser]);
+                if (gradesRes.rowCount > 0) {
+
+                    for (let row of gradesRes.rows) {
+                        response.schools[i].grades.push({
+                            'gradeId': row.org_id,
+                            'gradeName': row.name
+                        })
+                    }
                 }
-
-            } else `No schools found for teacher ${loggedInUser}`
+            }
         }
-        else if (type.toLowerCase() === 'students') {
-
-            let result = await client.query(queries.getUserGrades, [ schoolId, loggedInUser]);
-            if (result.rowCount > 0) {
-
-                for (let row of result.rows) {
-                    response.grades.push({
-                        'gradeId': row.org_id,
-                        'gradeName': row.name
-                    })
-                }
-
-                // let schoolRes = await client.query(queries.getSchoolOfGrade, [response.grades[0].gradeId]);
-                // if (schoolRes.rowCount > 0) {
-                //     response.schoolId = schoolRes.rows[0].org_id;
-                //     response.schoolName = schoolRes.rows[0].org_name;
-                // } else `No school found for ${response.grades[0].gradeId}`;
-
-            } else 'Logged in user is not mapped to any grade.';
-        } 
-
         return {
             data: response
         }
@@ -295,8 +280,75 @@ async function getAttendance(type,schoolId, loggedInUser) {
 
 }
 
+
+async function getGradeAttendance(loggedInUser, schoolId, grade) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        let attendance = [];
+        let response = {};
+        let term = {};
+        let result = await client.query(queries.getGradeWiseAttendance, [loggedInUser, schoolId, grade]);
+
+        console.debug(`No of student found for grade ${grade} are ${result.rowCount} `)
+        if (result.rowCount > 0) {
+            for (let row of result.rows) {
+
+                if (term.school_term_detail_id === undefined) {
+                    term.termDtlId = row.school_term_detail_id;
+                    term.termYear = row.term_year;
+                    term.termStartDate = row.term_start_date;
+                    term.termEndDate = row.term_end_date;
+                }
+
+                attendance.push({
+                    student_id: row.student_id,
+                    student_name: row.student_name,
+                    has_attende: row.has_attended,
+                    sunday_school_attendace_id: row.sunday_school_attendace_id
+                })
+
+            }
+            response.attendanceData = attendance;
+            response.term = term;
+        }
+        return {
+            data: response
+        }
+
+    } catch (error) {
+        console.error(`reqSsOperations.js::getGradeAttendance() --> error as : ${error}`);
+        return errorHandling.handleDBError('queryExecutionError');
+    } finally {
+        client.release(false);
+    }
+}
+
+
+async function postAttendance(attData, loggedInUser) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+
+    } catch (error) {
+        console.error(`reqSsOperations.js::getGradeAttendance() --> error as : ${error}`);
+        return errorHandling.handleDBError('queryExecutionError');
+    } finally {
+        client.release(false);
+    }
+
+
+}
+
+
+
+
 module.exports = {
     getSSchoolData,
     getStaffAssmtBySchool,
-    getAttendance
+    getGradeAttendance,
+    getAssignedGrades,
+    postAttendance
 }

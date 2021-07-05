@@ -143,7 +143,39 @@ const getAllSchoolsOfTeacher = `select distinct to3."name", to3.org_id from t_or
                                     and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
                                     and tstd.is_deleted = false and tosa.user_id = $1 and tosa.role_type = 'Sunday School Teacher'
                                 join t_organization to2 on to2.org_id = tosa.org_id
-                                join t_organization to3 on to3.org_id = to2.parent_org_id;`;                        
+                                join t_organization to3 on to3.org_id = to2.parent_org_id;`;
+                                
+const getGradeWiseAttendance = `select distinct
+                                        tstd.school_term_detail_id, 
+                                        tstd.term_year, 
+                                        tstd.term_start_date, 
+                                        tstd.term_end_date,
+                                        tssd.student_id,
+                                        concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name) student_name,
+                                        case when tssa.has_attended is null then false else true end has_attended,
+                                        tssa.sunday_school_attendace_id 
+                                        from t_organization_staff_assignment tosa 
+                                        join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
+                                        and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+                                        and tstd.is_deleted = false and tosa.user_id = $1
+                                        join t_student_sundayschool_dtl tssd on tstd.school_term_detail_id = tssd.term_id
+                                        join t_organization to2 on tssd.school_grade = to2."name" and tssd.school_id = $2
+                                            and to2.org_id in (	(WITH recursive child_orgs 
+                                                            AS (
+                                                                SELECT  org_id
+                                                                FROM   t_organization parent_org 
+                                                                WHERE  parent_org.parent_org_id = $2
+                                                                UNION
+                                                                SELECT     child_org.parent_org_id child_id
+                                                                FROM       t_organization child_org
+                                                                INNER JOIN child_orgs c
+                                                                ON         c.org_id = child_org.org_id )
+                                                                SELECT org_id FROM child_orgs))
+                                            and to2.org_id = $3
+                                        left join t_sunday_school_attendace tssa on tssa.school_id =  $2
+                                        and tssa.teacher_id =  $1
+                                        and tssa.school_term_detail_id = tstd.school_term_detail_id 
+                                        join t_user tu on tu.user_id = tssd.student_id order by student_name;`;                                
 
 module.exports = {
     getGradeStaffAssBySchoolIdDefTerm,
@@ -153,5 +185,6 @@ module.exports = {
     getAllTerms,
     getUserGrades,
     // getSchoolOfGrade,
-    getAllSchoolsOfTeacher
+    getAllSchoolsOfTeacher,
+    getGradeWiseAttendance
 }
