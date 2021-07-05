@@ -864,7 +864,24 @@ app.get('/api/getEventDef', function (req, res) {
   }
 });
 
-
+app.get('/api/getAttendance', function (req, res) {
+  console.log("getAttendance called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getAttendance(req.query.type, req.query.schoolId, loggedInUser,)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getAttendance as : ' + error)
+  }
+});
 
 
 //to decode loggedin user Id from the request context.

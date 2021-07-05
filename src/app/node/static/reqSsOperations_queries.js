@@ -109,11 +109,49 @@ const getAllTerms = `select jsonb_agg(
                             ) term_data from t_school_term_detail tstd
                             where is_deleted = false ;`                                        
 
+// const getUserGrades = `select distinct to2.org_id, to2."name", to2."sequence" from t_organization_staff_assignment tosa
+//                         join t_organization to2 on to2.org_id = tosa.org_id 
+//                         join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
+//                         and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+//                         and tstd.is_deleted = false 
+//                         where role_type = 'Sunday School Teacher'
+//                         and user_id = $1 order by to2."sequence";`;           
+                        
+const getUserGrades = `select distinct to2.org_id, to2."name", to2."sequence" from t_organization_staff_assignment tosa
+                            join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
+                            and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+                            and tstd.is_deleted = false 
+                            join t_organization to2 on tosa.org_id = to2.org_id
+                            join (WITH recursive child_orgs 
+                                        AS (
+                                            SELECT  org_id
+                                            FROM   t_organization parent_org 
+                                            WHERE  parent_org.parent_org_id = $1
+                                            UNION
+                                            SELECT     child_org.parent_org_id child_id
+                                            FROM       t_organization child_org
+                                            INNER JOIN child_orgs c
+                                            ON         c.org_id = child_org.org_id )
+                                            SELECT org_id FROM child_orgs) hquery
+                            on hquery.org_id = to2.org_id
+                            and to2.org_type = 'Grade'
+                            where tosa.role_type = 'Sunday School Teacher'
+                            and tosa.user_id = $2 order by to2."sequence";`;                   
+                        
+const getAllSchoolsOfTeacher = `select distinct to3."name", to3.org_id from t_organization_staff_assignment tosa 
+                                join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
+                                    and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+                                    and tstd.is_deleted = false and tosa.user_id = $1 and tosa.role_type = 'Sunday School Teacher'
+                                join t_organization to2 on to2.org_id = tosa.org_id
+                                join t_organization to3 on to3.org_id = to2.parent_org_id;`;                        
 
 module.exports = {
     getGradeStaffAssBySchoolIdDefTerm,
     getGradeStaffAssBySchoolIdReqTerm,
     getCurretTerm,
     getParishesAndSchoolsByUserId,
-    getAllTerms
+    getAllTerms,
+    getUserGrades,
+    // getSchoolOfGrade,
+    getAllSchoolsOfTeacher
 }

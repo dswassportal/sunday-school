@@ -8,25 +8,25 @@ async function getSSchoolData(loggedInUserId, role) {
     let client = await dbConnections.getConnection();
 
     try {
-       let schoolData = [];
+        let schoolData = [];
         // if (role) {
-          let result = await client.query(queries.getParishesAndSchoolsByUserId, [loggedInUserId]);
+        let result = await client.query(queries.getParishesAndSchoolsByUserId, [loggedInUserId]);
 
-          if(result.rowCount > 0){
-            for(let row of result.rows){
-                if(row.org_type === 'Sunday School'){
-                        let index = result.rows.findIndex((item) => row.parent_org_id === item.org_id) 
-                        let temp = {
-                            orgId : row.org_id,
-                            name : row.name,
-                            parishName : result.rows[index].name,
-                            parishId : result.rows[index].org_id
-                        }
-                        schoolData.push(temp)                                
+        if (result.rowCount > 0) {
+            for (let row of result.rows) {
+                if (row.org_type === 'Sunday School') {
+                    let index = result.rows.findIndex((item) => row.parent_org_id === item.org_id)
+                    let temp = {
+                        orgId: row.org_id,
+                        name: row.name,
+                        parishName: result.rows[index].name,
+                        parishId: result.rows[index].org_id
+                    }
+                    schoolData.push(temp)
                 }
             }
-    }
-           
+        }
+
         // } else {
         //     query = `select org_id, org_type, "name", parent_org_id, address_line1, address_line2, city from t_organization to2 
         //      where org_id in (WITH recursive child_orgs 
@@ -139,7 +139,7 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
                 status: 'success'
             }
         }
-        
+
         // To get grade wise teacher and sub-teachers list for given schoolId
         let gradeArr = [];
         let principal = []
@@ -148,11 +148,11 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
 
             //if term not provided then retrun default current term's data.
             let result;
-            if(term)
+            if (term)
                 result = await client.query(queries.getGradeStaffAssBySchoolIdReqTerm, [schoolId, term]);
             else
-            result = await client.query(queries.getGradeStaffAssBySchoolIdDefTerm, [schoolId]);
-             
+                result = await client.query(queries.getGradeStaffAssBySchoolIdDefTerm, [schoolId]);
+
             if (result.rowCount > 0) {
                 for (let row of result.rows) {
                     if (row.org_type === 'Grade') {
@@ -189,20 +189,20 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
                             }
                         }
 
-                    }else if(row.org_type === 'Sunday School' && row.role_type === 'Sunday School Principal'){
-                        if(row.org_type !== null || row.org_type !== undefined)
-                        principal.push({
+                    } else if (row.org_type === 'Sunday School' && row.role_type === 'Sunday School Principal') {
+                        if (row.org_type !== null || row.org_type !== undefined)
+                            principal.push({
                                 staffName: row.staff_name,
                                 staffId: row.user_id,
                                 orgStaffAssId: row.org_staff_assignment_id
-                        });
-                    }else if(row.org_type === 'Sunday School' && row.role_type === 'Sunday School Vice Principal'){
-                        if(row.org_type !== null || row.org_type !== undefined)
-                        vicePrincipal.push({
+                            });
+                    } else if (row.org_type === 'Sunday School' && row.role_type === 'Sunday School Vice Principal') {
+                        if (row.org_type !== null || row.org_type !== undefined)
+                            vicePrincipal.push({
                                 staffName: row.staff_name,
                                 staffId: row.user_id,
                                 orgStaffAssId: row.org_staff_assignment_id
-                        })
+                            })
                     }
                 }
             }
@@ -236,7 +236,67 @@ async function getStaffAssmtBySchool(schoolId, term, loggedInUser) {
     }
 }
 
+async function getAttendance(type,schoolId, loggedInUser) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        let response = {
+            grades: [],
+            // schoolId: 0,
+            // schoolName: '',
+            schools: [],
+            status: 'success'
+        }
+        if (type.toLowerCase() === 'schools') {
+
+            let result = await client.query(queries.getAllSchoolsOfTeacher, [loggedInUser]);
+            if (result.rowCount > 0) {
+                for (let row of result.rows) {
+                    response.schools.push({
+                        schoolId: row.org_id,
+                        schoolName: row.name
+                    });
+                }
+
+            } else `No schools found for teacher ${loggedInUser}`
+        }
+        else if (type.toLowerCase() === 'students') {
+
+            let result = await client.query(queries.getUserGrades, [ schoolId, loggedInUser]);
+            if (result.rowCount > 0) {
+
+                for (let row of result.rows) {
+                    response.grades.push({
+                        'gradeId': row.org_id,
+                        'gradeName': row.name
+                    })
+                }
+
+                // let schoolRes = await client.query(queries.getSchoolOfGrade, [response.grades[0].gradeId]);
+                // if (schoolRes.rowCount > 0) {
+                //     response.schoolId = schoolRes.rows[0].org_id;
+                //     response.schoolName = schoolRes.rows[0].org_name;
+                // } else `No school found for ${response.grades[0].gradeId}`;
+
+            } else 'Logged in user is not mapped to any grade.';
+        } 
+
+        return {
+            data: response
+        }
+
+    } catch (error) {
+        console.error(`reqSsOperations.js::getAttendance() --> error as : ${error}`);
+        return errorHandling.handleDBError('queryExecutionError');
+    } finally {
+        client.release(false);
+    }
+
+}
+
 module.exports = {
     getSSchoolData,
-    getStaffAssmtBySchool
+    getStaffAssmtBySchool,
+    getAttendance
 }
