@@ -281,7 +281,7 @@ async function getAssignedGrades(loggedInUser) {
 }
 
 
-async function getGradeAttendance(loggedInUser, schoolId, grade) {
+async function getGradeAttendance(loggedInUser, schoolId, grade, date) {
 
     let client = await dbConnections.getConnection();
     try {
@@ -289,9 +289,11 @@ async function getGradeAttendance(loggedInUser, schoolId, grade) {
         let attendance = [];
         let response = {};
         let term = {};
-        let result = await client.query(queries.getGradeWiseAttendance, [loggedInUser, schoolId, grade]);
+        console.debug(date);
+        let result = await client.query(queries.getGradeWiseAttendance, [loggedInUser, schoolId, grade, date]);
 
-        console.debug(`No of student found for grade ${grade} are ${result.rowCount} `)
+        console.debug(`No of student found for grade ${grade}  are ${result.rowCount} `)
+ 
         if (result.rowCount > 0) {
             for (let row of result.rows) {
 
@@ -305,7 +307,7 @@ async function getGradeAttendance(loggedInUser, schoolId, grade) {
                 attendance.push({
                     student_id: row.student_id,
                     student_name: row.student_name,
-                    has_attende: row.has_attended,
+                    has_attended: row.has_attended,
                     sunday_school_attendace_id: row.sunday_school_attendace_id
                 })
 
@@ -326,14 +328,43 @@ async function getGradeAttendance(loggedInUser, schoolId, grade) {
 }
 
 
-async function postAttendance(attData, loggedInUser) {
+async function postSSAttendance(attData, loggedInUser) {
 
     let client = await dbConnections.getConnection();
     try {
+        await client.query('begin;');
 
+        //Create temp table
+        await client.query(queries.create_t_temp_attendance);
 
+        let tempInsRes = await client.query(queries.insertIntoAttendanceTempTbl, [JSON.stringify(attData.attendance)]);
+        console.debug(`${tempInsRes.rowCount} rows inserted in to t_temp_attendance.`);
+        if (tempInsRes.rowCount > 0) {
+
+            // Delete existing attendance record
+            let attDelRes = await client.query(queries.deleteExistingAttendance,
+                [attData.termRefId, attData.schoolId, attData.gradeId, attData.attendanceDate, attData.teacherId]);
+
+            console.debug(`${attDelRes.rowCount} rows were deleted for attendance from t_sunday_school_attendace!`);
+
+            //Insert new attendance data into the table
+            let attInsRes = await client.query(queries.bulkInstetAttendance,
+                [attData.schoolId, attData.gradeId, attData.teacherId, attData.termRefId,
+                attData.attendanceDate, loggedInUser, new Date().toUTCString()]);
+
+            console.debug(`${attInsRes.rowCount} rows were inserted for attendance in t_sunday_school_attendace!`);
+        }
+
+        await client.query('commit;');
+
+        return ({
+            data: {
+                status: 'success'
+            }
+        })
     } catch (error) {
-        console.error(`reqSsOperations.js::getGradeAttendance() --> error as : ${error}`);
+        await client.query('rollback;');
+        console.error(`reqSsOperations.js::postSSAttendance() Rolled Back since error : ${error}`);
         return errorHandling.handleDBError('queryExecutionError');
     } finally {
         client.release(false);
@@ -350,5 +381,5 @@ module.exports = {
     getStaffAssmtBySchool,
     getGradeAttendance,
     getAssignedGrades,
-    postAttendance
+    postSSAttendance
 }

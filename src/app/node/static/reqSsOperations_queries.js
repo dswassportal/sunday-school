@@ -152,8 +152,7 @@ const getGradeWiseAttendance = `select distinct
                                         tstd.term_end_date,
                                         tssd.student_id,
                                         concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name) student_name,
-                                        case when tssa.has_attended is null then false else true end has_attended,
-                                        tssa.sunday_school_attendace_id 
+                                        case when tssa.has_attended = true then true else false end has_attended
                                         from t_organization_staff_assignment tosa 
                                         join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
                                         and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
@@ -173,9 +172,32 @@ const getGradeWiseAttendance = `select distinct
                                                                 SELECT org_id FROM child_orgs))
                                             and to2.org_id = $3
                                         left join t_sunday_school_attendace tssa on tssa.school_id =  $2
-                                        and tssa.teacher_id =  $1
+                                        and tssa.teacher_id =  $1 and tstd.school_term_detail_id  = tstd.school_term_detail_id 
+                                        and tssd.student_id = tssa.student_id 
+                                        and tssa.attendance_date = to_date($4, 'yyyy-mm-dd')
                                         and tssa.school_term_detail_id = tstd.school_term_detail_id 
-                                        join t_user tu on tu.user_id = tssd.student_id order by student_name;`;                                
+                                        join t_user tu on tu.user_id = tssd.student_id order by student_name;`;     
+                                        
+const create_t_temp_attendance = `create temporary table t_temp_attendance(
+                                            user_id int,
+                                            has_attended bool
+                                          );`;
+
+const insertIntoAttendanceTempTbl = `INSERT INTO t_temp_attendance (user_id, has_attended)
+                                        SELECT student_id, has_attended
+                                        FROM jsonb_to_recordset($1::jsonb) AS t (student_id int, has_attended bool);`;     
+                                        
+const deleteExistingAttendance = `delete from t_sunday_school_attendace where sunday_school_attendace_id in(
+                                    select tssa.sunday_school_attendace_id from t_temp_attendance tta 
+                                    join t_sunday_school_attendace tssa on tssa.school_term_detail_id = $1
+                                    and tta.user_id = tssa.student_id and tssa.attendance_date = to_date($4, 'yyyy-mm-dd')
+                                    and tssa.school_id = $2 and tssa.grade_id = $3 and tssa.teacher_id = $5);`;       
+                                    
+const bulkInstetAttendance =     `INSERT INTO t_sunday_school_attendace
+                                    (school_id, grade_id, teacher_id, student_id, school_term_detail_id, has_attended, attendance_date, created_by, created_date)
+                                    (select $1, $2, $3, tta.user_id, $4, tta.has_attended, to_date( $5, 'yyyy-mm-dd'), $6, $7  
+                                    from t_temp_attendance tta)`;                                    
+
 
 module.exports = {
     getGradeStaffAssBySchoolIdDefTerm,
@@ -184,7 +206,10 @@ module.exports = {
     getParishesAndSchoolsByUserId,
     getAllTerms,
     getUserGrades,
-    // getSchoolOfGrade,
     getAllSchoolsOfTeacher,
-    getGradeWiseAttendance
+    getGradeWiseAttendance,
+    create_t_temp_attendance,
+    insertIntoAttendanceTempTbl,
+    deleteExistingAttendance,
+    bulkInstetAttendance
 }

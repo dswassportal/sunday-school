@@ -888,7 +888,7 @@ app.get('/api/getGradeAttendance', function (req, res) {
   console.log("getGradeAttendance called... ");
   let loggedInUser = decodeUser(req)
   try {
-    processSSRequest.getGradeAttendance(loggedInUser, req.query.schoolId, req.query.grade)
+    processSSRequest.getGradeAttendance(loggedInUser, req.query.schoolId, req.query.grade, req.query.date)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -904,11 +904,11 @@ app.get('/api/getGradeAttendance', function (req, res) {
 });
 
 
-app.post('/api/postAttendance', function (req, res) {
+app.post('/api/postSSAttendance', function (req, res) {
   console.log("postAttendance called... ");
   let loggedInUser = decodeUser(req)
   try {
-    processSSRequest.postAttendance(req.body.data, loggedInUser)
+    processSSRequest.postSSAttendance(req.body.data, loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -919,7 +919,7 @@ app.post('/api/postAttendance', function (req, res) {
         res.end();
       })
   } catch (error) {
-    console.error('Error in postAttendance as : ' + error)
+    console.error('Error in postSSAttendance as : ' + error)
   }
 });
 
