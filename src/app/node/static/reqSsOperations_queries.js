@@ -198,6 +198,17 @@ const bulkInstetAttendance =     `INSERT INTO t_sunday_school_attendace
                                     (select $1, $2, $3, tta.user_id, $4, tta.has_attended, to_date( $5, 'yyyy-mm-dd'), $6, $7  
                                     from t_temp_attendance tta)`;                                    
 
+const getCurrentTerm = `select 
+                            jsonb_build_object(
+                                'termDtlId', tstd.school_term_detail_id,
+                                'termYear', tstd.term_year,
+                                'termStartDate', tstd.term_start_date,
+                                'termEndDate', tstd.term_end_date
+                                ) current_term
+                            from t_school_term_detail tstd
+                            where current_date <= tstd.term_end_date 
+                            and current_date >= tstd.term_start_date
+                            and tstd.is_deleted = false;`;                                    
 
 module.exports = {
     getGradeStaffAssBySchoolIdDefTerm,
@@ -211,5 +222,6 @@ module.exports = {
     create_t_temp_attendance,
     insertIntoAttendanceTempTbl,
     deleteExistingAttendance,
-    bulkInstetAttendance
+    bulkInstetAttendance,
+    getCurrentTerm
 }

@@ -267,6 +267,14 @@ async function getAssignedGrades(loggedInUser) {
                 }
             }
         }
+        
+        let getTermRes = await client.query(queries.getCurrentTerm);
+        if(getTermRes.rowCount > 0){
+            response.currentTerm = getTermRes.rows[0].current_term
+        }
+        
+
+
         return {
             data: response
         }
