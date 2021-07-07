@@ -77,6 +77,8 @@ import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { NgxMatIntlTelInputModule } from 'ngx-mat-intl-tel-input';
 import { EventBulkRegistrationComponent } from './screens/event-bulk-registration/event-bulk-registration.component';
 import { BulkRegistrationComponent } from './screens/bulk-registration/bulk-registration.component';
+import { SchoolAttendanceComponent } from './screens/school-attendance/school-attendance.component';
+import { SundaySchoolAttendanceComponent } from './screens/sunday-school-attendance/sunday-school-attendance.component';
 
 
 @NgModule({
@@ -107,7 +109,9 @@ import { BulkRegistrationComponent } from './screens/bulk-registration/bulk-regi
        DatePickerRendererComponent,
         StaffAssignmentComponent,
         EventBulkRegistrationComponent,
-        BulkRegistrationComponent
+        BulkRegistrationComponent,
+        SchoolAttendanceComponent,
+        SundaySchoolAttendanceComponent
     //UserProfileComponent,
     //OvbsRegistrationComponent
   ],
