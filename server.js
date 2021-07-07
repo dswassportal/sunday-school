@@ -7,7 +7,8 @@ const processScoreRequest = require(`./src/app/node/reqScoreOperations`)
 const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions`)
 const processSSRequest = require(`./src/app/node/reqSsOperations`)
 const processFileUpload = require(`./src/app/node/reqFileUpload`)
-const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOperations`) 
+const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOperations`);
+const studentSearch =  require(`./src/app/node/search/studentSearch`)
 
 const fileUpload = require('express-fileupload');
 express = require('express')
@@ -923,6 +924,44 @@ app.post('/api/postSSAttendance', function (req, res) {
   }
 });
 
+app.post('/api/searchStudents', function (req, res) {
+  console.log("searchStudents called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    studentSearch.searchStudents(req.body.data, loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in searchStudents as : ' + error)
+  }
+});
+
+
+app.get('/api/getSearchables', function (req, res) {
+  console.log("getSearchables called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    studentSearch.getSearchables(loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getSearchables as : ' + error)
+  }
+});
 
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {
