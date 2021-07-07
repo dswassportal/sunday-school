@@ -75,16 +75,23 @@ export class SundaySchoolAttendanceComponent implements OnInit {
     this.sundaySchoolAttendanceForm = this.formBuilder.group({
       schoolName: new FormControl(''),
       schoolTerm: new FormControl(''),
-      grades: new FormControl('')
+      grades: new FormControl(''),
+      attendanceDate: new FormControl('')
     });
+
+    let recentSundayDate = moment().startOf('week');
+    let convertedRecentSundayDate = recentSundayDate.toLocaleString();
 
     this.sundaySchoolAttendanceForm.patchValue({
       schoolName: this.selectedRowJson.schoolName,
-      grades: this.selectedRowJson.grades
+      grades: this.selectedRowJson.grades,
+      attendanceDate: formatDate(convertedRecentSundayDate.split(',')[0].trim(), 'yyyy-MM-dd', 'en')
     });
 
-    this.gradeData = this.selectedRowJson.grades;
+    this.formattedDate = convertedRecentSundayDate;
+    this.formattedDate = formatDate(this.formattedDate, 'yyyy-MM-dd', 'en');
 
+    this.gradeData = this.selectedRowJson.grades;
     this.dropdownSettingsGrades = this.dropdownSettingForGrades;
 
     this.columnDefs = [
@@ -116,7 +123,7 @@ export class SundaySchoolAttendanceComponent implements OnInit {
 
 
 
-    this.apiService.callGetService(`getGradeAttendance?schoolId=${this.selectedRowJson.schoolId}&grade=${this.selectedRowJson.grades[0].gradeId}`).subscribe((res) => {
+    this.apiService.callGetService(`getGradeAttendance?schoolId=${this.selectedRowJson.schoolId}&grade=${this.selectedRowJson.grades[0].gradeId}&date=${this.formattedDate}`).subscribe((res) => {
       this.rowData = res.data.attendanceData;
       // this.termData = res.data.term;
       // let tempStartDateArray: any = [];
@@ -221,11 +228,11 @@ export class SundaySchoolAttendanceComponent implements OnInit {
     return day !== 1 && day !== 2 && day !== 3 && day !== 4 && day !== 5;
   }
 
-
   //miscellaneous
   onItemSelect(item: any) {
     console.log(item);
   }
+
   onSelectAll(items: any) {
     console.log(items);
   }
