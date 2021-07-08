@@ -88,6 +88,19 @@ async function searchStudents(filterParamJson, loggedInUser) {
             orConditions.push(`vs.staff_home_ph_no like ('%${filterParamJson.teacherPhoneNo}%')`)
         }
 
+         //-------------------------------------   Search By Student Details Conditions ---------------------------------------------//
+        //And conditions
+        if (isValidString(filterParamJson.studentFirstName))
+            andConditions.push(`lower(vs.student_first_name) like lower('%${filterParamJson.studentFirstName}%')`)
+        if (isValidString(filterParamJson.studentLastName))
+            andConditions.push(`lower(vs.student_last_name) like lower('%${filterParamJson.studentLastName}%')`)
+
+        //Or Conditions       
+        if (isValidString(filterParamJson.studentPhoneNo)) {
+            orConditions.push(`vs.student_mobile_no like ('%${filterParamJson.studentPhoneNo}%')`)
+            orConditions.push(`vs.student_home_ph_no like ('%${filterParamJson.studentPhoneNo}%')`)
+        }
+
         let query = `select distinct
             ${projection.join(` , `)}
         from v_student vs
