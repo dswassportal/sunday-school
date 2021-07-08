@@ -59,7 +59,7 @@ async function searchStudents(filterParamJson, loggedInUser) {
             andConditions.push(`vs.region_id = ${filterParamJson.regionId}`);
 
         if (isValidNumber(filterParamJson.parishId))
-        andConditions.push(`vs.student_org = ${filterParamJson.parishId}`);
+            andConditions.push(`vs.student_org = ${filterParamJson.parishId}`);
 
         //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
         //And conditions
@@ -131,10 +131,21 @@ async function searchStudents(filterParamJson, loggedInUser) {
                 searchResultResp.push(temp);
             }
         }
+
+        let configJson = [];
+        for (let configRow of configRes.rows) {
+            if (configRow.column_display_name)
+                configJson.push({
+                    colDisplayName: configRow.column_display_name,
+                    colKey: configRow.column_json_key
+                })
+        }
+
         return ({
             data: {
                 status: 'success',
-                result: searchResultResp
+                result: searchResultResp,
+                displayConfig: configJson
             }
         })
 
