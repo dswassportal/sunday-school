@@ -5,12 +5,17 @@ const dbConnections = require(`../dbConnection`)
 
 
 function isValidString(str) {
-    console.debug('str :: ', str);
     if (str === '' || str === undefined || str === null)
         return false;
     else return true;
-
 }
+
+function isValidNumber(num) {
+    if (num === '' || num === undefined || num === null || num === 0 || num <= 0)
+        return false;
+    else return true;
+}
+
 async function searchStudents(filterParamJson, loggedInUser) {
 
     let client = await dbConnections.getConnection();
@@ -19,26 +24,73 @@ async function searchStudents(filterParamJson, loggedInUser) {
         let andConditions = [];
         let orConditions = [];
 
-        // console.debug('isValidString(filterParamJson.parentFirstName)', filterParamJson.parentFirstName);
-        // console.debug('isValidString(filterParamJson.parentLastName)', filterParamJson.parentLastName);
-        // console.debug('isValidString(filterParamJson.parentPhoneNo)', filterParamJson.parentPhoneNo);
-        //   console.debug('isValidString(filterParamJson.parentPhoneNo)', isValidString(filterParamJson.parentPhoneNo));
+        if (!isValidString(filterParamJson.code)) throw `Invalid search code recived from UI as '${filterParamJson.code}'`
+        let projection = [];
+        let configRes;
+        if (filterParamJson.extendedSearch === false) {
+            configRes = await client.query(`select column_display_name, view_column_name, column_json_key, "expression", "sequence"  
+                                            from t_search_grid_column_config 
+                                            where code = $1
+                                            and for_default_search = $2
+                                            order by "sequence";`, [filterParamJson.code, true]);
 
+        } else if (filterParamJson.extendedSearch === true) {
+            configRes = await client.query(`select column_display_name, view_column_name, column_json_key, "expression", "sequence"  
+                                            from t_search_grid_column_config 
+                                            where code = $1
+                                            and for_extended_search = $2
+                                            order by "sequence";`, [filterParamJson.code, true]);
+        }
 
+        if (configRes.rowCount > 0) {
+            configRes.rows.forEach(item => {
+                if (item.expression !== null) {
+                    projection.push(item.expression)
+                } else if (item.view_column_name !== null)
+                    projection.push(item.view_column_name)
+            })
+        } else throw `for code ${code}, no configrations found`;
 
+        //----------------------------------   Search By Parish, Diocese, Regions Conditions --------------------------------------//
+        if (isValidNumber(filterParamJson.dioceseId))
+            andConditions.push(`vs.diocese_id = ${filterParamJson.dioceseId}`);
+
+        if (isValidNumber(filterParamJson.regionId))
+            andConditions.push(`vs.region_id = ${filterParamJson.regionId}`);
+
+        if (isValidNumber(filterParamJson.parishId))
+        andConditions.push(`vs.student_org = ${filterParamJson.parishId}`);
+
+        //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
         //And conditions
         if (isValidString(filterParamJson.parentFirstName))
-            andConditions.push(`lower(vs.parent_first_name) like '%${filterParamJson.parentFirstName}%'`)
+            andConditions.push(`lower(vs.parent_first_name) like lower('%${filterParamJson.parentFirstName}%')`)
         if (isValidString(filterParamJson.parentLastName))
-            andConditions.push(`lower(vs.parent_last_name) like '%${filterParamJson.parentLastName}%'`)
+            andConditions.push(`lower(vs.parent_last_name) like lower('%${filterParamJson.parentLastName}%')`)
 
         //Or Conditions       
         if (isValidString(filterParamJson.parentPhoneNo)) {
-            orConditions.push(`vs.parent_mobile_no like '%${filterParamJson.parentPhoneNo}%'`)
-            orConditions.push(`vs.parent_home_ph_no like '%${filterParamJson.parentPhoneNo}%'`)
+            orConditions.push(`vs.parent_mobile_no like ('%${filterParamJson.parentPhoneNo}%')`)
+            orConditions.push(`vs.parent_home_ph_no like ('%${filterParamJson.parentPhoneNo}%')`)
         }
 
-        let query = `select * from v_student vs
+
+        //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
+        //And conditions
+        if (isValidString(filterParamJson.teacherFirstName))
+            andConditions.push(`lower(vs.staff_first_name) like lower('%${filterParamJson.teacherFirstName}%')`)
+        if (isValidString(filterParamJson.teacherLastName))
+            andConditions.push(`lower(vs.staff_last_name) like lower('%${filterParamJson.teachertLastName}%')`)
+
+        //Or Conditions       
+        if (isValidString(filterParamJson.teacherPhoneNo)) {
+            orConditions.push(`vs.staff_mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+            orConditions.push(`vs.staff_home_ph_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+        }
+
+        let query = `select distinct
+            ${projection.join(` , `)}
+        from v_student vs
         where  
             ${(andConditions.length > 0) ? andConditions.join(` AND `) : ''}
             ${(orConditions.length > 0 && andConditions.length > 0) ? ` AND ` : ''}
@@ -64,17 +116,25 @@ async function searchStudents(filterParamJson, loggedInUser) {
                                             ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                 FROM   child_orgs)`;
 
+        console.debug(query)
+        searchResultResp = [];
         let result = await client.query(query);
         console.debug('Search result rows found : ' + result.rowCount);
-        // if (result.rowCount > 0) {
-        //     for(let row of result.rows ){
-        //         console.debug(row.student_first_name)
-        //     }
-        // }
+
+        if (result.rowCount > 0) {
+            for (let row of result.rows) {
+                let temp = {}
+                for (let configRow of configRes.rows) {
+                    if (configRow.column_json_key !== null && configRow.view_column_name !== null)
+                        temp[configRow.column_json_key] = row[configRow.view_column_name]
+                }
+                searchResultResp.push(temp);
+            }
+        }
         return ({
             data: {
                 status: 'success',
-                result: result.rowCount > 0 ? result.rows : []
+                result: searchResultResp
             }
         })
 
