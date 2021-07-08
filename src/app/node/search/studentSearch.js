@@ -67,6 +67,8 @@ async function searchStudents(filterParamJson, loggedInUser) {
             andConditions.push(`lower(vs.parent_first_name) like lower('%${filterParamJson.parentFirstName}%')`)
         if (isValidString(filterParamJson.parentLastName))
             andConditions.push(`lower(vs.parent_last_name) like lower('%${filterParamJson.parentLastName}%')`)
+        if (isValidString(filterParamJson.parentEmailId))
+        andConditions.push(`lower(vs.parent_email_id) like lower('%${filterParamJson.parentEmailId}%')`)
 
         //Or Conditions       
         if (isValidString(filterParamJson.parentPhoneNo)) {
@@ -81,6 +83,8 @@ async function searchStudents(filterParamJson, loggedInUser) {
             andConditions.push(`lower(vs.staff_first_name) like lower('%${filterParamJson.teacherFirstName}%')`)
         if (isValidString(filterParamJson.teacherLastName))
             andConditions.push(`lower(vs.staff_last_name) like lower('%${filterParamJson.teachertLastName}%')`)
+        if (isValidString(filterParamJson.teacherEmailId))
+        andConditions.push(`lower(vs.staff_email_id) like lower('%${filterParamJson.teacherEmailId}%')`)
 
         //Or Conditions       
         if (isValidString(filterParamJson.teacherPhoneNo)) {
@@ -94,6 +98,8 @@ async function searchStudents(filterParamJson, loggedInUser) {
             andConditions.push(`lower(vs.student_first_name) like lower('%${filterParamJson.studentFirstName}%')`)
         if (isValidString(filterParamJson.studentLastName))
             andConditions.push(`lower(vs.student_last_name) like lower('%${filterParamJson.studentLastName}%')`)
+            if (isValidString(filterParamJson.studentEmailId))
+            andConditions.push(`lower(vs.student_email_id) like lower('%${filterParamJson.studentEmailId}%')`)
 
         //Or Conditions       
         if (isValidString(filterParamJson.studentPhoneNo)) {
