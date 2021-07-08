@@ -23,7 +23,7 @@ import { EventBulkRegistrationComponent } from './screens/event-bulk-registratio
 import { BulkRegistrationComponent } from './screens/bulk-registration/bulk-registration.component';
 import { SchoolAttendanceComponent } from './screens/school-attendance/school-attendance.component';
 import { SundaySchoolAttendanceComponent } from './screens/sunday-school-attendance/sunday-school-attendance.component';
-
+import { SearchComponent } from './screens/search/search.component';
 
 const routes: Routes = [
   { path: 'signup', component: SignUpComponent },
@@ -50,6 +50,7 @@ const routes: Routes = [
       { path: 'bulkRegistration', component: BulkRegistrationComponent },
       { path: 'schoolAttendance', component: SchoolAttendanceComponent },
       { path: 'sundaySchoolAttendance', component: SundaySchoolAttendanceComponent },
+      { path: 'search', component: SearchComponent },
       // { path: 'testEvent',component:UserProfileComponent},
     ]
   },
