@@ -309,6 +309,16 @@ export class SearchComponent implements OnInit {
     })
   }
 
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `filtered_result`,
+    };
+    this.gridApi.exportDataAsCsv(params);
+  }
+
 
   onOrgSelectForMultiSelect(event: any) {
 
@@ -335,7 +345,7 @@ export class SearchComponent implements OnInit {
       "parentLastName": this.searchFormGroup.value.parentLasttName,
       "parentPhoneNo": this.searchFormGroup.value.parentPhoneNumber,
       "code": "student_search",
-      "extendedSearch": true,
+      "extendedSearch": false,
       "teacherFirstName": this.searchFormGroup.value.teacherFirstName,
       "teacherLastName": this.searchFormGroup.value.teacherLastName,
       "teacherPhoneNo": this.searchFormGroup.value.teacherPhoneNumber,

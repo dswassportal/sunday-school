@@ -353,6 +353,15 @@ export class ProfileSearchComponent implements OnInit {
     });
   }
 
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `filtered_result`,
+    };
+    this.gridApi.exportDataAsCsv(params);
+  }
 
   clearSearch() {
 
@@ -616,7 +625,7 @@ onremovebtnclick(index: any) {
 
     let selectedRows = this.gridApi.getSelectedRows();
     for (let i = 0; i < selectedRows.length; i++) {
-      console.log("Users for Delete", selectedRows[i].userId);
+      // console.log("Users for Delete", selectedRows[i].userId);
       this.deleteUser.push(selectedRows[i].userId);
       //this.deleteUser = selectedRows[i].userId;
     }
