@@ -217,7 +217,7 @@ function getMemberSearchQueryConditions(filterParamJson) {
         andConditions.push(`lower(email_id) like lower('%${filterParamJson.memberEmailId}%')`)
 
     if (isValidNumber(filterParamJson.membershipId))
-        andConditions.push(` membership_no = ${filterParamJson.membershipId}`)
+        andConditions.push(` membership_no = '${filterParamJson.membershipId}'`)
 
     //Or Conditions       
     if (isValidString(filterParamJson.memberPhoneNo)) {
