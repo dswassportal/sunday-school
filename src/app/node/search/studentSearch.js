@@ -21,10 +21,8 @@ async function searchStudents(filterParamJson, loggedInUser) {
     let client = await dbConnections.getConnection();
     try {
 
-        let andConditions = [];
-        let orConditions = [];
 
-        if (!isValidString(filterParamJson.code)) throw `Invalid search code recived from UI as '${filterParamJson.code}'`
+        if (!isValidString(filterParamJson.code)) throw `Invalid search code recived from payload as '${filterParamJson.code}'`
         let projection = [];
         let configRes;
         if (filterParamJson.extendedSearch === false) {
@@ -40,7 +38,8 @@ async function searchStudents(filterParamJson, loggedInUser) {
                                             where code = $1
                                             and for_extended_search = $2
                                             order by "sequence";`, [filterParamJson.code, true]);
-        }
+        } else throw `Recived invalid value for extended search param as ${extendedSearch} `
+
 
         if (configRes.rowCount > 0) {
             configRes.rows.forEach(item => {
@@ -51,71 +50,36 @@ async function searchStudents(filterParamJson, loggedInUser) {
             })
         } else throw `for code ${code}, no configrations found`;
 
+
+        let filterConditions = {};
+        let viewToQuery = "";
+        if (filterParamJson.code === 'student_search') {
+            filterConditions = getStudentSearchQueryConditions(filterParamJson);
+            viewToQuery = ' v_student vs ';
+        } else if (filterParamJson.code === 'member_search') {
+            filterConditions = getMemberSearchQueryConditions(filterParamJson);
+            viewToQuery = ' v_member vm ';
+        }
+
         //----------------------------------   Search By Parish, Diocese, Regions Conditions --------------------------------------//
         if (isValidNumber(filterParamJson.dioceseId))
-            andConditions.push(`vs.diocese_id = ${filterParamJson.dioceseId}`);
+            filterConditions.andConditions.push(`diocese_id = ${filterParamJson.dioceseId}`);
 
         if (isValidNumber(filterParamJson.regionId))
-            andConditions.push(`vs.region_id = ${filterParamJson.regionId}`);
+            filterConditions.andConditions.push(`region_id = ${filterParamJson.regionId}`);
 
         if (isValidNumber(filterParamJson.parishId))
-            andConditions.push(`vs.student_org = ${filterParamJson.parishId}`);
-
-        //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
-        //And conditions
-        if (isValidString(filterParamJson.parentFirstName))
-            andConditions.push(`lower(vs.parent_first_name) like lower('%${filterParamJson.parentFirstName}%')`)
-        if (isValidString(filterParamJson.parentLastName))
-            andConditions.push(`lower(vs.parent_last_name) like lower('%${filterParamJson.parentLastName}%')`)
-        if (isValidString(filterParamJson.parentEmailId))
-        andConditions.push(`lower(vs.parent_email_id) like lower('%${filterParamJson.parentEmailId}%')`)
-
-        //Or Conditions       
-        if (isValidString(filterParamJson.parentPhoneNo)) {
-            orConditions.push(`vs.parent_mobile_no like ('%${filterParamJson.parentPhoneNo}%')`)
-            orConditions.push(`vs.parent_home_ph_no like ('%${filterParamJson.parentPhoneNo}%')`)
-        }
-
-
-        //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
-        //And conditions
-        if (isValidString(filterParamJson.teacherFirstName))
-            andConditions.push(`lower(vs.staff_first_name) like lower('%${filterParamJson.teacherFirstName}%')`)
-        if (isValidString(filterParamJson.teacherLastName))
-            andConditions.push(`lower(vs.staff_last_name) like lower('%${filterParamJson.teachertLastName}%')`)
-        if (isValidString(filterParamJson.teacherEmailId))
-        andConditions.push(`lower(vs.staff_email_id) like lower('%${filterParamJson.teacherEmailId}%')`)
-
-        //Or Conditions       
-        if (isValidString(filterParamJson.teacherPhoneNo)) {
-            orConditions.push(`vs.staff_mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
-            orConditions.push(`vs.staff_home_ph_no like ('%${filterParamJson.teacherPhoneNo}%')`)
-        }
-
-         //-------------------------------------   Search By Student Details Conditions ---------------------------------------------//
-        //And conditions
-        if (isValidString(filterParamJson.studentFirstName))
-            andConditions.push(`lower(vs.student_first_name) like lower('%${filterParamJson.studentFirstName}%')`)
-        if (isValidString(filterParamJson.studentLastName))
-            andConditions.push(`lower(vs.student_last_name) like lower('%${filterParamJson.studentLastName}%')`)
-            if (isValidString(filterParamJson.studentEmailId))
-            andConditions.push(`lower(vs.student_email_id) like lower('%${filterParamJson.studentEmailId}%')`)
-
-        //Or Conditions       
-        if (isValidString(filterParamJson.studentPhoneNo)) {
-            orConditions.push(`vs.student_mobile_no like ('%${filterParamJson.studentPhoneNo}%')`)
-            orConditions.push(`vs.student_home_ph_no like ('%${filterParamJson.studentPhoneNo}%')`)
-        }
+            filterConditions.andConditions.push(`org_id = ${filterParamJson.parishId}`);
 
         let query = `select distinct
             ${projection.join(` , `)}
-        from v_student vs
+        from ${viewToQuery}
         where  
-            ${(andConditions.length > 0) ? andConditions.join(` AND `) : ''}
-            ${(orConditions.length > 0 && andConditions.length > 0) ? ` AND ` : ''}
-            ${(orConditions.length > 0) ? orConditions.join(` OR `) : ''}
-            ${(orConditions.length === 0 && andConditions.length === 0) ? '' : ` AND `} 
-        vs.student_org in (WITH recursive child_orgs 
+            ${(filterConditions.andConditions.length > 0) ? filterConditions.andConditions.join(` AND `) : ''}
+            ${(filterConditions.orConditions.length > 0 && filterConditions.andConditions.length > 0) ? ` AND ` : ''}
+            ${(filterConditions.orConditions.length > 0) ? filterConditions.orConditions.join(` OR `) : ''}
+            ${(filterConditions.orConditions.length === 0 && filterConditions.andConditions.length === 0) ? '' : ` AND `} 
+        org_id in (WITH recursive child_orgs 
                                         AS (
                                             SELECT org_id
                                             FROM   t_organization parent_org 
@@ -177,20 +141,111 @@ async function searchStudents(filterParamJson, loggedInUser) {
     }
 }
 
+
+function getStudentSearchQueryConditions(filterParamJson) {
+
+    let andConditions = [];
+    let orConditions = [];
+
+    //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
+    //And conditions
+    if (isValidString(filterParamJson.parentFirstName))
+        andConditions.push(`lower(vs.parent_first_name) like lower('%${filterParamJson.parentFirstName}%')`)
+    if (isValidString(filterParamJson.parentLastName))
+        andConditions.push(`lower(vs.parent_last_name) like lower('%${filterParamJson.parentLastName}%')`)
+    if (isValidString(filterParamJson.parentEmailId))
+        andConditions.push(`lower(vs.parent_email_id) like lower('%${filterParamJson.parentEmailId}%')`)
+
+    //Or Conditions       
+    if (isValidString(filterParamJson.parentPhoneNo)) {
+        orConditions.push(`vs.parent_mobile_no like ('%${filterParamJson.parentPhoneNo}%')`)
+        orConditions.push(`vs.parent_home_ph_no like ('%${filterParamJson.parentPhoneNo}%')`)
+    }
+
+
+    //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
+    //And conditions
+    if (isValidString(filterParamJson.teacherFirstName))
+        andConditions.push(`lower(vs.staff_first_name) like lower('%${filterParamJson.teacherFirstName}%')`)
+    if (isValidString(filterParamJson.teacherLastName))
+        andConditions.push(`lower(vs.staff_last_name) like lower('%${filterParamJson.teachertLastName}%')`)
+    if (isValidString(filterParamJson.teacherEmailId))
+        andConditions.push(`lower(vs.staff_email_id) like lower('%${filterParamJson.teacherEmailId}%')`)
+
+    //Or Conditions       
+    if (isValidString(filterParamJson.teacherPhoneNo)) {
+        orConditions.push(`vs.staff_mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+        orConditions.push(`vs.staff_home_ph_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+    }
+
+    //-------------------------------------   Search By Student Details Conditions ---------------------------------------------//
+    //And conditions
+    if (isValidString(filterParamJson.studentFirstName))
+        andConditions.push(`lower(vs.student_first_name) like lower('%${filterParamJson.studentFirstName}%')`)
+    if (isValidString(filterParamJson.studentLastName))
+        andConditions.push(`lower(vs.student_last_name) like lower('%${filterParamJson.studentLastName}%')`)
+    if (isValidString(filterParamJson.studentEmailId))
+        andConditions.push(`lower(vs.student_email_id) like lower('%${filterParamJson.studentEmailId}%')`)
+
+    //Or Conditions       
+    if (isValidString(filterParamJson.studentPhoneNo)) {
+        orConditions.push(`vs.student_mobile_no like ('%${filterParamJson.studentPhoneNo}%')`)
+        orConditions.push(`vs.student_home_ph_no like ('%${filterParamJson.studentPhoneNo}%')`)
+    }
+
+    return {
+        'andConditions': andConditions,
+        'orConditions': orConditions
+    }
+
+}
+
+
+
+function getMemberSearchQueryConditions(filterParamJson) {
+
+    let andConditions = [];
+    let orConditions = [];
+
+    //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
+    //And conditions
+    if (isValidString(filterParamJson.memberFirstName))
+        andConditions.push(`lower(first_name) like lower('%${filterParamJson.memberFirstName}%')`)
+    if (isValidString(filterParamJson.memberLastName))
+        andConditions.push(`lower(last_name) like lower('%${filterParamJson.memberLastName}%')`)
+    if (isValidString(filterParamJson.memberEmailId))
+        andConditions.push(`lower(email_id) like lower('%${filterParamJson.memberEmailId}%')`)
+
+    if (isValidNumber(filterParamJson.membershipId))
+        andConditions.push(` membership_no = ${filterParamJson.membershipId}`)
+
+    //Or Conditions       
+    if (isValidString(filterParamJson.memberPhoneNo)) {
+        orConditions.push(`mobile_no like ('%${filterParamJson.memberPhoneNo}%')`)
+        orConditions.push(`home_phone_no like ('%${filterParamJson.memberPhoneNo}%')`)
+    }
+
+
+    return {
+        'andConditions': andConditions,
+        'orConditions': orConditions
+    }
+}
+
 async function getSearchables(loggedInUser) {
 
     let client = await dbConnections.getConnection();
     try {
 
         let query = `with recursive child_orgs as (
-                        select org_id org_id, org_type, name org_name, parent_org_id parent_id from t_organization parent_org
-                        where org_id in (WITH recursive child_orgs 
-                                                                            AS (
-                                                                                SELECT org_id
+    select org_id org_id, org_type, name org_name, parent_org_id parent_id from t_organization parent_org
+where org_id in (WITH recursive child_orgs
+AS(
+    SELECT org_id
                                                                                 FROM   t_organization parent_org 
                                                                                 WHERE  org_id IN
-                                                                                        (
-                                                                                            SELECT a.org_id
+    (
+        SELECT a.org_id
                                                                                         FROM   t_user_role_context a, t_user b
                                                                                         WHERE  b.user_id = $1
                                                                                         AND    a.user_id = b.user_id
@@ -201,13 +256,13 @@ async function getSearchables(loggedInUser) {
                                                                                 SELECT     child_org.org_id child_id
                                                                                 FROM       t_organization child_org
                                                                                 INNER JOIN child_orgs c
-                                                                                ON         c.org_id = child_org.parent_org_id ) SELECT *
-                                                                                    FROM   child_orgs)
-                        union
-                        select child_org.org_id child_id, child_org.org_type, child_org.name child_name, child_org.parent_org_id pid
-                        from t_organization child_org
-                        inner join child_orgs c on c.parent_id = child_org.org_id
-                    )select * from child_orgs;`;
+                                                                                ON         c.org_id = child_org.parent_org_id) SELECT *
+    FROM   child_orgs)
+union
+select child_org.org_id child_id, child_org.org_type, child_org.name child_name, child_org.parent_org_id pid
+from t_organization child_org
+inner join child_orgs c on c.parent_id = child_org.org_id
+                    ) select * from child_orgs; `;
 
         let response = {
             diocese: [],
@@ -251,7 +306,7 @@ async function getSearchables(loggedInUser) {
         });
 
     } catch (error) {
-        console.error(`studentSearch.js::getStudents() : ${error}`);
+        console.error(`studentSearch.js:: getStudents() : ${error} `);
         return (errorHandling.handleDBError('connectionError'));
 
     } finally {
