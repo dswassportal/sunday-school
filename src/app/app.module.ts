@@ -80,6 +80,7 @@ import { BulkRegistrationComponent } from './screens/bulk-registration/bulk-regi
 import { SchoolAttendanceComponent } from './screens/school-attendance/school-attendance.component';
 import { SundaySchoolAttendanceComponent } from './screens/sunday-school-attendance/sunday-school-attendance.component';
 import { SearchComponent } from './screens/search/search.component';
+import { ProfileSearchComponent } from './screens/profile-search/profile-search.component';
 
 
 @NgModule({
@@ -113,7 +114,8 @@ import { SearchComponent } from './screens/search/search.component';
         BulkRegistrationComponent,
         SchoolAttendanceComponent,
         SundaySchoolAttendanceComponent,
-        SearchComponent
+        SearchComponent,
+        ProfileSearchComponent
     //UserProfileComponent,
     //OvbsRegistrationComponent
   ],

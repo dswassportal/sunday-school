@@ -99,7 +99,7 @@ async function searchStudents(filterParamJson, loggedInUser) {
                                             ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                 FROM   child_orgs)`;
 
-        console.debug(query)
+        //console.debug(query)
         searchResultResp = [];
         let result = await client.query(query);
         console.debug('Search result rows found : ' + result.rowCount);
