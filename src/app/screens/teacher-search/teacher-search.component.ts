@@ -91,7 +91,7 @@ export class TeacherSearchComponent implements OnInit {
 
 
 
-  profileSearchFormGroup: any;
+  teacherSearchFormGroup: any;
   parishDataList!: any[];
   dioceseData: any = [];
   regionData: any = [];
@@ -109,7 +109,7 @@ export class TeacherSearchComponent implements OnInit {
   lastName!: string;
   phoneNumber!:string;
   emailId!: string;
-  teacherId!:string;
+  
 
   dropdownSettingsForDiocese: IDropdownSettings = {
     singleSelection: true,
@@ -191,21 +191,6 @@ export class TeacherSearchComponent implements OnInit {
     });
 
     this.columnDefs = [
-      { headerName: 'First Name', field: 'firstName', sortable: true, filter: true, width: 170, checkboxSelection: true },
-      { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true, width: 170 },
-      { headerName: 'Member Type', field: 'memberType', sortable: true, filter: true, width: 150 },
-      { headerName: 'Parish', field: 'parish_name', sortable: true, filter: true, width: 300 },
-      { headerName: 'City', field: 'city', sortable: true, filter: true, width: 140 },
-      { headerName: 'State', field: 'state', sortable: true, filter: true, width: 140 },
-      { headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 140 },
-      {
-        headerName: 'Actions', field: 'action', cellRendererFramework: ButtonRendererComponent, width: 140,
-        cellRendererParams: function (params: any) {
-          // onClick: this.openModal.bind(this),
-          // label: 'Click'
-          // `<button>Edit</button>`;
-        }, suppressSizeToFit: false
-      }
     ];
 
      //this.getUserData();
@@ -256,15 +241,15 @@ export class TeacherSearchComponent implements OnInit {
 
 
 
-    this.profileSearchFormGroup = this.formBuilder.group({
+    this.teacherSearchFormGroup = this.formBuilder.group({
       dioceseName: new FormControl('',),
       regionName: new FormControl('',),
       parishName: new FormControl(''),
-      teacherId: new FormControl('',),
+     
       firstName: new FormControl('',),
       lastName: new FormControl('',),
       phoneNumber: new FormControl('',),
-      emailId: new FormControl('', [Validators.email]),
+      emailId: new FormControl('',),
 
     });
 
@@ -331,13 +316,16 @@ export class TeacherSearchComponent implements OnInit {
   onSearchClick() {
     
     let payload = {
-      
-      "code": "member_search",
+      "teacherFirstName": this.teacherSearchFormGroup.value.firstName,
+      "teacherLastName": this.teacherSearchFormGroup.value.lastName,
+      "teacherPhoneNo": this.teacherSearchFormGroup.value.phoneNumber,
+      "code": "teacher_search",
       "extendedSearch": false,
-      "parishId": this.profileSearchFormGroup.value.parishName.length == 0 ? "" : this.profileSearchFormGroup.value.parishName[0].parishId,
-      "dioceseId": this.profileSearchFormGroup.value.dioceseName.length == 0 ? "" : this.profileSearchFormGroup.value.dioceseName[0].dioceseId,
-      "regionId": this.profileSearchFormGroup.value.regionName.length == 0 ? "" : this.profileSearchFormGroup.value.regionName[0].regionId,
-      
+      "parishId": this.teacherSearchFormGroup.value.parishName.length == 0 ? "" : this.teacherSearchFormGroup.value.parishName[0].parishId,
+      "dioceseId": this.teacherSearchFormGroup.value.dioceseName.length == 0 ? "" : this.teacherSearchFormGroup.value.dioceseName[0].dioceseId,
+      "regionId": this.teacherSearchFormGroup.value.regionName.length == 0 ? "" : this.teacherSearchFormGroup.value.regionName[0].regionId,
+      "teacherEmailId":  this.teacherSearchFormGroup.value.emailId,
+      "membershipId":  this.teacherSearchFormGroup.value.memberId,
     }
 
     this.apiService.callPostService(`searchStudents`, payload).subscribe((res) => {
@@ -356,20 +344,29 @@ export class TeacherSearchComponent implements OnInit {
     });
   }
 
-
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `filtered_result`,
+    };
+    this.gridApi.exportDataAsCsv(params);
+  }
+  
   clearSearch() {
 
     this.dioceseName =' ';
     this.regionName= ' ' ;
     this.parishName=' '
-    this.teacherId=' ';
+    
     this.firstName =' ';
     this.lastName =' ';
     this.phoneNumber= ' ';
     this.emailId =' ';
-    this.profileSearchFormGroup.get('dioceseName').setValue([]);
-    this.profileSearchFormGroup.get('regionName').setValue([]);
-    this.profileSearchFormGroup.get('parishName').setValue([]);
+    this.teacherSearchFormGroup.get('dioceseName').setValue([]);
+    this.teacherSearchFormGroup.get('regionName').setValue([]);
+    this.teacherSearchFormGroup.get('parishName').setValue([]);
 }
 
 

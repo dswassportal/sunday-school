@@ -20,7 +20,7 @@
                     </mat-panel-description>
                     
                 </mat-expansion-panel-header>
-                <form [formGroup]="profileSearchFormGroup">
+                <form [formGroup]="teacherSearchFormGroup">
                     <div class="row" style="margin-top: 1%; ">
                         <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw; " id="dioceseName"
                             placeholder="Select Diocese" [data]="dioceseData"
@@ -48,16 +48,13 @@
                     </div>
                     
                     <div class="row" style="margin-top: 1%;">
-                        <mat-form-field class="col-md-4">
-                            <mat-label>Teacher Id</mat-label>
-                            <input id="teacherId" [(ngModel)]="teacherId" matInput formControlName="teacherId" />
-                        </mat-form-field>
-                    <mat-form-field class="col-md-4">
+                        
+                    <mat-form-field class="col-md-6">
                         <mat-label>First Name</mat-label>
                         <input id="firstName" [(ngModel)]="firstName" matInput formControlName="firstName" />
                     </mat-form-field>
 
-                    <mat-form-field class="col-md-4">
+                    <mat-form-field class="col-md-6">
                         <mat-label>Last Name</mat-label>
                         <input id="lastName" [(ngModel)]="lastName" matInput formControlName="lastName" />
                     </mat-form-field>
@@ -93,6 +90,12 @@
                 <button mat-button type="submit" (click)="accordion.closeAll()" (click)="onSearchClick()"  mat-button class="mbutton">
                     Search</button>
             </div>
+        </div>
+
+        <div class="d-flex" style="margin-right: 1.4%;">
+            <button mat-button class="col-2 ml-auto border" (click)="onBtExport()">
+                <mat-icon>file_download</mat-icon>
+            </button>
         </div>
         <div class="container mt-3" style="overflow: hidden;">
 
@@ -464,4 +467,4 @@
     </div>
 </div>
 
-<p>teacher-search works!</p>
+

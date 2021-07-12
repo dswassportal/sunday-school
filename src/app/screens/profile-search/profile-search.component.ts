@@ -99,7 +99,8 @@ export class ProfileSearchComponent implements OnInit {
   dropdownSettingsDiocese: any;
   dropdownSettingsRegion: any;
   dropdownSettingsParish: any;
-
+  dropdownSettingsRole: any;
+  
   dioceseName!: string;
   regionName!:string ;
   parishName!:string;
@@ -142,6 +143,18 @@ export class ProfileSearchComponent implements OnInit {
     allowSearchFilter: true,
     maxHeight: 100
   };
+
+  dropdownSettingsForRole: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'id',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 1,
+    allowSearchFilter: true,
+    maxHeight: 100
+  }
+  canSearchByRole: boolean= false;
 
 
 
@@ -189,23 +202,7 @@ export class ProfileSearchComponent implements OnInit {
       roles: this.formBuilder.array([this.adduserroles()]),
     });
 
-    this.columnDefs = [
-      { headerName: 'First Name', field: 'firstName', sortable: true, filter: true, width: 170, checkboxSelection: true },
-      { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true, width: 170 },
-      { headerName: 'Member Type', field: 'memberType', sortable: true, filter: true, width: 150 },
-      { headerName: 'Parish', field: 'parish_name', sortable: true, filter: true, width: 300 },
-      { headerName: 'City', field: 'city', sortable: true, filter: true, width: 140 },
-      { headerName: 'State', field: 'state', sortable: true, filter: true, width: 140 },
-      { headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 140 },
-      {
-        headerName: 'Actions', field: 'action', cellRendererFramework: ButtonRendererComponent, width: 140,
-        cellRendererParams: function (params: any) {
-          // onClick: this.openModal.bind(this),
-          // label: 'Click'
-          // `<button>Edit</button>`;
-        }, suppressSizeToFit: false
-      }
-    ];
+    this.columnDefs = [ ];
 
      //this.getUserData();
      this.rowData = [];
@@ -264,13 +261,16 @@ export class ProfileSearchComponent implements OnInit {
       lastName: new FormControl('',),
       phoneNumber: new FormControl('',),
       emailId: new FormControl('', [Validators.email]),
+      roles: new FormControl('',),
 
     });
 
     this.dropdownSettingsDiocese = this.dropdownSettingsForDiocese;
     this.dropdownSettingsRegion = this.dropdownSettingsForRegion;
     this.dropdownSettingsParish = this.dropdownSettingsForParish;
+    this.dropdownSettingsRole = this.dropdownSettingsForRole;
 
+    this.canSearchByRole = this.uiCommonUtils.hasPermissions("can_search_by_role");
 
     this.apiService.callGetService('getRegionAndParish').subscribe((res: any) => {
       this.allDioceseRegionParishData = res.data.metaData.regions;
@@ -378,9 +378,11 @@ export class ProfileSearchComponent implements OnInit {
     this.lastName =' ';
     this.phoneNumber= ' ';
     this.emailId =' ';
+    this.roles=' ';
     this.profileSearchFormGroup.get('dioceseName').setValue([]);
     this.profileSearchFormGroup.get('regionName').setValue([]);
     this.profileSearchFormGroup.get('parishName').setValue([]);
+    this.profileSearchFormGroup.get('roles').setValue([]);
 }
 
 

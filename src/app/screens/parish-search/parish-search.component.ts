@@ -193,12 +193,12 @@ export class ParishSearchComponent implements OnInit {
     });
 
     this.columnDefs = [
-      { headerName: 'Parish Name', field: '', sortable: true, filter: true, width: 200, checkboxSelection: true },
-      { headerName: 'Address', field: '', sortable: true, filter: true, width: 200 },
-      { headerName: 'Region Name', field: '', sortable: true, filter: true, width: 200 },
-      { headerName: 'Phone Number', field: '', sortable: true, filter: true, width: 200 },
-      { headerName: 'Email Address', field: '', sortable: true, filter: true, width: 200 },
     ];
+    // { headerName: 'Parish Name', field: '', sortable: true, filter: true, width: 200, checkboxSelection: true },
+    // { headerName: 'Address', field: '', sortable: true, filter: true, width: 200 },
+    // { headerName: 'Region Name', field: '', sortable: true, filter: true, width: 200 },
+    // { headerName: 'Phone Number', field: '', sortable: true, filter: true, width: 200 },
+    // { headerName: 'Email Address', field: '', sortable: true, filter: true, width: 200 },
 
     //this.getUserData();
     this.rowData = [];
@@ -293,6 +293,16 @@ export class ParishSearchComponent implements OnInit {
 
     })
    
+  }
+
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `filtered_result`,
+    };
+    this.gridApi.exportDataAsCsv(params);
   }
 
   onOrgSelectForMultiSelect(event: any) {

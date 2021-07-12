@@ -193,21 +193,6 @@ export class SearchComponent implements OnInit {
     });
 
     this.columnDefs = [
-      { headerName: 'First Name', field: 'firstName', sortable: true, filter: true, width: 170, checkboxSelection: true },
-      { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true, width: 170 },
-      { headerName: 'Member Type', field: 'memberType', sortable: true, filter: true, width: 150 },
-      { headerName: 'Parish', field: 'parish_name', sortable: true, filter: true, width: 300 },
-      { headerName: 'City', field: 'city', sortable: true, filter: true, width: 140 },
-      { headerName: 'State', field: 'state', sortable: true, filter: true, width: 140 },
-      { headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 140 },
-      {
-        headerName: 'Actions', field: 'action', cellRendererFramework: ButtonRendererComponent, width: 140,
-        cellRendererParams: function (params: any) {
-          // onClick: this.openModal.bind(this),
-          // label: 'Click'
-          // `<button>Edit</button>`;
-        }, suppressSizeToFit: false
-      }
     ];
 
     this.gridOptions = {
