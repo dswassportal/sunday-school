@@ -1,0 +1,33 @@
+.container{
+    font-family: poppins;
+    letter-spacing: 0.18px;
+}
+.modal-title{
+    font-weight: bold;
+    font-family: poppins;
+    letter-spacing: 0.18px;
+}
+mat-form-field{
+    font-family: poppins;
+    letter-spacing: 0.18px;
+}
+h2{
+    font-family: poppins;
+}
+.modal{
+    width:115%;
+}
+:host ::ng-deep.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+    border-color: #a82b029e !important;
+  }
+
+  :host ::ng-deep.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-inner-circle {
+    background-color: #a82b029e !important;
+  }
+  .search:focus{
+    border-color: grey;
+    box-shadow: none;
+  }
+  ::ng-deep .mat-form-field-wrapper{
+    margin-bottom: -0.4em;
+ }

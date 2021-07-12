@@ -30,16 +30,17 @@ class CustomDateAdapter extends NativeDateAdapter {
 }
 
 @Component({
-  selector: 'app-profile-search',
-  templateUrl: './profile-search.component.html',
-  styleUrls: ['./profile-search.component.css'],
+  selector: 'app-teacher-search',
+  templateUrl: './teacher-search.component.html',
+  styleUrls: ['./teacher-search.component.css'],
   providers: [
     {
       provide: DateAdapter, useClass: CustomDateAdapter
     }
   ]
 })
-export class ProfileSearchComponent implements OnInit {
+export class TeacherSearchComponent implements OnInit {
+
   @ViewChild(MatAccordion) accordion!: MatAccordion;
 
   parishList!: any[];
@@ -108,7 +109,7 @@ export class ProfileSearchComponent implements OnInit {
   lastName!: string;
   phoneNumber!:string;
   emailId!: string;
-  memberId!:string;
+  teacherId!:string;
 
   dropdownSettingsForDiocese: IDropdownSettings = {
     singleSelection: true,
@@ -258,7 +259,7 @@ export class ProfileSearchComponent implements OnInit {
       dioceseName: new FormControl('',),
       regionName: new FormControl('',),
       parishName: new FormControl(''),
-      memberId: new FormControl('',),
+      teacherId: new FormControl('',),
       firstName: new FormControl('',),
       lastName: new FormControl('',),
       phoneNumber: new FormControl('',),
@@ -329,16 +330,13 @@ export class ProfileSearchComponent implements OnInit {
   onSearchClick() {
     
     let payload = {
-      "memberFirstName": this.profileSearchFormGroup.value.firstName,
-      "memberLastName": this.profileSearchFormGroup.value.lastName,
-      "memberPhoneNo": this.profileSearchFormGroup.value.phoneNumber,
+      
       "code": "member_search",
       "extendedSearch": false,
       "parishId": this.profileSearchFormGroup.value.parishName.length == 0 ? "" : this.profileSearchFormGroup.value.parishName[0].parishId,
       "dioceseId": this.profileSearchFormGroup.value.dioceseName.length == 0 ? "" : this.profileSearchFormGroup.value.dioceseName[0].dioceseId,
       "regionId": this.profileSearchFormGroup.value.regionName.length == 0 ? "" : this.profileSearchFormGroup.value.regionName[0].regionId,
-      "memberEmailId":  this.profileSearchFormGroup.value.emailId,
-      "membershipId":  this.profileSearchFormGroup.value.memberId,
+      
     }
 
     this.apiService.callPostService(`searchStudents`, payload).subscribe((res) => {
@@ -357,22 +355,13 @@ export class ProfileSearchComponent implements OnInit {
     });
   }
 
-  onBtExport() {
-    // this.gridApi.exportDataAsExcel();
-    const params = {
-      columnGroups: true,
-      allColumns: true,
-      fileName: `filtered_result`,
-    };
-    this.gridApi.exportDataAsCsv(params);
-  }
 
   clearSearch() {
 
     this.dioceseName =' ';
     this.regionName= ' ' ;
     this.parishName=' '
-    this.memberId=' ';
+    this.teacherId=' ';
     this.firstName =' ';
     this.lastName =' ';
     this.phoneNumber= ' ';
@@ -629,7 +618,7 @@ onremovebtnclick(index: any) {
 
     let selectedRows = this.gridApi.getSelectedRows();
     for (let i = 0; i < selectedRows.length; i++) {
-      // console.log("Users for Delete", selectedRows[i].userId);
+      console.log("Users for Delete", selectedRows[i].userId);
       this.deleteUser.push(selectedRows[i].userId);
       //this.deleteUser = selectedRows[i].userId;
     }

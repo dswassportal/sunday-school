@@ -241,7 +241,7 @@ export class SearchComponent implements OnInit {
 
     this.apiService.callGetService('getCountryStates').subscribe((res: any) => {
       this.countries = res.data.countryState;
-    });   
+    });
 
     this.searchFormGroup = this.formBuilder.group({
       dioceseName: new FormControl('',),
@@ -274,13 +274,19 @@ export class SearchComponent implements OnInit {
     this.apiService.callGetService('getRegionAndParish').subscribe((res: any) => {
       this.allDioceseRegionParishData = res.data.metaData.regions;
       let dioceseArray = [];
-      let dioceseDataTemp = res.data.metaData.regions[0];
-      let Json = {
-        "dioceseId": dioceseDataTemp.regionId,
-        "dioceseName": dioceseDataTemp.regionName
+
+      for (let row of res.data.metaData.regions) {
+        if(row.regionId == 1){
+          let Json = {
+            "dioceseId": row.regionId,
+            "dioceseName": row.regionName
+          }
+          dioceseArray.push(Json);
+          this.dioceseData = dioceseArray;
+        }
+       
       }
-      dioceseArray.push(Json);
-      this.dioceseData = dioceseArray;
+
 
       // this.searchFormGroup.patchValue({
       //   dioceseName: this.dioceseData
@@ -355,22 +361,22 @@ export class SearchComponent implements OnInit {
       "studentFirstName": this.searchFormGroup.value.studentFirstName,
       "studentLastName": this.searchFormGroup.value.studentLastName,
       "studentPhoneNo": this.searchFormGroup.value.studentPhoneNumber,
-      "teacherEmailId":  this.searchFormGroup.value.teacherEmail,
-      "parentEmailId":  this.searchFormGroup.value.parentEmail,
-      "studentEmailId":  this.searchFormGroup.value.studentEmail,
+      "teacherEmailId": this.searchFormGroup.value.teacherEmail,
+      "parentEmailId": this.searchFormGroup.value.parentEmail,
+      "studentEmailId": this.searchFormGroup.value.studentEmail,
     }
 
     this.apiService.callPostService(`searchStudents`, payload).subscribe((res) => {
       if (res.data.status == "success") {
         let columnsArray: any = [];
-        for(let row of res.data.displayConfig){   
-          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, suppressSizeToFit: true, flex: 1, resizable: true }
+        for (let row of res.data.displayConfig) {
+          let json = { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, suppressSizeToFit: true, flex: 1, resizable: true }
           columnsArray.push(json);
-        } 
+        }
         this.columnDefs = columnsArray;
         this.rowData = res.data.result;
       }
-      else{
+      else {
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
       }
     });

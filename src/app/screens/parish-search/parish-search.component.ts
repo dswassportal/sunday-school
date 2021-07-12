@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import {MatAccordion} from '@angular/material/expansion';
 
+
 declare let $: any;
 
 import { Moment } from 'moment';
@@ -29,18 +30,21 @@ class CustomDateAdapter extends NativeDateAdapter {
   }
 }
 
+
 @Component({
-  selector: 'app-profile-search',
-  templateUrl: './profile-search.component.html',
-  styleUrls: ['./profile-search.component.css'],
+  selector: 'app-parish-search',
+  templateUrl: './parish-search.component.html',
+  styleUrls: ['./parish-search.component.css'],
   providers: [
     {
       provide: DateAdapter, useClass: CustomDateAdapter
     }
   ]
 })
-export class ProfileSearchComponent implements OnInit {
+export class ParishSearchComponent implements OnInit {
   @ViewChild(MatAccordion) accordion!: MatAccordion;
+
+
 
   parishList!: any[];
   Parish!: any[];
@@ -90,25 +94,23 @@ export class ProfileSearchComponent implements OnInit {
 
 
 
-  profileSearchFormGroup: any;
+
+
+  parishSearchFormGroup: any;
+  dioceseName!: string;
+  regionName!:string ;
+  parishName!:string;
   parishDataList!: any[];
   dioceseData: any = [];
   regionData: any = [];
   parishData: any = [];
   allDioceseRegionParishData: any;
+
+  
+
   dropdownSettingsDiocese: any;
   dropdownSettingsRegion: any;
   dropdownSettingsParish: any;
-
-  dioceseName!: string;
-  regionName!:string ;
-  parishName!:string;
-  orgId!: string;
-  firstName!: string;
-  lastName!: string;
-  phoneNumber!:string;
-  emailId!: string;
-  memberId!:string;
 
   dropdownSettingsForDiocese: IDropdownSettings = {
     singleSelection: true,
@@ -148,13 +150,14 @@ export class ProfileSearchComponent implements OnInit {
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
     private http: HttpClient, private formBuilder: FormBuilder, public router: Router) { }
 
-
     agInit(params: any) {
       this.params = params;
       this.data = params.value;
     }
   
+
   ngOnInit(): void {
+
 
     this.userMetaData = this.uiCommonUtils.getUserMetaDataJson();
     this.loggedInUser = this.userMetaData.userId;
@@ -254,22 +257,16 @@ export class ProfileSearchComponent implements OnInit {
 
 
 
-    this.profileSearchFormGroup = this.formBuilder.group({
+
+
+    this.parishSearchFormGroup = this.formBuilder.group({
       dioceseName: new FormControl('',),
       regionName: new FormControl('',),
-      parishName: new FormControl(''),
-      memberId: new FormControl('',),
-      firstName: new FormControl('',),
-      lastName: new FormControl('',),
-      phoneNumber: new FormControl('',),
-      emailId: new FormControl('', [Validators.email]),
-
+      parishName: new FormControl('',),
     });
-
     this.dropdownSettingsDiocese = this.dropdownSettingsForDiocese;
     this.dropdownSettingsRegion = this.dropdownSettingsForRegion;
     this.dropdownSettingsParish = this.dropdownSettingsForParish;
-
 
     this.apiService.callGetService('getRegionAndParish').subscribe((res: any) => {
       this.allDioceseRegionParishData = res.data.metaData.regions;
@@ -302,9 +299,9 @@ export class ProfileSearchComponent implements OnInit {
       }
       this.regionData = regionDataArray;
 
+
     })
-
-
+   
   }
 
   onOrgSelectForMultiSelect(event: any) {
@@ -325,20 +322,16 @@ export class ProfileSearchComponent implements OnInit {
 
   }
 
-
   onSearchClick() {
     
     let payload = {
-      "memberFirstName": this.profileSearchFormGroup.value.firstName,
-      "memberLastName": this.profileSearchFormGroup.value.lastName,
-      "memberPhoneNo": this.profileSearchFormGroup.value.phoneNumber,
+      
       "code": "member_search",
       "extendedSearch": false,
-      "parishId": this.profileSearchFormGroup.value.parishName.length == 0 ? "" : this.profileSearchFormGroup.value.parishName[0].parishId,
-      "dioceseId": this.profileSearchFormGroup.value.dioceseName.length == 0 ? "" : this.profileSearchFormGroup.value.dioceseName[0].dioceseId,
-      "regionId": this.profileSearchFormGroup.value.regionName.length == 0 ? "" : this.profileSearchFormGroup.value.regionName[0].regionId,
-      "memberEmailId":  this.profileSearchFormGroup.value.emailId,
-      "membershipId":  this.profileSearchFormGroup.value.memberId,
+      "parishId": this.parishSearchFormGroup.value.parishName.length == 0 ? "" : this.parishSearchFormGroup.value.parishName[0].parishId,
+      "dioceseId": this.parishSearchFormGroup.value.dioceseName.length == 0 ? "" : this.parishSearchFormGroup.value.dioceseName[0].dioceseId,
+      "regionId": this.parishSearchFormGroup.value.regionName.length == 0 ? "" : this.parishSearchFormGroup.value.regionName[0].regionId,
+      
     }
 
     this.apiService.callPostService(`searchStudents`, payload).subscribe((res) => {
@@ -356,34 +349,17 @@ export class ProfileSearchComponent implements OnInit {
       }
     });
   }
-
-  onBtExport() {
-    // this.gridApi.exportDataAsExcel();
-    const params = {
-      columnGroups: true,
-      allColumns: true,
-      fileName: `filtered_result`,
-    };
-    this.gridApi.exportDataAsCsv(params);
-  }
-
   clearSearch() {
 
-    this.dioceseName =' ';
-    this.regionName= ' ' ;
-    this.parishName=' '
-    this.memberId=' ';
-    this.firstName =' ';
-    this.lastName =' ';
-    this.phoneNumber= ' ';
-    this.emailId =' ';
-    this.profileSearchFormGroup.get('dioceseName').setValue([]);
-    this.profileSearchFormGroup.get('regionName').setValue([]);
-    this.profileSearchFormGroup.get('parishName').setValue([]);
+    
+    this.parishSearchFormGroup.get('dioceseName').setValue([]);
+    this.parishSearchFormGroup.get('regionName').setValue([]);
+    this.parishSearchFormGroup.get('parishName').setValue([]);
+    
 }
 
 
-  isStateDataSet = false;
+isStateDataSet = false;
   keyPress(event: any) {
     this.isStateDataSet = false;
     const pattern = /[0-9\+\-\ ]/;
@@ -629,7 +605,7 @@ onremovebtnclick(index: any) {
 
     let selectedRows = this.gridApi.getSelectedRows();
     for (let i = 0; i < selectedRows.length; i++) {
-      // console.log("Users for Delete", selectedRows[i].userId);
+      console.log("Users for Delete", selectedRows[i].userId);
       this.deleteUser.push(selectedRows[i].userId);
       //this.deleteUser = selectedRows[i].userId;
     }
@@ -666,13 +642,12 @@ onremovebtnclick(index: any) {
     onSelectionChanged(event: any) {
       var selectedRows = this.gridApi.getSelectedRows();
     }
+
       //miscellaneous
-    onItemSelect(item: any) {
-      console.log(item);
-    }
-    onSelectAll(items: any) {
-      console.log(items);
-    }
-
-
+      onItemSelect(item: any) {
+        console.log(item);
+      }
+      onSelectAll(items: any) {
+        console.log(items);
+      }
 }

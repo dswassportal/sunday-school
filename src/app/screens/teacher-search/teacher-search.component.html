@@ -1,8 +1,8 @@
 <div class="container mt-4">
     <mat-card class="shadow">
 
-        <h1 style="font-family: poppins;">Profile Search</h1>
-
+        <h1 style="font-family: poppins;">Teacher Search</h1>
+        
         <!-- <div class="example-action-buttons">
     <button mat-button (click)="accordion.openAll()">Expand All</button>
     <button mat-button (click)="accordion.closeAll()">Collapse All</button>
@@ -14,9 +14,11 @@
                     <mat-panel-title>
                         Search Criteria
                     </mat-panel-title>
-                    <!-- <mat-panel-description>
+                    <mat-panel-description>
                         Search Details
-                    </mat-panel-description> -->
+                       
+                    </mat-panel-description>
+                    
                 </mat-expansion-panel-header>
                 <form [formGroup]="profileSearchFormGroup">
                     <div class="row" style="margin-top: 1%; ">
@@ -47,8 +49,8 @@
                     
                     <div class="row" style="margin-top: 1%;">
                         <mat-form-field class="col-md-4">
-                            <mat-label>Member Id</mat-label>
-                            <input id="memberId" [(ngModel)]="memberId" matInput formControlName="memberId" />
+                            <mat-label>Teacher Id</mat-label>
+                            <input id="teacherId" [(ngModel)]="teacherId" matInput formControlName="teacherId" />
                         </mat-form-field>
                     <mat-form-field class="col-md-4">
                         <mat-label>First Name</mat-label>
@@ -92,12 +94,8 @@
                     Search</button>
             </div>
         </div>
-        <div class="d-flex" style="margin-right: 1.4%;">
-            <button mat-button class="col-2 ml-auto border" (click)="onBtExport()">
-                <mat-icon>file_download</mat-icon>
-            </button>
-        </div>
         <div class="container mt-3" style="overflow: hidden;">
+
             <ag-grid-angular style="width: auto; height: 450px;" class="ag-theme-alpine mt-3" [rowData]="rowData "
                 [columnDefs]="columnDefs" [pagination]="true" rowSelection='multiple'
                 (selectionChanged)="onSelectionChanged($event)" (gridReady)="onGridReady($event)"
@@ -466,23 +464,4 @@
     </div>
 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<p>teacher-search works!</p>
