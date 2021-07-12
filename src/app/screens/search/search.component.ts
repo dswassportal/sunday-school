@@ -223,7 +223,8 @@ export class SearchComponent implements OnInit {
     };
 
 
-    //this.getUserData();
+     //this.getUserData();
+     this.rowData = [];
 
     this.max_date = new Date;
     this.max_date = new Date;
@@ -269,7 +270,7 @@ export class SearchComponent implements OnInit {
     // this.apiService.callGetService('getSearchables').subscribe((res: any) => {
     //   this.parishDataList = res.data.metaData.Parish;
     // })
-    this.canAssignDioceseAndRegion = this.uiCommonUtils.hasPermissions("can_assign_principal");
+    // this.canAssignDioceseAndRegion = this.uiCommonUtils.hasPermissions("can_assign_principal");
 
     this.apiService.callGetService('getRegionAndParish').subscribe((res: any) => {
       this.allDioceseRegionParishData = res.data.metaData.regions;

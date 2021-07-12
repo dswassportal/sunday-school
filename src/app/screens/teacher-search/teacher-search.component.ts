@@ -208,7 +208,8 @@ export class TeacherSearchComponent implements OnInit {
       }
     ];
 
-    this.getUserData();
+     //this.getUserData();
+     this.rowData = [];
 
     this.max_date = new Date;
 
