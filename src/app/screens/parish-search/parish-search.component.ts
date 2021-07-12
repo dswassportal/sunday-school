@@ -327,7 +327,7 @@ export class ParishSearchComponent implements OnInit {
     
     let payload = {
       
-      "code": "member_search",
+      "code": "parish_search",
       "extendedSearch": false,
       "parishId": this.parishSearchFormGroup.value.parishName.length == 0 ? "" : this.parishSearchFormGroup.value.parishName[0].parishId,
       "dioceseId": this.parishSearchFormGroup.value.dioceseName.length == 0 ? "" : this.parishSearchFormGroup.value.dioceseName[0].dioceseId,
