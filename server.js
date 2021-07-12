@@ -7,7 +7,8 @@ const processScoreRequest = require(`./src/app/node/reqScoreOperations`)
 const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions`)
 const processSSRequest = require(`./src/app/node/reqSsOperations`)
 const processFileUpload = require(`./src/app/node/reqFileUpload`)
-const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOperations`) 
+const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOperations`);
+const studentSearch =  require(`./src/app/node/search/studentSearch`)
 
 const fileUpload = require('express-fileupload');
 express = require('express')
@@ -864,8 +865,103 @@ app.get('/api/getEventDef', function (req, res) {
   }
 });
 
+app.get('/api/getAssignedGrades', function (req, res) {
+  console.log("getAssignedGrades called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getAssignedGrades(loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getAssignedGrades as : ' + error)
+  }
+});
 
 
+app.get('/api/getGradeAttendance', function (req, res) {
+  console.log("getGradeAttendance called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getGradeAttendance(loggedInUser, req.query.schoolId, req.query.grade, req.query.date)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getGradeAttendance as : ' + error)
+  }
+});
+
+
+app.post('/api/postSSAttendance', function (req, res) {
+  console.log("postAttendance called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.postSSAttendance(req.body.data, loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in postSSAttendance as : ' + error)
+  }
+});
+
+app.post('/api/searchStudents', function (req, res) {
+  console.log("searchStudents called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    studentSearch.searchStudents(req.body.data, loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in searchStudents as : ' + error)
+  }
+});
+
+
+app.get('/api/getSearchables', function (req, res) {
+  console.log("getSearchables called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    studentSearch.getSearchables(loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getSearchables as : ' + error)
+  }
+});
 
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {

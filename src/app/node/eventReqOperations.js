@@ -1013,12 +1013,11 @@ async function getRegionAndParish() {
 
                 if (regionId != row.region_id) {
 
-                    console.log("row.region_id", row.region_id);
-
+//                    console.log("row.region_id", row.region_id);
 
 
                     if (regionId != null) {
-                        console.log("regionId", regionId);
+                       // console.log("regionId", regionId);
 
                         region.parishes = parishes;
                         regions.push(region);
@@ -1031,7 +1030,7 @@ async function getRegionAndParish() {
                     region.regionName = row.region_name;
                     region.regionId = row.region_id;
                     regionId = row.region_id;
-                    console.log("regions", regions);
+                   // console.log("regions", regions);
                 }
 
                 parish = {};
@@ -1196,7 +1195,7 @@ async function getEventQuestionnaireData() {
         let getEventQuestionnaireData = `select * from t_event_questionnaire`;
         let res = await client.query(getEventQuestionnaireData);
         if (res && res.rowCount > 0) {
-            console.log("In Question response : " + res);
+          //  console.log("In Question response : " + res);
             let questionData = [];
             for (let row of res.rows) {
                 let questions = {};
