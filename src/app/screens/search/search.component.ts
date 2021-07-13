@@ -90,6 +90,7 @@ export class SearchComponent implements OnInit {
   maritalstatus!: any[];
   error = { validatePhoneNumber: true };
   canAssignDioceseAndRegion: boolean = false;
+  isCheckBoxChecked: boolean = false;
 
   allDioceseRegionParishData: any;
   dropdownSettingsDiocese: any;
@@ -330,6 +331,11 @@ export class SearchComponent implements OnInit {
 
   }
 
+  onCheckBoxClick(event : any){
+    console.log("event", event);
+    this.isCheckBoxChecked == true ? this.isCheckBoxChecked = false : this.isCheckBoxChecked = true;
+  }
+
   onSearchClick() {
 
     let payload = {
@@ -337,7 +343,7 @@ export class SearchComponent implements OnInit {
       "parentLastName": this.searchFormGroup.value.parentLasttName,
       "parentPhoneNo": this.searchFormGroup.value.parentPhoneNumber,
       "code": "student_search",
-      "extendedSearch": false,
+      "extendedSearch": this.isCheckBoxChecked,
       "teacherFirstName": this.searchFormGroup.value.teacherFirstName,
       "teacherLastName": this.searchFormGroup.value.teacherLastName,
       "teacherPhoneNo": this.searchFormGroup.value.teacherPhoneNumber,
