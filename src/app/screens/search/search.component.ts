@@ -376,21 +376,21 @@ export class SearchComponent implements OnInit {
 
   clearSearch() {
 
-    this.dioceseName = ' ';
-    this.regionName = ' ';
-    this.orgId = ' ';
-    this.teacherFirstName = ' ';
-    this.teacherLastName = ' ';
-    this.teacherPhoneNumber = ' ';
-    this.teacherEmail = ' ';
-    this.parentFirstName = ' ';
-    this.parentLasttName = ' ';
-    this.parentPhoneNumber = ' ';
-    this.parentEmail = ' ';
-    this.studentFirstName = ' ';
-    this.studentLastName = ' ';
-    this.studentPhoneNumber = ' ';
-    this.studentEmail = ' ';
+    this.dioceseName = '';
+    this.regionName = '';
+    this.orgId = '';
+    this.teacherFirstName = '';
+    this.teacherLastName = '';
+    this.teacherPhoneNumber = '';
+    this.teacherEmail = '';
+    this.parentFirstName = '';
+    this.parentLasttName = '';
+    this.parentPhoneNumber = '';
+    this.parentEmail = '';
+    this.studentFirstName = '';
+    this.studentLastName = '';
+    this.studentPhoneNumber = '';
+    this.studentEmail = '';
   }
 
   cancel() {

@@ -356,14 +356,13 @@ export class TeacherSearchComponent implements OnInit {
   
   clearSearch() {
 
-    this.dioceseName =' ';
-    this.regionName= ' ' ;
-    this.parishName=' '
-    
-    this.firstName =' ';
-    this.lastName =' ';
-    this.phoneNumber= ' ';
-    this.emailId =' ';
+    this.dioceseName ='';
+    this.regionName= '' ;
+    this.parishName='';    
+    this.firstName ='';
+    this.lastName ='';
+    this.phoneNumber= '';
+    this.emailId ='';
     this.teacherSearchFormGroup.get('dioceseName').setValue([]);
     this.teacherSearchFormGroup.get('regionName').setValue([]);
     this.teacherSearchFormGroup.get('parishName').setValue([]);
