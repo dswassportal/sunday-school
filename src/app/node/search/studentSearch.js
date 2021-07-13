@@ -239,8 +239,12 @@ function getMemberSearchQueryConditions(filterParamJson) {
 
     if (isValidString(filterParamJson.memberPhoneNo)) {
         andConditions.push(`mobile_no like ('%${filterParamJson.memberPhoneNo}%')`)
+
         // orConditions.push(`home_phone_no like ('%${filterParamJson.memberPhoneNo}%')`)
     }
+
+    if (isValidNumber(filterParamJson.memberRoleId))
+        andConditions.push(`${filterParamJson.memberRoleId} = any(role_id) `)
 
     //Or Conditions       
     // if (isValidString(filterParamJson.memberPhoneNo)) {
