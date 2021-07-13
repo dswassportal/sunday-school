@@ -211,25 +211,29 @@ export class CwcregistrationComponent implements OnInit {
       this.isAttachmentRequired = this.eventData.sectionConfig.isAttachmentRequired;
       this.isSingleDayEvent = this.eventData.sectionConfig.isSingleDayEvent;
 
+
+
       if (this.selectedRowJson.event_type == "TTC") {
-        
-        this.participantRoles[1].isDisabled = true
-        this.participantRoles = [...this.participantRoles];
+        if (this.participantRoles.code = "Student") {
+          this.participantRoles[1].isDisabled = true
+          this.participantRoles = [...this.participantRoles];
+        }
       }
       else {
         this.participantRoles[1].isDisabled = false;
       }
 
       if (this.selectedRowJson.event_type == "CWC" || this.selectedRowJson.event_type == "OVBS") {
-        
-        this.participantRoles[2].isDisabled = true
-        this.participantRoles[3].isDisabled = true
-        this.participantRoles = [...this.participantRoles];
+        if ((this.participantRoles.code = "Teacher") && (this.participantRoles.code = "Clergy")) {
+          this.participantRoles[2].isDisabled = true
+          this.participantRoles[3].isDisabled = true
+          this.participantRoles = [...this.participantRoles];
+        }
       }
       else {
         this.participantRoles[2].isDisabled = false;
         this.participantRoles[3].isDisabled = false;
-      }	
+      }
 
 
       if (this.eventData.registrationStatus == "Registered" && this.selectedEventType === 'registered_events') {
