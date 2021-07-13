@@ -161,12 +161,16 @@ function getStudentSearchQueryConditions(filterParamJson) {
         andConditions.push(`lower(vs.parent_last_name) like lower('%${filterParamJson.parentLastName}%')`)
     if (isValidString(filterParamJson.parentEmailId))
         andConditions.push(`lower(vs.parent_email_id) like lower('%${filterParamJson.parentEmailId}%')`)
+    if (isValidString(filterParamJson.parentPhoneNo)) {
+        andConditions.push(`vs.parent_mobile_no like ('%${filterParamJson.parentPhoneNo}%')`)
+        //    orConditions.push(`vs.parent_home_ph_no like ('%${filterParamJson.parentPhoneNo}%')`)
+    }
 
     //Or Conditions       
-    if (isValidString(filterParamJson.parentPhoneNo)) {
-        orConditions.push(`vs.parent_mobile_no like ('%${filterParamJson.parentPhoneNo}%')`)
-        orConditions.push(`vs.parent_home_ph_no like ('%${filterParamJson.parentPhoneNo}%')`)
-    }
+    // if (isValidString(filterParamJson.parentPhoneNo)) {
+    //     orConditions.push(`vs.parent_mobile_no like ('%${filterParamJson.parentPhoneNo}%')`)
+    //     orConditions.push(`vs.parent_home_ph_no like ('%${filterParamJson.parentPhoneNo}%')`)
+    // }
 
 
     //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
@@ -177,12 +181,16 @@ function getStudentSearchQueryConditions(filterParamJson) {
         andConditions.push(`lower(vs.staff_last_name) like lower('%${filterParamJson.teachertLastName}%')`)
     if (isValidString(filterParamJson.teacherEmailId))
         andConditions.push(`lower(vs.staff_email_id) like lower('%${filterParamJson.teacherEmailId}%')`)
+    if (isValidString(filterParamJson.teacherPhoneNo)) {
+        andConditions.push(`vs.staff_mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+        // orConditions.push(`vs.staff_home_ph_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+    }
 
     //Or Conditions       
-    if (isValidString(filterParamJson.teacherPhoneNo)) {
-        orConditions.push(`vs.staff_mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
-        orConditions.push(`vs.staff_home_ph_no like ('%${filterParamJson.teacherPhoneNo}%')`)
-    }
+    // if (isValidString(filterParamJson.teacherPhoneNo)) {
+    //     orConditions.push(`vs.staff_mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+    //     orConditions.push(`vs.staff_home_ph_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+    // }
 
     //-------------------------------------   Search By Student Details Conditions ---------------------------------------------//
     //And conditions
@@ -193,11 +201,15 @@ function getStudentSearchQueryConditions(filterParamJson) {
     if (isValidString(filterParamJson.studentEmailId))
         andConditions.push(`lower(vs.student_email_id) like lower('%${filterParamJson.studentEmailId}%')`)
 
-    //Or Conditions       
     if (isValidString(filterParamJson.studentPhoneNo)) {
-        orConditions.push(`vs.student_mobile_no like ('%${filterParamJson.studentPhoneNo}%')`)
-        orConditions.push(`vs.student_home_ph_no like ('%${filterParamJson.studentPhoneNo}%')`)
+        andConditions.push(`vs.student_mobile_no like ('%${filterParamJson.studentPhoneNo}%')`)
+        //  orConditions.push(`vs.student_home_ph_no like ('%${filterParamJson.studentPhoneNo}%')`)
     }
+    //Or Conditions       
+    // if (isValidString(filterParamJson.studentPhoneNo)) {
+    //     orConditions.push(`vs.student_mobile_no like ('%${filterParamJson.studentPhoneNo}%')`)
+    //     orConditions.push(`vs.student_home_ph_no like ('%${filterParamJson.studentPhoneNo}%')`)
+    // }
 
     return {
         'andConditions': andConditions,
@@ -225,11 +237,20 @@ function getMemberSearchQueryConditions(filterParamJson) {
     if (isValidNumber(filterParamJson.membershipId))
         andConditions.push(` membership_no = '${filterParamJson.membershipId}'`)
 
-    //Or Conditions       
     if (isValidString(filterParamJson.memberPhoneNo)) {
-        orConditions.push(`mobile_no like ('%${filterParamJson.memberPhoneNo}%')`)
-        orConditions.push(`home_phone_no like ('%${filterParamJson.memberPhoneNo}%')`)
+        andConditions.push(`mobile_no like ('%${filterParamJson.memberPhoneNo}%')`)
+
+        // orConditions.push(`home_phone_no like ('%${filterParamJson.memberPhoneNo}%')`)
     }
+
+    if (isValidNumber(filterParamJson.memberRoleId))
+        andConditions.push(`${filterParamJson.memberRoleId} = any(role_id) `)
+
+    //Or Conditions       
+    // if (isValidString(filterParamJson.memberPhoneNo)) {
+    //     orConditions.push(`mobile_no like ('%${filterParamJson.memberPhoneNo}%')`)
+    //     orConditions.push(`home_phone_no like ('%${filterParamJson.memberPhoneNo}%')`)
+    // }
 
 
     return {
@@ -251,12 +272,15 @@ function getTeachersSearchQueryConditions(filterParamJson) {
         andConditions.push(`lower(last_name) like lower('%${filterParamJson.teacherLastName}%')`)
     if (isValidString(filterParamJson.teacherEmailId))
         andConditions.push(`lower(email_id) like lower('%${filterParamJson.teacherEmailId}%')`)
+    if (isValidString(filterParamJson.teacherPhoneNo)) {
+        andConditions.push(`mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+    }
 
     //Or Conditions       
-    if (isValidString(filterParamJson.teacherPhoneNo)) {
-        orConditions.push(`mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
-        orConditions.push(`home_phone_no like ('%${filterParamJson.teacherPhoneNo}%')`)
-    }
+    // if (isValidString(filterParamJson.teacherPhoneNo)) {
+    //     orConditions.push(`mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+    //     orConditions.push(`home_phone_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+    // }
 
 
     return {

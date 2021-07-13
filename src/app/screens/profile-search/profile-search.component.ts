@@ -261,8 +261,8 @@ export class ProfileSearchComponent implements OnInit {
       lastName: new FormControl('',),
       phoneNumber: new FormControl('',),
       emailId: new FormControl('', [Validators.email]),
-      roles: new FormControl('',),
-
+      id: new FormControl('',),
+      
     });
 
     this.dropdownSettingsDiocese = this.dropdownSettingsForDiocese;
@@ -329,6 +329,9 @@ export class ProfileSearchComponent implements OnInit {
 
   onSearchClick() {
     
+    
+
+    
     let payload = {
       "memberFirstName": this.profileSearchFormGroup.value.firstName,
       "memberLastName": this.profileSearchFormGroup.value.lastName,
@@ -340,22 +343,44 @@ export class ProfileSearchComponent implements OnInit {
       "regionId": this.profileSearchFormGroup.value.regionName.length == 0 ? "" : this.profileSearchFormGroup.value.regionName[0].regionId,
       "memberEmailId":  this.profileSearchFormGroup.value.emailId,
       "membershipId":  this.profileSearchFormGroup.value.memberId,
+      "memberRoleId": this.profileSearchFormGroup.value.id.length == 0 ? "" : this.profileSearchFormGroup.value.id[0].id,
     }
 
     this.apiService.callPostService(`searchStudents`, payload).subscribe((res) => {
       if (res.data.status == "success") {
         let columnsArray: any = [];
         for(let row of res.data.displayConfig){   
-          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, suppressSizeToFit: true, flex: 1, resizable: true }
+          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true,width:150,resizable:true }
           columnsArray.push(json);
         } 
         this.columnDefs = columnsArray;
         this.rowData = res.data.result;
       }
+      
       else{
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
       }
+
+      this.roledata = res.data.metadata.roles;
+      let temproledata: any = [];
+      temproledata = res.data.metaData.roles;
+
+      this.roledata = [];
+
+      for (let row of temproledata) {
+        let name = row.name + ', ' + row.name + ', ' + row.name 
+        if (row.name == null) {
+          name = row.name + ' ' + row.name
+        }
+        let payload: any = {
+          "id": row.id,
+          "name": name
+        }
+        this.roledata.push(payload);
+      }
     });
+
+   
   }
 
   onBtExport() {
@@ -370,19 +395,19 @@ export class ProfileSearchComponent implements OnInit {
 
   clearSearch() {
 
-    this.dioceseName =' ';
-    this.regionName= ' ' ;
-    this.parishName=' '
-    this.memberId=' ';
-    this.firstName =' ';
-    this.lastName =' ';
-    this.phoneNumber= ' ';
-    this.emailId =' ';
-    this.roles=' ';
+    this.dioceseName ='';
+    this.regionName= '' ;
+    this.parishName=''
+    this.memberId='';
+    this.firstName ='';
+    this.lastName ='';
+    this.phoneNumber= '';
+    this.emailId ='';
+    this.roles='';
     this.profileSearchFormGroup.get('dioceseName').setValue([]);
     this.profileSearchFormGroup.get('regionName').setValue([]);
     this.profileSearchFormGroup.get('parishName').setValue([]);
-    this.profileSearchFormGroup.get('roles').setValue([]);
+    this.profileSearchFormGroup.get('id').setValue([]);
 }
 
 

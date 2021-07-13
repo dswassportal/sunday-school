@@ -90,6 +90,7 @@ export class SearchComponent implements OnInit {
   maritalstatus!: any[];
   error = { validatePhoneNumber: true };
   canAssignDioceseAndRegion: boolean = false;
+  isCheckBoxChecked: boolean = false;
 
   allDioceseRegionParishData: any;
   dropdownSettingsDiocese: any;
@@ -330,6 +331,11 @@ export class SearchComponent implements OnInit {
 
   }
 
+  onCheckBoxClick(event : any){
+    console.log("event", event);
+    this.isCheckBoxChecked == true ? this.isCheckBoxChecked = false : this.isCheckBoxChecked = true;
+  }
+
   onSearchClick() {
 
     let payload = {
@@ -337,7 +343,7 @@ export class SearchComponent implements OnInit {
       "parentLastName": this.searchFormGroup.value.parentLasttName,
       "parentPhoneNo": this.searchFormGroup.value.parentPhoneNumber,
       "code": "student_search",
-      "extendedSearch": false,
+      "extendedSearch": this.isCheckBoxChecked,
       "teacherFirstName": this.searchFormGroup.value.teacherFirstName,
       "teacherLastName": this.searchFormGroup.value.teacherLastName,
       "teacherPhoneNo": this.searchFormGroup.value.teacherPhoneNumber,
@@ -356,7 +362,7 @@ export class SearchComponent implements OnInit {
       if (res.data.status == "success") {
         let columnsArray: any = [];
         for (let row of res.data.displayConfig) {
-          let json = { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, suppressSizeToFit: true, flex: 1, resizable: true }
+          let json = { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, width: 200 }
           columnsArray.push(json);
         }
         this.columnDefs = columnsArray;
@@ -370,21 +376,21 @@ export class SearchComponent implements OnInit {
 
   clearSearch() {
 
-    this.dioceseName = ' ';
-    this.regionName = ' ';
-    this.orgId = ' ';
-    this.teacherFirstName = ' ';
-    this.teacherLastName = ' ';
-    this.teacherPhoneNumber = ' ';
-    this.teacherEmail = ' ';
-    this.parentFirstName = ' ';
-    this.parentLasttName = ' ';
-    this.parentPhoneNumber = ' ';
-    this.parentEmail = ' ';
-    this.studentFirstName = ' ';
-    this.studentLastName = ' ';
-    this.studentPhoneNumber = ' ';
-    this.studentEmail = ' ';
+    this.dioceseName = '';
+    this.regionName = '';
+    this.orgId = '';
+    this.teacherFirstName = '';
+    this.teacherLastName = '';
+    this.teacherPhoneNumber = '';
+    this.teacherEmail = '';
+    this.parentFirstName = '';
+    this.parentLasttName = '';
+    this.parentPhoneNumber = '';
+    this.parentEmail = '';
+    this.studentFirstName = '';
+    this.studentLastName = '';
+    this.studentPhoneNumber = '';
+    this.studentEmail = '';
   }
 
   cancel() {
