@@ -882,6 +882,67 @@ export class EventCreationComponent implements OnInit {
       });
     }
 
+    if(this.eventType == 'Diploma Exam'){
+      this.rolesData = ['Diploma Exam Coordinator'];
+      let roleData =
+      {
+        "data": {
+          "rolesData": this.rolesData
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+
+    
+    if(this.eventType == 'Talent Competition'){
+      this.rolesData = ['Regional Talent Competition Coordinator'];
+      let roleData =
+      {
+        "data": {
+          "rolesData": this.rolesData
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+
+    if(this.eventType == 'Sunday School Midterm Exam'){
+      this.rolesData = ['Sunday School Event Coordinator'];
+      let roleData =
+      {
+        "data": {
+          "rolesData": this.rolesData
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+
+    if(this.eventType == 'Sunday School Final Exam'){
+      this.rolesData = ['Sunday School Event Coordinator'];
+      let roleData =
+      {
+        "data": {
+          "rolesData": this.rolesData
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+
 
     this.getData();
 
