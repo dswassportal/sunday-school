@@ -59,6 +59,12 @@ async function searchStudents(filterParamJson, loggedInUser) {
         } else if (filterParamJson.code === 'member_search') {
             filterConditions = getMemberSearchQueryConditions(filterParamJson);
             viewToQuery = ' v_member vm ';
+        } else if (filterParamJson.code === 'teacher_search') {
+            filterConditions = getTeachersSearchQueryConditions(filterParamJson);
+            viewToQuery = ' v_teacher vt ';
+        } else if (filterParamJson.code === 'parish_search') {
+            filterConditions = getParishSearchQueryConditions(filterParamJson);
+            viewToQuery = ' v_organization vo ';
         }
 
         //----------------------------------   Search By Parish, Diocese, Regions Conditions --------------------------------------//
@@ -99,7 +105,7 @@ async function searchStudents(filterParamJson, loggedInUser) {
                                             ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                 FROM   child_orgs)`;
 
-        //console.debug(query)
+        console.debug(query)
         searchResultResp = [];
         let result = await client.query(query);
         console.debug('Search result rows found : ' + result.rowCount);
@@ -225,6 +231,49 @@ function getMemberSearchQueryConditions(filterParamJson) {
         orConditions.push(`home_phone_no like ('%${filterParamJson.memberPhoneNo}%')`)
     }
 
+
+    return {
+        'andConditions': andConditions,
+        'orConditions': orConditions
+    }
+}
+
+function getTeachersSearchQueryConditions(filterParamJson) {
+
+    let andConditions = [];
+    let orConditions = [];
+
+    //-------------------------------------   Search By Parent Details Conditions ---------------------------------------------//
+    //And conditions
+    if (isValidString(filterParamJson.teacherFirstName))
+        andConditions.push(`lower(first_name) like lower('%${filterParamJson.teacherFirstName}%')`)
+    if (isValidString(filterParamJson.teacherLastName))
+        andConditions.push(`lower(last_name) like lower('%${filterParamJson.teacherLastName}%')`)
+    if (isValidString(filterParamJson.teacherEmailId))
+        andConditions.push(`lower(email_id) like lower('%${filterParamJson.teacherEmailId}%')`)
+
+    //Or Conditions       
+    if (isValidString(filterParamJson.teacherPhoneNo)) {
+        orConditions.push(`mobile_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+        orConditions.push(`home_phone_no like ('%${filterParamJson.teacherPhoneNo}%')`)
+    }
+
+
+    return {
+        'andConditions': andConditions,
+        'orConditions': orConditions
+    }
+}
+
+
+function getParishSearchQueryConditions(filterParamJson) {
+
+    let andConditions = [];
+    let orConditions = [];
+
+    //And conditions
+    if (isValidString(filterParamJson.memberFirstName))
+        andConditions.push(`lower(name) like lower('%${filterParamJson.parishName}%')`)
 
     return {
         'andConditions': andConditions,
