@@ -736,7 +736,7 @@ app.get('/api/getSSchools', function (req, res) {
   console.log("getSSchools called...");
   let loggedInUser = decodeUser(req)
   try {
-    processSSRequest.getSSchoolData(loggedInUser, req.query.role)
+    processSSRequest.getSSchoolData(loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);

@@ -77,8 +77,8 @@ const getCurretTerm = ` select jsonb_agg(
                                     and current_date < term_end_date
                                     and is_deleted != true;`                                            
 
-const getParishesAndSchoolsByUserId = `select distinct to2.org_id, org_type, "name", parent_org_id, address_line1, address_line2, city
-                                        "level"
+const getParishesAndSchoolsByUserId = `select distinct to2.org_id, org_type, "name", parent_org_id, address_line1, address_line2, city,
+                                      to2."sequence"
                                         from t_organization to2 join  
                                         (WITH recursive child_orgs 
                                                                 AS (
@@ -96,7 +96,7 @@ const getParishesAndSchoolsByUserId = `select distinct to2.org_id, org_type, "na
                                                                     INNER JOIN child_orgs c
                                                                     ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                                         FROM   child_orgs) hyrq on to2.org_id  = hyrq.org_id
-                                        where to2.org_type in ('Parish', 'Sunday School') order by "level"; `;
+                                        where to2.org_type in ('Parish', 'Sunday School', 'Grade') order by to2."sequence"; `;
 
 
 const getAllTerms = `select jsonb_agg(
