@@ -76,6 +76,12 @@ async function getEventDefinationForIndivisualUser(client, eventId, participantI
                 response.regStartDate = row.registration_start_date;
                 response.regEndDate = row.registration_end_date;
                 response.eventURL = row.event_url;
+                response.selectedGroup = [
+                    {
+                        groupId: row.grade_group_id,
+                        groupName: row.group_name
+                    }
+                ]
 
                 response.categories = []
                 if (row.event_cat_map_id) {
@@ -183,6 +189,16 @@ async function getEventDefinationForIndivisualUser(client, eventId, participantI
                 'relationship': member.relationship,
                 'hasRegistered': member.has_registred,
                 'registrationStatus': member.registration_status
+            })
+        }
+    }
+    response.gradeGroup = [];
+    let groupRes = await client.query(queries.getGradeGroups, [eventId, participantId]);
+    if(groupRes.rowCount > 0){
+        for(let row of groupRes.rows){
+            response.gradeGroup.push({
+                'groupId': row.grade_group_id,
+                'groupName' : row.group_name
             })
         }
     }
@@ -382,7 +398,8 @@ async function eventRegistration(eventData, loggedInUser) {
                 //Updating existing event registration.(t_event_participant_registration)
                 if (eventData.eventPartiRegId && eventData.registrationStatus) {
                     let regUpdateRes = await client.query(queries.updateEventRegistration,
-                        [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus, eventData.role, eventData.eventPartiRegId]);
+                        [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus, 
+                            eventData.role, eventData.group, eventData.eventPartiRegId]);
 
                     if (regUpdateRes.rowCount > 0)
                         console.debug(`Event registration updated for ${eventData.eventPartiRegId} event_participant_registration_id.`);

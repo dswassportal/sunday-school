@@ -77,7 +77,8 @@ export class CwcregistrationComponent implements OnInit {
   enrollmentId: any;
   showHideEnrollmentId: boolean = false;
   eventCatMapId: any;
-
+  groupData: any;
+  isStudent:boolean = true;
 
   constructor(private router: Router, private apiService: ApiService, private formBuilder: FormBuilder,
     private uiCommonUtils: uiCommonUtils, private eventRegistrationDataService: EventRegistrationDataService) { }
@@ -126,6 +127,17 @@ export class CwcregistrationComponent implements OnInit {
     maxHeight: 100
   };
 
+  dropdownSettingsForGroup : IDropdownSettings = {
+    singleSelection: true,
+    idField: 'groupId',
+    textField: 'groupName',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 1,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
 
   ngOnInit(): void {
 
@@ -133,6 +145,7 @@ export class CwcregistrationComponent implements OnInit {
     let splitedURL = this.currentURL.split('/');
     this.selectedEventType = splitedURL[splitedURL.length - 1];
     console.log("currentURL is last value: " + this.selectedEventType);
+
 
     if (this.eventRegistrationDataService.getSelectedRowData() != undefined) {
       this.selectedRowJson = this.eventRegistrationDataService.getSelectedRowData();
@@ -146,9 +159,11 @@ export class CwcregistrationComponent implements OnInit {
       this.isTtcEvent = false;
     }
 
+
     this.dropdownSettingsFamilyMembers = this.dropdownSettingsForFamilyMembers;
     this.dropdownSettingsVenues = this.dropdownSettingsForVenues;
     this.dropdownSettingsRoles = this.dropdownSettingsForRoles;
+    this.dropdownSettingsGroup = this.dropdownSettingsForGroup;
 
     this.venuesDataFormGroup = this.formBuilder.group({
       venues: new FormControl('')
@@ -170,6 +185,7 @@ export class CwcregistrationComponent implements OnInit {
     this.userMetaData = this.uiCommonUtils.getUserMetaDataJson();
     this.loggedInUser = this.userMetaData.userId;
     this.eventId = this.selectedRowJson.event_Id;
+    this.isStudent = this.userMetaData.isStudent;
 
     this.registrationStartDate = new Date(this.selectedRowJson.registrationStartDate).toLocaleDateString("en-us");
     this.registrationEndDate = new Date(this.selectedRowJson.registrationEndDate).toLocaleDateString("en-us");
@@ -193,6 +209,8 @@ export class CwcregistrationComponent implements OnInit {
       this.eventData = res.data.eventData;
       this.venueList = res.data.eventData.venues;
 
+      this.groupData = this.eventData.gradeGroup;
+
       this.regEndDate = this.eventData.regEndDate;
       this.eventStartDate = this.eventData.eventStartDate;
       this.eventEndDate = this.eventData.eventEndDate;
@@ -210,6 +228,7 @@ export class CwcregistrationComponent implements OnInit {
       this.isQuestionnaireRequired = this.eventData.sectionConfig.isQuestionnaireRequired;
       this.isAttachmentRequired = this.eventData.sectionConfig.isAttachmentRequired;
       this.isSingleDayEvent = this.eventData.sectionConfig.isSingleDayEvent;
+
 
 
 
@@ -269,9 +288,12 @@ export class CwcregistrationComponent implements OnInit {
         }
 
 
+       
+
         this.participantDataFormGroup.patchValue({
           participantName: participantName,
-          role: roleDataArray
+          role: roleDataArray,
+          group: this.eventData.selectedGroup
         });
 
         this.venuesDataFormGroup.patchValue({
@@ -317,6 +339,13 @@ export class CwcregistrationComponent implements OnInit {
       }
 
     });
+
+    if (this.selectedRowJson.event_type == "CWC" || this.selectedRowJson.event_type == "Talent Show" || this.selectedRowJson.event_type == "Talent Compition") {
+      this.isStudent = true;
+    }
+    else{
+      this.isStudent = false;
+    }
 
   }
 
@@ -447,7 +476,7 @@ export class CwcregistrationComponent implements OnInit {
       "eventId": this.selectedRowJson.event_Id,
       "participantId": participantId,
       "eventType": this.selectedRowJson.event_type,
-      "group": "Group 1",
+      "group": this.participantDataFormGroup.value.group[0].groupId,
       "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueMapId,
       "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
       "categories": this.catArray,
@@ -508,7 +537,7 @@ export class CwcregistrationComponent implements OnInit {
       "enrollmentId": this.registrationId,
       "eventPartiRegId": this.eventData.eventPartiRegId,
       "eventType": this.selectedRowJson.event_type,
-      "group": "Group 1",
+      "group": this.participantDataFormGroup.value.group[0].groupId,
       "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueMapId,
       "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
       "categories": this.catArray,
@@ -571,7 +600,7 @@ export class CwcregistrationComponent implements OnInit {
       "enrollmentId": this.registrationId,
       "eventPartiRegId": this.eventData.eventPartiRegId,
       "eventType": this.selectedRowJson.event_type,
-      "group": "Group 1",
+      "group": this.participantDataFormGroup.value.group[0].groupId,
       "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueMapId,
       "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
       "categories": this.catArray,

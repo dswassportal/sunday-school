@@ -10,6 +10,8 @@ const getEventData = `select distinct te.event_id,
                         te.description,
                         tepr.role,
                         tepr.event_venue_id selected_event_venue_id,
+                        tgg.grade_group_id,
+                        tgg.group_name, 
                         te.start_date,
                         te.end_date,
                         te.registration_start_date,
@@ -47,6 +49,7 @@ const getEventData = `select distinct te.event_id,
                         left join t_event_question_response teqr 
                         	on teqr.event_participant_registration_id = tepr.event_participant_registration_id 
                             and teq.question_id = teqr.question_id
+                        left join t_grade_group tgg on tgg.grade_group_id =  tepr.grade_group_id
                         where te.event_id = $1 order by tec."sequence";`;
 
 const getTTCEventData = `    select distinct
@@ -153,7 +156,7 @@ const checkGeneratedEnrollmentNoExists = `select case when count(enrollment_id) 
                                             where enrollment_id =$1;`
 
 const newRegistration = `INSERT INTO t_event_participant_registration
-                            (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
+                            (event_id, user_id, grade_group_id, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
                             VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning event_participant_registration_id;`
 
 const insertRegCatMapping = `INSERT INTO t_participant_event_reg_cat
@@ -165,8 +168,8 @@ const insertRegQueResp = `INSERT INTO t_event_question_response
                             VALUES $1  returning question_response_id;`;
 
 const updateEventRegistration = `UPDATE t_event_participant_registration
-                                SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4, role=$5 
-                                WHERE event_participant_registration_id=$6;`;
+                            SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4, role=$5, grade_group_id=$6 
+                            WHERE event_participant_registration_id=$7;`;
 
 const updateEventRegCatMapping = `INSERT INTO t_participant_event_reg_cat(event_participant_registration_id, event_category_id, user_id, is_deleted, updated_by, updated_date)               
                                     SELECT $1, $2, $3, $4, $5, $6 
@@ -216,7 +219,7 @@ const getVenuesByEventId = `select distinct event_venue_id, name from t_event_ve
                                 join t_venue tv on tev.venue_id = tv.venue_id and event_id = $1;`;
 
 const bulkInsertNewRegistration = `INSERT INTO t_event_participant_registration
-                                    (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
+                                    (event_id, user_id, grade_group_id, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
                                     VALUES $1 returning event_participant_registration_id;`;
 
 const updateTTCRegistration = `	UPDATE t_event_participant_registration
@@ -225,7 +228,16 @@ const updateTTCRegistration = `	UPDATE t_event_participant_registration
 
 const cancelTTCRegistation = `UPDATE t_event_participant_registration
                                 SET updated_by=$1, updated_date=$2, registration_status=$3
-                                WHERE event_id= $4 and event_participant_registration_id not in ($5) returning event_participant_registration_id;`;                                    
+                                WHERE event_id= $4 and event_participant_registration_id not in ($5) returning event_participant_registration_id;`;  
+                                
+const getGradeGroups = `select distinct te.event_id, te."name", tgg.group_name, tgg.grade_group_id
+                            from t_student_sundayschool_dtl tssd 
+                            join t_school_term_detail tstd on tssd.term_id = tstd.school_term_detail_id 
+                                and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+                            join t_grade_group_detail tggd on tggd.grade = tssd.school_grade and tssd.student_id = $2
+                            join t_event_grade_group_map teggm on teggm.grade_group_id = tggd.grade_group_id 
+                            join t_grade_group tgg on tgg.grade_group_id = teggm.grade_group_id
+                            join t_event te on teggm.event_id = te.event_id and te.event_id = $1;`;                                
 
 
 module.exports = {
@@ -246,7 +258,8 @@ module.exports = {
     getVenuesByEventId,
     bulkInsertNewRegistration,
     updateTTCRegistration,
-    cancelTTCRegistation
+    cancelTTCRegistation,
+    getGradeGroups
 }
 
 

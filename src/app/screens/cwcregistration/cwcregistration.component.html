@@ -149,13 +149,13 @@
 
 
 
-                <div class="row" style="padding-bottom: 1%;">
+                <div *ngIf = "isStudent" class="row" style="padding-bottom: 1%;">
 
                     <h3 class="col-md-2">Participant Group :</h3>
 
 
-                    <ng-multiselect-dropdown class="col-md-6" style="font-family: poppins;" id="group"
-                        placeholder="Select Participant Group" [settings]="dropdownSettingsGroup"
+                    <ng-multiselect-dropdown  class="col-md-6" style="font-family: poppins;" id="group"
+                        placeholder="Select Participant Group" [settings]="dropdownSettingsGroup" [data]="groupData"
                         formControlName="group" (onSelectAll)="onSelectAll($event)">
                     </ng-multiselect-dropdown>
 
