@@ -303,8 +303,8 @@ async function processGetUserMetaDataRequest(uid) {
                             url: row.menu_url,
                             icon: row.menu_icon
                         });
-                        
-                        if (roles.indexOf(row.role_name)  === -1 && row.role_name !== null)
+
+                        if (roles.indexOf(row.role_name) === -1 && row.role_name !== null)
                             roles.push(row.role_name)
                     }
 
@@ -919,7 +919,7 @@ async function getEventData(userId, eventType) {
         console.log(`Fetching event data for ${userId} user.`)
         if (eventType === 'for_judgement') {
 
-                getEventData = ` select distinct 
+            getEventData = ` select distinct 
                         te.event_id,
                         te."name",
                         te.event_type e, 
@@ -930,7 +930,7 @@ async function getEventData(userId, eventType) {
                 join t_event te on te.event_id = tecsm.event_id 
                     where user_id = ${userId}
                     and te.is_deleted = false;`
-                    // and  tecm.is_attendance_submitted = true
+            // and  tecm.is_attendance_submitted = true
         }
         if (eventType === 'review_pending') {
 
@@ -968,7 +968,7 @@ async function getEventData(userId, eventType) {
                     join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
                     --where tecsm.is_score_submitted = true
                     order by te.end_date desc;`
-                    // and event_start_date >= current_date
+            // and event_start_date >= current_date
 
         }
 
@@ -1303,14 +1303,16 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             SET school_id =$1,
             school_grade= $2,
             school_year_start_date= $3,
-            school_year_end_date= $4
-            WHERE student_id=$5 and school_grade= $2;`
+            school_year_end_date= $4,
+            term_id=$5
+            WHERE student_id=$6 and school_grade= $2;`
 
             const updateSundaySchoolDtlsValues = [
                 userData.sunSchoolId,
                 userData.sunSchoolGrade,
-                userData.sunSchoolAcaYrStrtDate,
-                userData.sunSchoolAcaYrEndDate,
+                userData.sunSchoolAcaYrStrtDate == '' ? null : userData.sunSchoolAcaYrStrtDate,
+                userData.sunSchoolAcaYrEndDate == '' ? null : userData.sunSchoolAcaYrEndDate,
+                userData.termDetailId,
                 userData.userId
             ];
 
@@ -1324,16 +1326,18 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                  school_id,
                  school_grade, 
                  school_year_start_date, 
-                 school_year_end_date)
-            VALUES($1, $2, $3, $4, $5);`
+                 school_year_end_date,
+                 term_id)
+            VALUES($1, $2, $3, $4, $5 , $6);`
 
 
                 const insertSundaySchoolDtlsValues = [
                     userData.userId,
                     userData.sunSchoolId,
                     userData.sunSchoolGrade,
-                    userData.sunSchoolAcaYrStrtDate,
-                    userData.sunSchoolAcaYrEndDate
+                    userData.sunSchoolAcaYrStrtDate == '' ? null : userData.sunSchoolAcaYrStrtDate,
+                    userData.sunSchoolAcaYrEndDate == '' ? null : userData.sunSchoolAcaYrEndDate,
+                    userData.termDetailId
                 ];
 
                 await client.query(insertSundaySchoolDtls, insertSundaySchoolDtlsValues);
@@ -1477,8 +1481,28 @@ async function processUpdateUserRoles(userData, loggedInUser) {
         /**********************Insert -> t_user_role_mapping ************************* */
         //console.log("10");
 
+        if(userData.isStudent == true){
+            const insertStudentRole = `INSERT INTO t_user_role_mapping (role_id, user_id, is_deleted, role_start_date, role_end_date)
+            select (select role_id from t_role tr where tr."name" = 'Sunday School Student'),
+            		$1, $2, $3, $4
+            WHERE NOT EXISTS (
+            SELECT 1 FROM t_user_role_mapping turm
+                                   WHERE turm.role_id = (select role_id from t_role tr where tr."name" = 'Sunday School Student') 
+                                   and turm.user_id = $1
+                                   and turm.is_deleted = $2
+                                   );`;
+            insertStudentRoleValues = [userData.userId, false, userData.sunSchoolAcaYrStrtDate, userData.sunSchoolAcaYrEndDate];
+            await client.query(insertStudentRole, insertStudentRoleValues);
+        }
+        if(userData.isStudent == false){
+             const updateStudentRole = `update t_user_role_mapping set is_deleted = true where role_id =  (select role_id from t_role tr where tr."name" = 'Sunday School Student')
+              and user_id = ${userData.userId};`;
+             await client.query(updateStudentRole);
+        }
+
+
         if (userData.roles != undefined || userData.roles != null) {
-            //  console.log("7");
+            console.log("7");
             /**********************Delete -> t_user_role_mapping ************************* */
             const deleteFromRoleMapping = `DELETE FROM public.t_user_role_mapping WHERE user_id='${userData.userId}';`
             await client.query(deleteFromRoleMapping);
@@ -1488,7 +1512,10 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             const deleteFromRoleContext = `DELETE FROM public.t_user_role_context WHERE user_id='${userData.userId}';`
             client.query(deleteFromRoleContext);
 
-            //console.log("9");
+            console.log("9");
+
+
+
 
 
 

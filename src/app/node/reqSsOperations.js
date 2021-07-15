@@ -40,6 +40,11 @@ async function getSSchoolData(loggedInUserId) {
         }
 
 
+        let currentTerm ={};
+        let getTermRes = await client.query(queries.getCurrentTerm);
+        if (getTermRes.rowCount > 0) {
+            currentTerm = getTermRes.rows[0].current_term
+        }
 
         // } else {
         //     query = `select org_id, org_type, "name", parent_org_id, address_line1, address_line2, city from t_organization to2 
@@ -127,7 +132,8 @@ async function getSSchoolData(loggedInUserId) {
         return ({
             data: {
                 status: 'success',
-                schoolData: schoolData
+                schoolData: schoolData,
+                currentTerm:currentTerm
             }
         })
 
