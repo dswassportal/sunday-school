@@ -61,10 +61,18 @@ export class EventAttendanceComponent implements OnInit {
     };
 
     this.eventColumnDefs = [
-      { headerName: 'Event Name', field: 'eventname', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
-      { headerName: 'Event Type', field: 'eventtype', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
-      { headerName: 'Start Date', field: 'startdate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
-      { headerName: 'End Date', field: 'enddate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
+      { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
+      { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
+      { headerName: 'Start Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+        cellRenderer: (data: any) => {
+        return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+      },
+     },
+      { headerName: 'End Date', field: 'endDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
+        cellRenderer: (data: any) => {
+        return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+      },
+    },
     ];
 
     this.attendanceColDef = [
@@ -77,7 +85,7 @@ export class EventAttendanceComponent implements OnInit {
 
     //cellRendererFramework: CheckboxRendererComponent, field: 'hasAttended', editable: false 
     let userId = this.uiCommonUtils.getUserMetaDataJson().userId
-    this.apiService.callGetService(`getEventData?user=${userId}&eventType=attendance`).subscribe((respData) => {
+    this.apiService.callGetService(`getEventData?user=${userId}&eventType==attendance`).subscribe((respData) => {
 
       if (respData.data.status == 'failed') {
         this.eventRowData = []
@@ -87,7 +95,8 @@ export class EventAttendanceComponent implements OnInit {
       }
 
       if (respData.data.metaData) {
-        this.eventRowData = respData.data.metaData.events
+        
+        this.eventRowData = respData.data.metaData.eventData
       } else
         this.eventRowData = [];
 
@@ -95,14 +104,20 @@ export class EventAttendanceComponent implements OnInit {
 
   }
 
+
+  openModal() {
+    $("#imagemodal").modal("show");
+  }
   selectedEvent: any = {};
   onRowClicked(event: any) {
 
+    $("#imagemodal").modal("show");
     this.attendanceRowData = []
     this.selectedEvent = event.data;
+    console.log("Selected Event : " + this.selectedEvent);
     this.categoriesArr = event.data.catagories;
     this.selectedCategory = event.data.catagories[0].catId;
-    $("#imagemodal").modal("show");
+   
 
     this.getParicipantData(this.selectedEvent.eventid, this.selectedCategory)
   }

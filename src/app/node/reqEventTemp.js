@@ -96,7 +96,7 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                             'enrollmentId', tepr.enrollment_id,
                                             'isAttendanceSubmitted', tev.is_attendance_submitted,
                                             'hasAttended',  tepr.has_attended ,
-                                            'grade', tepr.school_grade,
+                                            --'grade', tepr.school_grade,
                                             'role', tepr."role", 
                                             'participantId', tepr.user_id ,
                                             'eventPartRegId', tepr.event_participant_registration_id,
