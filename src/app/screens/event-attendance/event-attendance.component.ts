@@ -116,10 +116,10 @@ export class EventAttendanceComponent implements OnInit {
     this.selectedEvent = event.data;
     console.log("Selected Event : " + this.selectedEvent);
     this.categoriesArr = event.data.catagories;
-    this.selectedCategory = event.data.catagories[0].catId;
+    //this.selectedCategory = event.data.catagories[0].catId;
    
 
-    this.getParicipantData(this.selectedEvent.eventid, this.selectedCategory)
+    this.getParicipantData(this.selectedEvent.event_Id, this.selectedCategory)
   }
 
   handleAttendanceSubmitBtnClick(event: any) {
