@@ -944,11 +944,11 @@ app.post('/api/searchStudents', function (req, res) {
 });
 
 
-app.get('/api/getSearchables', function (req, res) {
-  console.log("getSearchables called... ");
-  let loggedInUser = decodeUser(req)
+app.get('/api/getEventDoc', function (req, res) {
+  console.log("getEventDoc called... ");
+  //let loggedInUser = decodeUser(req)
   try {
-    studentSearch.getSearchables(loggedInUser)
+    processFileUpload.getEventDoc(req.query.docId)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -959,7 +959,7 @@ app.get('/api/getSearchables', function (req, res) {
         res.end();
       })
   } catch (error) {
-    console.error('Error in getSearchables as : ' + error)
+    console.error('Error in getEventDoc as : ' + error)
   }
 });
 

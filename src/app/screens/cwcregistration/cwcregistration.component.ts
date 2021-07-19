@@ -46,7 +46,6 @@ export class CwcregistrationComponent implements OnInit {
   isCategoryRequired: any;
   isSchoolGroupRequired: any;
   isQuestionnaireRequired: any;
-  isAttachmentRequired: any;
   isSingleDayEvent: any;
 
 
@@ -78,8 +77,8 @@ export class CwcregistrationComponent implements OnInit {
   showHideEnrollmentId: boolean = false;
   eventCatMapId: any;
   groupData: any;
-  isStudent:boolean = true;
-
+  isStudent: boolean = true;
+  isAttachmentRequired: boolean = false;
   constructor(private router: Router, private apiService: ApiService, private formBuilder: FormBuilder,
     private uiCommonUtils: uiCommonUtils, private eventRegistrationDataService: EventRegistrationDataService) { }
 
@@ -127,7 +126,7 @@ export class CwcregistrationComponent implements OnInit {
     maxHeight: 100
   };
 
-  dropdownSettingsForGroup : IDropdownSettings = {
+  dropdownSettingsForGroup: IDropdownSettings = {
     singleSelection: true,
     idField: 'groupId',
     textField: 'groupName',
@@ -230,8 +229,6 @@ export class CwcregistrationComponent implements OnInit {
       this.isSingleDayEvent = this.eventData.sectionConfig.isSingleDayEvent;
 
 
-
-
       if (this.selectedRowJson.event_type == "TTC") {
         if (this.participantRoles.code = "Student") {
           this.participantRoles[1].isDisabled = true
@@ -288,7 +285,7 @@ export class CwcregistrationComponent implements OnInit {
         }
 
 
-       
+
 
         this.participantDataFormGroup.patchValue({
           participantName: participantName,
@@ -343,7 +340,7 @@ export class CwcregistrationComponent implements OnInit {
     if (this.selectedRowJson.event_type == "CWC" || this.selectedRowJson.event_type == "Talent Show" || this.selectedRowJson.event_type == "Talent Compition") {
       this.isStudent = true;
     }
-    else{
+    else {
       this.isStudent = false;
     }
 
@@ -638,7 +635,13 @@ export class CwcregistrationComponent implements OnInit {
     console.log(items);
   }
 
-
+  handleEventDocLinkClick(attachment: any) {
+    this.apiService.downloadEventDoc(attachment).subscribe(
+      (res: any) => {
+        const fileURL = URL.createObjectURL(res);
+        window.open(fileURL, '_blank');
+      });
+  }
 
 
 }

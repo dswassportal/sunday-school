@@ -57,6 +57,18 @@
                 </div>
             </div>
 
+            <div *ngIf="isAttachmentRequired && eventData.attachments.length > 0">
+
+                <div class="row" style="margin-bottom: -1%;">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event Resouces :</h3>
+                </div>
+
+                <a *ngFor="let attachment of eventData.attachments" (click)="handleEventDocLinkClick(attachment)">
+                       <li> {{attachment.attName}}</li>
+                    </a>
+
+            </div>
+
         </div>
 
 
@@ -114,8 +126,9 @@
                     <h3 class="col-md-2" style="text-align: left; font-family: poppins;">Participant Name*:</h3>
 
                     <ng-multiselect-dropdown required class="col-md-6" style="font-family: poppins;" id="role"
-                        [data]="familyMembersData" placeholder="Select Participant Name" [disabled]="isPraticipantNameReadonly"
-                        [settings]="dropdownSettingsFamilyMembers" formControlName="participantName" (onSelectAll)="onSelectAll($event)">
+                        [data]="familyMembersData" placeholder="Select Participant Name"
+                        [disabled]="isPraticipantNameReadonly" [settings]="dropdownSettingsFamilyMembers"
+                        formControlName="participantName" (onSelectAll)="onSelectAll($event)">
                     </ng-multiselect-dropdown>
 
 
@@ -149,12 +162,12 @@
 
 
 
-                <div *ngIf = "isStudent" class="row" style="padding-bottom: 1%;">
+                <div *ngIf="isStudent" class="row" style="padding-bottom: 1%;">
 
                     <h3 class="col-md-2">Participant Group :</h3>
 
 
-                    <ng-multiselect-dropdown  class="col-md-6" style="font-family: poppins;" id="group"
+                    <ng-multiselect-dropdown class="col-md-6" style="font-family: poppins;" id="group"
                         placeholder="Select Participant Group" [settings]="dropdownSettingsGroup" [data]="groupData"
                         formControlName="group" (onSelectAll)="onSelectAll($event)">
                     </ng-multiselect-dropdown>
@@ -176,7 +189,7 @@
 
                     <div *ngFor="let category of eventCategoriesData" class=" example-margin text-black-50">
                         <div>
-                          
+
                             <mat-checkbox [checked]="category.hasSelected" (change)="onChange({ 
                                     'event' : $event,
                                     'item' : category

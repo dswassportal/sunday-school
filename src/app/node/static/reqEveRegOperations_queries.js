@@ -36,7 +36,7 @@ const getEventData = `select distinct te.event_id,
                         from t_event te 
                         left join t_event_participant_registration tepr on tepr.event_id = te.event_id 
                             and tepr.user_id = $2 and tepr.event_id = $1 and tepr.is_deleted != true
-                        left join t_event_attachment tea on tea.event_id = tepr.event_id
+                        left join t_event_attachment tea on tea.event_id = $1
                         left join t_event_venue tev on tev.event_id = $1
                         left join t_venue tv on tv.venue_id = tev.venue_id
                         left join t_event_category_map tecm on tecm.event_id = $1
