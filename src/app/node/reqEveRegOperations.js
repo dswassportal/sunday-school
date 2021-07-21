@@ -194,11 +194,11 @@ async function getEventDefinationForIndivisualUser(client, eventId, participantI
     }
     response.gradeGroup = [];
     let groupRes = await client.query(queries.getGradeGroups, [eventId, participantId]);
-    if(groupRes.rowCount > 0){
-        for(let row of groupRes.rows){
+    if (groupRes.rowCount > 0) {
+        for (let row of groupRes.rows) {
             response.gradeGroup.push({
                 'groupId': row.grade_group_id,
-                'groupName' : row.group_name
+                'groupName': row.group_name
             })
         }
     }
@@ -250,13 +250,13 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                 })
             }
 
-        if (row.venue_id !== null && response.selectedVenue.length == 0) {
-            response.selectedVenue.push({
-                venueId: row.venue_id,
-                eventVenueId: row.event_venue_id,
-                name: row.venue_name
-            })
-        }
+            if (row.venue_id !== null && response.selectedVenue.length == 0) {
+                response.selectedVenue.push({
+                    venueId: row.venue_id,
+                    eventVenueId: row.event_venue_id,
+                    name: row.venue_name
+                })
+            }
         }
 
 
@@ -330,6 +330,88 @@ async function bulkRegistration(client, loggedInUser, eventId) {
 
     } else throw `No data data found for event ${eventId}.`
     response.staffData = staffData;
+
+
+    let studentsData = [];
+    let tempstudentsData = {};
+    let resultStudents = await client.query(queries.getPrincipalwiseStudentsData, [loggedInUser, eventId]);
+
+    if (resultStudents.rowCount > 0) {
+        for (let row of resultStudents.rows) {
+
+            tempstudentsData.schoolId = row.school_id;
+            tempstudentsData.schoolName = row.school_name;
+            tempstudentsData.studentId = row.student_id;
+            tempstudentsData.studentName = row.student_name;
+            tempstudentsData.schoolGrade = row.school_grade;
+            tempstudentsData.hasSelected = row.has_selected;
+            tempstudentsData.registrationId = row.enrollment_id;
+            tempstudentsData.registeredBy = row.registered_by;
+            tempstudentsData.registrationStatus = row.registration_status;
+            tempstudentsData.evePartiRegId = row.event_participant_registration_id;
+            studentsData.push(tempstudentsData);
+            tempstudentsData = {};
+        }
+    }
+
+    if (studentsData.length == 0) {
+        let resultStudentsData = await client.query(queries.getTeacherwiseStudentData, [loggedInUser, eventId]);
+        if (resultStudentsData.rowCount > 0) {
+            for (let row of resultStudentsData.rows) {
+                tempstudentsData.schoolId = row.school_id;
+                tempstudentsData.schoolName = row.school_name;
+                tempstudentsData.studentId = row.student_id;
+                tempstudentsData.studentName = row.student_name;
+                tempstudentsData.schoolGrade = row.school_grade;
+                tempstudentsData.hasSelected = row.has_selected;
+                tempstudentsData.registrationId = row.enrollment_id;
+                tempstudentsData.registeredBy = row.registered_by;
+                tempstudentsData.registrationStatus = row.registration_status;
+                tempstudentsData.evePartiRegId = row.event_participant_registration_id;
+                studentsData.push(tempstudentsData);
+                tempstudentsData = {};
+            }
+        }
+    }
+    response.studentsData = studentsData;
+
+
+    let schools = [];
+    let students = [];
+    let tempSchools = {};
+    let tempStudents = {};
+    let schoolId = null;
+    let resultStudentsData = await client.query(queries.getPrincipalwiseStudentsData, [loggedInUser, eventId]);
+
+    if (resultStudentsData.rowCount > 0) {
+        for (let row of resultStudentsData.rows) {
+            if (row.school_id != schoolId) {
+                tempSchools.schoolId = row.school_id;
+                tempSchools.schoolName = row.school_name;
+                schools.push(tempSchools);
+                tempSchools = {};
+                schoolId = row.school_id;
+            }
+        }
+
+    }
+    if (schools.length == 0) {
+        let resultStudentsData = await client.query(queries.getTeacherwiseStudentData, [loggedInUser, eventId]);
+        if (resultStudentsData.rowCount > 0) {
+            for (let row of resultStudentsData.rows) {
+                if (row.school_id != schoolId) {
+                    tempSchools.schoolId = row.school_id;
+                    tempSchools.schoolName = row.school_name;
+                    schools.push(tempSchools);
+                    tempSchools = {};
+                    schoolId = row.school_id;
+                }
+            }
+        }
+    }
+
+
+    response.schools = schools;
     return response;
 }
 
@@ -358,7 +440,7 @@ async function eventRegistration(eventData, loggedInUser) {
                     [eventData.eventId, eventData.participantId, eventData.group,
                         false, loggedInUser, new Date().toUTCString(),
                         registrationId, eventData.eveVenueId, eventData.registrationStatus, eventData.role]);
-
+                console.log("111", newRegRes);
                 if (newRegRes.rowCount > 0) {
 
                     let participantRegId = newRegRes.rows[0].event_participant_registration_id;
@@ -398,7 +480,7 @@ async function eventRegistration(eventData, loggedInUser) {
                 //Updating existing event registration.(t_event_participant_registration)
                 if (eventData.eventPartiRegId && eventData.registrationStatus) {
                     let regUpdateRes = await client.query(queries.updateEventRegistration,
-                        [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus, 
+                        [loggedInUser, new Date().toUTCString(), eventData.eveVenueId, eventData.registrationStatus,
                             eventData.role, eventData.group, eventData.eventPartiRegId]);
 
                     if (regUpdateRes.rowCount > 0)
@@ -443,7 +525,7 @@ async function eventRegistration(eventData, loggedInUser) {
             await client.query('commit;')
         } else {
             console.debug(`Registering for an event of type '${eventType}' and regMethod is '${eventData.regMethod}'.`);
-            if (eventType === 'TTC' && eventData.regMethod === 'bulk') {
+            if (eventType === 'TTC' || eventType === 'Sunday School Midterm Exam' || eventType === 'Sunday School Final Exam' && eventData.regMethod === 'bulk') {
 
                 let bulkRegister = [];
                 let eventPartiArr = [];
@@ -488,6 +570,8 @@ async function eventRegistration(eventData, loggedInUser) {
 
                 await client.query("COMMIT");
             }
+
+            
 
         }
         return {

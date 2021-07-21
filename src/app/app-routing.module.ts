@@ -27,6 +27,9 @@ import { SearchComponent } from './screens/search/search.component';
 import { ProfileSearchComponent } from './screens/profile-search/profile-search.component';
 import { ParishSearchComponent } from './screens/parish-search/parish-search.component';
 import { TeacherSearchComponent } from './screens/teacher-search/teacher-search.component';
+import { EventExamRegistrationComponent } from './screens/event-exam-registration/event-exam-registration.component';
+import { ExamRegistrationComponent } from './screens/exam-registration/exam-registration.component';
+
 
 const routes: Routes = [
   { path: 'signup', component: SignUpComponent },
@@ -57,6 +60,8 @@ const routes: Routes = [
       { path: 'profileSearch', component: ProfileSearchComponent },
       { path: 'parishSearch', component: ParishSearchComponent },
       { path: 'teacherSearch', component: TeacherSearchComponent },
+      { path: 'eventExamRegistration', component: EventExamRegistrationComponent },
+      { path: 'examRegistration', component: ExamRegistrationComponent }
       // { path: 'testEvent',component:UserProfileComponent},
     ]
   },
