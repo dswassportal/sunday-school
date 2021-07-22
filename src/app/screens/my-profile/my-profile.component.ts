@@ -580,7 +580,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
                 ...this.studentDetailsForm.value,
                 respondWith: 'user_meta_data',
                 hasEmailChanged: true,
-                oldEmail: this.alluserdata.emailId
+                oldEmail: this.alluserdata.emailId,
+                familyId: this.alluserdata.familyId
               })
             }).catch((error: any) => {
               console.log(error);
@@ -598,7 +599,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
             sunSchoolAcaYrEndDate: this.SSchoolsApitermEndtDate,
 
             respondWith: 'user_meta_data',
-            hasEmailChanged: false
+            hasEmailChanged: false,
+            familyId: this.alluserdata.familyId
           };
           if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
             payloadJson.hasParishChanged = true;

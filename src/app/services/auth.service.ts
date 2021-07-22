@@ -113,10 +113,33 @@ export class AuthService {
   //     })
   // }
 
+  isEmail(userInput: string) {
+    let regexEmail = "^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$";
+    if (userInput.match(regexEmail)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
 
+  doSignIn(data: any) {
+    if (this.isEmail(data.data.username)) {
+      this.signInWithFirebase(data)
+    } else if (!this.isEmail(data.data.username)) {
+      this.apiService.callGetService(`getEmail?userName=${data.data.username}`).subscribe((res) => {
+        if (res.data.status === "success") {
+          data.data.username = res.data.emailId
+          this.signInWithFirebase(data);
+        } else
+          this.uiCommonUtils.showSnackBar('Invalid username or password!', 'error', 3000);
+      });
+    }
+  }
+
+  // data.data.username, data.data.password
   // Sign in with email/password for church project
-  SignIn(data: any) {
+  signInWithFirebase(data: any) {
     this.afAuth.auth.setPersistence('local')
       .then(() => {
         return this.afAuth.auth.signInWithEmailAndPassword(data.data.username, data.data.password)
@@ -132,22 +155,21 @@ export class AuthService {
                 localStorage.setItem('chUserFbId', result.user?.uid);
 
                 this.apiService.callGetService(`getUserApprovalStatus?fbuid=${result.user?.uid}`).subscribe((data) => {
-                  if (data.data.status == 'failed') {
+                  if (data.data.status === 'failed') {
                     this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
                   } else {
                     this.userData = result.user;
-                    if (data.data.isapproved == false) {
-                      this.apiService.callGetService(`getUserMetaData?uid=${data.data.user}`).subscribe((data) => {
-                        if (data.data.status == 'failed') {
-                          this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
-                        } else {
-                          localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData))
-                          this.router.navigate(['/dashboard']);
-                        }
-                      })
-                    }
-                    else
-                      this.router.navigate(['/loginAccList']);
+                    localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData))
+                    this.router.navigate(['/dashboard'])
+                      // this.apiService.callGetService(`getUserMetaData?uid=${data.data.user}`).subscribe((data) => {
+                      //   if (data.data.status == 'failed') {
+                      //     this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
+                      //   } else {
+                      //     localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData))
+                      //     this.router.navigate(['/dashboard']);
+                      //   }
+                      // })
+               
                   }
                 })
               })

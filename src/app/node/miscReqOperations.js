@@ -2,6 +2,7 @@ const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
+const reqOperations = require(`${__dirname}/reqOperations`);
 
 
 
@@ -156,15 +157,23 @@ async function getUserApprovalStatus(fbuid) {
                                 where 
                                     firebase_id = '${fbuid}';`;
 
-        let result = await client.query(userApprovedStatus)
-
-        return {
+        let result = await client.query(userApprovedStatus);
+        let response = {
             data: {
                 status: 'success',
                 isapproved: result.rows[0].approved,
                 user: result.rows[0].userid
             }
         }
+
+        await reqOperations.processGetUserMetaDataRequest(result.rows[0].userid)
+            .then((res) => {
+                if (res.data.status === "success")
+                    response.data.metaData = res.data.metaData
+                else throw 'Not able to levrage metadata from the the DB.';
+            });
+
+        return response;
 
 
     } catch (error) {
@@ -339,12 +348,41 @@ async function isUserNameTaken(userName) {
     }
 }
 
-module.exports = {  
+async function getEmail(userName) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        userName = userName.trim()
+        if (userName.length > 0) {
+            let query = `select email_id from t_user where lower(user_name) = lower($1)`;
+            let result = await client.query(query, [userName]);
+            if (result.rowCount === 1) {
+                return {
+                    data: {
+                        status: 'success',
+                        emailId: result.rows[0].email_id
+                    }
+                }
+            } else throw `More than one email found for  ${userName}`;
+        } else throw 'Empty or invalid username provided by the user.'
+
+
+    } catch (error) {
+        console.error(`miscReqOperations.js::isUserNameTaken() --> Error : ${error}`)
+        return (errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release(false);
+    }
+}
+
+module.exports = {
     getCountryStates,
     getMembers,
     getUserApprovalStatus,
     handleLogIn_LogOut,
     getLookupMasterData,
     getRolesByUserId,
-    isUserNameTaken
+    isUserNameTaken,
+    getEmail
 }

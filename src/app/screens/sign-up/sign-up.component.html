@@ -36,7 +36,7 @@
                 </div>
 
                 <div class="form-group row justify-content-center">
-                    <mat-form-field class="form-field col-md-5">
+                    <mat-form-field class="form-field col-md-6">
                         <input type="text" matInput formControlName="email" id="email" placeholder="Email" required>
                         <mat-error *ngIf="signUpForm.controls.email.touched && signUpForm.controls.email.invalid">
                             <span *ngIf="signUpForm.controls.email.errors.required">This field is mandatory.</span>
@@ -44,13 +44,15 @@
                         </mat-error>
                     </mat-form-field>
 
-                    <mat-form-field class="form-field col-md-5">
+                    <mat-form-field class="form-field col-md-6">
                         <input type="text" matInput formControlName="userName" (focusout)="onUserNameFocusOut($event)" id="userName" placeholder="User Name" required>
                         <mat-error *ngIf="signUpForm.controls.userName.touched && signUpForm.controls.userName.invalid">
-                            <!-- <span *ngIf="signUpForm.controls.userName.errors.required">This field is mandatory.</span> -->
-                            <!-- <span *ngIf="signUpForm.controls.userName.errors.pattern">This field is invalid.</span> -->
+                            <span *ngIf="signUpForm.controls.userName.errors.required">This field is mandatory.</span>
+                            <span *ngIf="signUpForm.controls.userName.errors.pattern">This field is invalid.</span>
                                 <!-- <span *ngIf="signUpForm.controls.userName.errors.required">This field is mandatory.</span> -->
                         </mat-error>
+                        <mat-error *ngIf="signUpForm.controls['userName'].hasError('invalid')">Username is already taken</mat-error>
+                                   
                     </mat-form-field>
                 </div>
                 <div class="row">

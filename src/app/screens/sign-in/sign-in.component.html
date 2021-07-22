@@ -14,7 +14,7 @@
                 <div class="form-group row justify-content-center">
                     <mat-icon class="col-1 mt-3">email</mat-icon>
                     <mat-form-field class="form-field col-10">
-                        <input matInput formControlName="username" id="username" placeholder="Your Username" required>
+                        <input matInput formControlName="username" id="username" placeholder="Your Username or Email" required>
                         <mat-error *ngIf="signInForm.controls.username.touched && signInForm.controls.username.invalid">
                             <span *ngIf="signInForm.controls.username.errors.required">This field is mandatory.</span>
                             <span *ngIf="signInForm.controls.username.errors.pattern">This field is invalid.</span>

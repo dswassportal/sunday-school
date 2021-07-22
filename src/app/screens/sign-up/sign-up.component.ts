@@ -56,10 +56,10 @@ export class SignUpComponent implements OnInit {
       firstName: new FormControl('', Validators.required),
       lastName: new FormControl('', Validators.required),
       email: new FormControl('', [Validators.required, Validators.email]),
-      userName: new FormControl('', [Validators.required]),
+      userName: new FormControl('', [Validators.required,Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[-_.])(?=.*?[0-9]).{8,15}$')]),
       dob: new FormControl(''),
-      password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
-      cnfmpwd: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
+      password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,15}$')]),
+      cnfmpwd: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,15}$')]),
       mobileNo: new FormControl('', [Validators.required]),
       memberType: new FormControl('', Validators.required),
       orgId: new FormControl('', Validators.required),
@@ -147,10 +147,9 @@ export class SignUpComponent implements OnInit {
         this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
           if(res.data.status === "success"){
             if(res.data.isTaken === true){
-
-              alert('Username already taken');
+              return this.signUpForm.controls['userName'].setErrors({'invalid': true });
             }else
-            alert('Username available');
+            return;
           }
         })
     }

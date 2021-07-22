@@ -982,6 +982,26 @@ app.get('/api/isUserNameTaken', function (req, res) {
   }
 });
 
+app.get('/api/getEmail', function (req, res) {
+  console.log("getEmailId called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getEmail(req.query.userName)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getEmailId as : ' + error)
+  }
+});
+
+
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {
   let userId = reqContext.header('User').toString();

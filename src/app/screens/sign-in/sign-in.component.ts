@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service'
 declare let $: any;
 @Component({
@@ -22,7 +22,7 @@ export class SignInComponent implements OnInit {
     hide = true;
   ngOnInit(): void {
     this.signInForm = this.formBuilder.group({
-      username: new FormControl('', [Validators.required, Validators.email, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$")]
+      username: new FormControl('', [Validators.required]
       ),
       password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]
     )
@@ -33,14 +33,14 @@ export class SignInComponent implements OnInit {
 
     
   }
-
+ 
   logIn() {
    
     if (this.signInForm.invalid) {
       return
     }
     else {
-      this.authService.SignIn({ data: this.signInForm.value })
+      this.authService.doSignIn({ data: this.signInForm.value })
 
     //  if(this.isFamilyHead == false){
       //}

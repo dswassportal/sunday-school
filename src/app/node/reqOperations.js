@@ -33,8 +33,8 @@ async function processSignInRequest(userInfo) {
         //   ) returning user_id;`
 
         let newUserInsStmt = `INSERT INTO public.t_user
-            (email_id, org_id, firebase_id, title, first_name, middle_name, last_name, about_yourself, created_date, member_type )
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning user_id;`;
+            (email_id, org_id, firebase_id, title, first_name, middle_name, last_name, about_yourself, created_date, member_type, user_name )
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning user_id;`;
 
         let newUserInsStmtValue = [
             userInfo.data.email,
@@ -46,7 +46,8 @@ async function processSignInRequest(userInfo) {
             userInfo.data.lastName,
             userInfo.data.abtyrslf,
             new Date().toISOString(),
-            userInfo.data.memberType
+            userInfo.data.memberType,
+            userInfo.userName
         ];
 
         let result = await client.query(newUserInsStmt, newUserInsStmtValue);
@@ -58,19 +59,20 @@ async function processSignInRequest(userInfo) {
 
 
         let newPersonTblInsQuery = `INSERT INTO public.t_person
-            (user_id, dob,  mobile_no, created_by, created_date)
-            VALUES($1 , $2, $3, $4, $5);`;
+            (user_id, dob,  mobile_no, created_by, created_date, family_id)
+            select $1 , $2, $3, $4, $5, nextval('s_family') returning family_id;`;
 
-        let newPersonTblInsQueryValue = [
-            newUserId,
-            //userInfo.data.dob,
-            userInfo.data.dob == '' ? null : userInfo.data.dob,
-            userInfo.data.mobileNo,
-            newUserId,
-            new Date().toISOString()
-        ];
+        let tPersonQryRes = await client.query(newPersonTblInsQuery, [newUserId, userInfo.data.dob == '' ? null : userInfo.data.dob,
+            userInfo.data.mobileNo, newUserId, new Date().toUTCString()]);
 
-        await client.query(newPersonTblInsQuery, newPersonTblInsQueryValue);
+        if (tPersonQryRes.rowCount > 0) {
+            let insertTPersonFam = `INSERT INTO t_person_family
+              (family_id, family_member_id, relationship, is_deleted, created_by, created_date)
+              VALUES(${tPersonQryRes.rows[0].family_id}, ${newUserId} , 'Family Head', ${false}, ${newUserId}, '${new Date().toUTCString()}');`;
+
+            await client.query(insertTPersonFam);
+
+        } else throw "Error while inserting data into t_person";
 
         // }
         // else {
@@ -204,6 +206,7 @@ async function processGetUserMetaDataRequest(uid) {
                 vu.url menu_url,
                 vu.firebase_id fbuid,
                 vu.icon_path menu_icon,
+                vu.family_id, 
                  vu.perm_name, 
                  vu.user_org org_name, 
                  vu.user_org_id org_id,
@@ -244,6 +247,7 @@ async function processGetUserMetaDataRequest(uid) {
             metaData.lastName = res.rows[0].last_name;
             metaData.dob = res.rows[0].dob;
             metaData.aboutYourself = res.rows[0].about_yourself;
+            metaData.familyId = res.rows[0].family_id
             metaData.orgName = res.rows[0].org_name;
             metaData.orgId = res.rows[0].org_id;
             metaData.membershipType = res.rows[0].membership_type
@@ -319,42 +323,15 @@ async function processGetUserMetaDataRequest(uid) {
                 metaData.menus = menus;
                 metaData.roles = roles;
 
-                console.log("metaData.userId", metaData.userId);
-
-
-
-                if (isFamilyHead == true) {
-
-                    query1 = `with family_tree as (select family_member_id user_id, relationship 
-                        from t_person_relationship tpr 
-                        where tpr.family_head_id = '${metaData.userId}'
-                        and is_deleted != true
-                        )
-                        select distinct vu.user_id,vu.baptismal_name, vu.email_id, vu.title,
-                        vu.first_name, vu.middle_name, vu.last_name,
-                        vu.dob, vu.mobile_no, family_tree.relationship from v_user vu, family_tree
-                        where vu.user_id = family_tree.user_id;`
-
-                }
-                else {
-
-                    query1 = `with family_tree as (		select distinct tpr3.family_head_id user_id, 'Family Head' relationship 
-                                            from t_person_relationship tpr2, t_person_relationship tpr3 
-                                            where tpr2.family_member_id = '${metaData.userId}'
-                                            and tpr3.family_head_id = tpr2.family_head_id and tpr3.is_deleted != true
-                                        union 
-                                            select distinct tpr3.family_member_id user_id, tpr3.relationship 
-                                            from t_person_relationship tpr2, t_person_relationship tpr3 
-                                            where tpr2.family_member_id = '${metaData.userId}'
-                                            and tpr3.family_head_id = tpr2.family_head_id and tpr3.is_deleted != true
-                                            and tpr3.family_member_id != '${metaData.userId}'
-                                        )
-                                        select distinct vu.user_id,vu.baptismal_name, vu.email_id, vu.title,
-                                        vu.first_name, vu.middle_name, vu.last_name,
-                                        vu.dob, vu.mobile_no, family_tree.relationship from v_user vu, family_tree
-                                        where vu.user_id = family_tree.user_id;`
-
-                }
+               let query1 = `  select tu.user_id, tp.baptismal_name, tu.email_id, tu.title,
+                                tu.first_name, tu.middle_name, tu.last_name,
+                                tp.dob, tp.mobile_no, tpf.relationship
+                                from t_person_family tpf 
+                                inner join t_user tu on tpf.family_member_id = tu.user_id 
+                                inner join t_person tp on tpf.family_member_id = tp.user_id  
+                                where tpf.is_deleted = false 
+                                and tpf.family_id =  ${metaData.familyId}
+                                and tpf.family_member_id != ${metaData.userId};`
 
                 let res1 = await client.query(query1);
 
@@ -1349,12 +1326,13 @@ async function processUpdateUserRoles(userData, loggedInUser) {
         if ((userData.memberDetails != undefined || userData.memberDetails != null) && userData.isFamilyHead === true) {
             console.debug('*******  Family Member Data Processing ********')
             if (userData.memberDetails.length > 0) {
-                let existingMembers = [];
+                let existingMembers = [userData.userId];
                 userData.memberDetails.forEach((element) => { if (element.userId !== '') existingMembers.push(element.userId) });
                 if (existingMembers.length > 0) {
                     let tempQuery = reqOpQueries.deleteMemberRelationship.replace('$5', existingMembers.join(','));
                     let delNonExistingRelRes = await client.query(tempQuery,
-                        [true, userData.updatedBy, new Date().toUTCString(), userData.userId]);
+                        [true, userData.userId, new Date().toUTCString(), userData.familyId]);
+
                     if (delNonExistingRelRes.rowCount > 0)
                         console.debug(`Deleted relationship's relationship_ids are : ${JSON.stringify(delNonExistingRelRes.rows)}`);
                 }
@@ -1382,7 +1360,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
 
                         let updatePerRelRes = await client.query(reqOpQueries.updateRelationship,
                             [details.relationship, false, userData.updatedBy, new Date().toUTCString(),
-                            details.userId, userData.userId]);
+                            details.userId, userData.familyId]);
                         if (updatePerRelRes.rowCount > 0)
                             console.debug(` ${details.userId} member relation has been updated(in t_person_relationship table)`)
 
@@ -1412,7 +1390,9 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                     //inserting member details into t_person table
                                     let tPersonres = await client.query(reqOpQueries.insertMemberIntoPersonTbl,
                                         [newUserId, details.dob == '' ? null : details.dob,
-                                            details.mobileNo, userData.updatedBy, new Date().toISOString(), details.baptismalName])
+                                            details.mobileNo, userData.updatedBy, new Date().toISOString(),
+                                            details.baptismalName, userData.familyId])
+
                                     if (tPersonres.rowCount > 0)
                                         console.debug(`New member's data inserted in t_person table for user_is ${newUserId}.`);
 
@@ -1421,17 +1401,17 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                     if (roleAssignment.rowCount > 0)
                                         console.debug(`Member role assigned to new member, user_role_map_id is ${roleAssignment.rows[0].user_role_map_id}`);
 
-                                    let tPerRelMap = await client.query(reqOpQueries.insertPersonRelationship,
-                                        [userData.userId, newUserId, details.relationship, userData.updatedBy, new Date().toUTCString()]);
+                                    let tPerRelMap = await client.query(reqOpQueries.insertPersonPrelationshipTbl,
+                                        [userData.familyId, newUserId, details.relationship, false, userData.updatedBy, new Date().toUTCString()]);
 
                                     if (tPerRelMap.rowCount > 0)
-                                        console.debug(`New member's '${details.relationship}' relationship inserted,  relationship_id is ${tPerRelMap.rows[0].relationship_id}`);
+                                        console.debug(`New member's '${details.relationship}' relationship inserted, for family Id ${userData.familyId}`);
 
                                 } else throw 'Failed to insert new member\'s data into t_user table.';
 
                                 //Condition when member is using own email id.(Create firebase account) 
                             } else if (userData.emailId !== details.emailId) {
-                                console.debug('Member is using his//her own email id, so  creating new account in firebase and populating new member data into the tables')
+                                console.debug('Member is using his//her own email id, so creating new account in firebase and populating new member data into the tables.')
                                 let fbuid;
                                 await firebase.auth().createUserWithEmailAndPassword(details.emailId, 'User#123!').then((data) => {
                                     fbuid = data.user.uid;
@@ -1454,7 +1434,8 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                         //inserting member details into t_person table
                                         let tPersonres = await client.query(reqOpQueries.insertMemberIntoPersonTbl,
                                             [newUserId, details.dob == '' ? null : details.dob,
-                                                details.mobileNo, userData.updatedBy, new Date().toUTCString(), details.baptismalName])
+                                                details.mobileNo, userData.updatedBy, new Date().toUTCString(), 
+                                                details.baptismalName,  userData.familyId])
                                         if (tPersonres.rowCount > 0)
                                             console.debug(`New member's data inserted in t_person table for user_is ${newUserId}.`);
 
@@ -1463,11 +1444,11 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                         if (roleAssignment.rowCount > 0)
                                             console.debug(`Member role assigned to new member, user_role_map_id is ${roleAssignment.rows[0].user_role_map_id}`);
 
-                                        let tPerRelMap = await client.query(reqOpQueries.insertPersonRelationship,
-                                            [userData.userId, newUserId, details.relationship, userData.updatedBy, new Date().toUTCString()]);
+                                        let tPerRelMap = await client.query(reqOpQueries.insertPersonPrelationshipTbl,
+                                            [userData.familyId, newUserId, details.relationship, false, userData.updatedBy, new Date().toUTCString()]);
 
                                         if (tPerRelMap.rowCount > 0)
-                                            console.debug(`New member's '${details.relationship}' relationship inserted,  relationship_id is ${tPerRelMap.rows[0].relationship_id}`);
+                                            console.debug(`New member's '${details.relationship}' relationship inserted,   for family Id ${userData.familyId}`);
 
                                     } else throw 'Failed to insert new member\'s data into t_user table.';
                                 }
@@ -1481,7 +1462,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
         /**********************Insert -> t_user_role_mapping ************************* */
         //console.log("10");
 
-        if(userData.isStudent == true){
+        if (userData.isStudent == true) {
             const insertStudentRole = `INSERT INTO t_user_role_mapping (role_id, user_id, is_deleted, role_start_date, role_end_date)
             select (select role_id from t_role tr where tr."name" = 'Sunday School Student'),
             		$1, $2, $3, $4
@@ -1494,10 +1475,10 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             insertStudentRoleValues = [userData.userId, false, userData.sunSchoolAcaYrStrtDate, userData.sunSchoolAcaYrEndDate];
             await client.query(insertStudentRole, insertStudentRoleValues);
         }
-        if(userData.isStudent == false){
-             const updateStudentRole = `update t_user_role_mapping set is_deleted = true where role_id =  (select role_id from t_role tr where tr."name" = 'Sunday School Student')
+        if (userData.isStudent == false) {
+            const updateStudentRole = `update t_user_role_mapping set is_deleted = true where role_id =  (select role_id from t_role tr where tr."name" = 'Sunday School Student')
               and user_id = ${userData.userId};`;
-             await client.query(updateStudentRole);
+            await client.query(updateStudentRole);
         }
 
 
