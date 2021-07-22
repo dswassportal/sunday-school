@@ -311,11 +311,40 @@ async function getRolesByUserId(userId) {
 
 }
 
-module.exports = {
+async function isUserNameTaken(userName) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        userName = userName.trim()
+        if (userName.length > 0) {
+            let query = `select case when count(user_id) > 0 then true else false end is_taken from t_user where lower(user_name) = lower($1);`;
+            let result = await client.query(query, [userName]);
+            if (result.rowCount > 0) {
+                return {
+                    data: {
+                        status: 'success',
+                        isTaken: result.rows[0].is_taken
+                    }
+                }
+            } else throw 'Query returned empty result.'
+        } else throw 'Empty or invalid username provided by the user.'
+
+
+    } catch (error) {
+        console.error(`miscReqOperations.js::isUserNameTaken() --> Error : ${error}`)
+        return (errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release(false);
+    }
+}
+
+module.exports = {  
     getCountryStates,
     getMembers,
     getUserApprovalStatus,
     handleLogIn_LogOut,
     getLookupMasterData,
-    getRolesByUserId
+    getRolesByUserId,
+    isUserNameTaken
 }

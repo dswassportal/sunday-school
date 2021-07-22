@@ -963,6 +963,25 @@ app.get('/api/getEventDoc', function (req, res) {
   }
 });
 
+app.get('/api/isUserNameTaken', function (req, res) {
+  console.log("isUserNameTaken called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.isUserNameTaken(req.query.userName)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in isUserNameTaken as : ' + error)
+  }
+});
+
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {
   let userId = reqContext.header('User').toString();

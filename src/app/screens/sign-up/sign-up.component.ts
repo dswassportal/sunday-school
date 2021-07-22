@@ -40,46 +40,47 @@ export class SignUpComponent implements OnInit {
   minDate = new Date();
   titles!: any[];
   memberships!: any[];
-  
- 
+
+
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private AuthService : AuthService ,
-    private apiService : ApiService
-    ) { }
+    private AuthService: AuthService,
+    private apiService: ApiService
+  ) { }
 
 
   ngOnInit(): void {
     this.signUpForm = this.formBuilder.group({
-      title : new FormControl('',Validators.required),
+      title: new FormControl('', Validators.required),
       firstName: new FormControl('', Validators.required),
       lastName: new FormControl('', Validators.required),
       email: new FormControl('', [Validators.required, Validators.email]),
+      userName: new FormControl('', [Validators.required]),
       dob: new FormControl(''),
       password: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
       cnfmpwd: new FormControl('', [Validators.required, Validators.pattern('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[@!#$%&*])(?=.*?[0-9]).{8,}$')]),
       mobileNo: new FormControl('', [Validators.required]),
-      memberType : new FormControl('',Validators.required),
-      orgId: new FormControl('',Validators.required),
+      memberType: new FormControl('', Validators.required),
+      orgId: new FormControl('', Validators.required),
       abtyrslf: new FormControl('')
     });
 
     this.max_date = new Date;
     this.apiService.getParishListData().subscribe(res => {
 
-     for(let i=0;i<res.data.metaData.Parish.length;i++){
-       this.parishList = res.data.metaData.Parish;
-     }
+      for (let i = 0; i < res.data.metaData.Parish.length; i++) {
+        this.parishList = res.data.metaData.Parish;
+      }
       console.log(this.parishList);
     });
-	
+
     this.apiService.callGetService('getLookupMasterData?types=title,membership').subscribe((res: any) => {
       this.titles = res.data["titles"];
       this.memberships = res.data["memberships"];
     })
- 
- 
+
+
   }
 
   signUp() {
@@ -96,12 +97,12 @@ export class SignUpComponent implements OnInit {
       else {
         //this.signUpForm.value.mobileNo = this.contactNo;
         this.signUpForm.value.middleName = null;
-         this.AuthService.SignUp(this.signUpForm.value).then((data)=>{
+        this.AuthService.SignUp(this.signUpForm.value).then((data) => {
           console.log(JSON.stringify(data));
-         })
+        })
         console.log("user registered");
       }
-     this.signUpForm.reset();
+    //this.signUpForm.reset();
   }
 
   isStateDataSet = false;
@@ -112,11 +113,11 @@ export class SignUpComponent implements OnInit {
     let inputChar = String.fromCharCode(event.charCode);
     if (event.keyCode != 5 && !pattern.test(inputChar)) {
       event.preventDefault();
-      if (event.keyCode == 13){
-//this.change(event);
-    console.log("keyCode == 13");
+      if (event.keyCode == 13) {
+        //this.change(event);
+        console.log("keyCode == 13");
       }
-    } 
+    }
   }
 
   cancel() {
@@ -132,12 +133,27 @@ export class SignUpComponent implements OnInit {
   //   this.contactNo = event;
   // }
 
-  validateDOB(event:any){
+  validateDOB(event: any) {
     let year = new Date(event).getFullYear();
     let today = new Date().getFullYear();
-if(year > today){
-  alert("Select Date in Past");
-}
+    if (year > today) {
+      alert("Select Date in Past");
+    }
+  }
+
+  onUserNameFocusOut(event: any) {
+    let userName = event.target.value.trim();
+    if (userName.length > 0) {
+        this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
+          if(res.data.status === "success"){
+            if(res.data.isTaken === true){
+
+              alert('Username already taken');
+            }else
+            alert('Username available');
+          }
+        })
+    }
   }
 
 }

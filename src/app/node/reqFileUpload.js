@@ -35,9 +35,9 @@ async function eventDocUpload(files, eventId) {
         }
 
         //code to latest uploded file get file
-        if (insResult.rowCount) {
-            console.log(`ID for event newly uploaded document is ${attachmentId}`);
-        } else throw `Failed to insert file into table.`;
+        // if (insResult.rowCount) {
+        //     console.log(`ID for event newly uploaded document is ${attachmentId}`);
+        // } else throw `Failed to insert file into table.`;
         await client.query("commit;");
         return ({
             data: {

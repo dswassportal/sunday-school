@@ -14,18 +14,6 @@
 
                 <div class="row form-group">
                     <mat-form-field class="form-field col-2">
-                             <!-- <mat-select required formControlName="title" id="title" placeholder="Title">
-                                    <mat-option value="His Grace">His Grace</mat-option>
-                                    <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
-                                    <mat-option value="Very Rev">Very Rev</mat-option>
-                                    <mat-option value="Fr">Fr</mat-option>
-                                    <mat-option value="Rev Fr. Dr">Rev Fr. Dr</mat-option>
-                                    <mat-option value="Rev Fr.">Rev Fr.</mat-option>
-                                    <mat-option value="Mr">Mr</mat-option>
-                                    <mat-option value="Ms">Ms</mat-option>
-                                    <mat-option value="Mrs">Mrs</mat-option>
-                                    <mat-option value="Dr">Dr</mat-option>
-                            </mat-select> -->
                             <mat-select id="title" formControlName = "title" placeholder="title" >
                                 <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
                               </mat-select>
@@ -48,11 +36,20 @@
                 </div>
 
                 <div class="form-group row justify-content-center">
-                    <mat-form-field class="form-field col-md">
+                    <mat-form-field class="form-field col-md-5">
                         <input type="text" matInput formControlName="email" id="email" placeholder="Email" required>
                         <mat-error *ngIf="signUpForm.controls.email.touched && signUpForm.controls.email.invalid">
                             <span *ngIf="signUpForm.controls.email.errors.required">This field is mandatory.</span>
                             <span *ngIf="signUpForm.controls.email.errors.pattern">This field is invalid.</span>
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field class="form-field col-md-5">
+                        <input type="text" matInput formControlName="userName" (focusout)="onUserNameFocusOut($event)" id="userName" placeholder="User Name" required>
+                        <mat-error *ngIf="signUpForm.controls.userName.touched && signUpForm.controls.userName.invalid">
+                            <!-- <span *ngIf="signUpForm.controls.userName.errors.required">This field is mandatory.</span> -->
+                            <!-- <span *ngIf="signUpForm.controls.userName.errors.pattern">This field is invalid.</span> -->
+                                <!-- <span *ngIf="signUpForm.controls.userName.errors.required">This field is mandatory.</span> -->
                         </mat-error>
                     </mat-form-field>
                 </div>
