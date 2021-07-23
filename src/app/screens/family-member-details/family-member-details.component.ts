@@ -61,7 +61,7 @@ export class FamilyMemberDetailsComponent implements OnInit {
     console.log("Event data : " + event.data);
     this.familyMemberDetails.getDataService().setSelectedRowData(event.data);
     //this.parentValue = this.router.navigate(['/dashboard/bulkRegistration/']);
-    this.router.navigate(['/dashboard/myprofile']);
+    this.router.navigate(['/dashboard/memberDetails']);
   }
 
 }
