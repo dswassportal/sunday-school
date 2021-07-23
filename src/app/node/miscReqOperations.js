@@ -145,7 +145,7 @@ async function getMembers(fireBaseId) {
 
 }
 
-async function getUserApprovalStatus(fbuid) {
+async function getUserApprovalStatus(fbuid, reqContextData) {
 
     let client = await dbConnections.getConnection();
     try {
@@ -158,6 +158,7 @@ async function getUserApprovalStatus(fbuid) {
                                     firebase_id = '${fbuid}';`;
 
         let result = await client.query(userApprovedStatus);
+        if (result.rowCount < 0) throw "User not found in system for " + fbuid + "firebase id.";
         let response = {
             data: {
                 status: 'success',
@@ -165,6 +166,10 @@ async function getUserApprovalStatus(fbuid) {
                 user: result.rows[0].userid
             }
         }
+
+        reqContextData.userId = result.rows[0].userid
+        // Code to make entry of user sign up activity 
+        handleLogIn_LogOut(reqContextData)
 
         await reqOperations.processGetUserMetaDataRequest(result.rows[0].userid)
             .then((res) => {

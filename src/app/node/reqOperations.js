@@ -251,6 +251,7 @@ async function processGetUserMetaDataRequest(uid) {
             metaData.orgName = res.rows[0].org_name;
             metaData.orgId = res.rows[0].org_id;
             metaData.membershipType = res.rows[0].membership_type
+            if(lastLoggedInRes.rowCount > 0)
             metaData.lastLoggedIn = lastLoggedInRes.rows[0].last_logged_in
             metaData.mobile_no = res.rows[0].mobile_no;
 

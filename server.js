@@ -151,14 +151,6 @@ app.get('/api/getRoleMetadata', function (req, res) {
 app.get('/api/getUserMetaData', function (req, res) {
   console.log("getUserMetaData called with : " + JSON.stringify(req.query.uid));
 
-  let reqContextData = {
-    actType: 'LOG_IN',
-    sessionId: req.header('Authorization'),
-    ipAddr: req.connection.remoteAddress,
-    userAgent: req.get('User-Agent'),
-    userId: req.query.uid
-  }
-  processMiscRequest.handleLogIn_LogOut(reqContextData)
   try {
     processRequest.processGetUserMetaDataRequest(req.query.uid)
       .then((data) => {
@@ -516,7 +508,15 @@ app.get('/api/getEventForRegistration', function (req, res) {
 app.get('/api/getUserApprovalStatus', function (req, res) {
   console.log("getUserApprovalStatus called with : " + JSON.stringify(req.query.fbuid));
   try {
-    processMiscRequest.getUserApprovalStatus(req.query.fbuid)
+    
+  let reqContextData = {
+    actType: 'LOG_IN',
+    sessionId: req.header('Authorization'),
+    ipAddr: req.connection.remoteAddress,
+    userAgent: req.get('User-Agent')
+  }
+
+    processMiscRequest.getUserApprovalStatus(req.query.fbuid, reqContextData)
       .then((data) => {
         //   console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
