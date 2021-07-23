@@ -504,8 +504,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         mobileNo: e.mobileNo,
         emailId: e.emailId,
         userId: e.userId,
-        username: e.userName,
-        isFamilyHeadFamilyMember: e.isFamilyHeadFamilyMember
+        userName: e.userName,
+        isMemberFamilyHead: e.isMemberFamilyHead
       }));
     });
     return formArray;
@@ -551,8 +551,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       mobileNo: new FormControl('', [Validators.required]),
       emailId: new FormControl('', [Validators.required, Validators.email]),
       userId: new FormControl(''),
-      username: new FormControl('', [Validators.required, Validators.pattern('^[ A-Za-z0-9_.-]*$')]),
-      isFamilyHeadFamilyMember: new FormControl('')
+      userName: new FormControl('', [Validators.required, Validators.pattern('^[ A-Za-z0-9_.-]*$')]),
+      isMemberFamilyHead: new FormControl('')
     });
   }
   //event handler for the select element's change event
