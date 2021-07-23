@@ -253,15 +253,15 @@ export class ProfileSearchComponent implements OnInit {
 
 
     this.profileSearchFormGroup = this.formBuilder.group({
-      dioceseName: new FormControl('',),
-      regionName: new FormControl('',),
-      parishName: new FormControl(''),
-      memberId: new FormControl('',),
-      firstName: new FormControl('',),
-      lastName: new FormControl('',),
-      phoneNumber: new FormControl('',),
-      emailId: new FormControl('', [Validators.email]),
-      id: new FormControl('',),
+      dioceseName: new FormControl('',Validators.required),
+      regionName: new FormControl('',Validators.required),
+      parishName: new FormControl('',Validators.required),
+      memberId: new FormControl('',Validators.required),
+      firstName: new FormControl('',Validators.required),
+      lastName: new FormControl('',Validators.required),
+      phoneNumber: new FormControl('',Validators.required),
+      emailId: new FormControl('', [Validators.required,Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
+      id: new FormControl('',Validators.required),
       
     });
 
@@ -393,6 +393,8 @@ export class ProfileSearchComponent implements OnInit {
     this.gridApi.exportDataAsCsv(params);
   }
 
+  
+
   clearSearch() {
 
     this.dioceseName ='';
@@ -429,6 +431,17 @@ export class ProfileSearchComponent implements OnInit {
     this.router.navigate(['/dashboard/']);
   }
 
+
+  checkValid() {
+    if(this.profileSearchFormGroup.get('firstName').valid || this.profileSearchFormGroup.get('lastName').valid || this.profileSearchFormGroup.get('memberId').valid
+    || this.profileSearchFormGroup.get('dioceseName').valid || this.profileSearchFormGroup.get('regionName').valid || this.profileSearchFormGroup.get('parishName').valid
+    || this.profileSearchFormGroup.get('phoneNumber').valid || this.profileSearchFormGroup.get('emailId').valid || this.profileSearchFormGroup.get('id').valid)
+     {
+      return false;
+    } else {
+      return true;
+    }
+  }
 
 
 //Role End Date Validator that is roleEndDate>roleStartDate

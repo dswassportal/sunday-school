@@ -138,6 +138,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   memberships!: any[];
   error = { validatePhoneNumber: true };
   isFamilyMember: any;
+  isFamilyHeadRadiobtn: any;
 
 
   //, Validators.required
@@ -443,6 +444,28 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     //this.isStudentvar = !this.isStudentvar;
   }
 
+  isFamilyHeadOnChange(event: any){
+    const usernameValidation = this.myprofileform.get('memberDetails'); 
+    console.log("usernameValidation.controls[0].controls.username",usernameValidation.controls[0].controls.username);
+    if(event.event.value == "true"){
+      // this.isFamilyHeadRadiobtn = true;
+      usernameValidation.controls[0].controls.username.setValidators([Validators.required]);
+    }
+    if(event.event.value == "false"){
+      // this.isFamilyHeadRadiobtn = false;
+      usernameValidation.controls[0].controls.username.clearValidators();
+    }
+    // console.log("event", event);
+    // for(let row of this.myprofileform.value.memberDetails){
+    //   console.log("row", row);
+    // }
+
+    //this.myprofileform.memberDetails.at(0).controls.username.clearValidators();
+
+    usernameValidation.controls[0].controls.forEach((c: any) => c.clearValidators());
+
+  }
+
   // @ViewChild(MatDatepicker) picker:any;
 
   // monthSelected(event : any) {
@@ -452,6 +475,18 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
 
 
+  onUserNameFocusOut(event: any) {
+    let userName = event.target.value.trim();
+    if (userName.length > 0) {
+        this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
+          if(res.data.status === "success"){
+            if(res.data.isTaken === true){
+              alert('Username already taken');
+            }
+          }
+        })
+    }
+  }
 
 
 
@@ -468,7 +503,9 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         dob: e.dob,
         mobileNo: e.mobileNo,
         emailId: e.emailId,
-        userId: e.userId
+        userId: e.userId,
+        username: e.userName,
+        isFamilyHeadFamilyMember: e.isFamilyHeadFamilyMember
       }));
     });
     return formArray;
@@ -514,6 +551,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       mobileNo: new FormControl('', [Validators.required]),
       emailId: new FormControl('', [Validators.required, Validators.email]),
       userId: new FormControl(''),
+      username: new FormControl('', [Validators.required, Validators.pattern('^[ A-Za-z0-9_.-]*$')]),
+      isFamilyHeadFamilyMember: new FormControl('')
     });
   }
   //event handler for the select element's change event

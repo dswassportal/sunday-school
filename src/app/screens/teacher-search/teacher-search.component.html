@@ -87,7 +87,7 @@
                 (click)="clearSearch()">Clear</button>
                 <!--  -->
 
-                <button mat-button type="submit" (click)="accordion.closeAll()" (click)="onSearchClick()"  mat-button class="mbutton">
+                <button [disabled]='checkValid()' mat-button type="submit" (click)="accordion.closeAll()" (click)="onSearchClick()"  mat-button class="mbutton">
                     Search</button>
             </div>
         </div>

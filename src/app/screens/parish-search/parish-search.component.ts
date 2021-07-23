@@ -251,9 +251,9 @@ export class ParishSearchComponent implements OnInit {
 
 
     this.parishSearchFormGroup = this.formBuilder.group({
-      dioceseName: new FormControl('',),
-      regionName: new FormControl('',),
-      parishName: new FormControl('',),
+      dioceseName: new FormControl('', [Validators.required]),
+      regionName: new FormControl('', [Validators.required]),
+      parishName: new FormControl('', [Validators.required]),
     });
     this.dropdownSettingsDiocese = this.dropdownSettingsForDiocese;
     this.dropdownSettingsRegion = this.dropdownSettingsForRegion;
@@ -393,6 +393,13 @@ comparisonRegiEnddateValidator(): any {
   }
 }
 
+checkValid() {
+  if(this.parishSearchFormGroup.get('dioceseName').valid || this.parishSearchFormGroup.get('regionName').valid || this.parishSearchFormGroup.get('parishName').valid) {
+    return false;
+  } else {
+    return true;
+  }
+}
 
 setRoles(selectedUserRole: any): FormArray {
   const formArray = new FormArray([]);
