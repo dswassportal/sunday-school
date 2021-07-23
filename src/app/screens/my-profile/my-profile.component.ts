@@ -98,7 +98,6 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils, private authService: AuthService,
     public router: Router) { }
 
-
   canDeactivate(): boolean {
     return !this.isDirty;
   }
@@ -183,7 +182,6 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     this.alluserdata = this.uiCommonUtils.getUserMetaDataJson();
     this.isApprovedUserLoggedIn = this.alluserdata.isApproved;
 
-
     this.studentDetailsForm = this.formBuilder.group({
       studentAcaDtlId: new FormControl('', Validators.required),
       studentId: new FormControl('', Validators.required),
@@ -238,6 +236,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       this.orgId = this.alluserdata.orgId;
       this.memberDetailsData = this.alluserdata.memberDetails;
+      this.myprofileform.setControl('memberDetails', this.setMemberDetails(this.memberDetailsData));
 
 
 
@@ -447,14 +446,14 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     //this.isStudentvar = !this.isStudentvar;
   }
 
-  isFamilyHeadOnChange(event: any) {
-    const usernameValidation = this.myprofileform.get('memberDetails');
-    console.log("usernameValidation.controls[0].controls.username", usernameValidation.controls[0].controls.username);
-    if (event.event.value == "true") {
+  isFamilyHeadOnChange(event: any){
+    const usernameValidation = this.myprofileform.get('memberDetails'); 
+    console.log("usernameValidation.controls[0].controls.username",usernameValidation.controls[0].controls.username);
+    if(event.event.value == "true"){
       // this.isFamilyHeadRadiobtn = true;
       usernameValidation.controls[0].controls.username.setValidators([Validators.required]);
     }
-    if (event.event.value == "false") {
+    if(event.event.value == "false"){
       // this.isFamilyHeadRadiobtn = false;
       usernameValidation.controls[0].controls.username.clearValidators();
     }
@@ -481,13 +480,13 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   onUserNameFocusOut(event: any) {
     let userName = event.target.value.trim();
     if (userName.length > 0) {
-      this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res: any) => {
-        if (res.data.status === "success") {
-          if (res.data.isTaken === true) {
-            alert('Username already taken');
+        this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
+          if(res.data.status === "success"){
+            if(res.data.isTaken === true){
+              alert('Username already taken');
+            }
           }
-        }
-      })
+        })
     }
   }
 

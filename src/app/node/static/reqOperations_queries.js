@@ -64,8 +64,8 @@ const toCheckIsMemberExistsWithSameName = `select
                                                 and tpr.is_deleted != true;`;              
                                                                                         
 const insertMemberIntoUserTbl = `INSERT INTO public.t_user
-                        (org_id, email_id, firebase_id, title, first_name, middle_name, last_name, created_by, created_date, member_type, is_approved )
-                        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning user_id;`;
+                        (org_id, email_id, firebase_id, title, first_name, middle_name, last_name, created_by, created_date, member_type, is_approved, user_name )
+                        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning user_id;`;
 
 const insertMemberIntoPersonTbl =  `INSERT INTO public.t_person
                                     (user_id, dob,  mobile_no, created_by, created_date, baptismal_name, family_id)
@@ -94,6 +94,22 @@ const insertPersonPrelationshipTbl = ` INSERT INTO t_person_family
                                     (family_id, family_member_id, relationship, is_deleted, created_by, created_date)
                                     VALUES($1, $2, $3, $4, $5, $6);`                                
 
+const updateFamId = `UPDATE t_person SET family_id=$1 WHERE user_id=$2`;
+
+const updateIsFamHead = `update t_user set is_family_head = $1 where user_id =$2`; 
+
+const checkNewMemEmailAndRelationExists = `select 
+                                            user_id, 
+                                            case when count(user_id) > 0 then true else false end user_exists, 
+                                            case when count(tpf.family_member_id) > 0 then true else false end user_family_related 
+                                            from t_user tu
+                                            left join t_person_family tpf on tu.user_id = tpf.family_member_id 
+                                            and tpf.is_deleted = false
+                                            and tu.is_deleted = false 
+                                            where lower(tu.email_id) = lower($1) 
+                                            and lower(tu.first_name) = lower($2)
+                                            and lower(tu.last_name) = lower($3)
+                                            group by user_id;`;
 
 module.exports= {
     updateEmailId,
@@ -109,5 +125,8 @@ module.exports= {
     deleteMemberRelationship,
     updateTUserForMember,
     updateTPersonForMember,
-    insertPersonPrelationshipTbl
+    insertPersonPrelationshipTbl,
+    updateFamId,
+    updateIsFamHead,
+    checkNewMemEmailAndRelationExists
 }                                                

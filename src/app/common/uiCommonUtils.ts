@@ -1,4 +1,4 @@
-import { Injectable, Component, ElementRef, Inject, OnInit, ViewChild  } from '@angular/core';
+import { Injectable, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 // import { Router } from '@angular/router';
 // import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBar, MatSnackBarConfig, MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
@@ -18,17 +18,17 @@ export class uiCommonUtils {
         // });
 
         let config = {
-            message  :  message,
-            type :  type
+            message: message,
+            type: type
         }
-        let styleClass = type == 'success'? 'successSnackBarStyle' : 'errorSnackBarStyle';
+        let styleClass = type == 'success' ? 'successSnackBarStyle' : 'errorSnackBarStyle';
         this.snackBar.openFromComponent(customSnackBar, {
             duration: duration,
             data: config,
             verticalPosition: 'top',
             horizontalPosition: 'center',
             panelClass: [styleClass]
-          });
+        });
     }
 
     hasPermissions(permission: string): boolean {
@@ -43,13 +43,19 @@ export class uiCommonUtils {
     }
 
     getUserMetaDataJson(): any {
-        let metaDataJSON = JSON.parse(localStorage.getItem('chUserMetaData') || '{}')
 
-        if (metaDataJSON == {})
-            console.log('User metadata not found in the LocalStorage');
+        let metaDataJSON = {};
+        try {
+             metaDataJSON = JSON.parse(localStorage.getItem('chUserMetaData') || '{}')
 
+            if (metaDataJSON == {})
+                console.log('User metadata not found in the LocalStorage');
+
+            metaDataJSON;
+        } catch (error) {
+            console.error(error)
+        }
         return metaDataJSON;
-
     }
 }
 
@@ -57,9 +63,9 @@ export class uiCommonUtils {
     selector: 'custom-snackbar.component',
     templateUrl: 'custom-snackbar.component.html',
     styles: [],
-  })
-  export class customSnackBar {
+})
+export class customSnackBar {
     constructor(
-      public snackBarRef: MatSnackBarRef<customSnackBar>,
-      @Inject(MAT_SNACK_BAR_DATA) public data: any) { }
-  }
+        public snackBarRef: MatSnackBarRef<customSnackBar>,
+        @Inject(MAT_SNACK_BAR_DATA) public data: any) { }
+}
