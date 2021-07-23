@@ -10,7 +10,6 @@ import { default as _rollupMoment } from 'moment';
 import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
 import { AuthService } from '../../services/auth.service'
 const moment = _rollupMoment || _moment;
-import { FamilyMemberDetails } from '../family-member-details/family-member-details.dataService';
 
 
 class CustomDateAdapter extends NativeDateAdapter {
@@ -97,7 +96,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
   constructor(private apiService: ApiService,
     private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils, private authService: AuthService,
-    public router: Router, private familyMemberDetails: FamilyMemberDetails) { }
+    public router: Router) { }
 
 
   canDeactivate(): boolean {
@@ -142,6 +141,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   isFamilyMember: any;
   isFamilyHeadRadiobtn: boolean = false;
   selectedRowData: any;
+  selectedUrl: any;
 
 
   //, Validators.required
@@ -431,54 +431,6 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       })
 
     }
-
-
-
-    if (this.familyMemberDetails.getSelectedRowData() != undefined) {
-      this.selectedRowData = this.familyMemberDetails.getSelectedRowData();
-      console.log('selected row data is :: ' + JSON.stringify(this.selectedRowData));
-
-      this.apiService.callGetService(`getUserMetaData?uid=${this.selectedRowData.userId}`).subscribe((res) => {
-        //localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData));
-        console.log("res.data.metaData", res.data.metaData);
-        let memberData = res.data.metaData;
-        // if (memberData.memberDetails.length > 0) {
-        //   this.myprofileform.setControl('memberDetails', this.setMemberDetails(memberData.memberDetails));
-        // }
-
-
-        this.myprofileform.patchValue({
-          country: memberData.country,
-
-          title: memberData.title,
-          firstName: memberData.firstName,
-          middleName: memberData.middleName,
-          lastName: memberData.lastName,
-          nickName: memberData.nickName,
-          baptismalName: memberData.baptismalName,
-          dob: memberData.dob,
-          homePhoneNo: memberData.homePhoneNo,
-          mobileNo: memberData.mobile_no,
-          emailId: memberData.emailId,
-          addressLine1: memberData.addressLine1,
-          addressLine2: memberData.addressLine2,
-          addressLine3: memberData.addressLine3,
-          city: memberData.city,
-          postalCode: memberData.postalCode,
-          //country: memberData.country,
-          state: memberData.state,
-          parish: memberData.orgId,
-          //memberDetails: memberData.memberDetails,
-          maritalStatus: memberData.maritalStatus,
-          dateofMarriage: memberData.dateOfMarriage,
-          aboutYourself: memberData.aboutYourself,
-          userId: memberData.userId,
-        });
-      });
-    }
-
-
-
   }
 
   isStudentFn(event: any) {
