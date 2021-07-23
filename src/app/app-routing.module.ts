@@ -29,6 +29,7 @@ import { ParishSearchComponent } from './screens/parish-search/parish-search.com
 import { TeacherSearchComponent } from './screens/teacher-search/teacher-search.component';
 import { EventExamRegistrationComponent } from './screens/event-exam-registration/event-exam-registration.component';
 import { ExamRegistrationComponent } from './screens/exam-registration/exam-registration.component';
+import { FamilyMemberDetailsComponent } from './screens/family-member-details/family-member-details.component';
 
 
 const routes: Routes = [
@@ -61,7 +62,8 @@ const routes: Routes = [
       { path: 'parishSearch', component: ParishSearchComponent },
       { path: 'teacherSearch', component: TeacherSearchComponent },
       { path: 'eventExamRegistration', component: EventExamRegistrationComponent },
-      { path: 'examRegistration', component: ExamRegistrationComponent }
+      { path: 'examRegistration', component: ExamRegistrationComponent },
+      { path: 'familyMemberDetails', component: FamilyMemberDetailsComponent }
       // { path: 'testEvent',component:UserProfileComponent},
     ]
   },

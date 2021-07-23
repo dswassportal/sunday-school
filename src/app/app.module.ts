@@ -85,6 +85,7 @@ import { ParishSearchComponent } from './screens/parish-search/parish-search.com
 import { TeacherSearchComponent } from './screens/teacher-search/teacher-search.component';
 import { EventExamRegistrationComponent } from './screens/event-exam-registration/event-exam-registration.component';
 import { ExamRegistrationComponent } from './screens/exam-registration/exam-registration.component';
+import { FamilyMemberDetailsComponent } from './screens/family-member-details/family-member-details.component';
 
 
 @NgModule({
@@ -123,7 +124,8 @@ import { ExamRegistrationComponent } from './screens/exam-registration/exam-regi
         ParishSearchComponent,
         TeacherSearchComponent,
         EventExamRegistrationComponent,
-        ExamRegistrationComponent
+        ExamRegistrationComponent,
+        FamilyMemberDetailsComponent
     //UserProfileComponent,
     //OvbsRegistrationComponent
   ],

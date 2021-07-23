@@ -10,6 +10,7 @@ import { default as _rollupMoment } from 'moment';
 import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
 import { AuthService } from '../../services/auth.service'
 const moment = _rollupMoment || _moment;
+import { FamilyMemberDetails } from '../family-member-details/family-member-details.dataService';
 
 
 class CustomDateAdapter extends NativeDateAdapter {
@@ -96,7 +97,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
   constructor(private apiService: ApiService,
     private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils, private authService: AuthService,
-    public router: Router) { }
+    public router: Router, private familyMemberDetails: FamilyMemberDetails) { }
+
 
   canDeactivate(): boolean {
     return !this.isDirty;
@@ -138,7 +140,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   memberships!: any[];
   error = { validatePhoneNumber: true };
   isFamilyMember: any;
-  isFamilyHeadRadiobtn: any;
+  isFamilyHeadRadiobtn: boolean = false;
+  selectedRowData: any;
 
 
   //, Validators.required
@@ -179,6 +182,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
     this.alluserdata = this.uiCommonUtils.getUserMetaDataJson();
     this.isApprovedUserLoggedIn = this.alluserdata.isApproved;
+
 
     this.studentDetailsForm = this.formBuilder.group({
       studentAcaDtlId: new FormControl('', Validators.required),
@@ -234,7 +238,6 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       this.orgId = this.alluserdata.orgId;
       this.memberDetailsData = this.alluserdata.memberDetails;
-      this.myprofileform.setControl('memberDetails', this.setMemberDetails(this.memberDetailsData));
 
 
 
@@ -428,6 +431,54 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       })
 
     }
+
+
+
+    if (this.familyMemberDetails.getSelectedRowData() != undefined) {
+      this.selectedRowData = this.familyMemberDetails.getSelectedRowData();
+      console.log('selected row data is :: ' + JSON.stringify(this.selectedRowData));
+
+      this.apiService.callGetService(`getUserMetaData?uid=${this.selectedRowData.userId}`).subscribe((res) => {
+        //localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData));
+        console.log("res.data.metaData", res.data.metaData);
+        let memberData = res.data.metaData;
+        // if (memberData.memberDetails.length > 0) {
+        //   this.myprofileform.setControl('memberDetails', this.setMemberDetails(memberData.memberDetails));
+        // }
+
+
+        this.myprofileform.patchValue({
+          country: memberData.country,
+
+          title: memberData.title,
+          firstName: memberData.firstName,
+          middleName: memberData.middleName,
+          lastName: memberData.lastName,
+          nickName: memberData.nickName,
+          baptismalName: memberData.baptismalName,
+          dob: memberData.dob,
+          homePhoneNo: memberData.homePhoneNo,
+          mobileNo: memberData.mobile_no,
+          emailId: memberData.emailId,
+          addressLine1: memberData.addressLine1,
+          addressLine2: memberData.addressLine2,
+          addressLine3: memberData.addressLine3,
+          city: memberData.city,
+          postalCode: memberData.postalCode,
+          //country: memberData.country,
+          state: memberData.state,
+          parish: memberData.orgId,
+          //memberDetails: memberData.memberDetails,
+          maritalStatus: memberData.maritalStatus,
+          dateofMarriage: memberData.dateOfMarriage,
+          aboutYourself: memberData.aboutYourself,
+          userId: memberData.userId,
+        });
+      });
+    }
+
+
+
   }
 
   isStudentFn(event: any) {
@@ -444,14 +495,14 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     //this.isStudentvar = !this.isStudentvar;
   }
 
-  isFamilyHeadOnChange(event: any){
-    const usernameValidation = this.myprofileform.get('memberDetails'); 
-    console.log("usernameValidation.controls[0].controls.username",usernameValidation.controls[0].controls.username);
-    if(event.event.value == "true"){
+  isFamilyHeadOnChange(event: any) {
+    const usernameValidation = this.myprofileform.get('memberDetails');
+    console.log("usernameValidation.controls[0].controls.username", usernameValidation.controls[0].controls.username);
+    if (event.event.value == "true") {
       // this.isFamilyHeadRadiobtn = true;
       usernameValidation.controls[0].controls.username.setValidators([Validators.required]);
     }
-    if(event.event.value == "false"){
+    if (event.event.value == "false") {
       // this.isFamilyHeadRadiobtn = false;
       usernameValidation.controls[0].controls.username.clearValidators();
     }
@@ -478,13 +529,13 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   onUserNameFocusOut(event: any) {
     let userName = event.target.value.trim();
     if (userName.length > 0) {
-        this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
-          if(res.data.status === "success"){
-            if(res.data.isTaken === true){
-              alert('Username already taken');
-            }
+      this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res: any) => {
+        if (res.data.status === "success") {
+          if (res.data.isTaken === true) {
+            alert('Username already taken');
           }
-        })
+        }
+      })
     }
   }
 
