@@ -1396,7 +1396,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                 let tUserRes = await client.query(reqOpQueries.insertMemberIntoUserTbl,
                                     [userData.orgId, userData.emailId, '', details.title,
                                     details.firstName, details.middleName, details.lastName,
-                                    userData.updatedBy, new Date().toUTCString(), 'Member', false, null, isMemberFamilyHead]);
+                                    userData.updatedBy, new Date().toUTCString(), 'Member', false,  isMemberFamilyHead]);
 
                                 if (tUserRes.rowCount > 0) {
                                     let newUserId = tUserRes.rows[0].user_id;
@@ -1472,7 +1472,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                             if (tPerRelMap.rowCount > 0)
                                                 console.debug(`New member's '${details.relationship}' relationship inserted,   for family Id ${userData.familyId}`);
 
-                                            if (member.isMemberFamilyHead === true || member.isMemberFamilyHead === 'true') {
+                                            if (details.isMemberFamilyHead === true || details.isMemberFamilyHead === 'true') {
                                                 await client.query(reqOpQueries.updateFamId, [true, resRow.user_id]);
 
                                                 await client.query(`insert into t_user_role_mapping (user_id, role_id)
