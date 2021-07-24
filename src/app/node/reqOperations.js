@@ -46,7 +46,7 @@ async function processSignInRequest(userInfo) {
             userInfo.data.abtyrslf,
             new Date().toUTCString(),
             userInfo.data.memberType,
-            userInfo.userName
+            userInfo.data.userName
         ];
 
         console.log("inserting into t_user " + newUserInsStmtValue);
