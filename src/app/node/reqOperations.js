@@ -17,7 +17,6 @@ try {
 async function processSignInRequest(userInfo) {
 
     let client = await dbConnections.getConnection();
-    console.log("User Data" + JSON.stringify(userInfo));
     try {
         await client.query("BEGIN");
 
@@ -45,10 +44,12 @@ async function processSignInRequest(userInfo) {
             userInfo.data.middleName,
             userInfo.data.lastName,
             userInfo.data.abtyrslf,
-            new Date().toISOString(),
+            new Date().toUTCString(),
             userInfo.data.memberType,
             userInfo.userName
         ];
+
+        console.log("inserting into t_user " + newUserInsStmtValue);
 
         let result = await client.query(newUserInsStmt, newUserInsStmtValue);
         //  console.log("2", this.userId);
@@ -251,8 +252,8 @@ async function processGetUserMetaDataRequest(uid) {
             metaData.orgName = res.rows[0].org_name;
             metaData.orgId = res.rows[0].org_id;
             metaData.membershipType = res.rows[0].membership_type
-            if(lastLoggedInRes.rowCount > 0)
-            metaData.lastLoggedIn = lastLoggedInRes.rows[0].last_logged_in
+            if (lastLoggedInRes.rowCount > 0)
+                metaData.lastLoggedIn = lastLoggedInRes.rows[0].last_logged_in
             metaData.mobile_no = res.rows[0].mobile_no;
 
             if (res.rows[0].is_approved == true) {
@@ -1369,7 +1370,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                             console.debug(` ${details.userId} member relation has been updated(in t_person_relationship table)`)
 
                         if (member.isMemberFamilyHead === true || member.isMemberFamilyHead === 'true') {
-                            await client.query(reqOpQueries.updateFamId, [true, resRow.user_id]);
+                            await client.query(reqOpQueries.updateFamId, [true, details.userId]);
 
                             await client.query(`insert into t_user_role_mapping (user_id, role_id)
                                (select ${details.userId}, role_id from t_role where name = 'Family Head');`)
@@ -1396,7 +1397,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                 let tUserRes = await client.query(reqOpQueries.insertMemberIntoUserTbl,
                                     [userData.orgId, userData.emailId, '', details.title,
                                     details.firstName, details.middleName, details.lastName,
-                                    userData.updatedBy, new Date().toUTCString(), 'Member', false,  isMemberFamilyHead]);
+                                    userData.updatedBy, new Date().toUTCString(), 'Member', false, isMemberFamilyHead]);
 
                                 if (tUserRes.rowCount > 0) {
                                     let newUserId = tUserRes.rows[0].user_id;
@@ -1473,7 +1474,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                                 console.debug(`New member's '${details.relationship}' relationship inserted,   for family Id ${userData.familyId}`);
 
                                             if (details.isMemberFamilyHead === true || details.isMemberFamilyHead === 'true') {
-                                                await client.query(reqOpQueries.updateFamId, [true, resRow.user_id]);
+                                                await client.query(reqOpQueries.updateFamId, [true, newUserId]);
 
                                                 await client.query(`insert into t_user_role_mapping (user_id, role_id)
                                                (select ${newUserId}, role_id from t_role where name = 'Family Head');`)
