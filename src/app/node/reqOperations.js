@@ -1369,13 +1369,13 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                         if (updatePerRelRes.rowCount > 0)
                             console.debug(` ${details.userId} member relation has been updated(in t_person_relationship table)`)
 
-                        if (member.isMemberFamilyHead === true || member.isMemberFamilyHead === 'true') {
+                        if (details.isMemberFamilyHead === true || details.isMemberFamilyHead === 'true') {
                             await client.query(reqOpQueries.updateFamId, [true, details.userId]);
 
                             await client.query(`insert into t_user_role_mapping (user_id, role_id)
                                (select ${details.userId}, role_id from t_role where name = 'Family Head');`)
                         }
-
+                        
                     } else {
 
                         //query and condition to check whether the given first name, last name, email, and relation to that family already exists or not.
