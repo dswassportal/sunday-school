@@ -2,6 +2,7 @@ const { Client, Pool } = require('pg');
 const _ = require('underscore');
 const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
+const reqOperations = require(`${__dirname}/reqOperations`);
 
 
 
@@ -144,7 +145,7 @@ async function getMembers(fireBaseId) {
 
 }
 
-async function getUserApprovalStatus(fbuid) {
+async function getUserApprovalStatus(fbuid, reqContextData) {
 
     let client = await dbConnections.getConnection();
     try {
@@ -156,15 +157,28 @@ async function getUserApprovalStatus(fbuid) {
                                 where 
                                     firebase_id = '${fbuid}';`;
 
-        let result = await client.query(userApprovedStatus)
-
-        return {
+        let result = await client.query(userApprovedStatus);
+        if (result.rowCount < 0) throw "User not found in system for " + fbuid + "firebase id.";
+        let response = {
             data: {
                 status: 'success',
                 isapproved: result.rows[0].approved,
                 user: result.rows[0].userid
             }
         }
+
+        reqContextData.userId = result.rows[0].userid
+        // Code to make entry of user sign up activity 
+        handleLogIn_LogOut(reqContextData)
+
+        await reqOperations.processGetUserMetaDataRequest(result.rows[0].userid)
+            .then((res) => {
+                if (res.data.status === "success")
+                    response.data.metaData = res.data.metaData
+                else throw 'Not able to levrage metadata from the the DB.';
+            });
+
+        return response;
 
 
     } catch (error) {
@@ -311,11 +325,69 @@ async function getRolesByUserId(userId) {
 
 }
 
+async function isUserNameTaken(userName) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        userName = userName.trim()
+        if (userName.length > 0) {
+            let query = `select case when count(user_id) > 0 then true else false end is_taken from t_user where lower(user_name) = lower($1);`;
+            let result = await client.query(query, [userName]);
+            if (result.rowCount > 0) {
+                return {
+                    data: {
+                        status: 'success',
+                        isTaken: result.rows[0].is_taken
+                    }
+                }
+            } else throw 'Query returned empty result.'
+        } else throw 'Empty or invalid username provided by the user.'
+
+
+    } catch (error) {
+        console.error(`miscReqOperations.js::isUserNameTaken() --> Error : ${error}`)
+        return (errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release(false);
+    }
+}
+
+async function getEmail(userName) {
+
+    let client = await dbConnections.getConnection();
+    try {
+
+        userName = userName.trim()
+        if (userName.length > 0) {
+            let query = `select email_id from t_user where lower(user_name) = lower($1)`;
+            let result = await client.query(query, [userName]);
+            if (result.rowCount === 1) {
+                return {
+                    data: {
+                        status: 'success',
+                        emailId: result.rows[0].email_id
+                    }
+                }
+            } else throw `More than one email found for  ${userName}`;
+        } else throw 'Empty or invalid username provided by the user.'
+
+
+    } catch (error) {
+        console.error(`miscReqOperations.js::isUserNameTaken() --> Error : ${error}`)
+        return (errorHandling.handleDBError('connectionError'));
+    } finally {
+        client.release(false);
+    }
+}
+
 module.exports = {
     getCountryStates,
     getMembers,
     getUserApprovalStatus,
     handleLogIn_LogOut,
     getLookupMasterData,
-    getRolesByUserId
+    getRolesByUserId,
+    isUserNameTaken,
+    getEmail
 }

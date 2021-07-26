@@ -17,7 +17,6 @@ try {
 async function processSignInRequest(userInfo) {
 
     let client = await dbConnections.getConnection();
-    console.log("User Data" + JSON.stringify(userInfo));
     try {
         await client.query("BEGIN");
 
@@ -33,8 +32,8 @@ async function processSignInRequest(userInfo) {
         //   ) returning user_id;`
 
         let newUserInsStmt = `INSERT INTO public.t_user
-            (email_id, org_id, firebase_id, title, first_name, middle_name, last_name, about_yourself, created_date, member_type )
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning user_id;`;
+            (email_id, org_id, firebase_id, title, first_name, middle_name, last_name, about_yourself, created_date, member_type, user_name )
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning user_id;`;
 
         let newUserInsStmtValue = [
             userInfo.data.email,
@@ -45,9 +44,12 @@ async function processSignInRequest(userInfo) {
             userInfo.data.middleName,
             userInfo.data.lastName,
             userInfo.data.abtyrslf,
-            new Date().toISOString(),
-            userInfo.data.memberType
+            new Date().toUTCString(),
+            userInfo.data.memberType,
+            userInfo.data.userName
         ];
+
+        console.log("inserting into t_user " + newUserInsStmtValue);
 
         let result = await client.query(newUserInsStmt, newUserInsStmtValue);
         //  console.log("2", this.userId);
@@ -58,19 +60,11 @@ async function processSignInRequest(userInfo) {
 
 
         let newPersonTblInsQuery = `INSERT INTO public.t_person
-            (user_id, dob,  mobile_no, created_by, created_date)
-            VALUES($1 , $2, $3, $4, $5);`;
+            (user_id, dob,  mobile_no, created_by, created_date, family_id)
+            select $1 , $2, $3, $4, $5, nextval('s_family') returning family_id;`;
 
-        let newPersonTblInsQueryValue = [
-            newUserId,
-            //userInfo.data.dob,
-            userInfo.data.dob == '' ? null : userInfo.data.dob,
-            userInfo.data.mobileNo,
-            newUserId,
-            new Date().toISOString()
-        ];
-
-        await client.query(newPersonTblInsQuery, newPersonTblInsQueryValue);
+        let tPersonQryRes = await client.query(newPersonTblInsQuery, [newUserId, userInfo.data.dob == '' ? null : userInfo.data.dob,
+            userInfo.data.mobileNo, newUserId, new Date().toUTCString()]);
 
         // }
         // else {
@@ -204,6 +198,7 @@ async function processGetUserMetaDataRequest(uid) {
                 vu.url menu_url,
                 vu.firebase_id fbuid,
                 vu.icon_path menu_icon,
+                vu.family_id, 
                  vu.perm_name, 
                  vu.user_org org_name, 
                  vu.user_org_id org_id,
@@ -244,10 +239,12 @@ async function processGetUserMetaDataRequest(uid) {
             metaData.lastName = res.rows[0].last_name;
             metaData.dob = res.rows[0].dob;
             metaData.aboutYourself = res.rows[0].about_yourself;
+            metaData.familyId = res.rows[0].family_id
             metaData.orgName = res.rows[0].org_name;
             metaData.orgId = res.rows[0].org_id;
             metaData.membershipType = res.rows[0].membership_type
-            metaData.lastLoggedIn = lastLoggedInRes.rows[0].last_logged_in
+            if (lastLoggedInRes.rowCount > 0)
+                metaData.lastLoggedIn = lastLoggedInRes.rows[0].last_logged_in
             metaData.mobile_no = res.rows[0].mobile_no;
 
             if (res.rows[0].is_approved == true) {
@@ -303,8 +300,8 @@ async function processGetUserMetaDataRequest(uid) {
                             url: row.menu_url,
                             icon: row.menu_icon
                         });
-                        
-                        if (roles.indexOf(row.role_name)  === -1 && row.role_name !== null)
+
+                        if (roles.indexOf(row.role_name) === -1 && row.role_name !== null)
                             roles.push(row.role_name)
                     }
 
@@ -319,42 +316,16 @@ async function processGetUserMetaDataRequest(uid) {
                 metaData.menus = menus;
                 metaData.roles = roles;
 
-                console.log("metaData.userId", metaData.userId);
-
-
-
-                if (isFamilyHead == true) {
-
-                    query1 = `with family_tree as (select family_member_id user_id, relationship 
-                        from t_person_relationship tpr 
-                        where tpr.family_head_id = '${metaData.userId}'
-                        and is_deleted != true
-                        )
-                        select distinct vu.user_id,vu.baptismal_name, vu.email_id, vu.title,
-                        vu.first_name, vu.middle_name, vu.last_name,
-                        vu.dob, vu.mobile_no, family_tree.relationship from v_user vu, family_tree
-                        where vu.user_id = family_tree.user_id;`
-
-                }
-                else {
-
-                    query1 = `with family_tree as (		select distinct tpr3.family_head_id user_id, 'Family Head' relationship 
-                                            from t_person_relationship tpr2, t_person_relationship tpr3 
-                                            where tpr2.family_member_id = '${metaData.userId}'
-                                            and tpr3.family_head_id = tpr2.family_head_id and tpr3.is_deleted != true
-                                        union 
-                                            select distinct tpr3.family_member_id user_id, tpr3.relationship 
-                                            from t_person_relationship tpr2, t_person_relationship tpr3 
-                                            where tpr2.family_member_id = '${metaData.userId}'
-                                            and tpr3.family_head_id = tpr2.family_head_id and tpr3.is_deleted != true
-                                            and tpr3.family_member_id != '${metaData.userId}'
-                                        )
-                                        select distinct vu.user_id,vu.baptismal_name, vu.email_id, vu.title,
-                                        vu.first_name, vu.middle_name, vu.last_name,
-                                        vu.dob, vu.mobile_no, family_tree.relationship from v_user vu, family_tree
-                                        where vu.user_id = family_tree.user_id;`
-
-                }
+                let query1 = `  select tu.user_id, tp.baptismal_name, tu.email_id, tu.title,
+                                tu.first_name, tu.middle_name, tu.last_name,
+                                tp.dob, tp.mobile_no, tpf.relationship,
+                                tu.user_name, tu.is_family_head 
+                                from t_person_family tpf 
+                                inner join t_user tu on tpf.family_member_id = tu.user_id 
+                                inner join t_person tp on tpf.family_member_id = tp.user_id  
+                                where tpf.is_deleted = false 
+                                and tpf.family_id =  ${metaData.familyId}
+                                and tpf.family_member_id != ${metaData.userId};`
 
                 let res1 = await client.query(query1);
 
@@ -371,6 +342,8 @@ async function processGetUserMetaDataRequest(uid) {
                     member.relationship = row.relationship;
                     member.relationshipId = row.relationship_id;
                     member.baptismalName = row.baptismal_name;
+                    member.isMemberFamilyHead = row.is_family_head;
+                    member.userName = row.user_name;
                     memberDetails.push(member);
                 }
 
@@ -794,7 +767,7 @@ async function getEventCategory() {
         let getEventCategory = `select event_category_id id, name, description ,school_grade_from,school_grade_to from t_event_category;`
         let res = await client.query(getEventCategory);
         if (res && res.rowCount > 0) {
-            console.log("In response" + res);
+            // console.log("In response" + res);
             let eventCategory = [];
             for (let row of res.rows) {
                 let events = {};
@@ -919,7 +892,7 @@ async function getEventData(userId, eventType) {
         console.log(`Fetching event data for ${userId} user.`)
         if (eventType === 'for_judgement') {
 
-                getEventData = ` select distinct 
+            getEventData = ` select distinct 
                         te.event_id,
                         te."name",
                         te.event_type e, 
@@ -930,7 +903,7 @@ async function getEventData(userId, eventType) {
                 join t_event te on te.event_id = tecsm.event_id 
                     where user_id = ${userId}
                     and te.is_deleted = false;`
-                    // and  tecm.is_attendance_submitted = true
+            // and  tecm.is_attendance_submitted = true
         }
         if (eventType === 'review_pending') {
 
@@ -968,7 +941,7 @@ async function getEventData(userId, eventType) {
                     join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
                     --where tecsm.is_score_submitted = true
                     order by te.end_date desc;`
-                    // and event_start_date >= current_date
+            // and event_start_date >= current_date
 
         }
 
@@ -1108,6 +1081,11 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                 (select ${userData.userId}, role_id from t_role where name = 'Family Head');`
             await client.query(insertRoleMapping)
             console.log('User is family head gave him add member permission');
+
+            console.log( userData.familyId, userData.userId, 'Family Head', userData.userId, new Date().toUTCString());
+            await client.query(reqOpQueries.insertFamilyHeadRel, [
+                userData.familyId, userData.userId, 'Family Head',  new Date().toUTCString()]);
+
         }
         if (userData.isFamilyHead == false || userData.isFamilyHead == "false") {
 
@@ -1303,14 +1281,16 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             SET school_id =$1,
             school_grade= $2,
             school_year_start_date= $3,
-            school_year_end_date= $4
-            WHERE student_id=$5 and school_grade= $2;`
+            school_year_end_date= $4,
+            term_id=$5
+            WHERE student_id=$6 and school_grade= $2;`
 
             const updateSundaySchoolDtlsValues = [
                 userData.sunSchoolId,
                 userData.sunSchoolGrade,
-                userData.sunSchoolAcaYrStrtDate,
-                userData.sunSchoolAcaYrEndDate,
+                userData.sunSchoolAcaYrStrtDate == '' ? null : userData.sunSchoolAcaYrStrtDate,
+                userData.sunSchoolAcaYrEndDate == '' ? null : userData.sunSchoolAcaYrEndDate,
+                userData.termDetailId,
                 userData.userId
             ];
 
@@ -1324,16 +1304,18 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                  school_id,
                  school_grade, 
                  school_year_start_date, 
-                 school_year_end_date)
-            VALUES($1, $2, $3, $4, $5);`
+                 school_year_end_date,
+                 term_id)
+            VALUES($1, $2, $3, $4, $5 , $6);`
 
 
                 const insertSundaySchoolDtlsValues = [
                     userData.userId,
                     userData.sunSchoolId,
                     userData.sunSchoolGrade,
-                    userData.sunSchoolAcaYrStrtDate,
-                    userData.sunSchoolAcaYrEndDate
+                    userData.sunSchoolAcaYrStrtDate == '' ? null : userData.sunSchoolAcaYrStrtDate,
+                    userData.sunSchoolAcaYrEndDate == '' ? null : userData.sunSchoolAcaYrEndDate,
+                    userData.termDetailId
                 ];
 
                 await client.query(insertSundaySchoolDtls, insertSundaySchoolDtlsValues);
@@ -1345,12 +1327,13 @@ async function processUpdateUserRoles(userData, loggedInUser) {
         if ((userData.memberDetails != undefined || userData.memberDetails != null) && userData.isFamilyHead === true) {
             console.debug('*******  Family Member Data Processing ********')
             if (userData.memberDetails.length > 0) {
-                let existingMembers = [];
+                let existingMembers = [userData.userId];
                 userData.memberDetails.forEach((element) => { if (element.userId !== '') existingMembers.push(element.userId) });
                 if (existingMembers.length > 0) {
                     let tempQuery = reqOpQueries.deleteMemberRelationship.replace('$5', existingMembers.join(','));
                     let delNonExistingRelRes = await client.query(tempQuery,
-                        [true, userData.updatedBy, new Date().toUTCString(), userData.userId]);
+                        [true, userData.userId, new Date().toUTCString(), userData.familyId]);
+
                     if (delNonExistingRelRes.rowCount > 0)
                         console.debug(`Deleted relationship's relationship_ids are : ${JSON.stringify(delNonExistingRelRes.rows)}`);
                 }
@@ -1378,9 +1361,18 @@ async function processUpdateUserRoles(userData, loggedInUser) {
 
                         let updatePerRelRes = await client.query(reqOpQueries.updateRelationship,
                             [details.relationship, false, userData.updatedBy, new Date().toUTCString(),
-                            details.userId, userData.userId]);
+                            details.userId, userData.familyId]);
                         if (updatePerRelRes.rowCount > 0)
                             console.debug(` ${details.userId} member relation has been updated(in t_person_relationship table)`)
+
+                        if (details.isMemberFamilyHead === true || details.isMemberFamilyHead === 'true') {
+                            await client.query(reqOpQueries.updateIsFamHead, [true, details.userId]);
+                            await client.query(reqOpQueries.insertFamilyHeadRole, [details.userId])
+
+                        } else {
+                            await client.query(reqOpQueries.updateIsFamHead, [false, details.userId]);
+                            await client.query(reqOpQueries.deleteFamilyHeadRole, [details.userId])
+                        }
 
                     } else {
 
@@ -1395,11 +1387,15 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                             if (userData.emailId === details.emailId) {
                                 console.debug('Member is using parent\'s email id, creating new user!.')
 
+                                let isMemberFamilyHead = false;
+                                if (details.isMemberFamilyHead === true || details.isMemberFamilyHead === 'true')
+                                    isMemberFamilyHead = true;
+
                                 //inserting member details into t_user table
                                 let tUserRes = await client.query(reqOpQueries.insertMemberIntoUserTbl,
                                     [userData.orgId, userData.emailId, '', details.title,
                                     details.firstName, details.middleName, details.lastName,
-                                    userData.updatedBy, new Date().toUTCString(), 'Member', false]);
+                                    userData.updatedBy, new Date().toUTCString(), 'Member', false, isMemberFamilyHead]);
 
                                 if (tUserRes.rowCount > 0) {
                                     let newUserId = tUserRes.rows[0].user_id;
@@ -1408,7 +1404,9 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                     //inserting member details into t_person table
                                     let tPersonres = await client.query(reqOpQueries.insertMemberIntoPersonTbl,
                                         [newUserId, details.dob == '' ? null : details.dob,
-                                            details.mobileNo, userData.updatedBy, new Date().toISOString(), details.baptismalName])
+                                            details.mobileNo, userData.updatedBy, new Date().toISOString(),
+                                            details.baptismalName, userData.familyId])
+
                                     if (tPersonres.rowCount > 0)
                                         console.debug(`New member's data inserted in t_person table for user_is ${newUserId}.`);
 
@@ -1417,55 +1415,69 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                     if (roleAssignment.rowCount > 0)
                                         console.debug(`Member role assigned to new member, user_role_map_id is ${roleAssignment.rows[0].user_role_map_id}`);
 
-                                    let tPerRelMap = await client.query(reqOpQueries.insertPersonRelationship,
-                                        [userData.userId, newUserId, details.relationship, userData.updatedBy, new Date().toUTCString()]);
+                                    let tPerRelMap = await client.query(reqOpQueries.insertPersonPrelationshipTbl,
+                                        [userData.familyId, newUserId, details.relationship, false, userData.updatedBy, new Date().toUTCString()]);
 
                                     if (tPerRelMap.rowCount > 0)
-                                        console.debug(`New member's '${details.relationship}' relationship inserted,  relationship_id is ${tPerRelMap.rows[0].relationship_id}`);
+                                        console.debug(`New member's '${details.relationship}' relationship inserted, for family Id ${userData.familyId}`);
 
                                 } else throw 'Failed to insert new member\'s data into t_user table.';
 
                                 //Condition when member is using own email id.(Create firebase account) 
                             } else if (userData.emailId !== details.emailId) {
-                                console.debug('Member is using his//her own email id, so  creating new account in firebase and populating new member data into the tables')
-                                let fbuid;
-                                await firebase.auth().createUserWithEmailAndPassword(details.emailId, 'User#123!').then((data) => {
-                                    fbuid = data.user.uid;
-                                    console.debug('user is registred into firebase, Firebase ID : ' + fbuid);
-                                }).catch((error) => {
-                                    throw `Caught an error while creating member accout in firebase as : ${JSON.stringify(error)}`;
-                                });
 
-                                if (fbuid) {
-                                    //inserting data into t_user table,
-                                    let tUserRes = await client.query(reqOpQueries.insertMemberIntoUserTbl,
-                                        [userData.orgId, details.emailId, fbuid, details.title,
-                                        details.firstName, details.middleName, details.lastName,
-                                        userData.updatedBy, new Date().toUTCString(), 'Member', false]);
+                                //To check provided email id belogs to existing user if yes add that user to family tree.
+                                let isNewMemberAlreadyExists = false;
+                                await checkAndAddUserToFamilyTree(client, userData.familyId, details, userData.userId)
+                                    .then(res => isNewMemberAlreadyExists = res);
 
-                                    if (tUserRes.rowCount > 0) {
-                                        let newUserId = tUserRes.rows[0].user_id;
-                                        console.debug(`New member has been created, user id is : ${newUserId}`);
+                                if (isNewMemberAlreadyExists === false) {
+                                    console.debug('Member is using his//her own email id, so creating new account in firebase and populating new member data into the tables.')
+                                    let fbuid;
+                                    await firebase.auth().createUserWithEmailAndPassword(details.emailId, 'User#123!').then((data) => {
+                                        fbuid = data.user.uid;
+                                        console.debug('user is registred into firebase, Firebase ID : ' + fbuid);
+                                    }).catch((error) => {
+                                        throw `Caught an error while creating member accout in firebase as : ${JSON.stringify(error)}`;
+                                    });
 
-                                        //inserting member details into t_person table
-                                        let tPersonres = await client.query(reqOpQueries.insertMemberIntoPersonTbl,
-                                            [newUserId, details.dob == '' ? null : details.dob,
-                                                details.mobileNo, userData.updatedBy, new Date().toUTCString(), details.baptismalName])
-                                        if (tPersonres.rowCount > 0)
-                                            console.debug(`New member's data inserted in t_person table for user_is ${newUserId}.`);
+                                    if (fbuid) {
+                                        //inserting data into t_user table,
+                                        let tUserRes = await client.query(reqOpQueries.insertMemberIntoUserTbl,
+                                            [userData.orgId, details.emailId, fbuid, details.title,
+                                            details.firstName, details.middleName, details.lastName,
+                                            userData.updatedBy, new Date().toUTCString(), 'Member', false, details.userName]);
 
-                                        //Assigning member role for newly created member
-                                        let roleAssignment = await client.query(reqOpQueries.assignMemberRoleToUsr, [newUserId]);
-                                        if (roleAssignment.rowCount > 0)
-                                            console.debug(`Member role assigned to new member, user_role_map_id is ${roleAssignment.rows[0].user_role_map_id}`);
+                                        if (tUserRes.rowCount > 0) {
+                                            let newUserId = tUserRes.rows[0].user_id;
+                                            console.debug(`New member has been created, user id is : ${newUserId}`);
 
-                                        let tPerRelMap = await client.query(reqOpQueries.insertPersonRelationship,
-                                            [userData.userId, newUserId, details.relationship, userData.updatedBy, new Date().toUTCString()]);
+                                            //inserting member details into t_person table
+                                            let tPersonres = await client.query(reqOpQueries.insertMemberIntoPersonTbl,
+                                                [newUserId, details.dob == '' ? null : details.dob,
+                                                    details.mobileNo, userData.updatedBy, new Date().toUTCString(),
+                                                    details.baptismalName, userData.familyId])
+                                            if (tPersonres.rowCount > 0)
+                                                console.debug(`New member's data inserted in t_person table for user_is ${newUserId}.`);
 
-                                        if (tPerRelMap.rowCount > 0)
-                                            console.debug(`New member's '${details.relationship}' relationship inserted,  relationship_id is ${tPerRelMap.rows[0].relationship_id}`);
+                                            //Assigning member role for newly created member
+                                            let roleAssignment = await client.query(reqOpQueries.assignMemberRoleToUsr, [newUserId]);
+                                            if (roleAssignment.rowCount > 0)
+                                                console.debug(`Member role assigned to new member, user_role_map_id is ${roleAssignment.rows[0].user_role_map_id}`);
 
-                                    } else throw 'Failed to insert new member\'s data into t_user table.';
+                                            let tPerRelMap = await client.query(reqOpQueries.insertPersonPrelationshipTbl,
+                                                [userData.familyId, newUserId, details.relationship, false, userData.updatedBy, new Date().toUTCString()]);
+
+                                            if (tPerRelMap.rowCount > 0)
+                                                console.debug(`New member's '${details.relationship}' relationship inserted,   for family Id ${userData.familyId}`);
+
+                                            if (details.isMemberFamilyHead === true || details.isMemberFamilyHead === 'true') {
+                                                await client.query(reqOpQueries.updateIsFamHead, [true, newUserId]);
+                                                await client.query(reqOpQueries.insertFamilyHeadRole, [newUserId]);
+                                            }
+
+                                        } else throw 'Failed to insert new member\'s data into t_user table.';
+                                    }
                                 }
                             }
                         } else throw `Member name, email,title already exists.`;
@@ -1477,8 +1489,28 @@ async function processUpdateUserRoles(userData, loggedInUser) {
         /**********************Insert -> t_user_role_mapping ************************* */
         //console.log("10");
 
+        if (userData.isStudent == true) {
+            const insertStudentRole = `INSERT INTO t_user_role_mapping (role_id, user_id, is_deleted, role_start_date, role_end_date)
+            select (select role_id from t_role tr where tr."name" = 'Sunday School Student'),
+            		$1, $2, $3, $4
+            WHERE NOT EXISTS (
+            SELECT 1 FROM t_user_role_mapping turm
+                                   WHERE turm.role_id = (select role_id from t_role tr where tr."name" = 'Sunday School Student') 
+                                   and turm.user_id = $1
+                                   and turm.is_deleted = $2
+                                   );`;
+            insertStudentRoleValues = [userData.userId, false, userData.sunSchoolAcaYrStrtDate, userData.sunSchoolAcaYrEndDate];
+            await client.query(insertStudentRole, insertStudentRoleValues);
+        }
+        if (userData.isStudent == false) {
+            const updateStudentRole = `update t_user_role_mapping set is_deleted = true where role_id =  (select role_id from t_role tr where tr."name" = 'Sunday School Student')
+              and user_id = ${userData.userId};`;
+            await client.query(updateStudentRole);
+        }
+
+
         if (userData.roles != undefined || userData.roles != null) {
-            //  console.log("7");
+            console.log("7");
             /**********************Delete -> t_user_role_mapping ************************* */
             const deleteFromRoleMapping = `DELETE FROM public.t_user_role_mapping WHERE user_id='${userData.userId}';`
             await client.query(deleteFromRoleMapping);
@@ -1488,7 +1520,10 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             const deleteFromRoleContext = `DELETE FROM public.t_user_role_context WHERE user_id='${userData.userId}';`
             client.query(deleteFromRoleContext);
 
-            //console.log("9");
+            console.log("9");
+
+
+
 
 
 
@@ -1582,6 +1617,43 @@ async function processUpdateUserRoles(userData, loggedInUser) {
     } finally {
         client.release(false);
     }
+}
+
+
+async function checkAndAddUserToFamilyTree(client, familyId, member, familyHeadId) {
+
+    console.debug('Checking new user\'s existance.')
+    let result = await client.query(reqOpQueries.checkNewMemEmailAndRelationExists,
+        [member.emailId, member.firstName, member.lastName]);
+    console.log(JSON.stringify(result.rows))
+    if (result.rowCount > 0) {
+        let resRow = result.rows[0];
+        // condition for when member email id exists but relation to same of other family dosen't exists, Then add him current family head's family tree  
+        if (resRow.user_exists === true && resRow.user_family_related === false) {
+            console.debug('New member\'s email id already exists in the system and he does not have relation to any family.')
+
+            let tPerRelMap = await client.query(reqOpQueries.insertPersonPrelationshipTbl,
+                [familyId, resRow.user_id, member.relationship, false, familyHeadId, new Date().toUTCString()]);
+
+            if (tPerRelMap.rowCount > 0)
+                console.debug(`Existing user ${resRow.user_id} has been added to family. family id is  ${familyId}`);
+
+            // To update family id of the new member
+            await client.query(reqOpQueries.updateFamId, [familyId, resRow.user_id]);
+
+            // to set new user as family head
+            if (member.isMemberFamilyHead === true || member.isMemberFamilyHead === 'true') {
+                await client.query(reqOpQueries.updateIsFamHead, [true, resRow.user_id]);
+                await client.query(reqOpQueries.insertFamilyHeadRole, [resRow.user_id])
+            } else {
+                await client.query(reqOpQueries.updateIsFamHead, [false, resRow.user_id]);
+                await client.query(reqOpQueries.deleteFamilyHeadRole, [resRow.user_id])
+            }
+            return true;
+
+        }
+    } else return false;
+
 }
 
 async function getParishData() {

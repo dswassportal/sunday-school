@@ -46,9 +46,9 @@ const getUpcomingEvents = `select distinct te.event_id, te."name", te.event_type
                                     ) select org_id from child_orgs)
                             and te.registration_end_date >= current_date  and te.is_deleted != true;`;                                                
 
-const updateRelationship = `UPDATE t_person_relationship 
+const updateRelationship = `UPDATE t_person_family 
                             SET relationship= $1, is_deleted = $2, updated_by=$3 ,updated_date=$4 
-                            where family_member_id= $5 and family_head_id= $6 returning relationship_id;`;
+                            where family_member_id= $5 and family_id= $6;`;
 
 const toCheckIsMemberExistsWithSameName = `select 
                                             case when count(tu.user_id) > 0 then true else false end is_member_exists 
@@ -64,23 +64,23 @@ const toCheckIsMemberExistsWithSameName = `select
                                                 and tpr.is_deleted != true;`;              
                                                                                         
 const insertMemberIntoUserTbl = `INSERT INTO public.t_user
-                        (org_id, email_id, firebase_id, title, first_name, middle_name, last_name, created_by, created_date, member_type, is_approved )
-                        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning user_id;`;
+                        (org_id, email_id, firebase_id, title, first_name, middle_name, last_name, created_by, created_date, member_type, is_approved, user_name )
+                        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning user_id;`;
 
 const insertMemberIntoPersonTbl =  `INSERT INTO public.t_person
-                                    (user_id, dob,  mobile_no, created_by, created_date, baptismal_name )
-                                    VALUES($1 , $2, $3, $4, $5, $6);`;    
+                                    (user_id, dob,  mobile_no, created_by, created_date, baptismal_name, family_id)
+                                    VALUES($1 , $2, $3, $4, $5, $6, $7);`;    
                                     
 const assignMemberRoleToUsr = `insert into t_user_role_mapping (user_id, role_id)
                                 select $1, role_id from t_role where name = 'Member' returning user_role_map_id;`;                                    
                                             
-const insertPersonRelationship = `INSERT INTO t_person_relationship(
-                                    family_head_id, family_member_id, relationship, created_by, created_date)
-                                      VALUES ($1, $2, $3, $4, $5) returning relationship_id;`;         
+// const insertPersonRelationship = `INSERT INTO t_person_relationship(
+//                                     family_head_id, family_member_id, relationship, created_by, created_date)
+//                                       VALUES ($1, $2, $3, $4, $5) returning relationship_id;`;         
                                       
- const deleteMemberRelationship = `UPDATE t_person_relationship
+ const deleteMemberRelationship = `UPDATE t_person_family
                                     SET  is_deleted=$1, updated_by=$2, updated_date=$3
-                                    WHERE family_head_id= $4 and family_member_id not in ($5) returning relationship_id;`; 
+                                    WHERE family_id= $4 and family_member_id not in ($5) ;`; 
                                     
 const updateTUserForMember = `UPDATE t_user
                             SET title=$1, first_name=$2, middle_name=$3, last_name=$4, updated_by=$5, updated_date=$6
@@ -88,7 +88,42 @@ const updateTUserForMember = `UPDATE t_user
                             
 const updateTPersonForMember = `UPDATE t_person
                                 SET  dob=$1, mobile_no=$2, baptismal_name=$3, updated_by=$4, updated_date=$5
-                                WHERE user_id= $6;`;                            
+                                WHERE user_id= $6;`;        
+                                
+const insertPersonPrelationshipTbl = ` INSERT INTO t_person_family
+                                    (family_id, family_member_id, relationship, is_deleted, created_by, created_date)
+                                    VALUES($1, $2, $3, $4, $5, $6);`                                
+
+const updateFamId = `UPDATE t_person SET family_id=$1 WHERE user_id=$2`;
+
+const updateIsFamHead = `update t_user set is_family_head = $1 where user_id =$2`; 
+
+const checkNewMemEmailAndRelationExists = `select 
+                                            user_id, 
+                                            case when count(user_id) > 0 then true else false end user_exists, 
+                                            case when count(tpf.family_member_id) > 0 then true else false end user_family_related 
+                                            from t_user tu
+                                            left join t_person_family tpf on tu.user_id = tpf.family_member_id 
+                                            and tpf.is_deleted = false
+                                            and tu.is_deleted = false 
+                                            where lower(tu.email_id) = lower($1) 
+                                            and lower(tu.first_name) = lower($2)
+                                            and lower(tu.last_name) = lower($3)
+                                            group by user_id;`;
+
+const insertFamilyHeadRole = `insert into t_user_role_mapping (user_id, role_id)
+                             (select $1, role_id from t_role where name = 'Family Head');`;                                            
+
+const deleteFamilyHeadRole = `delete from t_user_role_mapping 
+                            where user_id = $1 and role_id = (select role_id from t_role where name = 'Family Head');`;    
+                           
+const insertFamilyHeadRel = `INSERT INTO t_person_family (family_id, family_member_id, relationship, created_by, created_date)
+                             select $1, $2, $3, $2, $4
+                            WHERE NOT EXISTS (
+                            SELECT 1 FROM t_person_family tpf 
+                                                WHERE family_member_id = $2 
+                                                and is_deleted = false
+                                        );`;                             
 
 
 module.exports= {
@@ -101,8 +136,15 @@ module.exports= {
     insertMemberIntoUserTbl,
     insertMemberIntoPersonTbl,
     assignMemberRoleToUsr,
-    insertPersonRelationship,
+    // insertPersonRelationship,
     deleteMemberRelationship,
     updateTUserForMember,
-    updateTPersonForMember
+    updateTPersonForMember,
+    insertPersonPrelationshipTbl,
+    updateFamId,
+    updateIsFamHead,
+    checkNewMemEmailAndRelationExists,
+    insertFamilyHeadRole,
+    deleteFamilyHeadRole,
+    insertFamilyHeadRel
 }                                                

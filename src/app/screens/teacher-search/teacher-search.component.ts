@@ -242,14 +242,13 @@ export class TeacherSearchComponent implements OnInit {
 
 
     this.teacherSearchFormGroup = this.formBuilder.group({
-      dioceseName: new FormControl('',),
-      regionName: new FormControl('',),
-      parishName: new FormControl(''),
-     
-      firstName: new FormControl('',),
-      lastName: new FormControl('',),
-      phoneNumber: new FormControl('',),
-      emailId: new FormControl('',),
+      dioceseName: new FormControl('',Validators.required),
+      regionName: new FormControl('',Validators.required),
+      parishName: new FormControl('',Validators.required),
+      firstName: new FormControl('',Validators.required),
+      lastName: new FormControl('',Validators.required),
+      phoneNumber: new FormControl('',Validators.required),
+      emailId: new FormControl('',[Validators.required,Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
 
     });
 
@@ -366,6 +365,17 @@ export class TeacherSearchComponent implements OnInit {
     this.teacherSearchFormGroup.get('dioceseName').setValue([]);
     this.teacherSearchFormGroup.get('regionName').setValue([]);
     this.teacherSearchFormGroup.get('parishName').setValue([]);
+}
+
+checkValid() {
+  if(this.teacherSearchFormGroup.get('firstName').valid || this.teacherSearchFormGroup.get('lastName').valid || this.teacherSearchFormGroup.get('phoneNumber').valid
+  || this.teacherSearchFormGroup.get('dioceseName').valid || this.teacherSearchFormGroup.get('regionName').valid || this.teacherSearchFormGroup.get('parishName').valid
+  || this.teacherSearchFormGroup.get('emailId').valid)
+   {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 

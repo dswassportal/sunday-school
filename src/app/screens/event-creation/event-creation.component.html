@@ -22,7 +22,7 @@
 
                     <form [formGroup]="eventsDataFormGroup">
                         <ng-template matStepLabel>
-                            <span style="font-family: poppins;">Event Details</span>
+                            <span class="stepLableStyle"><b>Event Details</b></span>
                         </ng-template>
                         <div class="form-container">
 
@@ -44,7 +44,7 @@
                                 
                                 <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="eventType" 
                                     placeholder="Event Type" [settings]="dropdownSettingsEventType"
-                                    [data]="eventList" formControlName="eventType" (onSelect)="eventTypeSelChange()"
+                                    [data]="eventList" [disabled]="evntTypedisabled" formControlName="eventType" (onSelect)="eventTypeSelChange()"
                                     (onSelectAll)="onSelectAll($event)">
                                 </ng-multiselect-dropdown>
                                
@@ -87,7 +87,7 @@
                                 <!-- [disabled]="evntTypedisabled" -->
                              
                                 <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgType" placeholder="Event Level"
-                                     [settings]="dropdownSettingsEventLevel" [data]="orgs"
+                                     [settings]="dropdownSettingsEventLevel" [data]="orgs" [disabled]="evntTypedisabled"
                                     (onSelect)="onOrgSelect($event)" formControlName="orgType"
                                     (onSelectAll)="onSelectAll($event)">
                                 </ng-multiselect-dropdown>
@@ -117,7 +117,7 @@
                                
                                 <!-- [disabled]="evntTypedisabled" -->
                                 <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgId" placeholder="Event Executed By"
-                                     [settings]="dropdownSettingsEventExecutedBy" [data]="orgDetails"
+                                     [settings]="dropdownSettingsEventExecutedBy" [data]="orgDetails"  [disabled]="evntTypedisabled"
                                     formControlName="orgId"
                                     (onSelectAll)="onSelectAll($event)">
                                 </ng-multiselect-dropdown>
@@ -286,7 +286,9 @@
 
                     <form [formGroup]="eventCategoriesFormGroup">
                         <ng-template matStepLabel>
-                            <span style="font-family: poppins;">Event Categories</span>
+                            <span class="stepLableStyle"><b>Event Categories</b></span>
+                            <div class="stepDisplayMessageStyle" mat-dialog-content>We list from Config Table By Event(if applicable).
+                             Allow user to add new categories & delete category in section .</div>
                         </ng-template>
                         <div class="form-container">
 
@@ -379,7 +381,9 @@
                 <div class="container">
                     <form [formGroup]="eventGroupsFormGroup">
                         <ng-template matStepLabel>
-                            <span style="font-family: poppins;">Event Groups</span>
+                            <span class="stepLableStyle"><b>Event Groups</b></span><div class="stepDisplayMessageStyle" mat-dialog-content>We list group from Config Table By Event(if applicable).
+                                 Allow user to add new Group & delete Group in section .</div>
+
                         </ng-template>
                         <div class="form-container">
 
@@ -476,7 +480,9 @@
                 <div class="container">
                     <form [formGroup]="eventCatGroupMapFormGroup">
                         <ng-template matStepLabel>
-                            <span style="font-family: poppins;">Event Category Group Mapping</span>
+                            <span class="stepLableStyle"><b>Event Category Group Mapping</b></span>
+                            <div class="stepDisplayMessageStyle" mat-dialog-content>We allow user to map Categories And Group from Category Define
+                                and Group Define in the <br> above 2 Section.Allow user to Unmap/Remove Mapping if Required.</div>
                         </ng-template>
                         <div class="form-container">
 
@@ -527,7 +533,9 @@
                 <div class="container">
                     <form [formGroup]="eventVenueAssignFormGroup">
                         <ng-template matStepLabel>
-                            <span style="font-family: poppins;">Event Venue Assignment</span>
+                            <span class="stepLableStyle"><b>Event Venue Assignment</b></span>
+                            <div class="stepDisplayMessageStyle" mat-dialog-content>We List Venue Associated to the Event Type & Org.
+                                 Allow users To Add Or Remove Venue From This Section.</div>
                         </ng-template>
                         <div class="form-container">
 
@@ -553,7 +561,8 @@
                 <div class="container">
                     <form [formGroup]="eventProctorAssignFormGroup">
                         <ng-template matStepLabel>
-                            <span style="font-family: poppins;">Event Proctor Assignment</span>
+                            <span class="stepLableStyle"><b>Event Proctor Assignment</b></span>
+                            <div class="stepDisplayMessageStyle" mat-dialog-content>For Each Venue In The Above Event Section - Allow user to Assign Proctor,Remove Proctor.</div>
                         </ng-template>
                         <div class="form-container">
 
@@ -604,7 +613,9 @@
                 <div class="container">
                     <form [formGroup]="eventJudgeAssignFormGroup">
                         <ng-template matStepLabel>
-                            <span style="font-family: poppins;">Event Judge Assignment</span>
+                            <span class="stepLableStyle"><b>Event Judge Assignment</b></span>
+                            <div class="stepDisplayMessageStyle" mat-dialog-content>For Each Category & Group In The Above Mapping. 
+                                Allow One Or More Judges & delete the Judges.</div>
                         </ng-template>
                         <div class="form-container">
 
@@ -755,7 +766,11 @@
             <mat-step *ngIf="isEvaluatorRequired" [stepControl]="eventEvaluatorAssignFormGroup">
                 <div class="container">
                     <form [formGroup]="eventEvaluatorAssignFormGroup">
-                        <ng-template matStepLabel>Event Evaluator Assignment</ng-template>
+                        <ng-template matStepLabel> 
+                            <span class="stepLableStyle"><b>Event Evaluator Assignment</b></span>
+                            <div class="stepDisplayMessageStyle" mat-dialog-content>Applicable To Exam Only. Allow One Or More Evaluator Setup
+                                Event Type - Diploma,TTC,Sunday School Mid Term And Sunday School Final Term.</div>
+                        </ng-template>
                         <div class="form-container">
 
 
@@ -794,7 +809,9 @@
             <mat-step *ngIf="isQuestionnaireRequired" [stepControl]="questionnaireDataFormGroup">
                 <div class="container">
                     <form [formGroup]="questionnaireDataFormGroup">
-                        <ng-template matStepLabel>Event Questionaries</ng-template>
+                        <ng-template matStepLabel>
+                            <span class="stepLableStyle"><b>Event Questionaries</b></span>
+                        </ng-template>
                         <div class="form-container">
 
                             <div style="margin-left: 83.7%; padding-bottom: 1%;" class="row">
@@ -874,9 +891,15 @@
         </mat-divider>
 
         <div class="row" style="padding-top: 1%;">
-            <div class="col text-center">
-                <button mat-raised-button type="submit" class="mbutton" (click)="createEvent()">
-                    <span style="font-family: poppins;"> Save</span></button>
+            <div class="col text-center ">
+                <!-- 5px 6px 2px #363535; 
+                text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+                    #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+                background-color: white;-->
+                <button mat-raised-button type="submit" class="mbutton saveButton" (click)="createEvent()" >
+                    <span class="rounded saveButtonSpan"> Save</span>
+                
+                </button>
             </div>
         </div>
 

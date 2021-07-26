@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { uiCommonUtils } from '../common/uiCommonUtils'
 import { environment } from '../../environments/environment';
+import { map } from 'rxjs/operators'
 
 @Injectable({
   providedIn: 'root'
@@ -231,7 +232,7 @@ export class ApiService {
   }
 
 
-  uploadfiles(url: string,formData: any){
+  uploadfiles(url: string, formData: any) {
     let headerObj = new HttpHeaders({
       'Authorization': localStorage.getItem('chUserToken')!,
       'Content-Type': 'multipart/form-data'
@@ -239,5 +240,10 @@ export class ApiService {
     return this.http.post(`${this._baseUrl}/${url}`, formData);
   }
 
+  downloadEventDoc(attachment: any): any {
+    return this.http.get(`${this._baseUrl}/getEventDoc?docId=${attachment.attId}`)
+      .pipe(map((data: any) => {
+        return new Blob([new Uint8Array(data.data.fileData.data)], { type: data.data.mimeType });
+      }))
+  }
 }
-

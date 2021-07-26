@@ -1,0 +1,237 @@
+<div class="container mt-4">
+  <mat-card class="shadow">
+      
+    <div class="row">
+
+        <h1 class="col-md-12">My Profile</h1>
+      </div>
+    
+  <form *ngIf="isApprovedUserLoggedIn" (change)="isDirty = true" [formGroup]="myprofileform">
+      
+    <div class="row" style="padding-left: 1.6%;">
+
+      <mat-form-field style="width:10%;">
+        <mat-label>Title</mat-label>
+        <!--<mat-select matNativeControl required formControlName="title">
+          <mat-option value="His Grace">His Grace</mat-option>
+          <mat-option value="Very Rev Fr. Dr">Very Rev Fr. Dr</mat-option>
+          <mat-option value="Very Rev">Very Rev</mat-option>
+          <mat-option value="Fr">Fr</mat-option>
+          <mat-option value="Rev Fr. Dr">Rev Fr. Dr</mat-option>
+          <mat-option value="Rev Fr.">Rev Fr.</mat-option>
+          <mat-option value="Mr">Mr</mat-option>
+          <mat-option value="Ms">Ms</mat-option>
+          <mat-option value="Mrs">Mrs</mat-option>
+          <mat-option value="Dr">Dr</mat-option>
+           <option *ngFor = "let role of roledata" [value]=role.id>{{role.name}} </option> 
+        </mat-select>-->
+        <mat-select required id="title" formControlName = "title" placeholder="title" >
+          <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+
+      <mat-form-field style="width:30%;padding-left: 1%;">
+        <mat-label>First Name</mat-label>
+        <input style="text-transform: capitalize;" required id="firstName" matInput formControlName="firstName" placeholder="Enter First Name" />
+      </mat-form-field>
+
+      <mat-form-field style="width:30%;padding-left: 1%;">
+        <mat-label>Middle Name</mat-label>
+        <!--required-->
+        <input style="text-transform: capitalize;"  id="middleName" matInput formControlName="middleName" placeholder="Enter Middle Name" />
+      </mat-form-field>
+
+      <mat-form-field style="width:30%;padding-left: 1%;padding-right: 1.4%;">
+        <mat-label>Last Name</mat-label>
+        <input style="text-transform: capitalize;" required id="lastName" matInput formControlName="lastName" placeholder="Enter Last Name" />
+      </mat-form-field>
+
+    </div>
+
+
+
+    <div class="row">
+      <mat-form-field class="col-md">
+        <mat-label>Nick Name</mat-label>
+        <input style="text-transform: capitalize;" id="lastName" matInput formControlName="nickName" />
+      </mat-form-field>
+
+      <mat-form-field class="col-md">
+        <mat-label>Baptismal Name</mat-label>
+        <input style="text-transform: capitalize;" id="baptismalName" matInput formControlName="baptismalName" />
+      </mat-form-field>
+
+
+      <mat-form-field class="col-md">
+        <mat-label>Date of Birth</mat-label>
+         <!--required-->
+        <input [max]="maxDate" matInput type="input" [matDatepicker]="picker"  id="dob" formControlName="dob">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+    </div>
+    <div class="row">
+      <mat-form-field class="col-md-4">
+        <mat-label style="padding-left: 15%;">Mobile Number *</mat-label>
+         <!--<input required id="mobileNo" matInput formControlName="mobileNo" ng2TelInput maxlength="10" (keypress)="keyPress($event)"
+          placeholder="Enter Mobile Number" /> 
+        [preferredCountries]="['us', 'in']"
+        [onlyCountries]= "['us','in']"-->
+          
+        <ngx-mat-intl-tel-input id="mobileNo" matInput (keypress)="keyPress($event)" 
+        [onlyCountries]= "['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']"
+        [enableAutoCountrySelect]="true" name="mobileNo" formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true"></ngx-mat-intl-tel-input>
+
+          <!-- <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
+            <span *ngIf="myprofileform.controls.mobileNo.errors.required">This field is mandatory.</span>
+             <span *ngIf="myprofileform.controls.mobileNo.errors.pattern">Enter 10 digit number.</span> 
+        </mat-error> -->
+        <!-- <mat-error *ngIf="myprofileform.controls['mobileNo']?.errors?.required">Required Field</mat-error>
+        <mat-error *ngIf="myprofileform.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</mat-error> -->
+     
+         <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
+            <span *ngIf="myprofileform.controls['mobileNo']?.errors?.required">This field is mandatory.</span>
+             <span *ngIf="myprofileform.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="col-md-4">
+        <mat-label style="padding-left: 15%;">Home Phone Number</mat-label>
+        <!-- <input id="homePhoneNo" matInput formControlName="homePhoneNo" ng2TelInput  maxlength="10" (keypress)="keyPress($event)"
+          placeholder="Enter Home Phone Number" />
+          <mat-error *ngIf="myprofileform.controls.homePhoneNo.touched && myprofileform.controls.homePhoneNo.invalid">
+            <span *ngIf="myprofileform.controls.homePhoneNo.errors.required">This field is mandatory.</span>
+            <span *ngIf="myprofileform.controls.homePhoneNo.errors.pattern">Enter 10 digit number.</span>
+        </mat-error> -->
+        <ngx-mat-intl-tel-input id="homePhoneNo" matInput (keypress)="keyPress($event)" 
+          [onlyCountries]= "['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']"
+          [enableAutoCountrySelect]="true" name="homePhoneNo" formControlName="homePhoneNo" [preferredCountries]="['us']" [enableRequired]="true">
+        </ngx-mat-intl-tel-input>
+        <mat-error *ngIf="myprofileform.controls.homePhoneNo.touched && myprofileform.controls.homePhoneNo.invalid">
+          <!-- <span *ngIf="myprofileform.controls['homePhoneNo']?.errors?.required">This field is mandatory.</span> -->
+           <span *ngIf="myprofileform.controls['homePhoneNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span> 
+      </mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="col-md-4">
+        <mat-label>Email Address</mat-label>
+        <input id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address"/>
+        <mat-error *ngIf="myprofileform.controls.emailId.touched && myprofileform.controls.emailId.invalid">
+          <span *ngIf="myprofileform.controls.emailId.errors.required">This field is mandatory.</span>
+          <span *ngIf="myprofileform.controls.emailId.errors.pattern">Enter valid email id.</span>
+      </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="row">
+      <mat-form-field class="col-md-12">
+        <mat-label>Address Line 1</mat-label>
+        <input id="addressLine1" matInput formControlName="addressLine1" placeholder="Enter Address" />
+      </mat-form-field>
+    </div>
+    <div class="row">
+      <mat-form-field class="col-md-12">
+        <mat-label>Address Line 2</mat-label>
+        <input id="addressLine2" matInput formControlName="addressLine2" placeholder="Enter Address" />
+      </mat-form-field>
+    </div>
+    <div class="row">
+      <mat-form-field class="col-md-12">
+        <mat-label>Address Line 3</mat-label>
+        <input id="addressLine3" matInput formControlName="addressLine3" placeholder="Enter Address" />
+      </mat-form-field>
+    </div>
+    <div class="row">
+      <mat-form-field class="col-md">
+        <mat-label>City</mat-label>
+        <!--required-->
+        <input  id="city" matInput formControlName="city" placeholder="Enter Address" />
+      </mat-form-field>
+
+      <mat-form-field class="col-md">
+        <mat-label>Postal Code</mat-label>
+        <!--required-->
+        <input  id="postalCode" matInput formControlName="postalCode" placeholder="Enter Address" />
+      </mat-form-field>
+
+      <mat-form-field class="col-md">
+        <mat-label>Parish</mat-label>
+        <!-- <input id="parish" matInput formControlName="parish" readonly /> -->
+       <!-- readonly -->
+        <mat-select [disabled] = true id="parish" formControlName = "parish" placeholder="Parish">
+          <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="row">
+
+        <mat-form-field class="col-md-6">
+            <mat-label>Country</mat-label>
+            <!--required [(ngModel)]="selectedCountry"-->
+            <select matNativeControl  id="country" formControlName="country" placeholder="Select Country"  (change)="changeCountry($event)">
+                    <option *ngFor="let country of countries" [value]="country.countryName">{{country.countryName}}</option>
+            </select>
+    </mat-form-field>
+      <mat-form-field class="col-md-6">
+          <mat-label>State/Province</mat-label>
+           <!--required-->
+          <select  matNativeControl  id="state" formControlName="state" placeholder="Select State/Province">
+            <option *ngFor="let state of states" [value]="state">{{state}}</option>
+          </select>
+        </mat-form-field>
+    </div>
+
+    <div class="row">
+      <mat-form-field class="col-md">
+        <mat-label>Marital Status</mat-label>
+         <!--required-->
+        <mat-select matNativeControl  id="maritalStatus" formControlName="maritalStatus"
+         placeholder="Enter Country">
+          <!-- <option value="married">Married</option>
+          <option value="unmarried">Unmarried</option> -->
+
+       <!-- (selectionChange)="onSelectionChanged($event)" -->
+       
+          <mat-option *ngFor="let married of maritalstatus " [value]="married">
+              {{married}}
+            </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="col-md">
+          <mat-label>Date of Marriage</mat-label>
+           <!--required-->
+          <input [disabled]="myprofileform.value.maritalStatus=='Unmarried'" [max]="maxDate" matInput type="input" [matDatepicker]="marriageDatepicker"  id="dateofMarriage"
+          formControlName="dateofMarriage">
+          <mat-datepicker-toggle matSuffix [for]="marriageDatepicker"></mat-datepicker-toggle>
+          <mat-datepicker #marriageDatepicker></mat-datepicker>
+        </mat-form-field>
+    </div>
+    <div class="row">
+      <mat-form-field class="col-md-12">
+        <mat-label>About Yourself</mat-label>
+        <textarea id="aboutYourself" matInput formControlName="aboutYourself" placeholder="Enter About Yourself">
+  </textarea>
+      </mat-form-field>
+    </div>
+
+  </form>
+ 
+
+
+<div class="col text-center">
+         
+    <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
+    </mat-divider>
+    
+      <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
+    <button mat-button type="submit" mat-button class="mbutton" style="margin-top: 2%;"
+     (click)="updateUserProfile()">
+      Update</button>
+  </div>
+
+
+</mat-card>
+</div>
+
+

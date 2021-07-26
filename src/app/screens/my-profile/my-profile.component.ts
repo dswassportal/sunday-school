@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { uiCommonUtils } from 'src/app/common/uiCommonUtils';
 import { ComponentCanDeactivate } from 'src/app/component-can-deactivate';
 import { ApiService } from 'src/app/services/api.service';
@@ -8,7 +9,6 @@ import * as _moment from 'moment';
 import { default as _rollupMoment } from 'moment';
 import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
 import { AuthService } from '../../services/auth.service'
-
 const moment = _rollupMoment || _moment;
 
 
@@ -44,11 +44,56 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   areDatesDisabled: boolean = false;
   schoolGrade: any;
   parishDataList!: any[];
-
+  sundaySchoolTermsList!: any[];
+  selectedTerm!: any[];
+  GradeData!: any[];
+  SSchoolsApitermId: any;
+  dropdownSettingsSundaySchoolName: any;
+  dropdownSettingsSundaySchoolGrade: any;
+  dropdownSettingsSchoolGrade: any;
   /*MarrirdOptions: any[] = [
     { value: "unmarried", viewValue: "unmarried" },
     { value: "married", viewValue: "married" }
   ];*/
+
+
+  dropdownSettingsForSundaySchoolName: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'orgId',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 1,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+  dropdownSettingsForSundaySchoolGrade: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'orgId',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 1,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+  dropdownSettingsForSchoolGrade: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'orgId',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 1,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+  termId2: any;
+  termId3: any;
+  SSchoolsApitermEndtDate: any;
+  SSchoolsApitermStartDate: any;
+
   constructor(private apiService: ApiService,
     private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils, private authService: AuthService,
     public router: Router) { }
@@ -92,7 +137,10 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   titles!: any[];
   memberships!: any[];
   error = { validatePhoneNumber: true };
-  isFamilyMember :any;
+  isFamilyMember: any;
+  isFamilyHeadRadiobtn: boolean = false;
+  selectedRowData: any;
+  selectedUrl: any;
 
 
   //, Validators.required
@@ -153,10 +201,12 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       sunSchoolId: new FormControl('', Validators.required),
       sunSchoolGrade: new FormControl('', Validators.required),
       sunSchoolAcaYrStrtDate: new FormControl('', Validators.required),
-      sunSchoolAcaYrEndDate: new FormControl('', Validators.required)
+      sunSchoolAcaYrEndDate: new FormControl('', Validators.required),
+      termDetailId: new FormControl(''),
     });
-
-
+    this.dropdownSettingsSundaySchoolName = this.dropdownSettingsForSundaySchoolName;
+    this.dropdownSettingsSundaySchoolGrade = this.dropdownSettingsForSundaySchoolGrade;
+    this.dropdownSettingsSchoolGrade = this.dropdownSettingsForSchoolGrade;
 
     this.myprofileform.valueChanges.subscribe((res: any) => {
       if (res.isStudent == 'yes') {
@@ -167,19 +217,23 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     });
 
 
+
+
     if (this.isApprovedUserLoggedIn == true) {
 
       this.userId = this.alluserdata.userId;
       this.fbUid = this.alluserdata.fbUid;
-      this.isFamilyMember=this.alluserdata.isFamilyMember;
+      this.isFamilyMember = this.alluserdata.isFamilyMember;
+      this.isStudent = this.alluserdata.isStudent;
+      console.log(this.isStudent, "isStudent")
       this.isFamilyHead = this.alluserdata.isFamilyHead;
-      if(this.isFamilyHead == true){
+      if (this.isFamilyHead == true) {
         this.isReadOnly = false;
       }
-      else{
+      else {
         this.isReadOnly = true;
       }
-	    this.isStudent = this.alluserdata.isStudent;
+
       this.orgId = this.alluserdata.orgId;
       this.memberDetailsData = this.alluserdata.memberDetails;
       this.myprofileform.setControl('memberDetails', this.setMemberDetails(this.memberDetailsData));
@@ -206,13 +260,27 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       this.apiService.callGetService(`getSSchools`).subscribe((res: any) => {
 
-        this.schoolDataList = res.data.schoolData.schoolData;
-        //to default the dropdrown value
-        this.sundaySchoolNameSelect = this.schoolDataList[0].orgId;
-        this.sundaySchoolGradeSelect = this.schoolDataList[0].orgId;
+        this.schoolDataList = res.data.schoolData;
+        this.selectedTerm = res.data.currentTerm;
 
-        // console.log(this.schoolDataList);
+        this.studentDetailsForm.patchValue({
+          termDetailId: `${res.data.currentTerm.termYear} (${res.data.currentTerm.termStartDate} - ${res.data.currentTerm.termEndDate})`,
+          sunSchoolAcaYrEndDate: res.data.currentTerm.termEndDate,
+          sunSchoolAcaYrStrtDate: res.data.currentTerm.termStartDate,
+        });
+
+        // this.termId2=res.data.schoolData[0].orgId
+        //   console.log(this.termId2,"orgId")
+
+        // this.termId3=res.data.schoolData[0].grades.orgId
+        // console.log(this.termId3,"gradename")
+        this.SSchoolsApitermId = res.data.currentTerm.termDtlId;
+        this.SSchoolsApitermStartDate = res.data.currentTerm.termStartDate
+        this.SSchoolsApitermEndtDate = res.data.currentTerm.termEndDate
+
       });
+
+
 
       // this.apiService.callGetService('getCountryStates').subscribe((res: any) => {
       //   this.countries = res.data.countryState;
@@ -290,9 +358,12 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         sunSchoolStudentId: this.alluserdata.sundaySchoolDetails[0].studentId,
         sunSchoolId: this.alluserdata.sundaySchoolDetails[0].schoolId,
         sunSchoolGrade: this.alluserdata.sundaySchoolDetails[0].schoolGrade,
-        sunSchoolAcaYrStrtDate: this.alluserdata.sundaySchoolDetails[0].schoolYearStartDate,
-        sunSchoolAcaYrEndDate: this.alluserdata.sundaySchoolDetails[0].schoolYearEndDate,
+        //sunSchoolAcaYrStrtDate: this.alluserdata.sundaySchoolDetails[0].schoolYearStartDate,
+        //sunSchoolAcaYrEndDate: this.alluserdata.sundaySchoolDetails[0].schoolYearEndDate,
+
+
       });
+
 
       if (this.studentDetailsForm.sunSchoolId != null) {
         this.studentDetailsForm.patchValue({
@@ -364,11 +435,38 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   isStudentFn(event: any) {
     if (event.value == "true") {
       this.isStudentvar = true;
+      this.isStudent = true;
+      this.myprofileform.value.isStudent = true;
     }
     if (event.value == "false") {
       this.isStudentvar = false;
+      this.isStudent = false;
+      this.myprofileform.value.isStudent = false;
     }
     //this.isStudentvar = !this.isStudentvar;
+  }
+
+  isFamilyHeadOnChange(event: any){
+    const usernameValidation = this.myprofileform.get('memberDetails'); 
+    console.log("usernameValidation.controls[0].controls.username",usernameValidation.controls[0].controls.username);
+    if(event.event.value == "true"){
+      // this.isFamilyHeadRadiobtn = true;
+      usernameValidation.controls[0].controls.username.setValidators([Validators.required]);
+     // this.myprofileform.get('memberDetails').controls["userName"].setValidators(Validators.required);
+    }
+    if(event.event.value == "false"){
+      // this.isFamilyHeadRadiobtn = false;
+      usernameValidation.controls[0].controls.username.clearValidators();
+    }
+    // console.log("event", event);
+    // for(let row of this.myprofileform.value.memberDetails){
+    //   console.log("row", row);
+    // }
+
+    //this.myprofileform.memberDetails.at(0).controls.username.clearValidators();
+
+    usernameValidation.controls[0].controls.forEach((c: any) => c.clearValidators());
+
   }
 
   // @ViewChild(MatDatepicker) picker:any;
@@ -380,8 +478,24 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
 
 
+  onUserNameFocusOut(event: any) {
+    let userName = event.target.value.trim();
+    if (userName.length > 0) {
+        this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
+          if(res.data.status === "success"){
+            if(res.data.isTaken === true){
+              alert('Username already taken');
+              //return this.myprofileform.get('memberDetails').controls['userName'].setErrors({'invalid': true });
+            }
+          }
+        })
+    }
+  }
 
-
+  get memberDetails(): FormArray {
+    return this.myprofileform.get('memberDetails') as FormArray;
+      //return (<FormArray>this.myprofileform.get('memberDetails'));
+    }
 
   setMemberDetails(memberDetailsData: any): FormArray {
     const formArray = new FormArray([]);
@@ -396,7 +510,9 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         dob: e.dob,
         mobileNo: e.mobileNo,
         emailId: e.emailId,
-        userId : e.userId
+        userId: e.userId,
+        userName: e.userName,
+        isMemberFamilyHead: e.isMemberFamilyHead
       }));
     });
     return formArray;
@@ -408,7 +524,9 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     this.sundaySchoolGradeSelect = event;
   }
 
+  radioClick() {
 
+  }
 
   eventStartDateChange() {
     this.studentDetailsForm.patchValue({
@@ -426,6 +544,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   onaddbtnclick() {
     this.members = this.myprofileform.get('memberDetails') as FormArray;
     this.members.push(this.addfamilyMembers());
+    //this.myprofileform.get('memberDetails').clearValidators();
+  
   }
 
   addfamilyMembers(): FormGroup {
@@ -438,8 +558,10 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       baptismalName: new FormControl(''),
       dob: new FormControl('',),
       mobileNo: new FormControl('', [Validators.required]),
-      emailId: new FormControl('', [Validators.required, Validators.email]),
-      userId : new FormControl(''),
+      emailId: new FormControl('', [Validators.required, Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
+      userId: new FormControl(''),
+      userName: new FormControl('', [Validators.required, Validators.pattern('^[ A-Za-z0-9_.-]*$')]),
+      isMemberFamilyHead: new FormControl('')
     });
   }
   //event handler for the select element's change event
@@ -452,66 +574,88 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   }
 
   updateUserProfile() {
-    if ((this.myprofileform.invalid && this.isApprovedUserLoggedIn == true) ) {
+    if ((this.myprofileform.invalid && this.isApprovedUserLoggedIn == true)) {
       this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
-   //   return
+      //   return
     }
     else //{
-    if (this.isApprovedUserLoggedIn == true) {
-      this.myprofileform.value.userId = this.userId;
-      this.myprofileform.value.updatedBy = this.userId;
-      this.myprofileform.value.orgId = this.orgId;
-
-      let currFHValue = this.myprofileform.value.isFamilyHead;
-      if (currFHValue === true || currFHValue == 'true')
-        this.myprofileform.value.isFamilyHead = true;
-      else if (currFHValue === false || currFHValue == 'false')
-        this.myprofileform.value.isFamilyHead = false;
-      else if (currFHValue === '')
-        this.myprofileform.value.isFamilyHead = this.alluserdata.isFamilyHead
+      if (this.isApprovedUserLoggedIn == true) {
+        this.myprofileform.value.userId = this.userId;
+        this.myprofileform.value.updatedBy = this.userId;
+        this.myprofileform.value.orgId = this.orgId;
+        this.myprofileform.value.termDetailId = this.SSchoolsApitermId;
+        this.myprofileform.value.sunSchoolId = this.termId2;
+        this.alluserdata.isStudent = this.myprofileform.value.isStudent;
 
 
-      let currisStudentValue = this.myprofileform.value.isStudent;
-      if (currisStudentValue === true || currisStudentValue == 'true')
-        this.myprofileform.value.isStudent = true;
-      else if (currisStudentValue === false || currisStudentValue == 'false')
-        this.myprofileform.value.isStudent = false;
-      else if (currisStudentValue === '')
-        this.myprofileform.value.isStudent = this.alluserdata.isStudent
+        let currFHValue = this.myprofileform.value.isFamilyHead;
+        if (currFHValue === true || currFHValue == 'true')
+          this.myprofileform.value.isFamilyHead = true;
+        else if (currFHValue === false || currFHValue == 'false')
+          this.myprofileform.value.isFamilyHead = false;
+        else if (currFHValue === '')
+          this.myprofileform.value.isFamilyHead = this.alluserdata.isFamilyHead
 
 
-        
+        // let currisStudentValue = this.myprofileform.value.isStudent;
+        // if (currisStudentValue === false || currisStudentValue == 'yes')
+        //   this.myprofileform.value.isStudent = true;
+        // else if (currisStudentValue === false || currisStudentValue == 'no')
+        //   this.myprofileform.value.isStudent = false;
+        // else if (currisStudentValue === '')
+        //   this.myprofileform.value.isStudent = this.alluserdata.isStudent
 
 
-      if (this.alluserdata.emailId.toLowerCase() !== this.myprofileform.value.emailId.toLowerCase()) {
-        let confmMsgSt = 'You have changed your email address, You need to complete email verfication process for new email otherwise your account will be locked. Press OK to continue';
-        if (confirm(confmMsgSt)) {
-          this.authService.updateEmailAddress(this.myprofileform.value.emailId)?.then(() => {
-            this.invokeApi({
-              ...this.myprofileform.value,
-              ...this.studentDetailsForm.value,
-              respondWith: 'user_meta_data',
-              hasEmailChanged: true,
-              oldEmail: this.alluserdata.emailId
+
+        // this.myprofileform.valueChanges.subscribe((res: any) => {
+        //   if (res.isStudent == 'yes') {
+        //     this.myprofileform.value.isStudent = true;
+        //   } else if (res.isStudent == 'no') {
+        //     this.myprofileform.value.isStudent = false; 
+        //   }else if (res.isStudent === '')
+        //     this.myprofileform.value.isStudent = this.alluserdata.isStudent
+        // });
+        //this.isStudent = this.myprofileform.value.isStudent
+        console.log(this.isStudent, "student value");
+        console.log(this.myprofileform.value.isStudent, "studentvalue2")
+
+        if (this.alluserdata.emailId.toLowerCase() !== this.myprofileform.value.emailId.toLowerCase()) {
+          let confmMsgSt = 'You have changed your email address, You need to complete email verfication process for new email otherwise your account will be locked. Press OK to continue';
+          if (confirm(confmMsgSt)) {
+            this.authService.updateEmailAddress(this.myprofileform.value.emailId)?.then(() => {
+              this.invokeApi({
+                ...this.myprofileform.value,
+                ...this.studentDetailsForm.value,
+                respondWith: 'user_meta_data',
+                hasEmailChanged: true,
+                oldEmail: this.alluserdata.emailId,
+                familyId: this.alluserdata.familyId
+              })
+            }).catch((error: any) => {
+              console.log(error);
+              this.uiCommonUtils.showSnackBar("Session Expired!", "error", 3000);
             })
-          }).catch((error: any) => {
-            console.log(error);
-            this.uiCommonUtils.showSnackBar("Session Expired!", "error", 3000);
-          })
+          }
+        } else {
+          let payloadJson = {
+            ...this.myprofileform.value,
+            ...this.studentDetailsForm.value,
+            termDetailId: this.SSchoolsApitermId,
+            //sunSchoolId : this.termId2,
+
+            sunSchoolAcaYrStrtDate: this.SSchoolsApitermStartDate,
+            sunSchoolAcaYrEndDate: this.SSchoolsApitermEndtDate,
+
+            respondWith: 'user_meta_data',
+            hasEmailChanged: false,
+            familyId: this.alluserdata.familyId
+          };
+          if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
+            payloadJson.hasParishChanged = true;
+          }
+          this.invokeApi(payloadJson);
         }
-      } else {
-        let payloadJson = {
-          ...this.myprofileform.value,
-          ...this.studentDetailsForm.value,
-          respondWith: 'user_meta_data',
-          hasEmailChanged: false
-        };
-        if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
-          payloadJson.hasParishChanged = true;
-        }
-        this.invokeApi(payloadJson);
       }
-    }
 
     if (this.isApprovedUserLoggedIn == false) {
 
@@ -638,4 +782,11 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       alert("Select Date in Past");
     }
   }
-}        
+  //miscellaneous
+  onItemSelect(item: any) {
+    console.log(item);
+  }
+  onSelectAll(items: any) {
+    console.log(items);
+  }
+}

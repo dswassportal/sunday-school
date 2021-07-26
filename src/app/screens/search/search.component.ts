@@ -231,21 +231,21 @@ export class SearchComponent implements OnInit {
     });
 
     this.searchFormGroup = this.formBuilder.group({
-      dioceseName: new FormControl('',),
-      regionName: new FormControl('',),
-      parishName: new FormControl(''),
-      teacherFirstName: new FormControl('',),
-      teacherLastName: new FormControl('',),
-      teacherPhoneNumber: new FormControl('',),
-      teacherEmail: new FormControl('', [Validators.email]),
-      parentFirstName: new FormControl(''),
-      parentLasttName: new FormControl(''),
-      parentPhoneNumber: new FormControl(''),
-      parentEmail: new FormControl('', [Validators.email]),
-      studentFirstName: new FormControl(''),
-      studentLastName: new FormControl(''),
-      studentPhoneNumber: new FormControl(''),
-      studentEmail: new FormControl('', [Validators.email]),
+      dioceseName: new FormControl('',Validators.required),
+      regionName: new FormControl('',Validators.required),
+      parishName: new FormControl('',Validators.required),
+      teacherFirstName: new FormControl('',Validators.required),
+      teacherLastName: new FormControl('',Validators.required),
+      teacherPhoneNumber: new FormControl('',Validators.required),
+      teacherEmail: new FormControl('', [Validators.required,Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
+      parentFirstName: new FormControl('',Validators.required),
+      parentLastName: new FormControl('',Validators.required),
+      parentPhoneNumber: new FormControl('',Validators.required),
+      parentEmail: new FormControl('', [Validators.required,Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
+      studentFirstName: new FormControl('',Validators.required),
+      studentLastName: new FormControl('',Validators.required),
+      studentPhoneNumber: new FormControl('',Validators.required),
+      studentEmail: new FormControl('', [Validators.required,Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
 
     });
 
@@ -555,6 +555,19 @@ export class SearchComponent implements OnInit {
   openModal() {
     // this.rowId = event.rowData ? event.rowData._id : "";
     $("#imagemodal").modal("show");
+  }
+
+  checkValid() {
+    if(this.searchFormGroup.get('teacherFirstName').valid || this.searchFormGroup.get('teacherLastName').valid || this.searchFormGroup.get('teacherPhoneNumber').valid
+    || this.searchFormGroup.get('teacherEmail').valid|| this.searchFormGroup.get('dioceseName').valid || this.searchFormGroup.get('regionName').valid 
+    || this.searchFormGroup.get('parishName').valid || this.searchFormGroup.get('parentFirstName').valid || this.searchFormGroup.get('parentLastName').valid 
+    || this.searchFormGroup.get('parentPhoneNumber').valid || this.searchFormGroup.get('parentEmail').valid || this.searchFormGroup.get('studentFirstName').valid
+    || this.searchFormGroup.get('studentLastName').valid || this.searchFormGroup.get('studentPhoneNumber').valid || this.searchFormGroup.get('studentEmail').valid)
+     {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   onRowClicked(event: any) {

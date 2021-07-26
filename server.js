@@ -151,14 +151,6 @@ app.get('/api/getRoleMetadata', function (req, res) {
 app.get('/api/getUserMetaData', function (req, res) {
   console.log("getUserMetaData called with : " + JSON.stringify(req.query.uid));
 
-  let reqContextData = {
-    actType: 'LOG_IN',
-    sessionId: req.header('Authorization'),
-    ipAddr: req.connection.remoteAddress,
-    userAgent: req.get('User-Agent'),
-    userId: req.query.uid
-  }
-  processMiscRequest.handleLogIn_LogOut(reqContextData)
   try {
     processRequest.processGetUserMetaDataRequest(req.query.uid)
       .then((data) => {
@@ -516,7 +508,15 @@ app.get('/api/getEventForRegistration', function (req, res) {
 app.get('/api/getUserApprovalStatus', function (req, res) {
   console.log("getUserApprovalStatus called with : " + JSON.stringify(req.query.fbuid));
   try {
-    processMiscRequest.getUserApprovalStatus(req.query.fbuid)
+    
+  let reqContextData = {
+    actType: 'LOG_IN',
+    sessionId: req.header('Authorization'),
+    ipAddr: req.connection.remoteAddress,
+    userAgent: req.get('User-Agent')
+  }
+
+    processMiscRequest.getUserApprovalStatus(req.query.fbuid, reqContextData)
       .then((data) => {
         //   console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -736,7 +736,7 @@ app.get('/api/getSSchools', function (req, res) {
   console.log("getSSchools called...");
   let loggedInUser = decodeUser(req)
   try {
-    processSSRequest.getSSchoolData(loggedInUser, req.query.role)
+    processSSRequest.getSSchoolData(loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -944,11 +944,11 @@ app.post('/api/searchStudents', function (req, res) {
 });
 
 
-app.get('/api/getSearchables', function (req, res) {
-  console.log("getSearchables called... ");
-  let loggedInUser = decodeUser(req)
+app.get('/api/getEventDoc', function (req, res) {
+  console.log("getEventDoc called... ");
+  //let loggedInUser = decodeUser(req)
   try {
-    studentSearch.getSearchables(loggedInUser)
+    processFileUpload.getEventDoc(req.query.docId)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -959,9 +959,48 @@ app.get('/api/getSearchables', function (req, res) {
         res.end();
       })
   } catch (error) {
-    console.error('Error in getSearchables as : ' + error)
+    console.error('Error in getEventDoc as : ' + error)
   }
 });
+
+app.get('/api/isUserNameTaken', function (req, res) {
+  console.log("isUserNameTaken called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.isUserNameTaken(req.query.userName)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in isUserNameTaken as : ' + error)
+  }
+});
+
+app.get('/api/getEmail', function (req, res) {
+  console.log("getEmailId called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getEmail(req.query.userName)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getEmailId as : ' + error)
+  }
+});
+
 
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {

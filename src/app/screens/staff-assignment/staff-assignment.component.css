@@ -22,3 +22,9 @@
     border-color: grey;
     box-shadow: none;
   }
+
+  
+:host ::ng-deep .multiselect-dropdown .selected-item{
+  max-width: 400px !important;
+  margin: 4px; 
+  }

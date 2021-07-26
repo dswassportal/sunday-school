@@ -3,13 +3,12 @@ const errorHandling = require('./ErrorHandling/commonDBError');
 const dbConnections = require(`${__dirname}/dbConnection`);
 const queries = require('./static/reqSsOperations_queries');
 
-async function getSSchoolData(loggedInUserId, role) {
+async function getSSchoolData(loggedInUserId) {
 
     let client = await dbConnections.getConnection();
 
     try {
         let schoolData = [];
-        // if (role) {
         let result = await client.query(queries.getParishesAndSchoolsByUserId, [loggedInUserId]);
 
         if (result.rowCount > 0) {
@@ -20,11 +19,31 @@ async function getSSchoolData(loggedInUserId, role) {
                         orgId: row.org_id,
                         name: row.name,
                         parishName: result.rows[index].name,
-                        parishId: result.rows[index].org_id
+                        parishId: result.rows[index].org_id,
+                        grades: []
                     }
                     schoolData.push(temp)
                 }
             }
+            
+            for (let row of result.rows) {
+                if (row.org_type === 'Grade') {
+                    let sIndex = schoolData.findIndex((item) => row.parent_org_id === item.orgId);
+                    if (sIndex !== -1) {
+                        schoolData[sIndex].grades.push({
+                            orgId: row.org_id,
+                            name: row.name,
+                        })
+                    }
+                }
+            }
+        }
+
+
+        let currentTerm ={};
+        let getTermRes = await client.query(queries.getCurrentTerm);
+        if (getTermRes.rowCount > 0) {
+            currentTerm = getTermRes.rows[0].current_term
         }
 
         // } else {
@@ -113,7 +132,8 @@ async function getSSchoolData(loggedInUserId, role) {
         return ({
             data: {
                 status: 'success',
-                schoolData: schoolData
+                schoolData: schoolData,
+                currentTerm:currentTerm
             }
         })
 
@@ -267,12 +287,12 @@ async function getAssignedGrades(loggedInUser) {
                 }
             }
         }
-        
+
         let getTermRes = await client.query(queries.getCurrentTerm);
-        if(getTermRes.rowCount > 0){
+        if (getTermRes.rowCount > 0) {
             response.currentTerm = getTermRes.rows[0].current_term
         }
-        
+
 
 
         return {
@@ -301,7 +321,7 @@ async function getGradeAttendance(loggedInUser, schoolId, grade, date) {
         let result = await client.query(queries.getGradeWiseAttendance, [loggedInUser, schoolId, grade, date]);
 
         console.debug(`No of student found for grade ${grade}  are ${result.rowCount} `)
- 
+
         if (result.rowCount > 0) {
             for (let row of result.rows) {
 

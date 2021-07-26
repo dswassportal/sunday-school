@@ -83,6 +83,10 @@ import { SearchComponent } from './screens/search/search.component';
 import { ProfileSearchComponent } from './screens/profile-search/profile-search.component';
 import { ParishSearchComponent } from './screens/parish-search/parish-search.component';
 import { TeacherSearchComponent } from './screens/teacher-search/teacher-search.component';
+import { EventExamRegistrationComponent } from './screens/event-exam-registration/event-exam-registration.component';
+import { ExamRegistrationComponent } from './screens/exam-registration/exam-registration.component';
+import { FamilyMemberDetailsComponent } from './screens/family-member-details/family-member-details.component';
+import { MemberDetailsComponent } from './screens/member-details/member-details.component';
 
 
 @NgModule({
@@ -119,7 +123,11 @@ import { TeacherSearchComponent } from './screens/teacher-search/teacher-search.
         SearchComponent,
         ProfileSearchComponent,
         ParishSearchComponent,
-        TeacherSearchComponent
+        TeacherSearchComponent,
+        EventExamRegistrationComponent,
+        ExamRegistrationComponent,
+        FamilyMemberDetailsComponent,
+        MemberDetailsComponent
     //UserProfileComponent,
     //OvbsRegistrationComponent
   ],

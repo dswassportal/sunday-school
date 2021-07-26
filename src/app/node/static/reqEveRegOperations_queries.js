@@ -10,6 +10,8 @@ const getEventData = `select distinct te.event_id,
                         te.description,
                         tepr.role,
                         tepr.event_venue_id selected_event_venue_id,
+                        tgg.grade_group_id,
+                        tgg.group_name, 
                         te.start_date,
                         te.end_date,
                         te.registration_start_date,
@@ -34,7 +36,7 @@ const getEventData = `select distinct te.event_id,
                         from t_event te 
                         left join t_event_participant_registration tepr on tepr.event_id = te.event_id 
                             and tepr.user_id = $2 and tepr.event_id = $1 and tepr.is_deleted != true
-                        left join t_event_attachment tea on tea.event_id = tepr.event_id
+                        left join t_event_attachment tea on tea.event_id = $1
                         left join t_event_venue tev on tev.event_id = $1
                         left join t_venue tv on tv.venue_id = tev.venue_id
                         left join t_event_category_map tecm on tecm.event_id = $1
@@ -47,6 +49,7 @@ const getEventData = `select distinct te.event_id,
                         left join t_event_question_response teqr 
                         	on teqr.event_participant_registration_id = tepr.event_participant_registration_id 
                             and teq.question_id = teqr.question_id
+                        left join t_grade_group tgg on tgg.grade_group_id =  tepr.grade_group_id
                         where te.event_id = $1 order by tec."sequence";`;
 
 const getTTCEventData = `    select distinct
@@ -119,6 +122,48 @@ const getTTCEventData = `    select distinct
                                                 tepr.registration_status,  tosa.role_type, tosa.user_id, to2.parent_org_id,
                                                 tu2.title, tu2.first_name, tu2.middle_name, tu2.last_name, tv."name", tev.venue_id;`
 
+// const getPrincipalwiseStudentsData = `select distinct * from t_student_sundayschool_dtl tssd
+//                          join t_user tu on tu.user_id = tssd.student_id
+//                          where tssd.school_id IN (select org_id from t_organization_staff_Assignment where role_type = 'Sunday School Principal' and user_id= $1 );`;
+
+
+const getPrincipalwiseStudentsData = ` select distinct tssd.student_id, tssd.school_grade, torg.name as "school_name", tssd.school_id,
+                                        concat(tu.title, '. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) as "student_name",
+                                        tosa.user_id as "principal_user_id",
+                                        tepr.event_participant_registration_id,
+                                        case when tepr.event_participant_registration_id is null then false else true end has_selected,
+                                        tepr.enrollment_id,
+                                        tepr.registration_status,
+                                        case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
+                                        else null end registered_by
+                                        from t_student_sundayschool_dtl tssd
+                                                join t_organization torg on torg.org_id = tssd.school_id 
+                                            join t_user tu on tu.user_id = tssd.student_id
+                                            join t_organization_staff_Assignment tosa on tosa.org_id = tssd.school_id
+                                            left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
+                                            and tepr.event_id = $2
+                                            left join t_user tu2 on tu2.user_id = tepr.created_by 
+                                            where tosa.role_type = 'Sunday School Principal'  and tosa.user_id = $1`;
+
+const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_user_id", torg.name as "school_grade", tssd.school_id, tssd.student_id, torg1.name as "school_name",
+                                    concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) as "student_name",
+                                    tepr.event_participant_registration_id,
+                                    case when tepr.event_participant_registration_id is null then false else true end has_selected,
+                                    tepr.enrollment_id,
+                                    tepr.registration_status,
+                                    case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
+                                        else null end registered_by
+                                    from t_organization_staff_Assignment tosa 
+                                    join t_organization torg on tosa.org_id = torg.org_id
+                                    join t_student_sundayschool_dtl tssd on tssd.school_grade = torg.name
+                                    join t_organization torg1 on torg1.org_id = tssd.school_id
+                                    join t_user tu on tu.user_id = tssd.student_id
+                                    left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
+                                    and tepr.event_id = $2
+                                    left join t_user tu2 on tu2.user_id = tepr.created_by 
+                                    where tosa.role_type = 'Sunday School Teacher' and tosa.user_id = $1 order by tssd.school_id;`;
+
+
 const getParticipantRolesFormLookup = `select jsonb_agg(
                                             jsonb_build_object(
                                                 'roleDesc', tl.description,
@@ -153,7 +198,7 @@ const checkGeneratedEnrollmentNoExists = `select case when count(enrollment_id) 
                                             where enrollment_id =$1;`
 
 const newRegistration = `INSERT INTO t_event_participant_registration
-                            (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
+                            (event_id, user_id, grade_group_id, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
                             VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning event_participant_registration_id;`
 
 const insertRegCatMapping = `INSERT INTO t_participant_event_reg_cat
@@ -165,8 +210,8 @@ const insertRegQueResp = `INSERT INTO t_event_question_response
                             VALUES $1  returning question_response_id;`;
 
 const updateEventRegistration = `UPDATE t_event_participant_registration
-                                SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4, role=$5 
-                                WHERE event_participant_registration_id=$6;`;
+                            SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4, role=$5, grade_group_id=$6 
+                            WHERE event_participant_registration_id=$7;`;
 
 const updateEventRegCatMapping = `INSERT INTO t_participant_event_reg_cat(event_participant_registration_id, event_category_id, user_id, is_deleted, updated_by, updated_date)               
                                     SELECT $1, $2, $3, $4, $5, $6 
@@ -216,16 +261,25 @@ const getVenuesByEventId = `select distinct event_venue_id, name from t_event_ve
                                 join t_venue tv on tev.venue_id = tv.venue_id and event_id = $1;`;
 
 const bulkInsertNewRegistration = `INSERT INTO t_event_participant_registration
-                                    (event_id, user_id, school_grade, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
+                                    (event_id, user_id, grade_group_id, is_deleted, created_by, created_date, enrollment_id, event_venue_id, registration_status, role)
                                     VALUES $1 returning event_participant_registration_id;`;
 
 const updateTTCRegistration = `	UPDATE t_event_participant_registration
                                 SET updated_by=$1, updated_date=$2, event_venue_id=$3, registration_status=$4
-                                WHERE event_participant_registration_id in ($5) returning event_participant_registration_id`; 
+                                WHERE event_participant_registration_id in ($5) returning event_participant_registration_id`;
 
 const cancelTTCRegistation = `UPDATE t_event_participant_registration
                                 SET updated_by=$1, updated_date=$2, registration_status=$3
-                                WHERE event_id= $4 and event_participant_registration_id not in ($5) returning event_participant_registration_id;`;                                    
+                                WHERE event_id= $4 and event_participant_registration_id not in ($5) returning event_participant_registration_id;`;
+
+const getGradeGroups = `select distinct te.event_id, te."name", tgg.group_name, tgg.grade_group_id
+                            from t_student_sundayschool_dtl tssd 
+                            join t_school_term_detail tstd on tssd.term_id = tstd.school_term_detail_id 
+                                and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+                            join t_grade_group_detail tggd on tggd.grade = tssd.school_grade and tssd.student_id = $2
+                            join t_event_grade_group_map teggm on teggm.grade_group_id = tggd.grade_group_id 
+                            join t_grade_group tgg on tgg.grade_group_id = teggm.grade_group_id
+                            join t_event te on teggm.event_id = te.event_id and te.event_id = $1;`;
 
 
 module.exports = {
@@ -246,7 +300,10 @@ module.exports = {
     getVenuesByEventId,
     bulkInsertNewRegistration,
     updateTTCRegistration,
-    cancelTTCRegistation
+    cancelTTCRegistation,
+    getGradeGroups,
+    getPrincipalwiseStudentsData,
+    getTeacherwiseStudentData
 }
 
 

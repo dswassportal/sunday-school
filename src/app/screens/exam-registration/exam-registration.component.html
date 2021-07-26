@@ -1,0 +1,209 @@
+<div class="container mt-4">
+    <mat-card class="shadow">
+        <div class="row">
+            <h1 class="col-md-11" style="text-align: center; font-family: poppins; ">Registration For
+                <label><b>{{selectedRowJson.name}}</b></label>
+            </h1>
+
+            <button mat-button class="col-md-1" style="padding-bottom: 2%;" class="ml-auto" data-dismiss="modal"
+                (click)="onCancelClick()">
+                <mat-icon>clear</mat-icon>
+            </button>
+
+        </div>
+
+
+        <div style="padding-left: 1%; padding-right: 1%;">
+            <div class="row">
+                <h3 class="col-md-12" style="text-align: left; font-family: poppins;margin-bottom: 0%;">Event
+                    Description :</h3>
+            </div>
+
+            <div class="row">
+                <label
+                    style="text-align: left; font-family: poppins; padding-left: 1.4%;">{{eventData.description}}</label>
+            </div>
+
+
+            <div class="row" style="margin-bottom: -1%;">
+                <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Registration Deadline :</h3>
+                &nbsp;&nbsp;
+                <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{regEndDate}}</label>
+            </div>
+
+
+
+            <div *ngIf="isSingleDayEvent">
+                <div class="row">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Exam Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventStartDate}}</label>
+                </div>
+            </div>
+
+
+
+            <div *ngIf="!isSingleDayEvent">
+
+                <div class="row" style="margin-bottom: -1%;">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event Start Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventStartDate}}</label>
+                </div>
+
+                <div class="row">
+                    <h3 style="text-align: left; font-family: poppins; padding-left: 1.4%;">Event End Date :</h3>
+                    &nbsp;&nbsp;
+                    <label style="text-align: left; font-family: poppins; padding-top: 0.4%;">{{eventEndDate}}</label>
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+        <form *ngIf="isVenueRequired" [formGroup]="venuesDataFormGroup">
+
+
+            <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+            </mat-divider>
+
+            <h2 style="font-family: poppins; padding-top: 1%;">Venue</h2>
+            <div class="row" style="padding-right: 1%; padding-bottom:2%; padding-left: 1%;">
+                <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins;" id="venues"
+                    placeholder="Select Venue" [settings]="dropdownSettingsVenues" [data]="venueList"
+                    formControlName="venues" (onSelectAll)="onSelectAll($event)">
+                </ng-multiselect-dropdown>
+            </div>
+
+
+        </form>
+
+
+
+
+        <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+        </mat-divider>
+
+        <form [formGroup]="parishDetailsFormGroup">
+            <div style="padding-left: 1%; padding-right: 1%;">
+
+                <div class="row" style="padding-top:2%">
+
+                    <h3 class="col-md-2" style="text-align: left; font-family: poppins;">School Name :</h3>
+
+
+                    <ng-multiselect-dropdown class="col-md-4" style="font-family: poppins;" id="parishName"
+                        placeholder="Select School" [settings]="dropdownSettingsSchoolName" [data]="schoolNameData"
+                        formControlName="schoolName" (onSelectAll)="onSelectAll($event)">
+                    </ng-multiselect-dropdown>
+
+
+                    <h3 class="col-md-2" style="text-align: left; font-family: poppins;">School Grade :</h3>
+
+                    <ng-multiselect-dropdown class="col-md-4" style="font-family: poppins;" id="parishName"
+                        placeholder="Select Grade" [settings]="dropdownSettingsSchoolGrade" [data]="gradesData"
+                        (onSelect)="schoolGradeSelChange($event)" formControlName="schoolGrade"
+                        (onSelectAll)="onSelectAll($event)">
+                    </ng-multiselect-dropdown>
+
+
+                </div>
+
+
+
+                <div class="row">
+
+                    <h3 class="col-md-2" style="text-align: left; font-family: poppins;">Name of Vicar :</h3>
+
+                    <label
+                        style="padding-top: 0.4%; padding-left: 1.3%; font-family: poppins;"><b>{{eventData.vicarName}}</b></label>
+
+                </div>
+
+
+                <div class="row">
+
+                    <h3 class="col-md-2" style="text-align: left; font-family: poppins;">Name of Principal :</h3>
+
+                    <label
+                        style="padding-top: 0.4%; padding-left: 1.3%; font-family: poppins;"><b>{{principalName}}</b></label>
+                    <!-- {{nameOfPrincipal}} -->
+                </div>
+
+
+                <div class="row">
+
+                    <h3 class="col-md-2" style="text-align: left; font-family: poppins;">Principal Email Id :</h3>
+
+                    <label class="col-md-4"
+                        style="padding-top: 0.4%; padding-left: 1.3%; font-family: poppins;"><b>{{principalEmailId}}</b></label>
+                    <!-- {{nameOfPrincipal}} -->
+
+                    <h3 class="col-md-3" style="text-align: left; font-family: poppins;">Principal Telephone Number :
+                    </h3>
+
+                    <label class="col-md-3"
+                        style="padding-top: 0.4%; padding-left: 1.3%; font-family: poppins;"><b>{{principalMobileNo}}</b></label>
+
+                </div>
+
+
+            </div>
+        </form>
+
+
+
+        <!-- <form *ngIf="isVenueRequired" [formGroup]="venuesDataFormGroup">
+
+            <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+            </mat-divider>
+
+            <h2 style="font-family: poppins; padding-top: 1%;">Venue</h2>
+            <div class="row" style="padding-right: 1%; padding-bottom:2%; padding-left: 1%;">
+                <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins;" id="venues"
+                    placeholder="Select Venue" [settings]="dropdownSettingsVenues" [data]="venueList"
+                    formControlName="venues" (onSelectAll)="onSelectAll($event)">
+                </ng-multiselect-dropdown>
+            </div>
+
+        </form> -->
+
+
+        <form [formGroup]="ttcFormGroup">
+
+            <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+            </mat-divider>
+
+            <h2 style="padding-top: 1%;font-family: poppins;">Student's Registration</h2>
+
+            <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3" [rowData]="rowData"
+                [columnDefs]="columnDefs" [pagination]="true" rowSelection='multiple' [gridOptions]="gridOptions"
+                (gridReady)="onRegGridReady($event)" rowSelection='multiple'>
+            </ag-grid-angular>
+
+        </form>
+
+
+        <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top:1%;">
+        </mat-divider>
+
+        <div class="row" style="padding-top: 2%;">
+
+            <div class="col text-center" style="padding-top:1%">
+
+                <button style="float: center;" (click)="onRegisterEventClick()" mat-button type="submit" mat-button
+                    class="mbutton">
+                    Save
+                </button> &nbsp;
+
+                <button style="float: center;" type="submit" mat-button class="mbutton" (click)="onCancelClick()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+
+    </mat-card>
+</div>

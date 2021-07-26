@@ -1,60 +1,192 @@
 h2{
-    font-family: 'poppins'!important;
-    font-weight: bold;
-	letter-spacing: 0.18px;
-	margin-bottom: -0.5em;
-  }
-  input.mat-input-element{
-	font-family: 'poppins'!important;
-  }
-  
-  .container{
-    font-family: 'poppins'!important;
-    width: 100%;
-	padding-bottom: 2%;
-	justify-content: center;
-	letter-spacing: 0.18px;
-	
- }
-
- .shadow
- {
-    box-shadow: 7px 7px 22px grey;
- }
- ::ng-deep .mat-form-field-wrapper{
-	margin-bottom: 2%;
-	margin-top: -0.5em;
-
- }
- .example-card {
-    max-width: 10%;
-    margin-bottom: 2%;
-    
-  }
- 
-  mat-form-field{
-    font-family: poppins;
-    letter-spacing: 0.18px;
+  font-family: 'poppins'!important;
+  font-weight: bold;
+letter-spacing: 0.18px;
+margin-bottom: -0.5em;
+}
+input.mat-input-element{
+font-family: 'poppins'!important;
 }
 
-  /* Accordin panel CSS */
+.container{
+  font-family: 'poppins'!important;
+  width: 100%;
+padding-bottom: 2%;
+justify-content: center;
+letter-spacing: 0.18px;
+
+}
+
+.shadow
+{
+  box-shadow: 7px 7px 22px grey;
+}
+::ng-deep .mat-form-field-wrapper{
+margin-bottom: 2%;
+margin-top: -0.5em;
+
+}
+.example-card {
+  max-width: 10%;
+  margin-bottom: 2%;
+  
+}
+
+mat-form-field{
+  font-family: poppins;
+  letter-spacing: 0.18px;
+}
+
+/* Accordin panel CSS */
 
 
 .example-headers-align .mat-expansion-panel-header-title,
 .example-headers-align .mat-expansion-panel-header-description {
-  flex-basis: 0;
+flex-basis: 0;
 }
 
 .example-headers-align .mat-expansion-panel-header-description {
-  justify-content: space-between;
-  align-items: right;
+justify-content: space-between;
+align-items: right;
 }
 
 .example-headers-align .mat-form-field + .mat-form-field {
-  margin-left: 8px;
+margin-left: 8px;
 }
 
 .shadow{
-  box-shadow: 7px 7px 22px grey;
-  }
+box-shadow: 7px 7px 22px grey;
+}
 
+
+.ag-theme-alpine {
+/* use theme parameters where possible */
+
+--ag-header-background-color:rgba(238, 209, 172, 0.712);
+font-family: poppins;
+text-shadow: 2px 2px 3px rgb(158, 158, 151), 3px 3px 5px rgb(102, 98, 98);
+
+}
+
+/* or write CSS selectors to make customisations beyond what the parameters support */
+:host ::ng-deep.ag-theme-alpine .ag-header {
+font-family: poppins;
+text-shadow: 4px 0 0 #fff, -4px 0 0 #fff, 0 4px 0 #fff, 0 -4px 0 #fff, 3px 3px #fff, -3px -3px 0 
+#fff, 3px -3px 0 #fff, -3px 3px 0 #fff;
+
+}
+
+:host ::ng-deep.ag-theme-alpine .ag-checkbox{
+text-shadow: none;
+}
+
+:host ::ng-deep.ag-theme-alpine .ag-header-cell-resize::after{
+background-color: black;
+align-items: center;
+height: 30px;
+width: 1px;
+left: calc(40% - 2px);
+
+}
+
+
+:host ::ng-deep.ag-theme-alpine .ag-header-cell-resize::before{
+background-color: black;
+align-items: center;
+height: 30px;
+}
+
+:host ::ng-deep.ag-theme-alpine .ag-header-cell-resize{
+background-color: white;
+height: 60px;
+align-items: center;
+/* margin-top: 3%; */
+top: calc(0% - 30%);
+
+}
+
+.ag-theme-alpine .ag-header-cell-label {
+font-style: italic;
+background-color: yellow;
+}
+
+input[type="file"]::file-selector-button {
+box-shadow: 2px 2px 3px rgb(158, 158, 151), 3px 3px 5px rgb(102, 98, 98);
+background: red;
+box-sizing: border-box;
+position: relative;
+/* -webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+cursor: pointer;
+outline: none;
+border: none;
+-webkit-tap-highlight-color: transparent; */
+border: none;
+display: inline-block;
+white-space: nowrap;
+text-decoration: none;
+vertical-align: baseline;
+text-align: center;
+margin: 0;
+min-width: 64px;
+line-height: 36px;
+padding: 0 16px;
+/* border-radius: 4px; */
+overflow: visible;
+transform: translate3d(0, 0, 0);
+transition: background 400ms cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+margin: 1rem;
+color: black;
+text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+#fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+}
+
+
+
+/* :host ::ng-deep .multiselect-dropdown .dropdown-btn {
+border: 1px solid #337ab7;
+margin-right: 4px;
+ background: #337ab7;  
+padding: 0 5px;
+color: #000;
+border-radius: 2px;
+float: left;
+display: flex;
+max-width: 100px; 
+  margin: 4px;
+text-overflow: ellipsis;
+
+} */
+
+:host ::ng-deep .multiselect-dropdown .selected-item{
+max-width: 400px !important;
+margin: 4px; 
+}
+
+.stepLableStyle{
+font-family: poppins;color: red;font-size: 1vw;
+text-shadow: 4px 0 0 #fff, -4px 0 0 #fff, 0 4px 0 #fff, 0 -4px 0 #fff, 3px 3px #fff, -3px -3px 0 
+            #fff, 3px -3px 0 #fff, -3px 3px 0 #fff ,2px 2px 3px rgb(39, 39, 38), 4px 4px 5px rgb(46, 44, 44); 
+font-family: poppins; 
+}
+.stepDisplayMessageStyle{
+align-items: flex-end ;
+margin-top: 2%;
+
+text-shadow: 2px 2px 3px rgb(158, 158, 151), 3px 3px 2px rgb(102, 98, 98);
+/* 2px 2px 3px rgb(158, 158, 151), 3px 3px 5px rgb(102, 98, 98);
+2px 2px 3px rgb(204, 204, 190), 4px 4px 2px rgb(194, 189, 189) */
+color: black;
+}
+
+.saveButtonSpan{
+  font-family: poppins;
+  text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+  #fff, 1px -1px 0 #fff, -1px 1px 0 #fff
+}
+.saveButton{
+  background-color: red;
+  box-shadow: 2px 2px 3px rgb(158, 158, 151), 3px 3px 3px rgb(102, 98, 98);
+}
