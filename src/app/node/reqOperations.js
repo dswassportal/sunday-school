@@ -66,15 +66,6 @@ async function processSignInRequest(userInfo) {
         let tPersonQryRes = await client.query(newPersonTblInsQuery, [newUserId, userInfo.data.dob == '' ? null : userInfo.data.dob,
             userInfo.data.mobileNo, newUserId, new Date().toUTCString()]);
 
-        if (tPersonQryRes.rowCount > 0) {
-            let insertTPersonFam = `INSERT INTO t_person_family
-              (family_id, family_member_id, relationship, is_deleted, created_by, created_date)
-              VALUES(${tPersonQryRes.rows[0].family_id}, ${newUserId} , 'Family Head', ${false}, ${newUserId}, '${new Date().toUTCString()}');`;
-
-            await client.query(insertTPersonFam);
-
-        } else throw "Error while inserting data into t_person";
-
         // }
         // else {
         //     console.log("Is member");
@@ -1090,6 +1081,11 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                 (select ${userData.userId}, role_id from t_role where name = 'Family Head');`
             await client.query(insertRoleMapping)
             console.log('User is family head gave him add member permission');
+
+            console.log( userData.familyId, userData.userId, 'Family Head', userData.userId, new Date().toUTCString());
+            await client.query(reqOpQueries.insertFamilyHeadRel, [
+                userData.familyId, userData.userId, 'Family Head',  new Date().toUTCString()]);
+
         }
         if (userData.isFamilyHead == false || userData.isFamilyHead == "false") {
 
@@ -1370,12 +1366,14 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                             console.debug(` ${details.userId} member relation has been updated(in t_person_relationship table)`)
 
                         if (details.isMemberFamilyHead === true || details.isMemberFamilyHead === 'true') {
-                            await client.query(reqOpQueries.updateFamId, [true, details.userId]);
+                            await client.query(reqOpQueries.updateIsFamHead, [true, details.userId]);
+                            await client.query(reqOpQueries.insertFamilyHeadRole, [details.userId])
 
-                            await client.query(`insert into t_user_role_mapping (user_id, role_id)
-                               (select ${details.userId}, role_id from t_role where name = 'Family Head');`)
+                        } else {
+                            await client.query(reqOpQueries.updateIsFamHead, [false, details.userId]);
+                            await client.query(reqOpQueries.deleteFamilyHeadRole, [details.userId])
                         }
-                        
+
                     } else {
 
                         //query and condition to check whether the given first name, last name, email, and relation to that family already exists or not.
@@ -1474,12 +1472,9 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                                                 console.debug(`New member's '${details.relationship}' relationship inserted,   for family Id ${userData.familyId}`);
 
                                             if (details.isMemberFamilyHead === true || details.isMemberFamilyHead === 'true') {
-                                                await client.query(reqOpQueries.updateFamId, [true, newUserId]);
-
-                                                await client.query(`insert into t_user_role_mapping (user_id, role_id)
-                                               (select ${newUserId}, role_id from t_role where name = 'Family Head');`)
+                                                await client.query(reqOpQueries.updateIsFamHead, [true, newUserId]);
+                                                await client.query(reqOpQueries.insertFamilyHeadRole, [newUserId]);
                                             }
-
 
                                         } else throw 'Failed to insert new member\'s data into t_user table.';
                                     }
@@ -1630,9 +1625,9 @@ async function checkAndAddUserToFamilyTree(client, familyId, member, familyHeadI
     console.debug('Checking new user\'s existance.')
     let result = await client.query(reqOpQueries.checkNewMemEmailAndRelationExists,
         [member.emailId, member.firstName, member.lastName]);
+    console.log(JSON.stringify(result.rows))
     if (result.rowCount > 0) {
         let resRow = result.rows[0];
-        console.debug(JSON.stringify(result.rows[0]));
         // condition for when member email id exists but relation to same of other family dosen't exists, Then add him current family head's family tree  
         if (resRow.user_exists === true && resRow.user_family_related === false) {
             console.debug('New member\'s email id already exists in the system and he does not have relation to any family.')
@@ -1648,10 +1643,11 @@ async function checkAndAddUserToFamilyTree(client, familyId, member, familyHeadI
 
             // to set new user as family head
             if (member.isMemberFamilyHead === true || member.isMemberFamilyHead === 'true') {
-                await client.query(reqOpQueries.updateFamId, [true, resRow.user_id]);
-
-                await client.query(`insert into t_user_role_mapping (user_id, role_id)
-                (select ${resRow.user_id}, role_id from t_role where name = 'Family Head');`)
+                await client.query(reqOpQueries.updateIsFamHead, [true, resRow.user_id]);
+                await client.query(reqOpQueries.insertFamilyHeadRole, [resRow.user_id])
+            } else {
+                await client.query(reqOpQueries.updateIsFamHead, [false, resRow.user_id]);
+                await client.query(reqOpQueries.deleteFamilyHeadRole, [resRow.user_id])
             }
             return true;
 

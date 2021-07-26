@@ -111,6 +111,21 @@ const checkNewMemEmailAndRelationExists = `select
                                             and lower(tu.last_name) = lower($3)
                                             group by user_id;`;
 
+const insertFamilyHeadRole = `insert into t_user_role_mapping (user_id, role_id)
+                             (select $1, role_id from t_role where name = 'Family Head');`;                                            
+
+const deleteFamilyHeadRole = `delete from t_user_role_mapping 
+                            where user_id = $1 and role_id = (select role_id from t_role where name = 'Family Head');`;    
+                           
+const insertFamilyHeadRel = `INSERT INTO t_person_family (family_id, family_member_id, relationship, created_by, created_date)
+                             select $1, $2, $3, $2, $4
+                            WHERE NOT EXISTS (
+                            SELECT 1 FROM t_person_family tpf 
+                                                WHERE family_member_id = $2 
+                                                and is_deleted = false
+                                        );`;                             
+
+
 module.exports= {
     updateEmailId,
     insUsrOpsLog,
@@ -128,5 +143,8 @@ module.exports= {
     insertPersonPrelationshipTbl,
     updateFamId,
     updateIsFamHead,
-    checkNewMemEmailAndRelationExists
+    checkNewMemEmailAndRelationExists,
+    insertFamilyHeadRole,
+    deleteFamilyHeadRole,
+    insertFamilyHeadRel
 }                                                
