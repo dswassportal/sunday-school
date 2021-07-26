@@ -134,7 +134,6 @@ export class MemberDetailsComponent implements OnInit {
 
     if (this.familyMemberDetails.getSelectedRowData() != undefined) {
       this.selectedRowData = this.familyMemberDetails.getSelectedRowData();
-      console.log('selected row data is :: ' + JSON.stringify(this.selectedRowData));
 
       this.apiService.callGetService(`getUserMetaData?uid=${this.selectedRowData.userId}`).subscribe((res) => {
         //localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData));
@@ -143,6 +142,8 @@ export class MemberDetailsComponent implements OnInit {
         // if (memberData.memberDetails.length > 0) {
         //   this.myprofileform.setControl('memberDetails', this.setMemberDetails(memberData.memberDetails));
         // }
+
+        console.log("this.memberData", this.memberData);
 
 
         this.myprofileform.patchValue({
@@ -228,7 +229,7 @@ export class MemberDetailsComponent implements OnInit {
             userId : this.memberData.userId
           };
           if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
-            payloadJson.hasParishChanged = true;
+            payloadJson.hasParishChanged = false;
           }
           this.invokeApi(payloadJson);
        
