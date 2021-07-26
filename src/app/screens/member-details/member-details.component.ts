@@ -70,6 +70,7 @@ export class MemberDetailsComponent implements OnInit {
   selectedRowData: any;
   selectedUrl: any;
   isStateDataSet: any;
+  memberData: any;
 
 
   ngOnInit(): void {
@@ -101,7 +102,7 @@ export class MemberDetailsComponent implements OnInit {
       dateofMarriage: new FormControl(''),
       aboutYourself: new FormControl(''),
       userId: new FormControl(''),
-      isFamilyHead: new FormControl(''),
+      //isFamilyHead: new FormControl(''),
       orgId: new FormControl(''),
       isStudent: new FormControl(''),
       isFamilyMember: new FormControl('')
@@ -138,38 +139,38 @@ export class MemberDetailsComponent implements OnInit {
       this.apiService.callGetService(`getUserMetaData?uid=${this.selectedRowData.userId}`).subscribe((res) => {
         //localStorage.setItem('chUserMetaData', JSON.stringify(data.data.metaData));
         //console.log("res.data.metaData", res.data.metaData);
-        let memberData = res.data.metaData;
+        this.memberData = res.data.metaData;
         // if (memberData.memberDetails.length > 0) {
         //   this.myprofileform.setControl('memberDetails', this.setMemberDetails(memberData.memberDetails));
         // }
 
 
         this.myprofileform.patchValue({
-          country: memberData.country,
+          country: this.memberData.country,
 
-          title: memberData.title,
-          firstName: memberData.firstName,
-          middleName: memberData.middleName,
-          lastName: memberData.lastName,
-          nickName: memberData.nickName,
-          baptismalName: memberData.baptismalName,
-          dob: memberData.dob,
-          homePhoneNo: memberData.homePhoneNo,
-          mobileNo: memberData.mobile_no,
-          emailId: memberData.emailId,
-          addressLine1: memberData.addressLine1,
-          addressLine2: memberData.addressLine2,
-          addressLine3: memberData.addressLine3,
-          city: memberData.city,
-          postalCode: memberData.postalCode,
+          title: this.memberData.title,
+          firstName: this.memberData.firstName,
+          middleName: this.memberData.middleName,
+          lastName: this.memberData.lastName,
+          nickName: this.memberData.nickName,
+          baptismalName: this.memberData.baptismalName,
+          dob: this.memberData.dob,
+          homePhoneNo: this.memberData.homePhoneNo,
+          mobileNo: this.memberData.mobile_no,
+          emailId: this.memberData.emailId,
+          addressLine1: this.memberData.addressLine1,
+          addressLine2: this.memberData.addressLine2,
+          addressLine3: this.memberData.addressLine3,
+          city: this.memberData.city,
+          postalCode: this.memberData.postalCode,
           //country: memberData.country,
-          state: memberData.state,
-          parish: memberData.orgId,
+          state: this.memberData.state,
+          parish: this.memberData.orgId,
           //memberDetails: memberData.memberDetails,
-          maritalStatus: memberData.maritalStatus,
-          dateofMarriage: memberData.dateOfMarriage,
-          aboutYourself: memberData.aboutYourself,
-          userId: memberData.userId,
+          maritalStatus: this.memberData.maritalStatus,
+          dateofMarriage: this.memberData.dateOfMarriage,
+          aboutYourself: this.memberData.aboutYourself,
+          userId: this.memberData.userId,
         });
       });
     }
@@ -224,6 +225,7 @@ export class MemberDetailsComponent implements OnInit {
             ...this.myprofileform.value,
             respondWith: 'user_meta_data',
             hasEmailChanged: false,
+            userId : this.memberData.userId
           };
           if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
             payloadJson.hasParishChanged = true;
