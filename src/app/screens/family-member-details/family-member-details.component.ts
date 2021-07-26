@@ -64,4 +64,5 @@ export class FamilyMemberDetailsComponent implements OnInit {
     this.router.navigate(['/dashboard/memberDetails']);
   }
 
+  
 }

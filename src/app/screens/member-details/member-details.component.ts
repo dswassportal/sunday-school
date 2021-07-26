@@ -249,4 +249,6 @@ export class MemberDetailsComponent implements OnInit {
     });
   }
 
+  
+
 }

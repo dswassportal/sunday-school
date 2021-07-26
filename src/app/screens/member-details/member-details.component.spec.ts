@@ -13,6 +13,8 @@ describe('MemberDetailsComponent', () => {
     .compileComponents();
   });
 
+
+  
   beforeEach(() => {
     fixture = TestBed.createComponent(MemberDetailsComponent);
     component = fixture.componentInstance;
