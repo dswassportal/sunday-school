@@ -438,7 +438,7 @@
                 </mat-error> -->
                 <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName').errors?.required">Username is Required</mat-error>
                 <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName').errors?.pattern">Enter valid Username</mat-error>
-                <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName')?.hasError('invalid')">Enter valid Username</mat-error>
+                <!-- <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName')?.hasError('invalid')">Enter valid Username</mat-error> -->
                 
               </mat-form-field>
 

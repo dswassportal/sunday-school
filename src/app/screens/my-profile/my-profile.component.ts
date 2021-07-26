@@ -484,8 +484,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
           if(res.data.status === "success"){
             if(res.data.isTaken === true){
-              //alert('Username already taken');
-              return this.myprofileform.get('memberDetails').controls['userName'].setErrors({'invalid': true });
+              alert('Username already taken');
+              //return this.myprofileform.get('memberDetails').controls['userName'].setErrors({'invalid': true });
             }
           }
         })
