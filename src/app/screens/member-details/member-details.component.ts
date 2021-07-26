@@ -142,6 +142,9 @@ export class MemberDetailsComponent implements OnInit {
         // if (memberData.memberDetails.length > 0) {
         //   this.myprofileform.setControl('memberDetails', this.setMemberDetails(memberData.memberDetails));
         // }
+        if(this.memberData.isApproved == false){
+          this.uiCommonUtils.showSnackBar("This user in not approved yet!", "error", 3000);
+        }  
 
         console.log("this.memberData", this.memberData);
 
@@ -175,6 +178,7 @@ export class MemberDetailsComponent implements OnInit {
         });
       });
     }
+
   }
 
   cancel() {
@@ -215,27 +219,22 @@ export class MemberDetailsComponent implements OnInit {
 
   updateUserProfile() {
   
-    
-        this.myprofileform.value.userId = this.userId;
-        this.myprofileform.value.updatedBy = this.userId;
-        this.myprofileform.value.orgId = this.orgId;
 
+      this.myprofileform.value.userId = this.userId;
+      this.myprofileform.value.updatedBy = this.userId;
+      this.myprofileform.value.orgId = this.orgId;
 
-       
-          let payloadJson = {
-            ...this.myprofileform.value,
-            respondWith: 'user_meta_data',
-            hasEmailChanged: false,
-            userId : this.memberData.userId
-          };
-          if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
-            payloadJson.hasParishChanged = false;
-          }
-          this.invokeApi(payloadJson);
-       
-    
-
-    
+        let payloadJson = {
+          ...this.myprofileform.value,
+          respondWith: 'user_meta_data',
+          hasEmailChanged: false,
+          userId : this.memberData.userId
+        };
+        if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
+          payloadJson.hasParishChanged = false;
+        }
+        this.invokeApi(payloadJson);
+  
 
   }
 
