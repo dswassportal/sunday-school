@@ -452,6 +452,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     if(event.event.value == "true"){
       // this.isFamilyHeadRadiobtn = true;
       usernameValidation.controls[0].controls.username.setValidators([Validators.required]);
+     // this.myprofileform.get('memberDetails').controls["userName"].setValidators(Validators.required);
     }
     if(event.event.value == "false"){
       // this.isFamilyHeadRadiobtn = false;
@@ -483,14 +484,18 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
           if(res.data.status === "success"){
             if(res.data.isTaken === true){
-              alert('Username already taken');
+              //alert('Username already taken');
+              return this.myprofileform.get('memberDetails').controls['userName'].setErrors({'invalid': true });
             }
           }
         })
     }
   }
 
-
+  get memberDetails(): FormArray {
+    return this.myprofileform.get('memberDetails') as FormArray;
+      //return (<FormArray>this.myprofileform.get('memberDetails'));
+    }
 
   setMemberDetails(memberDetailsData: any): FormArray {
     const formArray = new FormArray([]);
@@ -539,6 +544,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   onaddbtnclick() {
     this.members = this.myprofileform.get('memberDetails') as FormArray;
     this.members.push(this.addfamilyMembers());
+    //this.myprofileform.get('memberDetails').clearValidators();
+  
   }
 
   addfamilyMembers(): FormGroup {
@@ -551,7 +558,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       baptismalName: new FormControl(''),
       dob: new FormControl('',),
       mobileNo: new FormControl('', [Validators.required]),
-      emailId: new FormControl('', [Validators.required, Validators.email]),
+      emailId: new FormControl('', [Validators.required, Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
       userId: new FormControl(''),
       userName: new FormControl('', [Validators.required, Validators.pattern('^[ A-Za-z0-9_.-]*$')]),
       isMemberFamilyHead: new FormControl('')

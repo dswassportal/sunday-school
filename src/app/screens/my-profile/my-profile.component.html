@@ -277,7 +277,7 @@
           </div>
           
           <div class="col-md-6 col text-right">
-            <button mat-raised-button *ngIf="!isReadOnly" (click)="onaddbtnclick()">
+            <button mat-raised-button type="button" *ngIf="!isReadOnly" (click)="onaddbtnclick()">
               <mat-icon>add</mat-icon>
               <span style="padding-top: 2%;font-size: 16px;">Add</span>
             </button>
@@ -306,6 +306,7 @@
                     <mat-select  required id="relationship" formControlName = "relationship" placeholder="relationship" >
                       <mat-option [disabled]="isReadOnly" *ngFor = "let relationship of relationships; index as i" [value]=relationship>{{relationship}}</mat-option>
                     </mat-select>
+                    <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('relationship').errors?.required">This field is mandatory.</mat-error>
                   </mat-form-field>
                 </div>
                 <div class="col-md-6">
@@ -346,12 +347,14 @@
                   <mat-select required id="title" formControlName = "title" placeholder="title" >
                     <mat-option [disabled]="isReadOnly" *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
                   </mat-select>
+                <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('title').errors?.required">This field is mandatory.</mat-error>
                 </mat-form-field>
 
 
                 <mat-form-field style="width:30%;padding-left: 1%;">
                   <mat-label>First Name</mat-label>
                   <input [readonly]="isReadOnly" style="text-transform: capitalize;" required id="firstName" matInput formControlName="firstName" placeholder="Enter First Name" />
+                  <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('firstName').errors?.required">This field is mandatory.</mat-error>
                 </mat-form-field>
 
                 <mat-form-field style="width:30%;padding-left: 1%;">
@@ -365,6 +368,7 @@
                 <mat-form-field style="width:30%;padding-left: 1%;padding-right: 2%;">
                   <mat-label>Last Name</mat-label>
                   <input [readonly]="isReadOnly" style="text-transform: capitalize;" required id="lastName" matInput formControlName="lastName" placeholder="Enter Last Name" />
+                  <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('lastName').errors?.required">This field is mandatory.</mat-error>
                 </mat-form-field>
 
               </div>
@@ -394,19 +398,23 @@
                     [enableSearch]="true" [enablePlaceholder]="true" [maxLength]="['10']" [enableAutoCountrySelect]="true" name="mobileNo"
                     formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true">
                   </ngx-mat-intl-tel-input>
-                  <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
+                  <!-- <mat-error *ngIf="myprofileform.controls.mobileNo.touched && myprofileform.controls.mobileNo.invalid">
                     <span *ngIf="myprofileform.controls['mobileNo']?.errors?.required">This field is mandatory.</span>
                     <span *ngIf="myprofileform.controls['mobileNo']?.errors?.validatePhoneNumber">Enter 10 digit number.</span>
-                  </mat-error>
+                  </mat-error> -->
+                  <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('mobileNo').errors?.required">This field is mandatory.</mat-error>
+                  <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('mobileNo').errors?.validatePhoneNumber">Enter 10 digit number.</mat-error>
                 </mat-form-field>
 
                 <mat-form-field class="col-md-4" style="padding-right: 2%;">
                   <mat-label>Email Address</mat-label>
                   <input [readonly]="isReadOnly" required id="emailId" matInput formControlName="emailId" placeholder="Enter Email Address" />
-                  <mat-error *ngIf="myprofileform.controls.emailId.touched && myprofileform.controls.emailId.invalid">
+                  <!-- <mat-error *ngIf="myprofileform.controls.emailId.touched && myprofileform.controls.emailId.invalid">
                     <span *ngIf="myprofileform.controls.emailId.errors.required">This field is mandatory.</span>
                     <span *ngIf="myprofileform.controls.emailId.errors.pattern">Enter valid mailid.</span>
-                </mat-error>
+                </mat-error> -->
+                <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('emailId').errors?.required">This field is mandatory.</mat-error>
+                <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('emailId').errors?.pattern">Enter valid Email Id.</mat-error>
                 </mat-form-field>
 
 
@@ -428,7 +436,11 @@
                     <span *ngIf="myprofileform.memberDetails.controls.username.errors.required">This field is mandatory.</span>
                     <span *ngIf="myprofileform.memberDetails.controls.username.errors.pattern">Enter valid mailid.</span>
                 </mat-error> -->
-                </mat-form-field>
+                <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName').errors?.required">Username is Required</mat-error>
+                <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName').errors?.pattern">Enter valid Username</mat-error>
+                <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName')?.hasError('invalid')">Enter valid Username</mat-error>
+                
+              </mat-form-field>
 
 
               </div>
