@@ -459,10 +459,13 @@
           <mat-divider style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
           </mat-divider>
           
-            <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
-          <button mat-button type="submit" mat-button class="mbutton" style="margin-top: 2%;"
-           (click)="updateUserProfile()">
-            Update</button>
+          <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1 allButton" (click)="cancel()">
+            <span class="allButtonSpan">Cancel</span>
+          </button>
+        <button mat-button type="submit" mat-button class="mbutton allButton" style="margin-top: 2%;"
+         (click)="updateUserProfile()">
+        <span class="allButtonSpan">Update</span>  
+        </button>
         </div>
        
        
@@ -894,10 +897,13 @@
     <div class="row" style="padding-top: 1%;" *ngIf="!isFamilyHead">
         <div class="col text-center">
           <!--[disabled]="!myprofileform.dirty"-->
-            <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
-          <button mat-button type="submit" mat-button class="mbutton" (change)="isDirty = false"
-           (click)="updateUserProfile()">
-            Update</button>
+          <button  mat-button type="submit" routerLinkActive="active" class="mbutton mr-1 allButton" (click)="cancel()">
+            <span class="allButtonSpan">Cancel</span>
+          </button>
+        <button mat-button type="submit" mat-button class="mbutton allButton" (change)="isDirty = false"
+         (click)="updateUserProfile()">
+          <span class="allButtonSpan">Update</span>
+        </button>
         </div>
       </div>  
   </mat-card>

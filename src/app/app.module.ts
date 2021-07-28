@@ -87,6 +87,7 @@ import { EventExamRegistrationComponent } from './screens/event-exam-registratio
 import { ExamRegistrationComponent } from './screens/exam-registration/exam-registration.component';
 import { FamilyMemberDetailsComponent } from './screens/family-member-details/family-member-details.component';
 import { MemberDetailsComponent } from './screens/member-details/member-details.component';
+import { AuthGuard } from './auth-guard.guard';
 
 
 @NgModule({
@@ -177,7 +178,7 @@ import { MemberDetailsComponent } from './screens/member-details/member-details.
     NgMultiSelectDropDownModule.forRoot(),
     NgxMatIntlTelInputModule
   ],
-  providers: [AuthService,  { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true },EventDataService, {provide: LocationStrategy, useClass: HashLocationStrategy}],
+  providers: [AuthService,  { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true },EventDataService, {provide: LocationStrategy, useClass: HashLocationStrategy}, AuthGuard],
   bootstrap: [AppComponent],
   entryComponents: [CheckboxRendererComponent],
   schemas:[CUSTOM_ELEMENTS_SCHEMA ]

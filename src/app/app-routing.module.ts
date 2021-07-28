@@ -31,6 +31,7 @@ import { EventExamRegistrationComponent } from './screens/event-exam-registratio
 import { ExamRegistrationComponent } from './screens/exam-registration/exam-registration.component';
 import { FamilyMemberDetailsComponent } from './screens/family-member-details/family-member-details.component';
 import { MemberDetailsComponent } from './screens/member-details/member-details.component';
+import { AuthGuard } from './auth-guard.guard';
 
 
 const routes: Routes = [
@@ -38,9 +39,11 @@ const routes: Routes = [
   { path: 'signin', component: SignInComponent },
   { path: 'loginAccList', component: LoginAccListComponent },
   { path: '', component: HomePageComponent },
-  { path: 'landingpage', component: LandingPageComponent },
+  { path: 'landingpage', component: LandingPageComponent , canActivate: 
+  [AuthGuard]},
   {
-    path: 'dashboard', component: UserProfileComponent,
+    path: 'dashboard', component: UserProfileComponent,canActivate: 
+    [AuthGuard],
     children: [
       { path: 'ovbsregistration', component: OvbsRegistrationComponent },
       { path: 'users', component: LandingPageComponent },

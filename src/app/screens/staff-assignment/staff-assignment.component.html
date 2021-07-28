@@ -47,28 +47,35 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field> -->
-
+              <div class="col-md-6">
+                <label  style="font-family: poppins;text-align: left; ">Sunday School Year :</label>
               <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="sundaySchoolTerm"
                 placeholder="Sunday School Year" [settings]="dropdownSettingsSundaySchoolTermsList" [data]="sundaySchoolTermsList"
                 formControlName="sundaySchoolTerm" (onSelectAll)="onSelectAll($event)"
                 (onSelect)="sundaySchoolYearSelChange($event)">
               </ng-multiselect-dropdown>
+            </div>
 
-              <mat-form-field class="col-md-6">
+              <div class="col-md-6">
+                <label  style="font-family: poppins;text-align: left; ">Sunday School Term Start And End Dates :</label>
+              <mat-form-field class="col-md-12">
                 <input id="sSchoolStartEndDate" placeholder="Sunday School Term Start And End Dates"
                   formControlName="sSchoolStartEndDate"  readonly matInput>
                 <!-- <span *ngIf="schoolStartDate != null"> </span> -->
                 <!-- {{selectedTermFromDropDown.startDate}} - {{selectedTermFromDropDown.endDate}} -->
               </mat-form-field>
+           </div>
 
             </div>
 
             <div class="row">
+              <div class="col-md-6">
+                <label  style="font-family: poppins;text-align: left; ">Principal :</label>
             <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="principalId"
               placeholder="Principal" [settings]="dropdownSettingsPrincipalId" [data]="principalList"
               formControlName="principal" (onSelectAll)="onSelectAll($event)" [disabled]="!canAssignPrincipal">
             </ng-multiselect-dropdown>
-
+          </div>
               <!-- <mat-form-field class="col-md-6">
                 <mat-select id="principalId" formControlName="principalId" placeholder="Principal">
                   <mat-option *ngFor="let principal of principalList" [value]=principal.userId>{{principal.title}}.
@@ -76,13 +83,14 @@
                 </mat-select>
               </mat-form-field> -->
 
-
+              <div class="col-md-6">
+                <label  style="font-family: poppins;text-align: left; ">Vice Principal :</label>
             <ng-multiselect-dropdown style="padding-top: 0.7%;" class="col-md-6" id="vicePrincipalId"
               placeholder="Vice Principal" [settings]="dropdownSettingsPrincipalId" [data]="principalList"
               formControlName="vicePrincipal" (onSelectAll)="onSelectAll($event)" [disabled]="!canAssignPrincipal">
             </ng-multiselect-dropdown>
 
-
+          </div>
               <!-- <mat-form-field class="col-md-6">
                 <mat-select id="vicePrincipalId" formControlName="vicePrincipalId" placeholder="Vice Principal">
                   <mat-option *ngFor="let principal of principalList" [value]=principal.userId>{{principal.title}}.
@@ -115,18 +123,20 @@
                       </div>
 
                       <div class="row">
-
+                        <div class="col-md-6">
+                          <label  style="font-family: poppins;text-align: left; ">Teacher Name :</label>
                         <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="teacher"
                           placeholder="Teacher Name" [settings]="dropdownSettingsTeacher" [data]="teacherList"
                           formControlName="teacher" (onSelectAll)="onSelectAll($event)">
                         </ng-multiselect-dropdown>
-
-
+                      </div>
+                        <div class="col-md-6">
+                          <label  style="font-family: poppins;text-align: left; ">Substitute Teacher Name :</label>
                         <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="substituteTeacher"
                           placeholder="Substitute Teacher Name" [settings]="dropdownSettingsSubstituteTeacher"
                           [data]="teacherList" formControlName="substituteTeacher" (onSelectAll)="onSelectAll($event)">
                         </ng-multiselect-dropdown>
-
+                      </div>
             
                       </div>
 
@@ -151,13 +161,15 @@
 
                  
                
-                  <button mat-button type="submit" mat-button class="mbutton" (click)="saveStaffProfile()">
-                    Save</button>
+                <button mat-button type="submit" mat-button class="mbutton allButton" (click)="saveStaffProfile()">
+                  <span class="allButtonSpan">Save</span>
+                </button>
 
-                    &nbsp; 
+                  &nbsp; 
 
-                    <button mat-button type="submit" mat-button class="mbutton"  data-dismiss="modal" (click)="resetForm()">
-                      Cancel</button>
+                  <button mat-button type="submit" mat-button class="mbutton allButton"  data-dismiss="modal" (click)="resetForm()">
+                    <span class="allButtonSpan">Cancel</span>
+                  </button>
 
                
              

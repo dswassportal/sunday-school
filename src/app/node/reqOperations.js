@@ -1159,8 +1159,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             userData.userId
         ];
 
-        //console.log(updateUserTbl_values);
-        await client.query(updateUserTbl, updateUserTbl_values)
+        await client.query(updateUserTbl, updateUserTbl_values);
         /*************************** t_person********************************************* */
 
         const updatePersonTbl = `UPDATE PUBLIC.t_person
@@ -1208,8 +1207,8 @@ async function processUpdateUserRoles(userData, loggedInUser) {
 
 
         if (userData.schoolGrade && userData.userId) {
-            const updateStdntAcaDtl = `UPDATE t_student_academic_dtl
-                        SET  school_name=$1, 
+            const updateStdntAcaDtl = `UPDATE public.t_student_academic_dtl
+                        SET school_name=$1, 
                             school_grade=$2, 
                             academic_year_start_date=$3,
                             academic_year_end_date=$4,
@@ -1225,8 +1224,8 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             const updateStdntAcaDtlValues = [
                 userData.schoolName,
                 userData.schoolGrade,
-                userData.studntAcaYrStrtDate,
-                userData.studntAcaYrEndDate,
+                userData.studntAcaYrStrtDate == '' ? null : userData.studntAcaYrStrtDate,
+                userData.studntAcaYrEndDate == '' ? null : userData.studntAcaYrEndDate,
                 userData.schoolAddrLine1,
                 userData.schoolAddrLine2,
                 userData.schoolAddrLine3,
@@ -1238,7 +1237,6 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             ];
 
             let result = await client.query(updateStdntAcaDtl, updateStdntAcaDtlValues);
-            // console.log("result", result.rowCount);
 
             if (result.rowCount == 0) {
                 const insertStdntAcaDtl = `INSERT INTO t_student_academic_dtl 
@@ -1259,15 +1257,15 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                     userData.userId,
                     userData.schoolName,
                     userData.schoolGrade,
-                    userData.studntAcaYrStrtDate,
-                    userData.studntAcaYrEndDate,
-                    userData.schoolAddrLine1,
-                    userData.schoolAddrLine2,
-                    userData.schoolAddrLine3,
-                    userData.schoolCity,
-                    userData.schoolState,
-                    userData.schoolPostalCode,
-                    userData.schoolCountry,
+                    userData.studntAcaYrStrtDate == '' ? null : userData.studntAcaYrStrtDate,
+                    userData.studntAcaYrEndDate == '' ? null : userData.studntAcaYrEndDate,
+                    userData.schoolAddrLine1 == '' ? null : userData.schoolAddrLine1,
+                    userData.schoolAddrLine2 == '' ? null : userData.schoolAddrLine2,
+                    userData.schoolAddrLine3 == '' ? null : userData.schoolAddrLine3,
+                    userData.schoolCity == '' ? null : userData.schoolCity,
+                    userData.schoolCity == '' ? null : userData.schoolCity,
+                    userData.schoolPostalCode == '' ? null : userData.schoolPostalCode,
+                    userData.schoolCountry == '' ? null : userData.schoolCountry
                 ];
                 await client.query(insertStdntAcaDtl, insertStdntAcaDtlValues);
             }

@@ -66,3 +66,46 @@ body {
   border: 1px solid #e44444 !important;
   max-width: inherit!important;
 }
+.ag-theme-alpine {
+  /* use theme parameters where possible */
+  
+  --ag-header-background-color:rgba(238, 209, 172, 0.712);
+  font-family: poppins;
+  text-shadow: 2px 2px 3px rgb(158, 158, 151), 3px 3px 5px rgb(102, 98, 98);
+  
+  }
+
+  .ag-theme-alpine .ag-header-cell-label {
+    font-style: poppins;
+    text-shadow: 4px 0 0 #fff, -4px 0 0 #fff, 0 4px 0 #fff, 0 -4px 0 #fff, 3px 3px #fff, -3px -3px 0 
+#fff, 3px -3px 0 #fff, -3px 3px 0 #fff;
+    }
+    
+  .ag-theme-alpine .ag-checkbox{
+      text-shadow: none;
+      }
+  
+      .ag-theme-alpine .ag-header-cell-resize::after{
+        background-color: black;
+        align-items: center;
+        height: 30px;
+        width: 1px;
+        left: calc(40% - 2px);
+        
+        }
+        
+        
+      .ag-theme-alpine .ag-header-cell-resize::before{
+        background-color: black;
+        align-items: center;
+        height: 30px;
+        }
+        
+        .ag-theme-alpine .ag-header-cell-resize{
+        background-color: white;
+        height: 60px;
+        align-items: center;
+        /* margin-top: 3%; */
+        top: calc(0% - 30%);
+        
+        }

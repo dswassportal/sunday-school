@@ -36,20 +36,23 @@
 
                             </div>
 
+
                             <div class="row">
 
-
+                             
                                 <!-- [disabled]="evntTypedisabled" -->
-
                                 
+                               
+                                <div class="col-md-6">
+                                    <label  style="font-family: poppins;text-align: left; ">Event Type :</label>
                                 <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="eventType" 
                                     placeholder="Event Type" [settings]="dropdownSettingsEventType"
                                     [data]="eventList" [disabled]="evntTypedisabled" formControlName="eventType" (onSelect)="eventTypeSelChange()"
                                     (onSelectAll)="onSelectAll($event)">
                                 </ng-multiselect-dropdown>
                                
-
-
+                            </div>
+                            
                                 <!-- <mat-form-field class="col-md-6">
                                     <mat-select required id="eventType" (selectionChange)="eventTypeSelChange()"
                                         formControlName="eventType" placeholder="Event Type">
@@ -60,14 +63,15 @@
                                 </mat-form-field> -->
 
 
-                               
+                                <div class="col-md-6">
+                                    <label  style="font-family: poppins;text-align: left; ">Event Co-ordinator :</label>
                                 <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="eventCoordinator"
                                     placeholder="Event Co-ordinator"
                                     [settings]="dropdownSettingsEventCoordinator" [data]="proctorData"
                                     formControlName="eventCoordinator" (onSelectAll)="onSelectAll($event)">
                                 </ng-multiselect-dropdown>
                            
-
+                            </div>
                                 <!-- <mat-form-field class="col-md-6">
                                     <mat-select required multiple id="eventCoordinator"
                                         formControlName="eventCoordinator" placeholder="Event Co-ordinator">
@@ -85,14 +89,15 @@
 
 
                                 <!-- [disabled]="evntTypedisabled" -->
-                             
+                                <div class="col-md-6">
+                                    <label  style="font-family: poppins;text-align: left; ">Event Level :</label>
                                 <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgType" placeholder="Event Level"
                                      [settings]="dropdownSettingsEventLevel" [data]="orgs" [disabled]="evntTypedisabled"
                                     (onSelect)="onOrgSelect($event)" formControlName="orgType"
                                     (onSelectAll)="onSelectAll($event)">
                                 </ng-multiselect-dropdown>
                                
-
+                            </div>
                                 <!-- <mat-form-field class="col-md-6">
                                        <mat-label>Event Level Type</mat-label> 
                                     <mat-select matNativeControl required formControlName="orgType"
@@ -114,7 +119,8 @@
                                 </mat-form-field> -->
 
 
-                               
+                                <div class="col-md-6">
+                                    <label  style="font-family: poppins;text-align: left; ">Event Executed By :</label>
                                 <!-- [disabled]="evntTypedisabled" -->
                                 <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgId" placeholder="Event Executed By"
                                      [settings]="dropdownSettingsEventExecutedBy" [data]="orgDetails"  [disabled]="evntTypedisabled"
@@ -122,6 +128,7 @@
                                     (onSelectAll)="onSelectAll($event)">
                                 </ng-multiselect-dropdown>
                                
+                            </div>
 
                             </div>
 
@@ -494,16 +501,21 @@
 
 
                                         <div class="row" style="padding-top: 4%;">
-                                            <mat-form-field class="col-md-6">
+                                            <div class="col-md-6">
+                                                <label  style="font-family: poppins;text-align: left; ">categoryName :</label>
+                                            <mat-form-field class="col-md-12">
                                                 <input matNativeControl readonly id="categoryName" matInput
                                                     formControlName="categoryName" placeholder="Category Name" />
                                             </mat-form-field>
-
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label  style="font-family: poppins;text-align: left; ">Event Executed By :</label>
                                             <ng-multiselect-dropdown class="col-md-6" id="groupMapIds"
                                                 placeholder="Select Groups" [settings]="dropdownSettingsGroups"
                                                 [data]="groupsDropdownValues" formControlName="groupMapIds"
                                                 (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)">
                                             </ng-multiselect-dropdown>
+                                            </div>
                                         </div>
 
                                         <mat-divider
@@ -574,16 +586,21 @@
 
 
                                         <div class="row" style="padding-top: 4%;">
-                                            <mat-form-field class="col-md-6">
+                                            <div class="col-md-6">
+                                                <label  style="font-family: poppins;text-align: left;margin-left: 1.2vw; ">Venue Name :</label>
+                                            <mat-form-field class="col-md-12">
                                                 <input matNativeControl readonly id="venueName" matInput
                                                     formControlName="venueName" placeholder="Venue Name" />
                                             </mat-form-field>
-
+                                        </div>
+                                            <div class="col-md-6">
+                                                <label  style="font-family: poppins;text-align: left; ">Proctor :</label>
                                             <ng-multiselect-dropdown class="col-md-6" id="proctorId"
                                                 placeholder="Select Proctor" [settings]="dropdownSettingsProctor"
                                                 [data]="proctorDropdownValues" formControlName="proctorId"
                                                 (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)">
                                             </ng-multiselect-dropdown>
+                                        </div>
                                         </div>
 
                                         <mat-divider
@@ -678,7 +695,7 @@
                                                                 <div class="row">
 
                                                                     <div class="col-md-6">
-
+                                                                        <label  style="font-family: poppins;text-align: left; ">Region :</label>
                                                                         <ng-multiselect-dropdown class="col-md-12"
                                                                             id="regions" placeholder="Select Region"
                                                                             [settings]="dropdownSettingsRegion"
@@ -709,7 +726,7 @@
                                                                 <div class="row">
 
                                                                     <div class="col-md-12">
-
+                                                                        <label  style="font-family: poppins;text-align: left; ">Judges :</label>
                                                                         <ng-multiselect-dropdown class="col-md-12"
                                                                             placeholder="Select Judges"
                                                                             [settings]="dropdownSettingsJudges"
@@ -775,7 +792,7 @@
 
 
                             <div class="row" style="padding-top: 2%; padding-bottom: 16%;">
-
+                                <label  style="font-family: poppins;text-align: left; margin-left: 1.2vw;">Evaluators :</label>
                                 <ng-multiselect-dropdown class="col-md-12" id="evaluators"
                                     placeholder="Select Evaluators" [settings]="dropdownSettingsEvaluator"
                                     [data]="evaluatorDropdownValues" formControlName="evaluators"

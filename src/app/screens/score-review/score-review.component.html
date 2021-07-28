@@ -69,18 +69,18 @@
 
                         </ag-grid-angular>
                         <div style="padding: 9px; text-align-last: center;">
-                            <button mat-button class="ml-auto border" style="background: #d68165;" data-dismiss="modal">
-                                Cancel
+                            <button mat-button class="ml-auto border allButton" style="background: #d68165;" data-dismiss="modal">
+                                <span class="allButtonSpan">Cancel</span>
                             </button>
 
-                            <button mat-button [disabled]="disableApproveBtn" class="ml-auto border"
+                            <button mat-button [disabled]="disableApproveBtn" class="ml-auto border allButton"
                                 (click)="handleSaveApproveBtnClick()" style="background: #d68165;">
-                                Save
+                                <span class="allButtonSpan">Save</span>
                             </button>
 
-                            <button mat-button [disabled]="disableApproveBtn" class="ml-auto border"
+                            <button mat-button [disabled]="disableApproveBtn" class="ml-auto border allButton"
                                 (click)="handleScoreApproveBtnClick()" style="background: #d68165;">
-                                Approve
+                                <span class="allButtonSpan">Approve</span>
                             </button>
                         </div>
                     </div>
