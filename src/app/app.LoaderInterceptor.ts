@@ -35,7 +35,12 @@ export class LoaderInterceptor implements HttpInterceptor {
                 })
                 if (menuIndex === -1)
                     this.router.navigate(['/signin']);
-            } else this.router.navigate(['/signin']);
+            } else {
+                let urlMapping = window.location.href.split('#');
+                let excludeUrl = urlMapping[1].split('/')[1];
+                if (!this.excludeList.indexOf(excludeUrl))
+                    this.router.navigate(['/signin']);
+            }
         } else this.router.navigate(['/signin']);
         this.spinner.show();
         return next.handle(req).pipe(
