@@ -2,6 +2,7 @@ import { Injectable, Component, ElementRef, Inject, OnInit, ViewChild } from '@a
 // import { Router } from '@angular/router';
 // import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBar, MatSnackBarConfig, MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 
 @Injectable({
     providedIn: 'root'
@@ -9,7 +10,8 @@ import { MatSnackBar, MatSnackBarConfig, MAT_SNACK_BAR_DATA, MatSnackBarRef } fr
 export class uiCommonUtils {
 
     constructor(
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        public router: Router
     ) { }
 
     showSnackBar(message: string, type: string, duration: number) {
@@ -46,14 +48,16 @@ export class uiCommonUtils {
 
         let metaDataJSON = {};
         try {
-             metaDataJSON = JSON.parse(localStorage.getItem('chUserMetaData') || '{}')
+            metaDataJSON = JSON.parse(localStorage.getItem('chUserMetaData') || '{}')
 
-            if (metaDataJSON == {})
+            if (metaDataJSON == {}) {
                 console.log('User metadata not found in the LocalStorage');
+                this.router.navigate(['/signin']);
+            }
 
-            metaDataJSON;
         } catch (error) {
             console.error(error)
+            this.router.navigate(['/signin']);
         }
         return metaDataJSON;
     }
