@@ -440,7 +440,7 @@ async function eventRegistration(eventData, loggedInUser) {
                     [eventData.eventId, eventData.participantId, eventData.group,
                         false, loggedInUser, new Date().toUTCString(),
                         registrationId, eventData.eveVenueId, eventData.registrationStatus, eventData.role]);
-                console.log("111", newRegRes);
+              
                 if (newRegRes.rowCount > 0) {
 
                     let participantRegId = newRegRes.rows[0].event_participant_registration_id;
@@ -526,7 +526,7 @@ async function eventRegistration(eventData, loggedInUser) {
         } else {
             console.debug(`Registering for an event of type '${eventType}' and regMethod is '${eventData.regMethod}'.`);
             if (eventType === 'TTC' || eventType === 'Sunday School Midterm Exam' || eventType === 'Sunday School Final Exam' && eventData.regMethod === 'bulk') {
-
+                console.debug('All conditions to for bulk registation are satisfied... Performing bulk registration now!')
                 let bulkRegister = [];
                 let eventPartiArr = [];
 
@@ -534,13 +534,12 @@ async function eventRegistration(eventData, loggedInUser) {
 
                     if (staff.evePartiRegId !== undefined && staff.evePartiRegId !== null) eventPartiArr.push(staff.evePartiRegId);
 
-                    if (staff.evePartiRegId === undefined || staff.evePartiRegId === '') {
+                    if (staff.evePartiRegId === undefined || staff.evePartiRegId === '' || staff.evePartiRegId === null ) {
                         let registrationId = await generateUniqueEnrollmentId(client);
                         bulkRegister.push(`( ${eventData.eventId}, ${staff.staffId}, ${null}, ${false}, ${loggedInUser},
                                                              '${new Date().toUTCString()}', '${registrationId}', ${eventData.eventVenueId}, 'Registered', ${null})`);
                     }
                 }
-
                 // Update event registration
                 if (eventPartiArr.length > 0) {
 

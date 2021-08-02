@@ -62,16 +62,16 @@ export class EventAttendanceComponent implements OnInit {
 
     this.eventColumnDefs = [
       { headerName: 'Event Name', field: 'name', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
-      { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
+      { headerName: 'Event Type', field: 'eventType', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, },
       { headerName: 'Start Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
-        cellRenderer: (data: any) => {
-        return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-      },
+      //   cellRenderer: (data: any) => {
+      //   return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+      // },
      },
       { headerName: 'End Date', field: 'endDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true,
-        cellRenderer: (data: any) => {
-        return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-      },
+      //   cellRenderer: (data: any) => {
+      //   return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+      // },
     },
     ];
 
@@ -85,21 +85,15 @@ export class EventAttendanceComponent implements OnInit {
 
     //cellRendererFramework: CheckboxRendererComponent, field: 'hasAttended', editable: false 
     let userId = this.uiCommonUtils.getUserMetaDataJson().userId
-    this.apiService.callGetService(`getEventData?user=${userId}&eventType==attendance`).subscribe((respData) => {
+    this.apiService.callGetService(`getEventData?user=${userId}&eventType=attendance`).subscribe((respData) => {
 
       if (respData.data.status == 'failed') {
         this.eventRowData = []
-        this.categoriesArr = []
+        // this.categoriesArr = []
         this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
         return;
-      }
-
-      if (respData.data.metaData) {
-        
-        this.eventRowData = respData.data.metaData.eventData
-      } else
-        this.eventRowData = [];
-
+      } else 
+        this.eventRowData = respData.data.events
     });
 
   }
@@ -109,17 +103,18 @@ export class EventAttendanceComponent implements OnInit {
     $("#imagemodal").modal("show");
   }
   selectedEvent: any = {};
-  onRowClicked(event: any) {
 
+
+  onRowClicked(event: any) {
     $("#imagemodal").modal("show");
     this.attendanceRowData = []
     this.selectedEvent = event.data;
-    console.log("Selected Event : " + this.selectedEvent);
-    this.categoriesArr = event.data.catagories;
+    // console.log("Selected Event : " + this.selectedEvent);
+    // this.categoriesArr = event.data.catagories;
     //this.selectedCategory = event.data.catagories[0].catId;
    
 
-    this.getParicipantData(this.selectedEvent.event_Id, this.selectedCategory)
+    this.getParicipantData(this.selectedEvent.eventId)
   }
 
   handleAttendanceSubmitBtnClick(event: any) {
@@ -138,7 +133,7 @@ export class EventAttendanceComponent implements OnInit {
       payload.action = 'submit';
     else payload.action = 'save';
 
-    payload.eventId = this.selectedEvent.eventid;
+    payload.eventId = this.selectedEvent.event_Id;
     payload.category = this.selectedCategory;
     payload.present = this.getParicipantAttendaneArr();
 
@@ -156,7 +151,7 @@ export class EventAttendanceComponent implements OnInit {
         return;
       } else {
         this.uiCommonUtils.showSnackBar('Score recorded successfully!', 'success', 3000);
-        this.getParicipantData(this.selectedEvent.eventid, this.selectedCategory);
+       // this.getParicipantData(this.selectedEvent.eventid, this.selectedCategory);
       }
     })
   }
@@ -166,9 +161,9 @@ export class EventAttendanceComponent implements OnInit {
 
   // }
 
-  getParicipantData(eventId: any, category: any) {
+  getParicipantData(eventId: any) {
 
-    let urlString = `to=attendance&event=${eventId}&category=${category}`;
+    let urlString = `to=attendance&event=${eventId}`;
 
     this.apiService.callGetService('getParticipants?' + urlString).subscribe((respData) => {
       if (respData.data.status == 'failed') {
