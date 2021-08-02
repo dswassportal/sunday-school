@@ -14,7 +14,7 @@
                 </button>
             </div>
         </div>
-        <mat-vertical-stepper [linear]="true" #stepper>
+        <mat-vertical-stepper [linear]="false" #stepper>
 
             <mat-step [stepControl]="eventsDataFormGroup">
 
@@ -807,6 +807,60 @@
                             <!-- <mat-divider
                                 style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 4%;margin-bottom: 3%;">
                             </mat-divider> -->
+
+
+                            <div style="padding-top: 4%; padding-bottom: 2%;">
+                                <button *ngIf="isEvalSecNextButtonRequired"
+                                    (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span style="font-family: poppins;">Next</span>
+                                </button>
+                            </div>
+
+
+                        </div>
+                    </form>
+                </div>
+            </mat-step>
+
+
+            <mat-step *ngIf="isGradewiseEvaluatorsRequired" [stepControl]="eventGradeEvalAssignFormGroup">
+                <div class="container">
+                    <form [formGroup]="eventGradeEvalAssignFormGroup">
+                        <ng-template matStepLabel> 
+                            <span class="stepLableStyle"><b>Event Evaluator Assignment</b></span>
+                            <div class="stepDisplayMessageStyle" mat-dialog-content>Applicable To Exam Only. Allow One Or More Evaluator Setup
+                                Event Type - Sunday School Mid Term And Sunday School Final Term.</div>
+                        </ng-template>
+                        <div class="form-container">
+
+                            <div class="row" formArrayName="gradeEvalFormArray"
+                            *ngFor="let item of eventGradeEvalAssignFormGroup.get('gradeEvalFormArray')['controls']; let i = index;">
+
+                            <div class="container" style="padding-left: 2%;" [formGroupName]="i">
+
+
+
+                                <div class="row" style="padding-top: 4%;">
+
+                                    <mat-form-field class="col-md-6">
+                                        <input id="grade" matInput formControlName="grade" readonly
+                                            placeholder="Grade" />
+                                    </mat-form-field>
+
+                                    <ng-multiselect-dropdown class="col-md-6" id="evaluator"
+                                        placeholder="Select Evaluator" [settings]="dropdownSettingsEvaluatorDropdownValues"
+                                        [data]="gradewiseEvaluatorDropdownValues" formControlName="evaluator"
+                                        (onSelect)="onItemSelect($event)"
+                                        (onSelectAll)="onSelectAll($event)">
+                                    </ng-multiselect-dropdown>
+
+
+                                </div>
+
+                                </div>
+                            </div>
+
+                           
 
 
                             <div style="padding-top: 4%; padding-bottom: 2%;">

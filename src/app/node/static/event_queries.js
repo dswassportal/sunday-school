@@ -447,7 +447,30 @@ const getEventDefForUpdateEvent = `select distinct event_id, event_type, event_n
                                     where ve.is_deleted != true and ve.event_id =  $1;`;            
                                     
 const getAttachmentsByEveId = `select event_attachment_id, attachment_type, attachment_name  
-                                from t_event_attachment tea where event_id = $1;`                                    
+                                from t_event_attachment tea where event_id = $1;`   
+                                
+                                
+const isExamPresent = `select distinct te.event_id, te.start_date 
+                                from t_event te,t_school_term_detail tstd 
+                                where te.event_type = 'Sunday School Midterm Exam'
+                                and to_date( $1 ,'yyyy-mm-dd') between tstd.term_start_date and tstd.term_end_date 
+                                and te.start_date between tstd.term_start_date and tstd.term_end_date`;
+
+
+const isFinalExamPresent = `select distinct te.event_id, te.start_date 
+                                from t_event te,t_school_term_detail tstd 
+                                where te.event_type = 'Sunday School Final Exam'
+                                and to_date( $1 ,'yyyy-mm-dd') between tstd.term_start_date and tstd.term_end_date 
+                                and te.start_date between tstd.term_start_date and tstd.term_end_date`;
+
+const getGradesData = `select * from t_organization where parent_org_id IN (select org_id from t_organization where parent_org_id IN 
+                                (select org_id from t_organization where org_id= $1));`; 
+
+const getTeachersData = `select vt.user_id,
+                            concat(vt.title, '. ', vt.first_name, ' ', vt.middle_name, ' ', vt.last_name) as name,
+                            vt.primary_grades
+                            from v_teacher vt where vt.org_id = $1`;
+
 
 module.exports = {
     insertEvent,
@@ -494,5 +517,9 @@ module.exports = {
     deleteEvaluatorsForEvalSection,
     deleteAllEvaluatorsForEvalSection,
     getEventDefForUpdateEvent,
-    getAttachmentsByEveId
+    getAttachmentsByEveId,
+    isExamPresent,
+    isFinalExamPresent,
+    getGradesData,
+    getTeachersData
 }
