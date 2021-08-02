@@ -129,14 +129,12 @@ const deleteFamIdRelTPerson = `update t_person set family_id =  nextval('s_famil
 
 const getEventForAttendance = ` select 
                                     jsonb_agg(
-                                    jsonb_build_object(
+                                   distinct jsonb_build_object(
                                         'eventId', te.event_id, 
                                         'eventType' , te.event_type,
                                         'startDate', to_char(te.start_date , 'DD-MM-YYYY'),
                                         'endDate', to_char(te.end_date, 'DD-MM-YYYY'),
-                                        'name', te."name",
-                                        'catId', tecm.event_cat_map_id,
-                                        'catName', tec."name" 
+                                        'name', te."name"
                                         ) 
                                     ) events  from  t_event_venue tev
                                         join t_event te on tev.event_id = te.event_id 
