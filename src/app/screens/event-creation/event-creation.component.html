@@ -14,7 +14,7 @@
                 </button>
             </div>
         </div>
-        <mat-vertical-stepper [linear]="false" #stepper>
+        <mat-vertical-stepper [linear]="true" #stepper>
 
             <mat-step [stepControl]="eventsDataFormGroup">
 
@@ -842,17 +842,20 @@
 
                                 <div class="row" style="padding-top: 4%;">
 
-                                    <mat-form-field class="col-md-6">
+                                    <mat-form-field class="col-md-6" style="padding-top: 3%;">
                                         <input id="grade" matInput formControlName="grade" readonly
                                             placeholder="Grade" />
                                     </mat-form-field>
 
-                                    <ng-multiselect-dropdown class="col-md-6" id="evaluator"
+                                    <div class="col-md-6">
+                                    <label  style="font-family: poppins;text-align: left; ">Evaluator :</label>
+                                    <ng-multiselect-dropdown id="evaluator"
                                         placeholder="Select Evaluator" [settings]="dropdownSettingsEvaluatorDropdownValues"
                                         [data]="gradewiseEvaluatorDropdownValues" formControlName="evaluator"
                                         (onSelect)="onItemSelect($event)"
                                         (onSelectAll)="onSelectAll($event)">
                                     </ng-multiselect-dropdown>
+                                </div>
 
 
                                 </div>
