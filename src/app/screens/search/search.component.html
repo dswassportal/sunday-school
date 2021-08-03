@@ -50,68 +50,6 @@
                         </ng-multiselect-dropdown>
                     </div>
 
-                    <div class="row" style="margin-top: 1%;">
-                        <mat-form-field class="col-md-3">
-                            <mat-label>Teacher First Name</mat-label>
-                            <input id="teacherFirstName" [(ngModel)]="teacherFirstName" matInput
-                                formControlName="teacherFirstName" />
-                        </mat-form-field>
-
-                        <mat-form-field class="col-md-3">
-                            <mat-label>Teacher Last Name</mat-label>
-                            <input id="teacherLastName" [(ngModel)]="teacherLastName" matInput
-                                formControlName="teacherLastName" />
-                        </mat-form-field>
-
-                        <mat-form-field class="col-md-3">
-                            <mat-label style="padding-left: 15%;">Teacher Phone Number</mat-label>
-
-                            <ngx-mat-intl-tel-input id="teacherPhoneNumber" [(ngModel)]="teacherPhoneNumber" matInput
-                                (keypress)="keyPress($event)" [onlyCountries]="['us','in','ca']" [enableSearch]="true"
-                                [enablePlaceholder]="true" [maxLength]="['10']" [enableAutoCountrySelect]="true"
-                                name="mobileNo" formControlName="teacherPhoneNumber" [preferredCountries]="['us']"
-                                [enableRequired]="true">
-                            </ngx-mat-intl-tel-input>
-                        </mat-form-field>
-
-                        <mat-form-field class="col-md-3">
-                            <mat-label>Teacher Email Address</mat-label>
-                            <input id="teacherEmail" [(ngModel)]="teacherEmail" matInput
-                                formControlName="teacherEmail" />
-                        </mat-form-field>
-                    </div>
-
-                    <div class="row">
-                        <mat-form-field class="col-md-3">
-                            <mat-label>Parent First Name</mat-label>
-                            <input id="parentFirstName" [(ngModel)]="parentFirstName" matInput
-                                formControlName="parentFirstName" />
-                        </mat-form-field>
-
-                        <mat-form-field class="col-md-3">
-                            <mat-label>Parent Last Name</mat-label>
-                            <input id="parentLasttName" [(ngModel)]="parentLasttName" matInput
-                                formControlName="parentLasttName" />
-                        </mat-form-field>
-
-                        <mat-form-field class="col-md-3">
-                            <mat-label style="padding-left: 15%;">Parent Phone Number</mat-label>
-
-                            <ngx-mat-intl-tel-input id="parentPhoneNumber" [(ngModel)]="parentPhoneNumber" matInput
-                                (keypress)="keyPress($event)" [onlyCountries]="['us','in','ca']" [enableSearch]="true"
-                                [enablePlaceholder]="true" [maxLength]="['10']" [enableAutoCountrySelect]="true"
-                                name="mobileNo" formControlName="parentPhoneNumber" [preferredCountries]="['us']"
-                                [enableRequired]="true">
-                            </ngx-mat-intl-tel-input>
-                        </mat-form-field>
-
-                        <mat-form-field class="col-md-3">
-                            <mat-label>Parent Email Address</mat-label>
-                            <input id="parentEmail" [(ngModel)]="parentEmail" matInput formControlName="parentEmail" />
-                        </mat-form-field>
-                    </div>
-
-
                     <div class="row">
                         <mat-form-field class="col-md-3">
                             <mat-label>Student First Name</mat-label>
@@ -143,8 +81,72 @@
                         </mat-form-field>
                     </div>
 
+
+                    <div class="row">
+                        <mat-form-field class="col-md-3">
+                            <mat-label>Parent First Name</mat-label>
+                            <input id="parentFirstName" [(ngModel)]="parentFirstName" matInput
+                                formControlName="parentFirstName" />
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-3">
+                            <mat-label>Parent Last Name</mat-label>
+                            <input id="parentLasttName" [(ngModel)]="parentLasttName" matInput
+                                formControlName="parentLasttName" />
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-3">
+                            <mat-label style="padding-left: 15%;">Parent Phone Number</mat-label>
+
+                            <ngx-mat-intl-tel-input id="parentPhoneNumber" [(ngModel)]="parentPhoneNumber" matInput
+                                (keypress)="keyPress($event)" [onlyCountries]="['us','in','ca']" [enableSearch]="true"
+                                [enablePlaceholder]="true" [maxLength]="['10']" [enableAutoCountrySelect]="true"
+                                name="mobileNo" formControlName="parentPhoneNumber" [preferredCountries]="['us']"
+                                [enableRequired]="true">
+                            </ngx-mat-intl-tel-input>
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-3">
+                            <mat-label>Parent Email Address</mat-label>
+                            <input id="parentEmail" [(ngModel)]="parentEmail" matInput formControlName="parentEmail" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="row" style="margin-top: 1%;">
+                        <mat-form-field class="col-md-3">
+                            <mat-label>Teacher First Name</mat-label>
+                            <input id="teacherFirstName" [(ngModel)]="teacherFirstName" matInput
+                                formControlName="teacherFirstName" />
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-3">
+                            <mat-label>Teacher Last Name</mat-label>
+                            <input id="teacherLastName" [(ngModel)]="teacherLastName" matInput
+                                formControlName="teacherLastName" />
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-3">
+                            <mat-label style="padding-left: 15%;">Teacher Phone Number</mat-label>
+
+                            <ngx-mat-intl-tel-input id="teacherPhoneNumber" [(ngModel)]="teacherPhoneNumber" matInput
+                                (keypress)="keyPress($event)" [onlyCountries]="['us','in','ca']" [enableSearch]="true"
+                                [enablePlaceholder]="true" [maxLength]="['10']" [enableAutoCountrySelect]="true"
+                                name="mobileNo" formControlName="teacherPhoneNumber" [preferredCountries]="['us']"
+                                [enableRequired]="true">
+                            </ngx-mat-intl-tel-input>
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-3">
+                            <mat-label>Teacher Email Address</mat-label>
+                            <input id="teacherEmail" [(ngModel)]="teacherEmail" matInput
+                                formControlName="teacherEmail" />
+                        </mat-form-field>
+                    </div>
+
+
+                   
                     <div class="row" style="padding-left:2%;padding-top:1%">
-                        <mat-checkbox class="example-margin" (click)="onCheckBoxClick($event)" [(ngModel)]="isCheckBoxChecked">Extended Search
+                        <mat-checkbox class="example-margin" (click)="onCheckBoxClick($event)" [(ngModel)]="isCheckBoxChecked">Show More
                         </mat-checkbox>
                     </div>
 

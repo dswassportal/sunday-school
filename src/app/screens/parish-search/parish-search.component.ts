@@ -300,7 +300,7 @@ export class ParishSearchComponent implements OnInit {
     const params = {
       columnGroups: true,
       allColumns: true,
-      fileName: `filtered_result`,
+      fileName: `Parish_Search_Result`,
     };
     this.gridApi.exportDataAsCsv(params);
   }

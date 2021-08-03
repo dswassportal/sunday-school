@@ -388,7 +388,7 @@ export class ProfileSearchComponent implements OnInit {
     const params = {
       columnGroups: true,
       allColumns: true,
-      fileName: `filtered_result`,
+      fileName: `Profile_Search_Result`,
     };
     this.gridApi.exportDataAsCsv(params);
   }
