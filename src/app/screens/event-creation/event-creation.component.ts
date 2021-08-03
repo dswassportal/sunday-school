@@ -841,6 +841,7 @@ export class EventCreationComponent implements OnInit {
             if (row.userId != null) {
               let tempjson = {
                 "grade": row.grade,
+                "gradeOrgId": row.gradeOrgId,
                 "name": row.name,
                 "userId": row.userId
               }
@@ -859,6 +860,7 @@ export class EventCreationComponent implements OnInit {
               for (let row1 of mappedEvaluator) {
                 let gardesJson = {
                   "grade": row.grade,
+                  "gradeOrgId": row.gradeOrgId,
                   "evaluator": [
                     {
                       "userId": row1.userId,
@@ -875,6 +877,7 @@ export class EventCreationComponent implements OnInit {
             else {
               let gardesJson = {
                 "grade": row.grade,
+                "gradeOrgId": row.gradeOrgId,
                 "evaluator": [
                   {
                     "userId": null,
@@ -1445,7 +1448,7 @@ export class EventCreationComponent implements OnInit {
     let payloadEval: any = {};
     let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
 
-    if (this.eventType == 'Diploma Exam' || this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam') {
+    if (this.eventType == 'Diploma Exam') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payloadEval.evaluatorAssignment = evaluatorAssignment;
       payloadEval.sectionCode = 'event_evaluator_assignment';
@@ -1454,6 +1457,21 @@ export class EventCreationComponent implements OnInit {
       payloadEval.eventId = this.eventId;
       this.createUpdateEvents(payloadEval);
       this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
+    }
+
+
+    let payloadGradeEval: any = {};
+    let gradeEvalAssign = this.eventGradeEvalAssignFormGroup.value.gradeEvalFormArray;
+    if(this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam'){
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payloadGradeEval.gradeEvalAssign = gradeEvalAssign;
+      payloadGradeEval.sectionCode = 'event_grade_evaluator_assignment';
+      payloadGradeEval.nextSectionCode = 'event_questionnaires';
+      payloadGradeEval.eventType = this.eventType;
+      payloadGradeEval.eventId = this.eventId;
+      this.createUpdateEvents(payloadGradeEval);
+      this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
+      console.log("payloadGradeEval", payloadGradeEval);
     }
 
 
@@ -1583,6 +1601,7 @@ export class EventCreationComponent implements OnInit {
   addGradeEval(): FormGroup {
     return this.formBuilder.group({
       grade: '',
+      gradeOrgId: '',
       evaluator: '',
     });
   };
@@ -1655,12 +1674,14 @@ export class EventCreationComponent implements OnInit {
       if(e.evaluator[0].name != null){
         formArray.push(this.formBuilder.group({
           grade: e.grade,
+          gradeOrgId: e.gradeOrgId,
           evaluator: [e.evaluator]
         }));
       }
       else{
           formArray.push(this.formBuilder.group({
             grade: e.grade,
+            gradeOrgId: e.gradeOrgId,
             evaluator: ''
           }));
       }

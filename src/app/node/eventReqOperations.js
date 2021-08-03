@@ -748,6 +748,27 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 break;
             }
+            case "event_grade_evaluator_assignment": {
+                if (eventsData.gradeEvalAssign) {
+
+                    for(let row of eventsData.gradeEvalAssign){
+                        const delEvals = `update t_event_cat_staff_map set is_deleted = true where event_id = ${eventsData.eventId};`;
+                        await client.query(delEvals);
+                    }
+
+                    for (let row of eventsData.gradeEvalAssign) {
+                        if(eventsData.eventType == "Sunday School Midterm Exam"){
+                            const insertEvals = `insert into t_event_cat_staff_map (event_id, event_category_map_id, user_id, role_id,role_type, is_deleted) values($1, $2, $3, $4, $5, $6);`;
+                            await client.query(insertEvals, [eventsData.eventId, '1031', row.evaluator[0].userId, row.gradeOrgId, 'Evaluator' , false]);
+                        }
+                        if(eventsData.eventType == "Sunday School Final Exam"){
+                            const insertEvals = `insert into t_event_cat_staff_map (event_id, event_category_map_id, user_id, role_id,role_type, is_deleted) values($1, $2, $3, $4, $5, $6);`;
+                            await client.query(insertEvals, [eventsData.eventId, '1032', row.evaluator[0].userId, row.gradeOrgId, 'Evaluator' , false]);
+                        }         
+                    }
+                }
+                break;
+            }
         }// Switch
 
         //if request from next section data in same requst
@@ -995,7 +1016,8 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
 
             for (let row of gradesDataResult.rows) {
                 gradesData.push({
-                    "grade": row.name
+                    "grade": row.name,
+                    "gradeOrgId": row.org_id
                 });
             }
 
