@@ -109,3 +109,11 @@ body {
         top: calc(0% - 30%);
         
         }
+
+        .heading{
+          font-family: poppins;color: red;
+            font-size: 1.5vw;
+          text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+          #fff, 1px -1px 0 #fff, -1px 1px 0 #fff ,2px 2px 3px rgb(39, 39, 38), 4px 4px 5px rgb(46, 44, 44); 
+          font-family: poppins;
+            }

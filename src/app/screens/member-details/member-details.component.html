@@ -3,7 +3,7 @@
 
         <div class="row">
 
-            <h1 class="col-md-12">My Profile</h1>
+            <h1 class="col-md-12 heading">My Profile</h1>
         </div>
 
         <form *ngIf="isApprovedUserLoggedIn" (change)="isDirty = true" [formGroup]="myprofileform">
@@ -466,12 +466,14 @@
 
         <div class="col text-center">
 
-
-            <button mat-button type="submit" routerLinkActive="active" class="mbutton mr-1"
-                (click)="cancel()">Cancel</button>
-            <button mat-button type="submit" mat-button class="mbutton" style="margin-top: 2%;"
-                (click)="updateUserProfile()">
-                Update</button>
+            <button mat-button type="submit" routerLinkActive="active" class="mbutton mr-1 allButton"
+            (click)="cancel()">
+            <span class="allButtonSpan">Cancel</span>
+        </button>
+        <button mat-button type="submit" mat-button class="mbutton allButton" style="margin-top: 2%;"
+            (click)="updateUserProfile()">
+        <span class="allButtonSpan">Update</span>    
+        </button>
         </div>
 
 

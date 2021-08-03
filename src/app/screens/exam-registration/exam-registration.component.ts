@@ -217,8 +217,8 @@ export class ExamRegistrationComponent implements OnInit {
     return this.columnDefs = [
       { headerName: 'Student Name', field: 'studentName', resizable: true, width: 330, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
       { headerName: 'Grade', field: 'schoolGrade', width: 150, resizable: true, sortable: true, filter: true },
+      { headerName: 'Teacher Name', field: 'staffName', width: 250, resizable: true, sortable: true, filter: true, },
       { headerName: 'Registration Id', field: 'registrationId', width: 150, resizable: true, sortable: true, filter: true },
-      { headerName: 'Registration Status', field: 'registrationStatus', width: 200, resizable: true, sortable: true, filter: true, },
       { headerName: 'Registered By', field: 'registeredBy', width: 150, resizable: true, sortable: true, filter: true },
       {
         headerName: 'Registered On', field: 'registeredOn', width: 200, resizable: true, sortable: true, filter: true,
@@ -226,6 +226,7 @@ export class ExamRegistrationComponent implements OnInit {
           return data.value ? (new Date(data.value)).toLocaleDateString() : '';
         }
       },
+      { headerName: 'Registration Status', field: 'registrationStatus', width: 200, resizable: true, sortable: true, filter: true, },
     ];
   }
 

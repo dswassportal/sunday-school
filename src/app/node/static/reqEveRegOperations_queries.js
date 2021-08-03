@@ -127,23 +127,25 @@ const getTTCEventData = `    select distinct
 //                          where tssd.school_id IN (select org_id from t_organization_staff_Assignment where role_type = 'Sunday School Principal' and user_id= $1 );`;
 
 
-const getPrincipalwiseStudentsData = ` select distinct tssd.student_id, tssd.school_grade, torg.name as "school_name", tssd.school_id,
-                                        concat(tu.title, '. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) as "student_name",
-                                        tosa.user_id as "principal_user_id",
-                                        tepr.event_participant_registration_id,
-                                        case when tepr.event_participant_registration_id is null then false else true end has_selected,
-                                        tepr.enrollment_id,
-                                        tepr.registration_status,
-                                        case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
-                                        else null end registered_by
-                                        from t_student_sundayschool_dtl tssd
-                                                join t_organization torg on torg.org_id = tssd.school_id 
-                                            join t_user tu on tu.user_id = tssd.student_id
-                                            join t_organization_staff_Assignment tosa on tosa.org_id = tssd.school_id
-                                            left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
-                                            and tepr.event_id = $2
-                                            left join t_user tu2 on tu2.user_id = tepr.created_by 
-                                            where tosa.role_type = 'Sunday School Principal'  and tosa.user_id = $1`;
+const getPrincipalwiseStudentsData = ` select distinct tssd.student_id, tssd.school_grade,tosa.user_id as "teacher_user_id",concat(tu1.title,'. ',tu1.first_name,' ', tu1.middle_name, ' ', tu1.last_name) as "teacher_name",
+torg.name as "school_name", tssd.school_id,
+                                      concat(tu.title, '. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) as "student_name",
+                                      tosa.user_id as "principal_user_id",
+                                      tepr.event_participant_registration_id,
+                                      case when tepr.event_participant_registration_id is null then false else true end has_selected,
+                                      tepr.enrollment_id,
+                                      tepr.registration_status,
+                                      case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
+                                      else null end registered_by
+                                      from t_student_sundayschool_dtl tssd
+                                              join t_organization torg on torg.org_id = tssd.school_id 
+                                          join t_user tu on tu.user_id = tssd.student_id 
+                                          join t_organization_staff_Assignment tosa on tosa.org_id = tssd.school_id
+                                          join t_user tu1 on tu1.user_id = tosa.user_id
+                                          left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
+                                          and tepr.event_id = $2
+                                          left join t_user tu2 on tu2.user_id = tepr.created_by 
+                                          where tosa.role_type = 'Sunday School Principal'or tosa.role_type = 'Sunday School Teacher' and tosa.user_id = $1`;
 
 const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_user_id", torg.name as "school_grade", tssd.school_id, tssd.student_id, torg1.name as "school_name",
                                     concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) as "student_name",

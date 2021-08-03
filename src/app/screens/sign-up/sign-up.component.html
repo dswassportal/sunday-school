@@ -3,10 +3,14 @@
 
 
         <div class="row" style="background-color: #bd34069e;">
-            <button mat-button class="col mbutton m-1" style="background-color: transparent;border-color: transparent;" (click)="goToLogin()">
-                <mat-icon style="margin-top:-4px">person</mat-icon>Login</button>
-            <button mat-button class="col mbutton m-1" style="background-color: #bd34069e;">
-                <mat-icon style="margin-top:-4px">person_add</mat-icon>Register</button>
+            <button mat-button class="col mbutton m-1 allButton" style="background-color: transparent;border-color: transparent;" (click)="goToLogin()">
+                <mat-icon class="allicon" style="margin-top:-4px">person</mat-icon>
+              <span class="allButtonSpan">Login</span>  
+            </button>
+            <button mat-button class="col mbutton m-1 allButton" style="background-color: #bd34069e;">
+                <mat-icon class="allicon" style="margin-top:-4px">person_add</mat-icon>
+                <span class="allButtonSpan">Register</span>
+            </button>
         </div>
 
         <div class="mt-3">
@@ -143,8 +147,12 @@
               
 
                 <div class="form-group text-right">
-                    <button mat-button type="submit" routerLinkActive="active" class="mbutton mr-1" (click)="cancel()">Cancel</button>
-                    <button mat-button id="signInBtn" type="submit" [disabled]="!signUpForm.valid" routerLinkActive="active" class="mbutton" (click)="signUp()">Register</button>
+                    <button mat-button type="submit" routerLinkActive="active" class="mbutton mr-1 allButton" (click)="cancel()">
+                        <span class="allButtonSpan">Cancel</span>
+                    </button>
+                    <button mat-button id="signInBtn" type="submit" [disabled]="!signUpForm.valid" routerLinkActive="active" class="mbutton allButton" (click)="signUp()">
+                        <span class="allButtonSpan">Register</span>
+                    </button>
                 </div>
             </form>
         </div>
