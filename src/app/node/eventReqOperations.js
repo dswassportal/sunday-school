@@ -810,7 +810,7 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 case "event_grade_evaluator_assignment": {
                     console.log("eventsData.orgId", eventsData.orgId);
-                    response.event_grade_evaluator_assignment = await getSectionWiseData(loggedInUser, eventsData.orgId, "event_grade_evaluator_assignment", eventsData.eventType, client);
+                    response.event_grade_evaluator_assignment = await getSectionWiseData(eventsData.orgId, eventsData.eventId, "event_grade_evaluator_assignment", eventsData.eventType, client);
                     break;
                 }
             }//switch
@@ -1014,7 +1014,8 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             let gradesData = [];
             let teachersData = [];
             let allData = [];
-            let gradesDataResult = await client.query(queries.getGradesData, [eventId]);
+            let selectedTeachersData = [];
+            let gradesDataResult = await client.query(queries.getGradesData, [loggedInUser]);
 
             for (let row of gradesDataResult.rows) {
                 gradesData.push({
@@ -1023,12 +1024,26 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                 });
             }
 
-            let teachersDataResult = await client.query(queries.getTeachersData, [eventId]);
+            let teachersDataResult = await client.query(queries.getTeachersData, [loggedInUser]);
             for (let row of teachersDataResult.rows) {
                 teachersData.push({
                     "userId": row.user_id,
                     "name": row.name,
-                    "primaryGrades": row.primary_grades
+                    "primaryGrades": row.primary_grades,
+                    "eventCatStaffMapId" : row.event_cat_staff_map_id,
+                    "roleId": row.role_id
+                });
+            }
+
+
+            let selectedTeachersDataResult = await client.query(queries.getSelectedTeachersData, [loggedInUser, eventId]);
+            for (let row of selectedTeachersDataResult.rows) {
+                selectedTeachersData.push({
+                    "userId": row.user_id,
+                    "name": row.name,
+                    "primaryGrades": row.primary_grades,
+                    "eventCatStaffMapId" : row.event_cat_staff_map_id,
+                    "roleId": row.role_id
                 });
             }
 
@@ -1062,7 +1077,8 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             return {
                 "gradesData": gradesData,
                 "teachersData": teachersData,
-                "allData": allData
+                "allData": allData,
+                "selectedTeachersData": selectedTeachersData
             }
         }
     }

@@ -471,6 +471,23 @@ const getTeachersData = `select vt.user_id,
                             vt.primary_grades
                             from v_teacher vt where vt.org_id = $1`;
 
+const getSelectedTeachersData = `select distinct vt.user_id, tecsm.event_cat_staff_map_id, tecsm.role_id,
+                                    concat(vt.title, '. ', vt.first_name, ' ', vt.middle_name, ' ', vt.last_name) as name,
+                                    vt.primary_grades
+                                    from v_teacher vt
+                                    left join t_event_cat_staff_map tecsm on tecsm.user_id = vt.user_id
+                                    and vt.org_id = $1 
+                                    and tecsm.event_id = $2
+                                    where tecsm.is_deleted = false
+                                    union 
+                                    select distinct vt.user_id, 0, 0,
+                                    concat(vt.title, '. ', vt.first_name, ' ', vt.middle_name, ' ', vt.last_name) as name,
+                                    vt.primary_grades
+                                    from v_teacher vt
+                                    left join t_event_cat_staff_map tecsm on tecsm.user_id = vt.user_id
+                                    and vt.org_id = $1 
+                                    where tecsm.is_deleted = false;`;
+
 
 module.exports = {
     insertEvent,
@@ -521,5 +538,6 @@ module.exports = {
     isExamPresent,
     isFinalExamPresent,
     getGradesData,
-    getTeachersData
+    getTeachersData,
+    getSelectedTeachersData
 }

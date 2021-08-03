@@ -845,11 +845,13 @@ export class EventCreationComponent implements OnInit {
                 "name": row.name,
                 "userId": row.userId
               }
-              mappedEvaluator.push(tempjson);
+              let result = mappedEvaluator.findIndex((item: any) => item.grade === row.grade);
+              if (result == -1) {
+                mappedEvaluator.push(tempjson);
+              }
             }
           }
 
-          console.log("mappedEvaluator", mappedEvaluator);
 
           let gradesEvaluatorsMappingData = [];
 
@@ -891,7 +893,45 @@ export class EventCreationComponent implements OnInit {
 
           }
 
-          this.eventGradeEvalAssignFormGroup.setControl('gradeEvalFormArray', this.setGradeEval(gradesEvaluatorsMappingData));
+          console.log("gradesEvaluatorsMappingData", gradesEvaluatorsMappingData);
+
+
+          let teachersGradesData = [];
+          for (let row1 of gradesEvaluatorsMappingData) {
+            let index = this.gradeEvaluatorAssignmentData.selectedTeachersData.findIndex((item: any) => item.roleId === row1.gradeOrgId && item.roleId !== 0);
+
+            if (index !== -1) {
+              teachersGradesData.push({
+                "grade": row1.grade,
+                "gradeOrgId": row1.gradeOrgId,
+                "evaluator": [
+                  {
+                    "userId": this.gradeEvaluatorAssignmentData.selectedTeachersData[index].userId,
+                    "name": this.gradeEvaluatorAssignmentData.selectedTeachersData[index].name
+                  }
+                ]
+              });
+            }
+            else {
+              teachersGradesData.push({
+                "grade": row1.grade,
+                "gradeOrgId": row1.gradeOrgId,
+                "evaluator": [row1.evaluator]
+              });
+            }
+          }
+
+
+
+          if (this.eventFormLabel == true) {
+            this.eventGradeEvalAssignFormGroup.setControl('gradeEvalFormArray', this.setGradeEval(teachersGradesData));
+          } // update screen
+          else {
+            this.eventGradeEvalAssignFormGroup.setControl('gradeEvalFormArray', this.setGradeEval(gradesEvaluatorsMappingData));
+          }
+
+
+
           this.gradewiseEvaluatorDropdownValues = res.data.event_grade_evaluator_assignment.teachersData;
 
         }
@@ -1462,7 +1502,7 @@ export class EventCreationComponent implements OnInit {
 
     let payloadGradeEval: any = {};
     let gradeEvalAssign = this.eventGradeEvalAssignFormGroup.value.gradeEvalFormArray;
-    if(this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam'){
+    if (this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payloadGradeEval.gradeEvalAssign = gradeEvalAssign;
       payloadGradeEval.sectionCode = 'event_grade_evaluator_assignment';
@@ -1671,21 +1711,21 @@ export class EventCreationComponent implements OnInit {
   setGradeEval(eventGradeEvaldata: any): FormArray {
     const formArray = new FormArray([]);
     eventGradeEvaldata.forEach((e: any) => {
-      if(e.evaluator[0].name != null){
+      if (e.evaluator[0].name != null) {
         formArray.push(this.formBuilder.group({
           grade: e.grade,
           gradeOrgId: e.gradeOrgId,
           evaluator: [e.evaluator]
         }));
       }
-      else{
-          formArray.push(this.formBuilder.group({
-            grade: e.grade,
-            gradeOrgId: e.gradeOrgId,
-            evaluator: ''
-          }));
+      else {
+        formArray.push(this.formBuilder.group({
+          grade: e.grade,
+          gradeOrgId: e.gradeOrgId,
+          evaluator: ''
+        }));
       }
-    
+
     });
     return formArray;
   }
