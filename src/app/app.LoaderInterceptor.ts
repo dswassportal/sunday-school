@@ -17,6 +17,7 @@ export class LoaderInterceptor implements HttpInterceptor {
         "landingpage",
         "signin",
         "signup",
+        'eventRegistration',
         "dashboard"];
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -27,11 +28,16 @@ export class LoaderInterceptor implements HttpInterceptor {
                 let menuIndex = userMetaData.menus.findIndex((menuUrl: any) => {
                     let urlMapping = window.location.href.split('#');
 
-                    if (urlMapping[1].indexOf('/') !== -1) {
-                        let excludeUrl = urlMapping[1].split('/')[1];
-                        excludeIndex = this.excludeList.indexOf(excludeUrl);
+                    if (urlMapping[1].includes('dashboard')) {
+                        urlMapping = window.location.href.split('#');
+                    } else {
+
+                        if (urlMapping[1].indexOf('/') !== -1) {
+                            let excludeUrl = urlMapping[1].split('/')[1];
+                            excludeIndex = this.excludeList.indexOf(excludeUrl);
+                        }
                     }
-                    return ((urlMapping[1] === menuUrl.url) || excludeIndex === -1 ? false : true)
+                    return ((urlMapping[1] === menuUrl.url) || excludeIndex === -1 ? true : false)
                 })
                 if (menuIndex === -1)
                     this.router.navigate(['/signin']);
