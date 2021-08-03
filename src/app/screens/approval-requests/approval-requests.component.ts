@@ -119,10 +119,10 @@ export class ApprovalRequestsComponent implements OnInit {
 
       if (usertype == 'approval_requests') {
         this.columnDefs = [
-          { headerName: 'First Name', field: 'firstName', sortable: true, filter: true, width: 170, checkboxSelection: true },
-          { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true, width: 170 },
-          { headerName: 'Member Type', field: 'memberType', sortable: true, filter: true, width: 150 },
-          { headerName: 'Parish', field: 'parish_name', sortable: true, filter: true, width: 450 },
+          { headerName: 'First Name', field: 'firstName', resizable: true,sortable: true, filter: true, width: 170, checkboxSelection: true },
+          { headerName: 'Last Name', field: 'lastName' ,resizable: true, sortable: true, filter: true, width: 170 },
+          { headerName: 'Member Type', field: 'memberType',resizable: true, sortable: true, filter: true, width: 150 },
+          { headerName: 'Parish', field: 'parish_name',resizable: true, sortable: true, filter: true, width: 450 },
           // { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
           //{ headerName: 'State', field: 'state', sortable: true, filter: true, width: 150 },
           //{ headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 150 },
@@ -130,14 +130,14 @@ export class ApprovalRequestsComponent implements OnInit {
         ]
       } else if (usertype == 'rejected') {
         this.columnDefs = [
-          { headerName: 'First Name', field: 'firstName', sortable: true, filter: true, width: 170, checkboxSelection: true },
-          { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true, width: 170 },
-          { headerName: 'Member Type', field: 'memberTypeForRejected', sortable: true, filter: true, width: 150 },
-          { headerName: 'Parish', field: 'parish_name', sortable: true, filter: true, width: 450 },
+          { headerName: 'First Name', field: 'firstName',resizable: true, sortable: true, filter: true, width: 170, checkboxSelection: true },
+          { headerName: 'Last Name', field: 'lastName',resizable: true, sortable: true, filter: true, width: 170 },
+          { headerName: 'Member Type', field: 'memberTypeForRejected',resizable: true, sortable: true, filter: true, width: 150 },
+          { headerName: 'Parish', field: 'parish_name',resizable: true, sortable: true, filter: true, width: 450 },
           // { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
           //{ headerName: 'State', field: 'state', sortable: true, filter: true, width: 150 },
           //{ headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 150 },
-          { headerName: 'Reason', field: 'reason', sortable: true, filter: true, width: 180 }
+          { headerName: 'Reason', field: 'reason',resizable: true, sortable: true, filter: true, width: 180 }
         ]
       }
 

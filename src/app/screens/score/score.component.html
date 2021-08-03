@@ -27,7 +27,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <div class="form-group form-inline row m-0 p-0">
-                            <h4 class="modal-title">Upload Score for <b>{{selectedEventName}}</b></h4>
+                            <h4 class="modal-title heading">Upload Score for <b>{{selectedEventName}}</b></h4>
 
                             <div class = "row d-flex" style="margin-left: 100px;">
 
@@ -63,20 +63,20 @@
                             -->
                         </ag-grid-angular>
                         <div style="padding: 9px; text-align-last: center;">
-                            <button mat-button class="ml-auto border" style="background: #d68165;" data-dismiss="modal">
-                                Cancel
+                            <button mat-button class="ml-auto border allButton"  data-dismiss="modal">
+                                <span>Cancel</span>
                                 <!-- <mat-icon>clear</mat-icon> -->
                             </button>
 
-                            <button [disabled]="selectedEvtIsScrSubmted" mat-button class="ml-auto border"
-                                (click)="handleScoreSaveBtnClick($event)" style="background: #d68165;">
-                                Save
+                            <button [disabled]="selectedEvtIsScrSubmted" mat-button class="ml-auto border allButton"
+                                (click)="handleScoreSaveBtnClick($event)" >
+                                <span class="allButtonSpan">Save</span>
                                 <!-- <mat-icon>clear</mat-icon> -->
                             </button>
 
-                            <button mat-button [disabled]="selectedEvtIsScrSubmted" class="ml-auto border"
-                                (click)="handleScoreCompleteBtnClick($event)" style="background: #d68165;">
-                                Submit
+                            <button mat-button [disabled]="selectedEvtIsScrSubmted" class="ml-auto border allButton"
+                                (click)="handleScoreCompleteBtnClick($event)" >
+                                <span class="allButtonSpan">Submit</span>
                                 <!-- <mat-icon>clear</mat-icon> -->
                             </button>
                         </div>

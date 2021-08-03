@@ -1,7 +1,7 @@
 <div class="container mt-4">
     <mat-card class="shadow">
         <div class="row">
-            <h1 class="col-md-11" style="text-align: center; font-family: poppins; ">Registration For
+            <h1 class="col-md-11 heading" style="text-align: center; font-family: poppins; ">Registration For
                 <label><b>{{selectedRowJson.name}}</b></label>
             </h1>
 
@@ -298,23 +298,23 @@
             <div class="col text-center" style="padding-top:1%">
 
 
-                <button style="float: center;" *ngIf="isCancelRegiBtnRequired" type="submit" mat-button class="mbutton"
-                    (click)="onCancelRegistrationClick()">
-                    Cancel Registration
-                </button>&nbsp;
+                <button style="float: center;" *ngIf="isCancelRegiBtnRequired" type="submit" mat-button class="mbutton allButton"
+                (click)="onCancelRegistrationClick()">
+               <span class="allButtonSpan"> Cancel Registration</span>
+            </button>&nbsp;
 
-                <button style="float: center;" *ngIf="!isUpdateBtnRequired" (click)="onRegisterEventClick()" mat-button
-                    type="submit" mat-button class="mbutton">
-                    Register
-                </button>
-                <button style="float: center;" *ngIf="isUpdateBtnRequired" type="submit" mat-button class="mbutton"
-                    (click)="onUpdateRegistrationClick()">
-                    <span *ngIf="isCancelRegiBtnRequired">Update</span>
-                    <span *ngIf="!isCancelRegiBtnRequired">Register</span>
-                </button>&nbsp;
-                <button style="float: center;" type="submit" mat-button class="mbutton" (click)="onCancelClick()">
-                    Cancel
-                </button>
+            <button style="float: center;" *ngIf="!isUpdateBtnRequired" (click)="onRegisterEventClick()" mat-button
+                type="submit" mat-button class="mbutton allButton">
+                <span class="allButtonSpan">Register</span>
+            </button>
+            <button style="float: center;" *ngIf="isUpdateBtnRequired" type="submit" mat-button class="mbutton allButton"
+                (click)="onUpdateRegistrationClick()">
+                <span class="allButtonSpan" *ngIf="isCancelRegiBtnRequired">Update</span>
+                <span class="allButtonSpan" *ngIf="!isCancelRegiBtnRequired">Register</span>
+            </button>&nbsp;
+            <button style="float: center;" type="submit" mat-button class="mbutton allButton" (click)="onCancelClick()">
+               <span class="allButtonSpan">Cancel</span>
+            </button>
             </div>
         </div>
 

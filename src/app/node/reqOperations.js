@@ -951,61 +951,41 @@ async function getEventData(userId, eventType) {
             res = await client.query(reqOpQueries.getUpcomingEvents, [userId]);
         } else if (eventType === 'registered_events') {
             res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [userId]);
-        } else if (eventType === 'completed_events') {
-
-        }
-
-        // getEventData =
-        //     `select distinct event_id, event_name "name", event_type, 
-        //                 event_desciption description, event_start_date start_date, event_end_date end_date, 
-        //                 registration_start_date, registration_end_date
-        //                 from v_event ve
-        //                 where
-        //                 ve.event_id ${condition} (select event_id 
-        //                         from t_event_participant_registration tepr 
-        //                         where tepr.user_id = ${userId}
-        //                     )
-        //                 ${condition2}
-        //                 and  ve.is_deleted = false;`;
-
-
-        else {
+        } else if (eventType === 'attendance') {
+            // and event_start_date >= current_date
+            res = await client.query(reqOpQueries.getEventForAttendance, [userId]);
+        } else
             res = await client.query(getEventData);
-        }
-
-
-
 
         if (eventType === 'attendance') {
-
-            if (res.rowCount == 0) {
-                return ({
-                    data: {
-                        events: []
-                    }
-                })
-            } else {
-
-                let events = [];
-
-                for (let row of res.rows) {
-                    let index = events.findIndex((event) => event.eventid == row.eventid)
-                    if (index < 0) {
-                        let temp = { 'catId': row.catid, 'catName': row.catname }
-                        let catagories = [temp]
-                        row.catagories = catagories;
-                        events.push(row);
-                    } else {
-                        let catIndex = events[index].catagories.findIndex((cat) => cat.catid == row.catid);
-                        if (catIndex < 0) {
-                            let temp = { 'catId': row.catid, 'catName': row.catname }
-                            events[index].catagories.push(temp)
-                        }
-                    }
+            return ({
+                data: {
+                    events: res.rowCount > 0 ? res.rows[0].events : []
                 }
-                metadata.events = events;
+            })
 
-            }
+            // } else {
+
+            //     let events = [];
+
+            //     for (let row of res.rows) {
+            //         let index = events.findIndex((event) => event.eventId == row.eventId)
+            //         if (index < 0) {
+            //             let temp = { 'catId': row.event_cat_map_id, 'catName': row.cat_name }
+            //             let catagories = [temp]
+            //             row.catagories = catagories;
+            //             events.push(row);
+            //         } else {
+            //             let catIndex = events[index].catagories.findIndex((cat) => cat.catId == row.event_cat_map_id);
+            //             if (catIndex < 0) {
+            //                 let temp = { 'catId': row.event_cat_map_id, 'catName': row.cat_name }
+            //                 events[index].catagories.push(temp)
+            //             }
+            //         }
+            //     }
+            //     metadata.events = events;
+
+            // }
         } else {
             if (res && res.rowCount > 0) {
                 //  console.log("In Event response : " + res);
@@ -1082,9 +1062,9 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             await client.query(insertRoleMapping)
             console.log('User is family head gave him add member permission');
 
-            console.log( userData.familyId, userData.userId, 'Family Head', userData.userId, new Date().toUTCString());
+            console.log(userData.familyId, userData.userId, 'Family Head', userData.userId, new Date().toUTCString());
             await client.query(reqOpQueries.insertFamilyHeadRel, [
-                userData.familyId, userData.userId, 'Family Head',  new Date().toUTCString()]);
+                userData.familyId, userData.userId, 'Family Head', new Date().toUTCString()]);
 
         }
         if (userData.isFamilyHead == false || userData.isFamilyHead == "false") {
@@ -1159,8 +1139,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             userData.userId
         ];
 
-        //console.log(updateUserTbl_values);
-        await client.query(updateUserTbl, updateUserTbl_values)
+        await client.query(updateUserTbl, updateUserTbl_values);
         /*************************** t_person********************************************* */
 
         const updatePersonTbl = `UPDATE PUBLIC.t_person
@@ -1208,8 +1187,8 @@ async function processUpdateUserRoles(userData, loggedInUser) {
 
 
         if (userData.schoolGrade && userData.userId) {
-            const updateStdntAcaDtl = `UPDATE t_student_academic_dtl
-                        SET  school_name=$1, 
+            const updateStdntAcaDtl = `UPDATE public.t_student_academic_dtl
+                        SET school_name=$1, 
                             school_grade=$2, 
                             academic_year_start_date=$3,
                             academic_year_end_date=$4,
@@ -1225,8 +1204,8 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             const updateStdntAcaDtlValues = [
                 userData.schoolName,
                 userData.schoolGrade,
-                userData.studntAcaYrStrtDate,
-                userData.studntAcaYrEndDate,
+                userData.studntAcaYrStrtDate == '' ? null : userData.studntAcaYrStrtDate,
+                userData.studntAcaYrEndDate == '' ? null : userData.studntAcaYrEndDate,
                 userData.schoolAddrLine1,
                 userData.schoolAddrLine2,
                 userData.schoolAddrLine3,
@@ -1238,7 +1217,6 @@ async function processUpdateUserRoles(userData, loggedInUser) {
             ];
 
             let result = await client.query(updateStdntAcaDtl, updateStdntAcaDtlValues);
-            // console.log("result", result.rowCount);
 
             if (result.rowCount == 0) {
                 const insertStdntAcaDtl = `INSERT INTO t_student_academic_dtl 
@@ -1259,15 +1237,15 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                     userData.userId,
                     userData.schoolName,
                     userData.schoolGrade,
-                    userData.studntAcaYrStrtDate,
-                    userData.studntAcaYrEndDate,
-                    userData.schoolAddrLine1,
-                    userData.schoolAddrLine2,
-                    userData.schoolAddrLine3,
-                    userData.schoolCity,
-                    userData.schoolState,
-                    userData.schoolPostalCode,
-                    userData.schoolCountry,
+                    userData.studntAcaYrStrtDate == '' ? null : userData.studntAcaYrStrtDate,
+                    userData.studntAcaYrEndDate == '' ? null : userData.studntAcaYrEndDate,
+                    userData.schoolAddrLine1 == '' ? null : userData.schoolAddrLine1,
+                    userData.schoolAddrLine2 == '' ? null : userData.schoolAddrLine2,
+                    userData.schoolAddrLine3 == '' ? null : userData.schoolAddrLine3,
+                    userData.schoolCity == '' ? null : userData.schoolCity,
+                    userData.schoolCity == '' ? null : userData.schoolCity,
+                    userData.schoolPostalCode == '' ? null : userData.schoolPostalCode,
+                    userData.schoolCountry == '' ? null : userData.schoolCountry
                 ];
                 await client.query(insertStdntAcaDtl, insertStdntAcaDtlValues);
             }
@@ -1334,9 +1312,20 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                     let delNonExistingRelRes = await client.query(tempQuery,
                         [true, userData.userId, new Date().toUTCString(), userData.familyId]);
 
-                    if (delNonExistingRelRes.rowCount > 0)
+                    if (delNonExistingRelRes.rowCount > 0) {
                         console.debug(`Deleted relationship's relationship_ids are : ${JSON.stringify(delNonExistingRelRes.rows)}`);
+
+                        //Clear persons family id for deleted relationship.
+                        let tempQuery2 = reqOpQueries.deleteFamIdRelTPerson.replace('$2', existingMembers.join(','));
+                        let delNonRelResTPer = await client.query(tempQuery2,
+                            [userData.familyId]);
+
+                        if (delNonRelResTPer.rowCount > 0) {
+                            console.log(`${delNonRelResTPer.rowCount} family ids resetted!, As fmaily head deleted relationships with them.`);
+                        }
+                    }
                 }
+
                 for (let details of userData.memberDetails) {
 
                     console.debug("Processing member : ", details);

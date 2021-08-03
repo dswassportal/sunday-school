@@ -125,6 +125,22 @@ const insertFamilyHeadRel = `INSERT INTO t_person_family (family_id, family_memb
                                                 and is_deleted = false
                                         );`;                             
 
+const deleteFamIdRelTPerson = `update t_person set family_id =  nextval('s_family') where user_id not in ($2) and family_id  = $1;`;           
+
+const getEventForAttendance = ` select 
+                                    jsonb_agg(
+                                   distinct jsonb_build_object(
+                                        'eventId', te.event_id, 
+                                        'eventType' , te.event_type,
+                                        'startDate', to_char(te.start_date , 'DD-MM-YYYY'),
+                                        'endDate', to_char(te.end_date, 'DD-MM-YYYY'),
+                                        'name', te."name"
+                                        ) 
+                                    ) events  from  t_event_venue tev
+                                        join t_event te on tev.event_id = te.event_id 
+                                        left join t_event_category_map tecm on tecm.event_id = te.event_id
+                                        left join t_event_category tec on tecm.event_category_id = tec.event_category_id 
+                                        where proctor_id = $1;`;
 
 module.exports= {
     updateEmailId,
@@ -146,5 +162,7 @@ module.exports= {
     checkNewMemEmailAndRelationExists,
     insertFamilyHeadRole,
     deleteFamilyHeadRole,
-    insertFamilyHeadRel
+    insertFamilyHeadRel,
+    deleteFamIdRelTPerson,
+    getEventForAttendance
 }                                                

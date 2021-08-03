@@ -2,10 +2,14 @@
     <div class="container col-md-6 col-sm-4 border rounded-lg box-shadow">
 
         <div class="row" style="background-color: #bd34069e;">
-            <button mat-button class="col mbutton m-1" style="background-color: #bd34069e">
-                <mat-icon style="margin-top:-4px">person</mat-icon>Login</button>
-            <button mat-button class="col mbutton m-1" style="color:white" (click)="goToSignUp()" style="background-color: transparent;border-color: transparent;">
-                <mat-icon style="margin-top:-4px">person_add</mat-icon>Register</button>
+            <button mat-button class="col mbutton m-1 allButton" >
+                <mat-icon class="allicon" style="margin-top:-4px ;">person</mat-icon>
+                <span class="allButtonSpan">Login</span>
+            </button>
+            <button mat-button class="col mbutton m-1 allButton" style="color:white" (click)="goToSignUp()" style="border-color: transparent;">
+                <mat-icon class="allicon" style="margin-top:-4px">person_add</mat-icon >
+                    <span class="allButtonSpan">Register</span>
+                </button>
         </div>
 
         <div class="mt-3">
@@ -37,7 +41,9 @@
 
 
                 <div class="form-group text-center">
-                    <button mat-button id="signInBtn" type="submit" class="mbutton" [disabled]="!signInForm.dirty" (click)="logIn()">LOG IN</button>
+                    <button mat-button id="signInBtn" type="submit" class="mbutton allButton" [disabled]="!signInForm.dirty" (click)="logIn()">
+                        <span class="loginButtonSpan">LOG IN</span>
+                    </button>
                 </div>
 
 

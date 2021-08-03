@@ -1,7 +1,7 @@
 <div class="container mt-3" style="overflow: hidden;">
 
     <div class="form-group form-inline row m-0 p-0">
-        <h4 style="font-family: poppins;"><b> Select event to mark attendance.</b></h4>
+        <h4 class="heading" style="font-family: poppins;"><b> Select event to mark attendance.</b></h4>
     </div>
 
     <ag-grid-angular style="width: auto; height: 480px;" class="ag-theme-alpine mt-3"
@@ -22,7 +22,7 @@
             <div class="modal-dialog modal-dialog-scrollable modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Mark attendance for <b>{{selectedEvent.eventname}}</b></h4>
+                        <h4 class="modal-title heading">Mark attendance for <b>{{selectedEvent.name}}</b></h4>
                         <button mat-button class="ml-auto" data-dismiss="modal">
                             <mat-icon>clear</mat-icon>
                         </button>
@@ -48,18 +48,16 @@
                         </ag-grid-angular>
 
                         <div style="padding: 9px; text-align-last: center;">
-                            <button mat-button class="ml-auto border" style="background: #d68165;" data-dismiss="modal">
-                                Cancel
+                            <button mat-button class="ml-auto border allButton"  data-dismiss="modal">
+                                <span class="allButtonSpan">Cancel</span>
                             </button>
 
-                            <button mat-button [disabled]="disableSaveSubmitBtn" class="ml-auto border" (click)="handleAttendanceSaveBtnClick($event)"
-                                style="background: #d68165;">
-                                Save
+                            <button mat-button [disabled]="disableSaveSubmitBtn" class="ml-auto border allButton" (click)="handleAttendanceSaveBtnClick($event)">
+                                <span class="allButtonSpan">Save</span>
                             </button>
 
-                            <button mat-button [disabled]="disableSaveSubmitBtn" class="ml-auto border" (click)="handleAttendanceSubmitBtnClick($event)"
-                                style="background: #d68165;">
-                                Submit
+                            <button mat-button [disabled]="disableSaveSubmitBtn" class="ml-auto border allButton" (click)="handleAttendanceSubmitBtnClick($event)">
+                                <span class="allButtonSpan">Submit</span>
                             </button>
                         </div>
                     </div>

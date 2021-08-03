@@ -53,6 +53,7 @@ export class EventCreationComponent implements OnInit {
   eventJudgeAssignFormGroup: any;
   questionnaireDataFormGroup: any;
   eventEvaluatorAssignFormGroup: any;
+  eventGradeEvalAssignFormGroup: any;
 
   gridOptionsCat: any;
   gridOptionsGroups: any;
@@ -149,6 +150,10 @@ export class EventCreationComponent implements OnInit {
   public myreg = /(^|\s)((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/gi
   minDate = new Date();
   selectedRowJson: any = {};
+  gradeEvaluatorAssignmentData: any;
+  isGradewiseEvaluatorsRequired: any;
+  gradewiseEvaluatorDropdownValues: any;
+  dropdownSettingsEvaluatorDropdownValues: any;
 
   error: any;
   fileUpload = { status: '', message: '', filePath: '' };
@@ -280,6 +285,17 @@ export class EventCreationComponent implements OnInit {
     maxHeight: 100
   };
 
+  dropdownSettingsForEvaluatorDropdownValues: IDropdownSettings = {
+    singleSelection: false,
+    idField: 'userId',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
 
 
 
@@ -308,7 +324,7 @@ export class EventCreationComponent implements OnInit {
       if (this.eventFormLabel == false) {   // insert screen
         eventType = this.eventsDataFormGroup.value.eventType[0].eventType;
       }
-      else{
+      else {
         eventType = this.eventsDataFormGroup.value.eventType[0];
       }
 
@@ -327,6 +343,7 @@ export class EventCreationComponent implements OnInit {
           this.isQuestionnaireRequired = this.eventList[i].isQuestionnaireRequired;
           this.isAttachmentRequired = this.eventList[i].isAttachmentRequired;
           this.isUrlRequired = this.eventList[i].isUrlRequired;
+          this.isGradewiseEvaluatorsRequired = this.eventList[i].isGradewiseEvaluatorsRequired;
           this.eventType = this.eventList[i].eventType;
         }
       }
@@ -517,6 +534,8 @@ export class EventCreationComponent implements OnInit {
     this.dropdownSettingsEventLevel = this.dropdownSettingsForEventLevel;
     this.dropdownSettingsEventExecutedBy = this.dropdownSettingsForEventExecutedBy;
 
+    this.dropdownSettingsEvaluatorDropdownValues = this.dropdownSettingsForEvaluatorDropdownValues;
+
 
     this.eventsDataFormGroup = this.formBuilder.group({
       eventId: '',
@@ -568,6 +587,12 @@ export class EventCreationComponent implements OnInit {
     this.eventEvaluatorAssignFormGroup = this.formBuilder.group({
       evaluators: new FormControl(''),
     });
+
+    this.eventGradeEvalAssignFormGroup = this.formBuilder.group({
+      gradeEvalFormArray: this.formBuilder.array([this.addGradeEval()])
+    });
+
+
 
     this.alluserdata = this.uiCommonUtils.getUserMetaDataJson();
     this.orgId = this.alluserdata.orgId;
@@ -809,6 +834,71 @@ export class EventCreationComponent implements OnInit {
           }
         }
 
+        if (res.data.event_grade_evaluator_assignment) {
+          let mappedEvaluator: any = [];
+          this.gradeEvaluatorAssignmentData = res.data.event_grade_evaluator_assignment;
+          for (let row of res.data.event_grade_evaluator_assignment.allData) {
+            if (row.userId != null) {
+              let tempjson = {
+                "grade": row.grade,
+                "gradeOrgId": row.gradeOrgId,
+                "name": row.name,
+                "userId": row.userId
+              }
+              mappedEvaluator.push(tempjson);
+            }
+          }
+
+          console.log("mappedEvaluator", mappedEvaluator);
+
+          let gradesEvaluatorsMappingData = [];
+
+          for (let row of this.gradeEvaluatorAssignmentData.gradesData) {
+
+            let result = mappedEvaluator.findIndex((item: any) => item.grade === row.grade);
+            if (result >= 0) {
+              for (let row1 of mappedEvaluator) {
+                let gardesJson = {
+                  "grade": row.grade,
+                  "gradeOrgId": row.gradeOrgId,
+                  "evaluator": [
+                    {
+                      "userId": row1.userId,
+                      "name": row1.name
+                    }
+                  ]
+                }
+                if (row1.grade == row.grade) {
+                  gradesEvaluatorsMappingData.push(gardesJson);
+                }
+              }
+
+            }
+            else {
+              let gardesJson = {
+                "grade": row.grade,
+                "gradeOrgId": row.gradeOrgId,
+                "evaluator": [
+                  {
+                    "userId": null,
+                    "name": null
+                  }
+                ]
+              }
+              gradesEvaluatorsMappingData.push(gardesJson);
+
+            }
+
+          }
+
+          this.eventGradeEvalAssignFormGroup.setControl('gradeEvalFormArray', this.setGradeEval(gradesEvaluatorsMappingData));
+          this.gradewiseEvaluatorDropdownValues = res.data.event_grade_evaluator_assignment.teachersData;
+
+        }
+
+      }
+      else if (res.data.status == "eventAlreadyExists") {
+        this.uiCommonUtils.showSnackBar("This type of event already exists for current term!", "error", 3000);
       }
       else
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
@@ -882,7 +972,7 @@ export class EventCreationComponent implements OnInit {
       });
     }
 
-    if(this.eventType == 'Diploma Exam'){
+    if (this.eventType == 'Diploma Exam') {
       this.rolesData = ['Diploma Exam Coordinator'];
       let roleData =
       {
@@ -897,8 +987,8 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    
-    if(this.eventType == 'Talent Competition'){
+
+    if (this.eventType == 'Talent Competition') {
       this.rolesData = ['Regional Talent Competition Coordinator'];
       let roleData =
       {
@@ -913,7 +1003,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    if(this.eventType == 'Sunday School Midterm Exam'){
+    if (this.eventType == 'Sunday School Midterm Exam') {
       this.rolesData = ['Sunday School Event Coordinator'];
       let roleData =
       {
@@ -928,7 +1018,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    if(this.eventType == 'Sunday School Final Exam'){
+    if (this.eventType == 'Sunday School Final Exam') {
       this.rolesData = ['Sunday School Event Coordinator'];
       let roleData =
       {
@@ -1211,11 +1301,28 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payload);
     }
 
-    if (this.eventType == 'TTC' || this.eventType == 'Diploma Exam' || this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam') {
+    if (this.eventType == 'TTC' || this.eventType == 'Diploma Exam') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payload.venueProctorAssignment = venueProctorAssignment;
       payload.sectionCode = 'event_proctor_assignment';
       payload.nextSectionCode = 'event_evaluator_assignment';
+      payload.eventType = this.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+    }
+
+
+    let orgId: any = [];
+    for (let row of this.eventsDataFormGroup.value.orgId) {
+      orgId.push(row.id);
+    }
+
+    if (this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payload.venueProctorAssignment = venueProctorAssignment;
+      payload.orgId = orgId[0];
+      payload.sectionCode = 'event_proctor_assignment';
+      payload.nextSectionCode = 'event_grade_evaluator_assignment';
       payload.eventType = this.eventType;
       payload.eventId = this.eventId;
       this.createUpdateEvents(payload);
@@ -1341,7 +1448,7 @@ export class EventCreationComponent implements OnInit {
     let payloadEval: any = {};
     let evaluatorAssignment = this.eventEvaluatorAssignFormGroup.value.evaluators;
 
-    if (this.eventType == 'Diploma Exam' || this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam') {
+    if (this.eventType == 'Diploma Exam') {
       this.eventsDataFormGroup.value.eventId = this.eventId;
       payloadEval.evaluatorAssignment = evaluatorAssignment;
       payloadEval.sectionCode = 'event_evaluator_assignment';
@@ -1350,6 +1457,21 @@ export class EventCreationComponent implements OnInit {
       payloadEval.eventId = this.eventId;
       this.createUpdateEvents(payloadEval);
       this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
+    }
+
+
+    let payloadGradeEval: any = {};
+    let gradeEvalAssign = this.eventGradeEvalAssignFormGroup.value.gradeEvalFormArray;
+    if(this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam'){
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      payloadGradeEval.gradeEvalAssign = gradeEvalAssign;
+      payloadGradeEval.sectionCode = 'event_grade_evaluator_assignment';
+      payloadGradeEval.nextSectionCode = 'event_questionnaires';
+      payloadGradeEval.eventType = this.eventType;
+      payloadGradeEval.eventId = this.eventId;
+      this.createUpdateEvents(payloadGradeEval);
+      this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
+      console.log("payloadGradeEval", payloadGradeEval);
     }
 
 
@@ -1476,6 +1598,14 @@ export class EventCreationComponent implements OnInit {
     });
   }
 
+  addGradeEval(): FormGroup {
+    return this.formBuilder.group({
+      grade: '',
+      gradeOrgId: '',
+      evaluator: '',
+    });
+  };
+
 
   addEventCatGroupMap(): FormGroup {
     return this.formBuilder.group({
@@ -1537,6 +1667,29 @@ export class EventCreationComponent implements OnInit {
     });
     return formArray;
   }
+
+  setGradeEval(eventGradeEvaldata: any): FormArray {
+    const formArray = new FormArray([]);
+    eventGradeEvaldata.forEach((e: any) => {
+      if(e.evaluator[0].name != null){
+        formArray.push(this.formBuilder.group({
+          grade: e.grade,
+          gradeOrgId: e.gradeOrgId,
+          evaluator: [e.evaluator]
+        }));
+      }
+      else{
+          formArray.push(this.formBuilder.group({
+            grade: e.grade,
+            gradeOrgId: e.gradeOrgId,
+            evaluator: ''
+          }));
+      }
+    
+    });
+    return formArray;
+  }
+
 
   setProctorAssign(eventProctorAssigndata: any): FormArray {
     const formArray = new FormArray([]);

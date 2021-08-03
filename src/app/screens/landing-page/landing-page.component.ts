@@ -129,13 +129,13 @@ export class LandingPageComponent implements OnInit{
     });
 
     this.columnDefs = [
-      { headerName: 'First Name', field: 'firstName', sortable: true, filter: true, width: 170, checkboxSelection: true },
-      { headerName: 'Last Name', field: 'lastName', sortable: true, filter: true, width: 170 },
-      { headerName: 'Member Type', field: 'memberType', sortable: true, filter: true, width: 150 },
-      { headerName: 'Parish', field: 'parish_name', sortable: true, filter: true, width: 200 },
-      { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
-      { headerName: 'State', field: 'state', sortable: true, filter: true, width: 150 },
-      { headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 140 },
+      { headerName: 'First Name', field: 'firstName',resizable: true, sortable: true, filter: true, width: 170, checkboxSelection: true },
+      { headerName: 'Last Name', field: 'lastName',resizable: true, sortable: true, filter: true, width: 170 },
+      { headerName: 'Member Type', field: 'memberType',resizable: true, sortable: true, filter: true, width: 150 },
+      { headerName: 'Parish', field: 'parish_name',resizable: true, sortable: true, filter: true, width: 200 },
+      { headerName: 'City', field: 'city',resizable: true, sortable: true, filter: true, width: 150 },
+      { headerName: 'State', field: 'state',resizable: true, sortable: true, filter: true, width: 150 },
+      { headerName: 'Postal Code', field: 'postalCode',resizable: true, sortable: true, filter: true, width: 140 },
       {
         headerName: 'Actions', field: 'action', cellRendererFramework: ButtonRendererComponent, width: 140,
         cellRendererParams: function (params: any) {

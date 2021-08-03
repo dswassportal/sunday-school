@@ -27,9 +27,9 @@ export class MemberDetailsComponent implements OnInit {
 
   constructor(private apiService: ApiService,
     private formBuilder: FormBuilder, private uiCommonUtils: uiCommonUtils, private authService: AuthService,
-    public router: Router, private familyMemberDetails : FamilyMemberDetails) { }
+    public router: Router, private familyMemberDetails: FamilyMemberDetails) { }
 
-   
+
   myprofileform: any;
   studentDetailsForm: any;
   members: any;
@@ -71,6 +71,28 @@ export class MemberDetailsComponent implements OnInit {
   selectedUrl: any;
   isStateDataSet: any;
   memberData: any;
+  selectedGrade: string = '';
+  selectedUserRole: any;
+  rolesArr: never[] | undefined;
+  orgs: any;
+  name: any;
+  acadmicGradeSelection = 'Grade1';
+  sundaySchoolGradeSelect = 'Grade1';
+  sundaySchoolNameSelect = '';
+  temp: any;
+  schoolData: any;
+  schoolDataList!: any[];
+  areDatesDisabled: boolean = false;
+  schoolGrade: any;
+  parishDataList!: any[];
+  sundaySchoolTermsList!: any[];
+  selectedTerm!: any[];
+  GradeData!: any[];
+  SSchoolsApitermId: any;
+  termId2: any;
+  termId3: any;
+  SSchoolsApitermEndtDate: any;
+  SSchoolsApitermStartDate: any;
 
 
   ngOnInit(): void {
@@ -108,7 +130,37 @@ export class MemberDetailsComponent implements OnInit {
       isFamilyMember: new FormControl('')
     });
 
-    
+    this.studentDetailsForm = this.formBuilder.group({
+      studentAcaDtlId: new FormControl('', Validators.required),
+      studentId: new FormControl('', Validators.required),
+      schoolName: new FormControl('', Validators.required),
+      schoolGrade: new FormControl('', Validators.required),
+      studntAcaYrStrtDate: new FormControl('', Validators.required),
+      studntAcaYrEndDate: new FormControl('', Validators.required),
+      schoolAddrLine1: new FormControl('', Validators.required),
+      schoolAddrLine2: new FormControl('', Validators.required),
+      schoolAddrLine3: new FormControl('', Validators.required),
+      schoolCountry: new FormControl('', Validators.required),
+      schoolState: new FormControl('', Validators.required),
+      schoolCity: new FormControl('', Validators.required),
+      schoolPostalCode: new FormControl('', Validators.required),
+      sunSchoolStudentAcaDtlId: new FormControl('', Validators.required),
+      sunSchoolStudentId: new FormControl('', Validators.required),
+      sunSchoolId: new FormControl('', Validators.required),
+      sunSchoolGrade: new FormControl('', Validators.required),
+      sunSchoolAcaYrStrtDate: new FormControl('', Validators.required),
+      sunSchoolAcaYrEndDate: new FormControl('', Validators.required),
+      termDetailId: new FormControl(''),
+    });
+
+    this.myprofileform.valueChanges.subscribe((res: any) => {
+      if (res.isStudent == 'yes') {
+        this.ishidden = true;
+      } else {
+        this.ishidden = false;
+      }
+    });
+
     this.apiService.getParishListData().subscribe(res => {
       for (let i = 0; i < res.data.metaData.Parish.length; i++) {
         this.parishList = res.data.metaData.Parish;
@@ -142,9 +194,9 @@ export class MemberDetailsComponent implements OnInit {
         // if (memberData.memberDetails.length > 0) {
         //   this.myprofileform.setControl('memberDetails', this.setMemberDetails(memberData.memberDetails));
         // }
-        if(this.memberData.isApproved == false){
+        if (this.memberData.isApproved == false) {
           this.uiCommonUtils.showSnackBar("This user in not approved yet!", "error", 3000);
-        }  
+        }
 
         console.log("this.memberData", this.memberData);
 
@@ -170,6 +222,7 @@ export class MemberDetailsComponent implements OnInit {
           //country: memberData.country,
           state: this.memberData.state,
           parish: this.memberData.orgId,
+          isStudent: this.memberData.isStudent,
           //memberDetails: memberData.memberDetails,
           maritalStatus: this.memberData.maritalStatus,
           dateofMarriage: this.memberData.dateOfMarriage,
@@ -179,10 +232,144 @@ export class MemberDetailsComponent implements OnInit {
       });
     }
 
+    this.apiService.callGetService('getParishData').subscribe((res: any) => {
+      this.parishDataList = res.data.metaData.Parish;
+    })
+
+
+
+    this.apiService.callGetService(`getSSchools`).subscribe((res: any) => {
+      if (res.data.schoolData.length > 0) {
+        this.schoolDataList = res.data.schoolData;
+      }
+      else{
+        this.schoolDataList = [          
+            {
+                "orgId": null,
+                "name": "",
+                "parishName": "",
+                "parishId": null,
+                "grades": [
+                    {
+                        "orgId": null,
+                        "name": ""
+                    }
+                ]
+            }        
+      ];
+      }
+
+      this.selectedTerm = res.data.currentTerm;
+
+      this.studentDetailsForm.patchValue({
+        termDetailId: `${res.data.currentTerm.termYear} (${res.data.currentTerm.termStartDate} - ${res.data.currentTerm.termEndDate})`,
+        sunSchoolAcaYrEndDate: res.data.currentTerm.termEndDate,
+        sunSchoolAcaYrStrtDate: res.data.currentTerm.termStartDate,
+      });
+
+      // this.termId2=res.data.schoolData[0].orgId
+      //   console.log(this.termId2,"orgId")
+
+      // this.termId3=res.data.schoolData[0].grades.orgId
+      // console.log(this.termId3,"gradename")
+      this.SSchoolsApitermId = res.data.currentTerm.termDtlId;
+      this.SSchoolsApitermStartDate = res.data.currentTerm.termStartDate
+      this.SSchoolsApitermEndtDate = res.data.currentTerm.termEndDate
+
+      this.userId = this.alluserdata.userId;
+      this.fbUid = this.alluserdata.fbUid;
+      this.isFamilyMember = this.alluserdata.isFamilyMember;
+      this.isStudent = this.alluserdata.isStudent;
+
+    });
+
+    console.log("this.memberData", this.memberData);
+    console.log("this.alluserdata",this.alluserdata);
+    this.studentDetailsForm.patchValue({
+      studentAcaDtlId: this.memberData.studentAcademicdetails[0].studentAcademicDetailId,
+      studentId: this.memberData.studentAcademicdetails[0].studentId,
+
+      schoolName: this.memberData.studentAcademicdetails[0].schoolName,
+      schoolGrade: this.memberData.studentAcademicdetails[0].schoolGrade,
+      studntAcaYrStrtDate: this.memberData.studentAcademicdetails[0].academicYearStartDate,
+      studntAcaYrEndDate: this.memberData.studentAcademicdetails[0].academicYearEndDate,
+      schoolAddrLine1: this.memberData.studentAcademicdetails[0].schoolAddressline1,
+      schoolAddrLine2: this.memberData.studentAcademicdetails[0].schoolAddressline2,
+      schoolAddrLine3: this.memberData.studentAcademicdetails[0].schoolAddressline3,
+      schoolCountry: this.memberData.studentAcademicdetails[0].schoolCity,
+      schoolState: this.memberData.studentAcademicdetails[0].schoolState,
+      schoolCity: this.memberData.studentAcademicdetails[0].schoolPostalCode,
+      schoolPostalCode: this.memberData.studentAcademicdetails[0].schoolCountry,
+      //sunday school
+      sunSchoolStudentAcaDtlId: this.memberData.sundaySchoolDetails[0].studentSundaySchooldtlId,
+      sunSchoolStudentId: this.memberData.sundaySchoolDetails[0].studentId,
+      sunSchoolId: this.memberData.sundaySchoolDetails[0].schoolId,
+      sunSchoolGrade: this.memberData.sundaySchoolDetails[0].schoolGrade,
+      //sunSchoolAcaYrStrtDate: this.alluserdata.sundaySchoolDetails[0].schoolYearStartDate,
+      //sunSchoolAcaYrEndDate: this.alluserdata.sundaySchoolDetails[0].schoolYearEndDate,
+
+
+    });
+
+
+    if (this.studentDetailsForm.sunSchoolId != null) {
+      this.studentDetailsForm.patchValue({
+        sunSchoolId: this.memberData.sundaySchoolDetails[0].sunSchoolId // array
+      });
+    }
+
+    if (this.studentDetailsForm.sunSchoolGrade != null) {
+      this.studentDetailsForm.patchValue({
+        sunSchoolGrade: this.memberData.sunSchoolGrade // array
+      });
+    }
+
+    if (this.studentDetailsForm.schoolGrade != null) {
+      this.studentDetailsForm.patchValue({
+        schoolGrade: this.memberData.schoolGrade // array
+      });
+    }
+
+  }
+
+
+  gradeChange() {
+    this.studentDetailsForm.patchValue({
+      sunSchoolGrade: this.studentDetailsForm.value.schoolGrade
+    });
+  }
+  // on acadmic grade dropdown
+  onAcadmicGradeChange(event: any) {
+    this.sundaySchoolGradeSelect = event;
+  }
+
+  radioClick() {
+
+  }
+
+  eventStartDateChange() {
+    this.studentDetailsForm.patchValue({
+      sunSchoolAcaYrEndDate: this.studentDetailsForm.value.sunSchoolAcaYrStrtDate
+    });
+    this.areDatesDisabled = false;
   }
 
   cancel() {
     this.router.navigate(['/dashboard/familyMemberDetails']);
+  }
+
+  isStudentFn(event: any) {
+    if (event.value == "true") {
+      this.isStudentvar = true;
+      this.isStudent = true;
+      this.myprofileform.value.isStudent = true;
+    }
+    if (event.value == "false") {
+      this.isStudentvar = false;
+      this.isStudent = false;
+      this.myprofileform.value.isStudent = false;
+    }
+    //this.isStudentvar = !this.isStudentvar;
   }
 
   changeCountry(country: any) {
@@ -218,23 +405,30 @@ export class MemberDetailsComponent implements OnInit {
   }
 
   updateUserProfile() {
-  
 
-      this.myprofileform.value.userId = this.userId;
-      this.myprofileform.value.updatedBy = this.userId;
-      this.myprofileform.value.orgId = this.orgId;
 
-        let payloadJson = {
-          ...this.myprofileform.value,
-          respondWith: 'user_meta_data',
-          hasEmailChanged: false,
-          userId : this.memberData.userId
-        };
-        if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
-          payloadJson.hasParishChanged = false;
-        }
-        this.invokeApi(payloadJson);
-  
+    this.myprofileform.value.userId = this.memberData.userId;
+    this.myprofileform.value.updatedBy = this.memberData.userId;
+    this.myprofileform.value.orgId = this.memberData.orgId;
+
+
+    let payloadJson = {
+      ...this.myprofileform.value,
+      ...this.studentDetailsForm.value,
+      termDetailId: this.SSchoolsApitermId,
+
+      sunSchoolAcaYrStrtDate: this.SSchoolsApitermStartDate,
+      sunSchoolAcaYrEndDate: this.SSchoolsApitermEndtDate,
+
+      respondWith: 'user_meta_data',
+      hasEmailChanged: false,
+      userId: this.memberData.userId
+    };
+    if (this.myprofileform.value.orgId !== this.myprofileform.value.parish) {
+      payloadJson.hasParishChanged = false;
+    }
+    this.invokeApi(payloadJson);
+
 
   }
 
@@ -251,6 +445,34 @@ export class MemberDetailsComponent implements OnInit {
     });
   }
 
-  
+  //SunSchool End Date Validator that is SunSchoolEndDate>SunSchoolStartDate
+  comparisonSunSchoolEndDateValidator(): any {
+    let sunSchoolStartDate = this.studentDetailsForm.value['sunSchoolAcaYrStrtDate'];
+    let sunSchoolEndDate = this.studentDetailsForm.value['sunSchoolAcaYrEndDate'];
+
+    let startnew = new Date(sunSchoolStartDate);
+    let endnew = new Date(sunSchoolEndDate);
+
+    if (startnew > endnew) {
+      return this.studentDetailsForm.controls['sunSchoolAcaYrEndDate'].setErrors({ 'invaliddaterange': true });
+    }
+
+  }
+
+  //SunSchool Start Date Validator that is SunSchoolStartDate < SunSchoolEndDate
+  comparisonSunSchoolStartDateValidator(): any {
+    let sunSchoolStartDate = this.studentDetailsForm.value['sunSchoolAcaYrStrtDate'];
+    let sunSchoolEndDate = this.studentDetailsForm.value['sunSchoolAcaYrEndDate'];
+
+    let startnew = new Date(sunSchoolStartDate);
+    let endnew = new Date(sunSchoolEndDate);
+    if (startnew > endnew) {
+      return this.studentDetailsForm.controls['sunSchoolAcaYrStrtDate'].setErrors({ 'invaliddaterange': true });
+    }
+
+
+  }
+
+
 
 }

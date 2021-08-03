@@ -1,34 +1,47 @@
 .container{
-    font-family: poppins;
-    letter-spacing: 0.18px;
+  font-family: poppins;
+  letter-spacing: 0.18px;
 }
 .modal-title{
-    font-weight: bold;
-    font-family: poppins;
-    letter-spacing: 0.18px;
+  font-weight: bold;
+  font-family: poppins;
+  letter-spacing: 0.18px;
 }
 mat-form-field{
-    font-family: poppins;
-    letter-spacing: 0.18px;
+  font-family: poppins;
+  letter-spacing: 0.18px;
 }
 h2{
-    font-family: poppins;
+  font-family: poppins;
 }
 .modal{
-    width:115%;
+  width:115%;
 }
 :host ::ng-deep.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
-    border-color: #a82b029e !important;
-  }
+  border-color: #a82b029e !important;
+}
 
-  :host ::ng-deep.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-inner-circle {
-    background-color: #a82b029e !important;
-  }
-  .search:focus{
-    border-color: grey;
-    box-shadow: none;
-  }
-  ::ng-deep .mat-form-field-wrapper{
-    margin-bottom: -0.4em;
- }
-  
+:host ::ng-deep.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-inner-circle {
+  background-color: #a82b029e !important;
+}
+.search:focus{
+  border-color: grey;
+  box-shadow: none;
+}
+::ng-deep .mat-form-field-wrapper{
+  margin-bottom: -0.4em;
+}
+
+.allButtonSpan{
+color: black;
+font-family: poppins;
+text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+#fff, 1px -1px 0 #fff, -1px 1px 0 #fff
+}
+.allButton{
+background-color: red;
+box-shadow: 2px 2px 3px rgb(158, 158, 151), 3px 3px 3px rgb(102, 98, 98);
+}
+.allButton:disabled{
+background-color: rgb(243, 88, 88)
+}

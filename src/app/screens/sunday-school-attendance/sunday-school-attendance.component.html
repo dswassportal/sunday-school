@@ -5,7 +5,7 @@
             <form [formGroup]="sundaySchoolAttendanceForm">
                 <div class="row">
 
-                    <h1 class="col-md-11" style="font-family: poppins;padding-top: 0.2%;">Sunday School Attendance</h1>
+                    <h1 class="col-md-11 heading" style="font-family: poppins;padding-top: 0.2%;">Sunday School Attendance</h1>
 
                     <button mat-button class="col-md-1" style="padding-bottom: 2%;" class="ml-auto" data-dismiss="modal"
                         (click)="onCancelClick()">
@@ -58,14 +58,15 @@
                     <div class="col text-center" style="padding-top:1%">
 
                         <button style="float: center;" (click)="onSaveClick()" mat-button type="submit" mat-button
-                            class="mbutton">
-                            Save
+                            class="mbutton allButton">
+                            <span class="allButtonSpan">Save</span>
                         </button> &nbsp;
 
-                        <button style="float: center;" type="submit" mat-button class="mbutton"
+                        <button style="float: center;" type="submit" mat-button class="mbutton allButton"
                             (click)="onCancelClick()">
-                            Cancel
+                            <span class="allButtonSpan">Cancel</span>
                         </button>
+                        
                     </div>
                 </div>
 

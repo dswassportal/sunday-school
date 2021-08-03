@@ -22,3 +22,28 @@ h1{
     font-family: poppins;
     letter-spacing: 0.18px;
 }
+.allButtonSpan{
+  color: black;
+  font-family: poppins;
+  text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+  #fff, 1px -1px 0 #fff, -1px 1px 0 #fff
+}
+
+.allicon{
+  text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+  #fff, 1px -1px 0 #fff, -1px 1px 0 #fff
+}
+.allButton{
+  background-color: #bd34069e;
+  box-shadow: 2px 2px 3px rgb(158, 158, 151), 3px 3px 3px rgb(102, 98, 98);
+  
+}
+.allButton:disabled{
+  background-color: #f08865c9;
+}
+.loginButtonSpan{
+  color: black;
+  font-family: poppins;
+  text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+  #fff, 1px -1px 0 #fff, -1px 1px 0 #fff
+}

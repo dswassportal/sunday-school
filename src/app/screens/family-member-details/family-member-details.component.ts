@@ -47,7 +47,10 @@ export class FamilyMemberDetailsComponent implements OnInit {
       { headerName: 'Middle Name', field: 'middleName', resizable: true, sortable: true, filter: true },
       { headerName: 'Last Name', field: 'lastName', resizable: true, sortable: true, filter: true },
       { headerName: 'Relationship', field: 'relationship',flex:1, resizable: true, sortable: true, filter: true },
-
+      { headerName: 'Family Head?', field: 'isMemberFamilyHead',flex:1, resizable: true, sortable: true, filter: true,
+      cellRenderer: (params: { value: boolean }) => params.value ? "Yes" : "No",
+      filterParams: { cellRenderer: (params: { value: string }) => params.value === "true" ? "Yes" : "No" }
+    }
     ];
 
   }

@@ -373,12 +373,30 @@ async function getVenues(venueData) {
 async function insertEvents(eventsData, loggedInUser) {
 
     let client = await dbConnections.getConnection();
-
     try {
         await client.query("BEGIN");
-
         let eventId = eventsData.eventId;
         let response = { eventId: eventsData.eventId }
+
+        let isExamPresentresult = await client.query(queries.isExamPresent, [eventsData.startDate]);
+        if (isExamPresentresult.rowCount > 0) {
+            client.query("commit;");
+            response.status = "eventAlreadyExists";
+            return ({
+                data: response
+            })
+        }
+
+        let isFinalExamPresentresult = await client.query(queries.isFinalExamPresent, [eventsData.startDate]);
+        if (isFinalExamPresentresult.rowCount > 0) {
+            client.query("commit;");
+            response.status = "eventAlreadyExists";
+            return ({
+                data: response
+            })
+        }
+
+
         console.log(`Processing request for ${eventsData.eventId} event Id and ${eventsData.sectionCode == undefined
             ? ' to get ' + eventsData.nextSectionCode + ' section data '
             : ' to process ' + eventsData.sectionCode + ' section '}`);
@@ -730,6 +748,29 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 break;
             }
+            case "event_grade_evaluator_assignment": {
+                if (eventsData.gradeEvalAssign) {
+
+                    for (let row of eventsData.gradeEvalAssign) {
+                        const delEvals = `update t_event_cat_staff_map set is_deleted = true where event_id = ${eventsData.eventId};`;
+                        await client.query(delEvals);
+                    }
+
+                    for (let row of eventsData.gradeEvalAssign) {
+                        if (eventsData.eventType == "Sunday School Midterm Exam") {
+                            const insertEvals = `insert into t_event_cat_staff_map (event_id, event_category_map_id, user_id, role_id,role_type, is_deleted) values($1, $2, $3, $4, $5, $6);`;
+                            await client.query(insertEvals, [eventsData.eventId, '1031', row.evaluator[0].userId, row.gradeOrgId, 'Evaluator', false]);
+                        }
+                        if (eventsData.eventType == "Sunday School Final Exam") {
+                            if (row.evaluator.length > 0 || row.evaluator != "") {
+                                const insertEvals = `insert into t_event_cat_staff_map (event_id, event_category_map_id, user_id, role_id,role_type, is_deleted) values($1, $2, $3, $4, $5, $6);`;
+                                await client.query(insertEvals, [eventsData.eventId, '1032', row.evaluator[0].userId, row.gradeOrgId, 'Evaluator', false]);
+                            }
+                        }
+                    }
+                }
+                break;
+            }
         }// Switch
 
         //if request from next section data in same requst
@@ -765,6 +806,11 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 case "event_evaluator_assignment": {
                     response.event_evaluator_assignment = await getSectionWiseData(loggedInUser, eventsData.eventId, "event_evaluator_assignment", eventsData.eventType, client);
+                    break;
+                }
+                case "event_grade_evaluator_assignment": {
+                    console.log("eventsData.orgId", eventsData.orgId);
+                    response.event_grade_evaluator_assignment = await getSectionWiseData(loggedInUser, eventsData.orgId, "event_grade_evaluator_assignment", eventsData.eventType, client);
                     break;
                 }
             }//switch
@@ -964,6 +1010,61 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             let evaluatorsList = await client.query(queries.getSelectedAndAllEvaluators, [eventId, `%Diocesan%${eventType}%Evaluator%`]);
             return evaluatorsList.rowCount > 0 ? evaluatorsList.rows[0].evaluators : [];
         }
+        case "event_grade_evaluator_assignment": {
+            let gradesData = [];
+            let teachersData = [];
+            let allData = [];
+            let gradesDataResult = await client.query(queries.getGradesData, [eventId]);
+
+            for (let row of gradesDataResult.rows) {
+                gradesData.push({
+                    "grade": row.name,
+                    "gradeOrgId": row.org_id
+                });
+            }
+
+            let teachersDataResult = await client.query(queries.getTeachersData, [eventId]);
+            for (let row of teachersDataResult.rows) {
+                teachersData.push({
+                    "userId": row.user_id,
+                    "name": row.name,
+                    "primaryGrades": row.primary_grades
+                });
+            }
+
+
+
+            for (let row of gradesData) {
+                for (let row1 of teachersData) {
+
+                    if (row1.primaryGrades == null) {
+                        allData.push({
+                            "grade": row.grade,
+                            "userId": null,
+                            "name": null
+                        });
+                    }
+                    else {
+                        let result = row1.primaryGrades.findIndex((item) => item === row.grade);
+                        if (result >= 0) {
+                            allData.push({
+                                "grade": row.grade,
+                                "userId": row1.userId,
+                                "name": row1.name
+                            });
+                        }
+                    }
+
+                }
+            }
+
+
+            return {
+                "gradesData": gradesData,
+                "teachersData": teachersData,
+                "allData": allData
+            }
+        }
     }
 }
 
@@ -1013,11 +1114,11 @@ async function getRegionAndParish() {
 
                 if (regionId != row.region_id) {
 
-//                    console.log("row.region_id", row.region_id);
+                    //                    console.log("row.region_id", row.region_id);
 
 
                     if (regionId != null) {
-                       // console.log("regionId", regionId);
+                        // console.log("regionId", regionId);
 
                         region.parishes = parishes;
                         regions.push(region);
@@ -1030,7 +1131,7 @@ async function getRegionAndParish() {
                     region.regionName = row.region_name;
                     region.regionId = row.region_id;
                     regionId = row.region_id;
-                   // console.log("regions", regions);
+                    // console.log("regions", regions);
                 }
 
                 parish = {};
@@ -1082,7 +1183,8 @@ async function getEventType() {
         tet.is_url_required,
         tec.event_category_id, 
         tec.name event_category_name, 
-        tec.description
+        tec.description,
+        tet.is_gradewise_evaluators_required
         from t_event_type tet , t_event_category tec 
         where tet.is_deleted = false 
         and tec.event_type_id = tet.event_type_id order by tet."sequence";`
@@ -1116,6 +1218,7 @@ async function getEventType() {
                     eventTypes.isQuestionnaireRequired = row.is_questionnaire_required;
                     eventTypes.isAttachmentRequired = row.is_attachment_required;
                     eventTypes.isUrlRequired = row.is_url_required;
+                    eventTypes.isGradewiseEvaluatorsRequired = row.is_gradewise_evaluators_required;
                     type = row.event_type;
 
                 }
@@ -1153,7 +1256,7 @@ async function getProctorData(userData) {
     try {
         let metadata = {};
         console.log("userData", JSON.stringify(userData));
-        
+
         var roles = "'" + userData.rolesData.join("','") + "'";
 
         let getProctorData = `select distinct user_id, 
@@ -1195,7 +1298,7 @@ async function getEventQuestionnaireData() {
         let getEventQuestionnaireData = `select * from t_event_questionnaire`;
         let res = await client.query(getEventQuestionnaireData);
         if (res && res.rowCount > 0) {
-          //  console.log("In Question response : " + res);
+            //  console.log("In Question response : " + res);
             let questionData = [];
             for (let row of res.rows) {
                 let questions = {};
