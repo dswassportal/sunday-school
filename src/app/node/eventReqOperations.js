@@ -378,23 +378,25 @@ async function insertEvents(eventsData, loggedInUser) {
         let eventId = eventsData.eventId;
         let response = { eventId: eventsData.eventId }
 
-        let isExamPresentresult = await client.query(queries.isExamPresent, [eventsData.startDate]);
-        if (isExamPresentresult.rowCount > 0) {
-            client.query("commit;");
-            response.status = "eventAlreadyExists";
-            return ({
-                data: response
-            })
+        if(eventsData.eventType == "Sunday School Midterm Exam" || eventsData.eventType == "Sunday School Final Exam"){
+            let isExamPresentresult = await client.query(queries.isExamPresent, [eventsData.startDate]);
+            if (isExamPresentresult.rowCount > 0) {
+                client.query("commit;");
+                response.status = "eventAlreadyExists";
+                return ({
+                    data: response
+                })
+            }
+            let isFinalExamPresentresult = await client.query(queries.isFinalExamPresent, [eventsData.startDate]);
+            if (isFinalExamPresentresult.rowCount > 0) {
+                client.query("commit;");
+                response.status = "eventAlreadyExists";
+                return ({
+                    data: response
+                })
+            }
         }
-
-        let isFinalExamPresentresult = await client.query(queries.isFinalExamPresent, [eventsData.startDate]);
-        if (isFinalExamPresentresult.rowCount > 0) {
-            client.query("commit;");
-            response.status = "eventAlreadyExists";
-            return ({
-                data: response
-            })
-        }
+      
 
 
         console.log(`Processing request for ${eventsData.eventId} event Id and ${eventsData.sectionCode == undefined
