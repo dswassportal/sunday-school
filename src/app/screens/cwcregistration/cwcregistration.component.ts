@@ -473,7 +473,7 @@ export class CwcregistrationComponent implements OnInit {
       "eventId": this.selectedRowJson.event_Id,
       "participantId": participantId,
       "eventType": this.selectedRowJson.event_type,
-      "group": this.participantDataFormGroup.value.group[0].groupId,
+      "group": this.participantDataFormGroup.value.group.length == 0 ? null : this.participantDataFormGroup.value.group[0].groupId,
       "eveVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].venueMapId,
       "role": this.participantDataFormGroup.value.role.length == 0 ? null : this.participantDataFormGroup.value.role[0].code,
       "categories": this.catArray,

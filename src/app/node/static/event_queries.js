@@ -488,6 +488,14 @@ const getSelectedTeachersData = `select distinct vt.user_id, tecsm.event_cat_sta
                                     and vt.org_id = $1 
                                     where tecsm.is_deleted = false;`;
 
+const getCategoryId = 'select event_category_id from t_event_category tec where lower(tec."name") = lower($1);';
+                          
+const delEvalAssignment = `update t_event_cat_staff_map set is_deleted = $1 where event_id = $2;`;
+
+const getCatMapId = `select event_cat_map_id from t_event_category_map tecm where event_id = $1 and event_category_id = $2;`;
+
+const insertStaffCatExamMapping = `insert into t_event_cat_staff_map (event_id, event_category_map_id, user_id, role_id,role_type, is_deleted) values $1 returning event_cat_staff_map_id`;
+
 
 module.exports = {
     insertEvent,
@@ -539,5 +547,9 @@ module.exports = {
     isFinalExamPresent,
     getGradesData,
     getTeachersData,
-    getSelectedTeachersData
+    getSelectedTeachersData,
+    getCategoryId,
+    delEvalAssignment,
+    getCatMapId,
+    insertStaffCatExamMapping
 }
