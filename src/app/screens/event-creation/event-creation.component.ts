@@ -938,7 +938,9 @@ export class EventCreationComponent implements OnInit {
 
       }
       else if (res.data.status == "eventAlreadyExists") {
-        this.uiCommonUtils.showSnackBar("This type of event already exists for current term!", "error", 3000);
+        if (this.eventFormLabel == false) {
+          this.uiCommonUtils.showSnackBar("This type of event already exists for current term!", "error", 3000);
+        }
       }
       else
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
