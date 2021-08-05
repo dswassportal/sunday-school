@@ -13,7 +13,36 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
     try {
         let getPaticipantQuery;
         if (action == 'upload') {
-            getPaticipantQuery = ` select jsonb_agg(
+
+
+            let getEventType = `select event_type from t_event te where event_id = $1`;
+            let EveTypeResult = await client.query(getEventType, [eventId]);
+            if (EveTypeResult.rowCount > 0) {
+
+                if (EveTypeResult.rows[0].event_type === 'Sunday School Final Exam' || EveTypeResult.rows[0].event_type === 'Sunday School Midterm Exam') {
+                    getPaticipantQuery = `select distinct  
+                                                    jsonb_agg(
+                                                        distinct jsonb_build_object(
+                                                                'regId', tepr.event_participant_registration_id,
+                                                                'enrollmentId',  tepr.enrollment_id,
+                                                                'score',tpes.score,
+                                                                'catStaffMapId',tecsm.event_cat_staff_map_id,
+                                                                'scoreRefId' , tpes.participant_event_score_id,
+                                                                'isScoreSubmitted', tecsm.is_score_submitted,
+                                                                'category', tec."name" 
+                                                        ) ) participants
+                                        from t_event_cat_staff_map tecsm
+                                                    join  t_event_participant_registration tepr on tecsm.event_id = tepr.event_id 
+                                                        and tecsm.event_id = ${eventId} and tecsm.user_id = ${userId} and tecsm.is_deleted = false
+                                                left join t_participant_event_score tpes on tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id
+                                                    and tpes.is_deleted = false
+                                                join t_event_category_map tecm on tecm.event_id = tepr.event_id 
+                                                join t_event_category tec on tec.event_category_id = tecm.event_category_id 
+                                                join t_organization to2 on to2.org_id = tecsm.role_id
+                                                join t_student_sundayschool_dtl tssd on tssd.school_grade = to2."name"
+                                                and tepr.user_id = tssd.student_id;`
+                } else {
+                    getPaticipantQuery = ` select jsonb_agg(
                                                 jsonb_build_object(
                                                 'regId', tepr.event_participant_registration_id,
                                                 'enrollmentId',  tepr.enrollment_id,
@@ -55,7 +84,8 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                             and tecsm2.user_id = ${userId}
                                             left join t_participant_event_score tpes on tpes.event_cat_staff_map_id = tecsm2.event_cat_staff_map_id 
                                             and tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id;`;
-
+                }
+            }
         } else if (action == 'approve') {
 
             getPaticipantQuery = `select jsonb_agg(
@@ -123,7 +153,7 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
         return {
             data: {
                 status: 'success',
-                paticipants: result.rowCount  > 0 ?  result.rows[0].participants : []
+                paticipants: result.rowCount > 0 ? result.rows[0].participants : []
             }
         }
 

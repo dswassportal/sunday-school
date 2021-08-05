@@ -787,7 +787,6 @@ async function insertEvents(eventsData, loggedInUser) {
 
                     }
 
-                 
                 }
                 break;
             }
