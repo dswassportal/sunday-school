@@ -457,7 +457,8 @@ const isExamPresent = `select distinct te.event_id, te.start_date
                         where te.event_type = 'Sunday School Midterm Exam'
                         and teo.org_id = $2
                         and to_date( $1, 'yyyy-mm-dd') between tstd.term_start_date and tstd.term_end_date 
-                        and te.start_date between tstd.term_start_date and tstd.term_end_date `;
+                        and te.start_date between tstd.term_start_date and tstd.term_end_date 
+                        and te.is_deleted = false`;
 
 
 const isFinalExamPresent = `select distinct te.event_id, te.start_date 
@@ -467,7 +468,8 @@ const isFinalExamPresent = `select distinct te.event_id, te.start_date
                                 where te.event_type = 'Sunday School Final Exam'
                                 and teo.org_id = $2
                                 and to_date( $1, 'yyyy-mm-dd') between tstd.term_start_date and tstd.term_end_date 
-                                and te.start_date between tstd.term_start_date and tstd.term_end_date`;
+                                and te.start_date between tstd.term_start_date and tstd.term_end_date
+                                and te.is_deleted = false`;
 
 const getGradesData = `select * from t_organization where parent_org_id IN (select org_id from t_organization where parent_org_id IN 
                                 (select org_id from t_organization where org_id= $1));`; 
