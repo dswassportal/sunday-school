@@ -121,7 +121,7 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
 
                         console.debug(`${pertainingEvt.rowCount} Sunday School Midterm Exam event(s) found pertaining to ${score.eventId} Sunday School Final Exam.`)
 
-                        let deleteFinalTermOverAllScore = `delete from t_participant_event_score where event_participant_registration_id 
+                        let deleteFinalTermOverAllScore = `delete from t_participant_event_overall_score where event_participant_registration_id 
                         	in (select event_participant_registration_id from t_event_participant_registration where  event_id = ${score.eventId} );`;
 
                         let insertFinalTermOverAllScore = `	INSERT INTO t_participant_event_overall_score
