@@ -26,21 +26,21 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                                                 'regId', tepr.event_participant_registration_id,
                                                                 'enrollmentId',  tepr.enrollment_id,
                                                                 'score',tpes.score,
-                                                                'catStaffMapId',tecsm.event_cat_staff_map_id,
                                                                 'scoreRefId' , tpes.participant_event_score_id,
                                                                 'isScoreSubmitted', tecsm.is_score_submitted,
                                                                 'category', tec."name" 
                                                         ) ) participants
-                                        from t_event_cat_staff_map tecsm
-                                                    join  t_event_participant_registration tepr on tecsm.event_id = tepr.event_id 
-                                                        and tecsm.event_id = ${eventId} and tecsm.user_id = ${userId} and tecsm.is_deleted = false
-                                                left join t_participant_event_score tpes on tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id
-                                                    and tpes.is_deleted = false
-                                                join t_event_category_map tecm on tecm.event_id = tepr.event_id 
-                                                join t_event_category tec on tec.event_category_id = tecm.event_category_id 
-                                                join t_organization to2 on to2.org_id = tecsm.role_id
-                                                join t_student_sundayschool_dtl tssd on tssd.school_grade = to2."name"
-                                                and tepr.user_id = tssd.student_id;`
+                                                from t_event_cat_staff_map tecsm
+                                                join  t_event_participant_registration tepr on tecsm.event_id = tepr.event_id 
+                                                    and tepr.event_id = ${eventId}  and tecsm.user_id = ${userId} and tecsm.is_deleted = false 
+                                                    and tepr.registration_status = 'Registered'
+                                                    join t_event_category_map tecm on tecm.event_id = tepr.event_id 
+                                                    left join t_participant_event_score tpes on tpes.event_participant_registration_id = tepr.event_participant_registration_id 
+                                                         and tpes.is_deleted = false and tecsm.user_id = ${userId}   
+                                                    join t_event_category tec on tec.event_category_id = tecm.event_category_id 
+                                                    join t_organization to2 on to2.org_id = tecsm.role_id
+                                                    join t_student_sundayschool_dtl tssd on tssd.school_grade = to2."name"
+                                                    and tepr.user_id = tssd.student_id;`
                 } else {
                     getPaticipantQuery = ` select jsonb_agg(
                                                 jsonb_build_object(

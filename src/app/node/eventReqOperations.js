@@ -787,15 +787,16 @@ async function insertEvents(eventsData, loggedInUser) {
 
                             let tempArr = [];
                             for (let evalAssObj of eventsData.gradeEvalAssign) {
-                                if (evalAssObj.evaluator.length > 0) {
+                                if (evalAssObj.evaluator.length > 0 && evalAssObj.evaluator.length !== 0) {
                                     tempArr.push(`( ${eventsData.eventId}, ${catMapId}, ${evalAssObj.evaluator[0].userId}, ${evalAssObj.gradeOrgId}, '${'Evaluator'}',  ${false} )`);
                                 }
-                                if (tempArr.length > 0) {
-                                    let tempQuery = queries.insertStaffCatExamMapping.replace('$1', tempArr.join(','));
-                                    let insRes = await client.query(tempQuery);
-                                    console.debug(`Newly inserted staff mapping's event_cat_staff_map_ids are  : ${JSON.stringify(insRes.rows)}`)
-                                }
                             }
+                            if (tempArr.length > 0) {
+                                let tempQuery = queries.insertStaffCatExamMapping.replace('$1', tempArr.join(','));
+                                let insRes = await client.query(tempQuery);
+                                console.debug(`Newly inserted staff mapping's event_cat_staff_map_ids are  : ${JSON.stringify(insRes.rows)}`)
+                            }
+
 
                         } else throw `Category ${eventsData.eventType} not found in db.`;
 
