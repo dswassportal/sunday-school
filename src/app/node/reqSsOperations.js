@@ -25,7 +25,7 @@ async function getSSchoolData(loggedInUserId) {
                     schoolData.push(temp)
                 }
             }
-            
+
             for (let row of result.rows) {
                 if (row.org_type === 'Grade') {
                     let sIndex = schoolData.findIndex((item) => row.parent_org_id === item.orgId);
@@ -40,7 +40,7 @@ async function getSSchoolData(loggedInUserId) {
         }
 
 
-        let currentTerm ={};
+        let currentTerm = {};
         let getTermRes = await client.query(queries.getCurrentTerm);
         if (getTermRes.rowCount > 0) {
             currentTerm = getTermRes.rows[0].current_term
@@ -133,7 +133,7 @@ async function getSSchoolData(loggedInUserId) {
             data: {
                 status: 'success',
                 schoolData: schoolData,
-                currentTerm:currentTerm
+                currentTerm: currentTerm
             }
         })
 
@@ -362,27 +362,33 @@ async function postSSAttendance(attData, loggedInUser) {
     try {
         await client.query('begin;');
 
-        //Create temp table
-        await client.query(queries.create_t_temp_attendance);
-
-        let tempInsRes = await client.query(queries.insertIntoAttendanceTempTbl, [JSON.stringify(attData.attendance)]);
-        console.debug(`${tempInsRes.rowCount} rows inserted in to t_temp_attendance.`);
-        if (tempInsRes.rowCount > 0) {
-
-            // Delete existing attendance record
-            let attDelRes = await client.query(queries.deleteExistingAttendance,
-                [attData.termRefId, attData.schoolId, attData.gradeId, attData.attendanceDate, attData.teacherId]);
+        if (attData.attendance.length === 0) {
+            let attDelRes = await client.query(queries.deleteAllAttendance,
+                [attData.schoolId, attData.gradeId, attData.teacherId, attData.attendanceDate, attData.termRefId]);
 
             console.debug(`${attDelRes.rowCount} rows were deleted for attendance from t_sunday_school_attendace!`);
 
-            //Insert new attendance data into the table
-            let attInsRes = await client.query(queries.bulkInstetAttendance,
-                [attData.schoolId, attData.gradeId, attData.teacherId, attData.termRefId,
-                attData.attendanceDate, loggedInUser, new Date().toUTCString()]);
+        } else {
+            //Create temp table
+            await client.query(queries.create_t_temp_attendance);
+            let tempInsRes = await client.query(queries.insertIntoAttendanceTempTbl, [JSON.stringify(attData.attendance)]);
+            console.debug(`${tempInsRes.rowCount} rows inserted in to t_temp_attendance.`);
+            if (tempInsRes.rowCount > 0) {
 
-            console.debug(`${attInsRes.rowCount} rows were inserted for attendance in t_sunday_school_attendace!`);
+                // Delete existing attendance record
+                let attDelRes = await client.query(queries.deleteExistingAttendance,
+                    [attData.termRefId, attData.schoolId, attData.gradeId, attData.attendanceDate, attData.teacherId]);
+
+                console.debug(`${attDelRes.rowCount} rows were deleted for attendance from t_sunday_school_attendace!`);
+
+                //Insert new attendance data into the table
+                let attInsRes = await client.query(queries.bulkInstetAttendance,
+                    [attData.schoolId, attData.gradeId, attData.teacherId, attData.termRefId,
+                    attData.attendanceDate, loggedInUser, new Date().toUTCString()]);
+
+                console.debug(`${attInsRes.rowCount} rows were inserted for attendance in t_sunday_school_attendace!`);
+            }
         }
-
         await client.query('commit;');
 
         return ({
