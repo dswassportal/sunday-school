@@ -174,12 +174,12 @@ export class ExamRegistrationComponent implements OnInit {
       this.principalName = this.staffData.sundaySchools[0].principalName;
       this.principalEmailId = this.staffData.sundaySchools[0].principalEmailId;
       this.principalMobileNo = this.staffData.sundaySchools[0].principalMobileNo;
-
+      console.log("this.eventData.studentsData", this.eventData.studentsData);
       const newArray = [...this.eventData.studentsData.reduce((map: any, obj: any) => map.set(obj.schoolGrade, obj), new Map()).values()];
       newArray.splice(0, 0 , {
         "schoolGrade": "All Grades"
       });
-      
+      console.log("newArray", newArray);
       this.gradesData = newArray;
       this.schoolNameData = this.eventData.schools;
       this.regGridApi.setRowData(this.eventData.studentsData);
@@ -198,13 +198,11 @@ export class ExamRegistrationComponent implements OnInit {
   schoolGradeSelChange(event: any) {
     let newStudentsData = [];
     for (let row of this.eventData.studentsData) {
-      if (row.schoolGrade == event.schoolGrade) {
-        for (let row1 of this.eventData.schools) {
-          if (row1.schoolId == this.parishDetailsFormGroup.value.schoolName[0].schoolId) {
-            newStudentsData.push(row);
-          }
+        let index = this.eventData.schools.findIndex((item: any)=> item.schoolId == this.parishDetailsFormGroup.value.schoolName[0].schoolId && row.schoolGrade == event.schoolGrade
+        && row.schoolId == item.schoolId);
+        if(index >= 0){
+          newStudentsData.push(row);
         }
-      }
     }
     this.regGridApi.setRowData(newStudentsData);
     if(event.schoolGrade == "All Grades"){

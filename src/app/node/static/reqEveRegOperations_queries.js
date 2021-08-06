@@ -145,7 +145,7 @@ torg.name as "school_name", tssd.school_id,
                                           left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
                                           and tepr.event_id = $2
                                           left join t_user tu2 on tu2.user_id = tepr.created_by 
-                                          where tosa.role_type = 'Sunday School Principal'or tosa.role_type = 'Sunday School Teacher' and tosa.user_id = $1`;
+                                          where tosa.role_type = 'Sunday School Principal' and tosa.user_id = $1`;
 
 const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_user_id", torg.name as "school_grade", tssd.school_id, tssd.student_id, torg1.name as "school_name",
                                     concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) as "student_name",
