@@ -78,25 +78,24 @@ const getCurretTerm = ` select jsonb_agg(
                                     and is_deleted != true;`                                            
 
 const getParishesAndSchoolsByUserId = `select distinct to2.org_id, org_type, "name", parent_org_id, address_line1, address_line2, city,
-                                      to2."sequence"
+                                        to2."sequence"
                                         from t_organization to2 join  
                                         (WITH recursive child_orgs 
                                                                 AS (
                                                                     SELECT org_id
                                                                     FROM   t_organization parent_org 
                                                                     WHERE  org_id IN
-                                                                            (
-                                                                                SELECT a.org_id
-                                                                            FROM   t_user_role_context a, t_user b
-                                                                            WHERE  b.user_id = $1
-                                                                            AND    a.user_id = b.user_id  )                                                    
+                                                                (
+                                                                SELECT b.org_id 
+                                                                FROM   t_user b
+                                                            WHERE  b.user_id = $1)                                                    
                                                                     UNION
                                                                     SELECT     child_org.org_id child_id
                                                                     FROM       t_organization child_org
                                                                     INNER JOIN child_orgs c
                                                                     ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                                         FROM   child_orgs) hyrq on to2.org_id  = hyrq.org_id
-                                        where to2.org_type in ('Parish', 'Sunday School', 'Grade') order by to2."sequence"; `;
+                                        where to2.org_type in ('Parish', 'Sunday School', 'Grade') order by to2."sequence";`;
 
 
 const getAllTerms = `select jsonb_agg(

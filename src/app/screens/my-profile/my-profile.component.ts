@@ -260,7 +260,25 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       this.apiService.callGetService(`getSSchools`).subscribe((res: any) => {
 
-        this.schoolDataList = res.data.schoolData;
+        if (res.data.schoolData.length > 0) {
+          this.schoolDataList = res.data.schoolData;
+        }
+        else{
+          this.schoolDataList = [          
+              {
+                  "orgId": null,
+                  "name": "",
+                  "parishName": "",
+                  "parishId": null,
+                  "grades": [
+                      {
+                          "orgId": null,
+                          "name": ""
+                      }
+                  ]
+              }        
+        ];
+        }
         this.selectedTerm = res.data.currentTerm;
 
         this.studentDetailsForm.patchValue({
