@@ -81,7 +81,7 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                             join t_event_category_map tecm on tecm.event_cat_map_id = tperc.event_category_id
                                             join t_event_category tec on tec.event_category_id = tecm.event_category_id 
                                             join t_event_cat_staff_map tecsm2 on tecsm2.event_category_map_id =  tecm.event_cat_map_id
-                                            and tecsm2.user_id = ${userId}
+                                            and tecsm2.user_id = ${userId} and tecsm2.is_deleted != true
                                             left join t_participant_event_score tpes on tpes.event_cat_staff_map_id = tecsm2.event_cat_staff_map_id 
                                             and tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id;`;
                 }
