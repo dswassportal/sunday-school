@@ -155,18 +155,18 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
                                                     join t_event_cat_staff_map tecsm on  tecsm.event_category_map_id = tecm.event_cat_map_id 
                                                         and tecsm.user_id = ${score.judge} 
                                                     join t_participant_event_score tpes on tpes.participant_event_reg_cat_id  = tperc.participant_event_reg_cat_id 
-                                                        and  tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id);`;
+                                                        and  tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id and tecsm.is_deleted = false);`;
 
 
-                insertIntoScoreTable = `insert into t_participant_event_score (participant_event_reg_cat_id, event_cat_staff_map_id, score, created_by, created_date)
-                                            select tperc.participant_event_reg_cat_id, tecsm.event_cat_staff_map_id, tts.score, ${loggedInUser}, current_timestamp  from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
+                insertIntoScoreTable = `insert into t_participant_event_score (participant_event_reg_cat_id, event_cat_staff_map_id, score, created_by, created_date, event_participant_registration_id)
+                                            select tperc.participant_event_reg_cat_id, tecsm.event_cat_staff_map_id, tts.score, ${loggedInUser}, current_timestamp, tepr.event_participant_registration_id  from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
                                             join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
                                             and tecm.event_id = ${score.eventId} 
                                             join t_event_participant_registration tepr on tts.enrollment_id  = tepr.enrollment_id 
                                         join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
                                             and tperc.event_category_id = tecm.event_cat_map_id 
                                         join t_event_cat_staff_map tecsm on  tecsm.event_category_map_id = tecm.event_cat_map_id 
-                                            and tecsm.user_id = ${score.judge}`;
+                                            and tecsm.user_id = ${score.judge} and tecsm.is_deleted = false`;
 
                 let deleteResult = await client.query(deleteFromScoreTable);
                 console.log('No. of rows deleted from t_participant_event_score are ', deleteResult.rowCount);
