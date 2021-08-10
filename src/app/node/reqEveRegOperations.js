@@ -335,7 +335,6 @@ async function bulkRegistration(client, loggedInUser, eventId) {
     let studentsData = [];
     let tempstudentsData = {};
     let resultStudents = await client.query(queries.getPrincipalwiseStudentsData, [loggedInUser, eventId]);
-
     if (resultStudents.rowCount > 0) {
         for (let row of resultStudents.rows) {
 

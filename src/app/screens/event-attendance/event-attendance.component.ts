@@ -133,7 +133,7 @@ export class EventAttendanceComponent implements OnInit {
       payload.action = 'submit';
     else payload.action = 'save';
 
-    payload.eventId = this.selectedEvent.event_Id;
+    payload.eventId = this.selectedEvent.eventId;
     payload.category = this.selectedCategory;
     payload.present = this.getParicipantAttendaneArr();
 

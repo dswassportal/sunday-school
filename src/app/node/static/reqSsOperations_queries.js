@@ -78,25 +78,24 @@ const getCurretTerm = ` select jsonb_agg(
                                     and is_deleted != true;`                                            
 
 const getParishesAndSchoolsByUserId = `select distinct to2.org_id, org_type, "name", parent_org_id, address_line1, address_line2, city,
-                                      to2."sequence"
+                                        to2."sequence"
                                         from t_organization to2 join  
                                         (WITH recursive child_orgs 
                                                                 AS (
                                                                     SELECT org_id
                                                                     FROM   t_organization parent_org 
                                                                     WHERE  org_id IN
-                                                                            (
-                                                                                SELECT a.org_id
-                                                                            FROM   t_user_role_context a, t_user b
-                                                                            WHERE  b.user_id = $1
-                                                                            AND    a.user_id = b.user_id  )                                                    
+                                                                (
+                                                                SELECT b.org_id 
+                                                                FROM   t_user b
+                                                            WHERE  b.user_id = $1)                                                    
                                                                     UNION
                                                                     SELECT     child_org.org_id child_id
                                                                     FROM       t_organization child_org
                                                                     INNER JOIN child_orgs c
                                                                     ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                                         FROM   child_orgs) hyrq on to2.org_id  = hyrq.org_id
-                                        where to2.org_type in ('Parish', 'Sunday School', 'Grade') order by to2."sequence"; `;
+                                        where to2.org_type in ('Parish', 'Sunday School', 'Grade') order by to2."sequence";`;
 
 
 const getAllTerms = `select jsonb_agg(
@@ -145,38 +144,39 @@ const getAllSchoolsOfTeacher = `select distinct to3."name", to3.org_id from t_or
                                 join t_organization to2 on to2.org_id = tosa.org_id
                                 join t_organization to3 on to3.org_id = to2.parent_org_id;`;
                                 
-const getGradeWiseAttendance = `select distinct
-                                        tstd.school_term_detail_id, 
-                                        tstd.term_year, 
-                                        tstd.term_start_date, 
-                                        tstd.term_end_date,
-                                        tssd.student_id,
-                                        concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name) student_name,
-                                        case when tssa.has_attended = true then true else false end has_attended
-                                        from t_organization_staff_assignment tosa 
-                                        join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
-                                        and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
-                                        and tstd.is_deleted = false and tosa.user_id = $1
-                                        join t_student_sundayschool_dtl tssd on tstd.school_term_detail_id = tssd.term_id
-                                        join t_organization to2 on tssd.school_grade = to2."name" and tssd.school_id = $2
-                                            and to2.org_id in (	(WITH recursive child_orgs 
-                                                            AS (
-                                                                SELECT  org_id
-                                                                FROM   t_organization parent_org 
-                                                                WHERE  parent_org.parent_org_id = $2
-                                                                UNION
-                                                                SELECT     child_org.parent_org_id child_id
-                                                                FROM       t_organization child_org
-                                                                INNER JOIN child_orgs c
-                                                                ON         c.org_id = child_org.org_id )
-                                                                SELECT org_id FROM child_orgs))
-                                            and to2.org_id = $3
-                                        left join t_sunday_school_attendace tssa on tssa.school_id =  $2
-                                        and tssa.teacher_id =  $1 and tstd.school_term_detail_id  = tstd.school_term_detail_id 
-                                        and tssd.student_id = tssa.student_id 
-                                        and tssa.attendance_date = to_date($4, 'yyyy-mm-dd')
-                                        and tssa.school_term_detail_id = tstd.school_term_detail_id 
-                                        join t_user tu on tu.user_id = tssd.student_id order by student_name;`;     
+const getGradeWiseAttendance = `
+                                  select distinct
+                                    tstd.school_term_detail_id, 
+                                    tstd.term_year, 
+                                    tstd.term_start_date, 
+                                    tstd.term_end_date,
+                                    tssd.student_id,
+                                    concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name) student_name,
+                                    case when tssa.has_attended = true then true else false end has_attended                                  
+                                    from t_organization_staff_assignment tosa 
+                                    join t_school_term_detail tstd on tosa.school_term_detail_id = tstd.school_term_detail_id 
+                                    and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+                                    and tstd.is_deleted = false and tosa.user_id = $1
+                                    join t_student_sundayschool_dtl tssd on tstd.school_term_detail_id = tssd.term_id
+                                    join t_organization to2 on tssd.school_grade = to2."name" and tssd.school_id =  $2
+                                        and to2.org_id in (	(WITH recursive child_orgs 
+                                                        AS (
+                                                            SELECT  org_id
+                                                            FROM   t_organization parent_org 
+                                                            WHERE  parent_org.parent_org_id =  $2
+                                                            UNION
+                                                            SELECT     child_org.parent_org_id child_id
+                                                            FROM       t_organization child_org
+                                                            INNER JOIN child_orgs c
+                                                            ON         c.org_id = child_org.org_id )
+                                                            SELECT org_id FROM child_orgs))
+                                        and to2.org_id = $3
+                                    left join t_sunday_school_attendace tssa on tssd.school_id = tssa.school_id
+                                    and tssa.teacher_id = $1 
+                                    and tssd.student_id = tssa.student_id 
+                                    and tssa.attendance_date = to_date($4, 'yyyy-mm-dd')
+                                    and tssa.school_term_detail_id = tstd.school_term_detail_id 
+                                    join t_user tu on tu.user_id = tssd.student_id;`;
                                         
 const create_t_temp_attendance = `create temporary table t_temp_attendance(
                                             user_id int,
@@ -210,6 +210,13 @@ const getCurrentTerm = `select
                             and current_date >= tstd.term_start_date
                             and tstd.is_deleted = false;`;                                    
 
+const deleteAllAttendance = `delete from t_sunday_school_attendace 
+                                where school_id = $1 
+                                and grade_id = $2 
+                                and teacher_id = $3 
+                                and attendance_date = to_date($4, 'yyyy-mm-dd')
+                                and school_term_detail_id = $5`;                            
+
 module.exports = {
     getGradeStaffAssBySchoolIdDefTerm,
     getGradeStaffAssBySchoolIdReqTerm,
@@ -223,5 +230,6 @@ module.exports = {
     insertIntoAttendanceTempTbl,
     deleteExistingAttendance,
     bulkInstetAttendance,
-    getCurrentTerm
+    getCurrentTerm,
+    deleteAllAttendance
 }

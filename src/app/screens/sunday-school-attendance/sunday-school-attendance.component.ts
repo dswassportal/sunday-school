@@ -124,17 +124,15 @@ export class SundaySchoolAttendanceComponent implements OnInit {
 
 
     this.apiService.callGetService(`getGradeAttendance?schoolId=${this.selectedRowJson.schoolId}&grade=${this.selectedRowJson.grades[0].gradeId}&date=${this.formattedDate}`).subscribe((res) => {
-      this.rowData = res.data.attendanceData;
-      // this.termData = res.data.term;
-      // let tempStartDateArray: any = [];
-      // let tempEndDateArray: any = [];
-      // tempStartDateArray = res.data.term.termStartDate.split("T");
-      // tempEndDateArray = res.data.term.termEndDate.split("T");
-      // this.sundaySchoolAttendanceForm.patchValue({
-      //   schoolTerm: tempStartDateArray[0] + '  -  ' + tempEndDateArray[0]
-      // });
-    });
-
+      // this.rowData = res.data.attendanceData;
+      this.studentAttendanceGridApi.setRowData(res.data.attendanceData);
+      this.studentAttendanceGridApi.forEachNode(
+        (node: any) => {
+          if (node.data.has_attended !== null)
+            node.setSelected(node.data.has_attended)
+        });
+ 
+      });
   }
 
 
@@ -154,7 +152,7 @@ export class SundaySchoolAttendanceComponent implements OnInit {
     }
 
     this.apiService.callGetService(`getGradeAttendance?schoolId=${this.selectedRowJson.schoolId}&grade=${gradeId}&date=${this.formattedDate}`).subscribe((res) => {
-      //this.rowData = res.data.attendanceData;
+      // this.rowData = res.data.attendanceData;
       this.studentAttendanceGridApi.setRowData(res.data.attendanceData);
       this.studentAttendanceGridApi.forEachNode(
         (node: any) => {
@@ -168,7 +166,7 @@ export class SundaySchoolAttendanceComponent implements OnInit {
 
     let finalGridData: any = [];
     let selectedGridData = this.studentAttendanceGridApi.getSelectedRows();
-    let allGridData = this.rowData;
+    // let allGridData = this.rowData;
 
     for (let row of selectedGridData) {
       let gridData =
@@ -179,17 +177,17 @@ export class SundaySchoolAttendanceComponent implements OnInit {
       finalGridData.push(gridData);
     }
 
-    for (let row of allGridData) {
-      let index = finalGridData.findIndex((item: any) => item.student_id === row.student_id);
-      if (index == -1) {
-        let gridData =
-        {
-          "student_id": row.student_id,
-          "has_attended": false
-        }
-        finalGridData.push(gridData);
-      }
-    }
+    // for (let row of allGridData) {
+    //   let index = finalGridData.findIndex((item: any) => item.student_id === row.student_id);
+    //   if (index == -1) {
+    //     let gridData =
+    //     {
+    //       "student_id": row.student_id,
+    //       "has_attended": false
+    //     }
+    //     finalGridData.push(gridData);
+    //   }
+    // }
 
     let gradeId: any;
     if (this.sundaySchoolAttendanceForm.value.grades[0].gradeId) {
@@ -207,7 +205,7 @@ export class SundaySchoolAttendanceComponent implements OnInit {
       "attendance": finalGridData
     }
 
-    console.log("payload", payload);
+    // console.log("payload", payload);
 
     this.apiService.callPostService(`postSSAttendance`, payload).subscribe((res) => {
       if (res.data.status == "success") {

@@ -145,7 +145,7 @@ torg.name as "school_name", tssd.school_id,
                                           left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
                                           and tepr.event_id = $2
                                           left join t_user tu2 on tu2.user_id = tepr.created_by 
-                                          where tosa.role_type = 'Sunday School Principal'or tosa.role_type = 'Sunday School Teacher' and tosa.user_id = $1`;
+                                          where tosa.role_type = 'Sunday School Principal' and tosa.user_id = $1`;
 
 const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_user_id", torg.name as "school_grade", tssd.school_id, tssd.student_id, torg1.name as "school_name",
                                     concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) as "student_name",
@@ -253,19 +253,31 @@ const updateRegQuestionRes = `UPDATE t_event_question_response
 
 
 const getFamTreeWithEventRegStatus = `with family_tree as (                    
-                                        select tpf.family_member_id user_id, tpf.relationship from t_person_family tpf 
-                                        where family_id = (select family_id from t_person tp where user_id = $2)
-                                        and tpf.is_deleted = false
-                                        )
-                                        select distinct vu.user_id, 
-                                            tepr.event_participant_registration_id,
-                                            case when tepr.event_participant_registration_id is not null then true else false end has_registred,
-                                            concat(vu.title,'. ',vu.first_name,' ', vu.middle_name, ' ', vu.last_name) "name",
-                                            tepr.registration_status, 
-                                            ft.relationship from v_user vu
-                                            join family_tree ft on vu.user_id = ft.user_id
-                                            left join t_event_participant_registration tepr on tepr.user_id = ft.user_id
-                                            and tepr.event_id = $1 where vu.is_approved != false;`;
+                                    select tpf.family_member_id user_id, tpf.relationship 
+                                    from t_person_family tpf
+                                    where family_id = (select family_id from t_person tp where user_id = $2)
+                                    and tpf.is_deleted = false
+                                    )
+                                    select distinct vu.user_id, 
+                                        tepr.event_participant_registration_id,
+                                        case when tepr.event_participant_registration_id is not null then true else false end has_registred,
+                                        concat(vu.title,'. ',vu.first_name,' ', vu.middle_name, ' ', vu.last_name) "name",
+                                        tepr.registration_status, 
+                                        ft.relationship 
+                                    from v_user vu
+                                        join family_tree ft on vu.user_id = ft.user_id
+                                        left join t_event_participant_registration tepr on tepr.user_id = ft.user_id and tepr.event_id = $1 
+                                    where vu.user_id != $2 and vu.is_approved != false
+                                union
+                                    select distinct vu.user_id, 
+                                        tepr.event_participant_registration_id,
+                                        case when tepr.event_participant_registration_id is not null then true else false end has_registred,
+                                        concat(vu.title,'. ',vu.first_name,' ', vu.middle_name, ' ', vu.last_name) "name",
+                                        tepr.registration_status, 
+                                        null relationship
+                                    from v_user vu
+                                    left join t_event_participant_registration tepr on tepr.user_id = vu.user_id and tepr.event_id = $1 
+                                    where vu.user_id = $2 and vu.is_approved != false;`;
 
 const getVicarDetails = `select distinct 
                         concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) user_name,

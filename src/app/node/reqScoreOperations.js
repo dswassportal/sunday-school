@@ -10,8 +10,8 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
 
         for (let score of userScoreData.scoreArr) {
 
-            console.log('Updating score for event :' + score.eventId + ' by user ' + score.judge) 
-         
+            console.log('Updating score for event :' + score.eventId + ' by user ' + score.judge)
+
             await client.query('begin;');
 
             // First create the temp table
@@ -30,16 +30,122 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
             let result = await client.query(insertIntoTempTable, [JSON.stringify(score.scoreData)]);
 
             let tRes = await client.query('select * from t_temp_score');
-            console.log(` enrollment_id \t|\t event_category_name \t|\t score`)
+            console.log(` enrollment_id \t|\t event_category_name \t\t\t|\t\t score`)
             for (let row of tRes.rows) {
                 console.log(` ${row.enrollment_id} \t|\t ${row.event_category_name} \t\t\t|\t\t ${row.score}`)
-
             }
-
+            let deleteFromScoreTable = '';
+            let insertIntoScoreTable = '';
             console.log('Data inserted into temp table', result.rowCount);
+            let getEventType = `select event_type from t_event te where event_id = $1`;
+            let EveTypeResult = await client.query(getEventType, [score.eventId]);
 
-            // Delete existing records if any
-            let deleteFromScoreTable = `delete from t_participant_event_score where participant_event_score_id in (
+            if (EveTypeResult.rows[0].event_type === 'Sunday School Final Exam' || EveTypeResult.rows[0].event_type === 'Sunday School Midterm Exam') {
+
+
+                deleteFromScoreTable = `delete from t_participant_event_score where participant_event_score_id in(	
+                                            select 
+                                                    tpes.participant_event_score_id 
+                                            from t_event_cat_staff_map tecsm
+                                                join  t_event_participant_registration tepr on tecsm.event_id = tepr.event_id 
+                                                    and tecsm.event_id = ${score.eventId} and tecsm.user_id = ${score.judge} and tecsm.is_deleted = false
+                                            left join t_participant_event_score tpes on tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id
+                                                and tpes.is_deleted = false
+                                            join t_event_category_map tecm on tecm.event_id = tepr.event_id 
+                                            join t_event_category tec on tec.event_category_id = tecm.event_category_id 
+                                            join t_organization to2 on to2.org_id = tecsm.role_id
+                                            join t_student_sundayschool_dtl tssd on tssd.school_grade = to2."name"
+                                            and tepr.user_id = tssd.student_id)`;
+
+
+                insertIntoScoreTable = `  insert into t_participant_event_score (participant_event_reg_cat_id, event_cat_staff_map_id, score, created_by, created_date, event_participant_registration_id)
+                                                        select distinct tecsm.event_category_map_id , tecsm.event_cat_staff_map_id, tts.score, ${loggedInUser}, current_timestamp, tepr.event_participant_registration_id 
+                                                        from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
+                                                left join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
+                                                and tecm.event_id = ${score.eventId} 
+                                                join t_event_participant_registration tepr on tts.enrollment_id  = tepr.enrollment_id 
+                                                    and tepr.registration_status = 'Registered'
+                                                left join t_event_cat_staff_map tecsm on  tecsm.event_category_map_id = tecm.event_cat_map_id 
+                                                and tecsm.user_id = ${score.judge}  and tecsm.is_deleted = false
+                                                join t_organization to2 on to2.org_id = tecsm.role_id
+                                                join t_student_sundayschool_dtl tssd on tssd.school_grade = to2."name"
+                                                and tepr.user_id = tssd.student_id;`;
+
+                let deleteResult = await client.query(deleteFromScoreTable);
+                console.log('No. of rows deleted from t_participant_event_score are ', deleteResult.rowCount);
+                let insertedResult = await client.query(insertIntoScoreTable);
+                console.log('No. of rows inserted in t_participant_event_score are :: ', insertedResult.rowCount);
+
+
+                if (EveTypeResult.rows[0].event_type === 'Sunday School Midterm Exam') {
+
+                    console.debug('Inserting score into t_participant_event_overall_score table');
+                    let deleteOverAllScore = `delete from t_participant_event_overall_score where event_participant_registration_id in (
+                    select tepr.event_participant_registration_id from t_event_participant_registration tepr 
+                            join t_event_category_map tecm on tepr.event_id = tecm.event_id 
+                            and  tepr.event_id = ${score.eventId} 
+                            join t_participant_event_overall_score tpeos 
+                            on tpeos.event_category_map_id = tecm.event_cat_map_id
+                            and tpeos.participant_event_reg_cat_id = ${score.judge})`;
+
+                    let insertOverAllScore = `INSERT INTO t_participant_event_overall_score
+                                        (event_category_map_id, event_participant_registration_id, overall_score, participant_event_reg_cat_id)
+                                        select tecm.event_cat_map_id, tepr.event_participant_registration_id, tts.score, ${score.judge}
+                                            from t_event_participant_registration tepr 
+                                                    join t_temp_score tts on tepr.enrollment_id = tts.enrollment_id 
+                                                    and tepr.is_deleted = false and tepr.registration_status = 'Registered'
+                                                    join t_event_category_map tecm on tecm.event_id = tepr.event_id 
+                                                    where tepr.event_id = ${score.eventId};`
+
+                    let delRes = await client.query(deleteOverAllScore);
+                    console.debug(`for event ${score.eventId}, ${delRes.rowCount} records have been deleted.`);
+                    let insRes = await client.query(insertOverAllScore);
+                    console.debug(`for event ${score.eventId}, ${insRes.rowCount} new records have been inserted.`);
+
+                } else if (EveTypeResult.rows[0].event_type === 'Sunday School Final Exam') {
+                    console.debug('Inserting score into t_participant_event_overall_score table.');
+                    let getMidTermEventId = `select distinct te2.event_id event_id
+                                                    from t_event te
+                                                join t_event_organization teo on te.event_id = teo.event_id 
+                                                    and te.event_id = ${score.eventId} and te.is_deleted = false
+                                                join t_event_organization teo2 on teo.org_id = teo2.org_id 
+                                                join t_event te2 on teo2.event_id = te2.event_id
+                                                            and te2.event_type = 'Sunday School Midterm Exam' 
+                                                join t_school_term_detail tstd on te2.start_date between tstd.term_start_date and tstd.term_end_date 
+                                                            and current_date <= tstd.term_end_date and current_date >= tstd.term_start_date
+                                                            and tstd.is_deleted = false;`;
+
+                    let pertainingEvt = await client.query(getMidTermEventId);
+
+                    if (pertainingEvt.rowCount === 1) {
+
+                        console.debug(`${pertainingEvt.rowCount} Sunday School Midterm Exam event(s) found pertaining to ${score.eventId} Sunday School Final Exam.`)
+
+                        let deleteFinalTermOverAllScore = `delete from t_participant_event_overall_score where event_participant_registration_id 
+                        	in (select event_participant_registration_id from t_event_participant_registration where  event_id = ${score.eventId} );`;
+
+                        let insertFinalTermOverAllScore = `	INSERT INTO t_participant_event_overall_score
+                                                        (event_category_map_id, event_participant_registration_id, overall_score, participant_event_reg_cat_id)
+                                                            select tpes2.participant_event_reg_cat_id, tepr.event_participant_registration_id, (tpes.score + tpes2.score) /2, ${loggedInUser} 
+                                                                    from t_event_participant_registration tepr 
+                                                                    join t_event_participant_registration tepr2 on tepr.user_id =  tepr2.user_id 
+                                                                        and  tepr.event_id = ${score.eventId} 
+                                                                        and tepr2.event_id = ${pertainingEvt.rows[0].event_id}
+                                                                    join t_participant_event_score tpes on tepr.event_participant_registration_id = tpes.event_participant_registration_id 
+                                                                    join t_participant_event_score tpes2 on tepr2.event_participant_registration_id = tpes2.event_participant_registration_id;`;
+
+
+                        let delRes = await client.query(deleteFinalTermOverAllScore);
+                        console.debug(`for event ${score.eventId}, ${delRes.rowCount} records have been deleted.`);
+                        let insRes = await client.query(insertFinalTermOverAllScore);
+                        console.debug(`for event ${score.eventId}, ${insRes.rowCount} new records have been inserted.`);
+                    } else if (pertainingEvt.rowCount > 0) throw `For Sunday School final Term Event ${score.eventId}, Multiple pertaining Midterm exam events found.`;
+                    else throw `For Sunday School final Term Event ${score.eventId}, Pertaining Midterm exam event not found.`;
+                }
+            } else {
+
+                // Delete existing records if any
+                deleteFromScoreTable = `delete from t_participant_event_score where participant_event_score_id in (
                                         select tpes.participant_event_score_id  from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
                                                     join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
                                                     and tecm.event_id = ${score.eventId} 
@@ -49,25 +155,26 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
                                                     join t_event_cat_staff_map tecsm on  tecsm.event_category_map_id = tecm.event_cat_map_id 
                                                         and tecsm.user_id = ${score.judge} 
                                                     join t_participant_event_score tpes on tpes.participant_event_reg_cat_id  = tperc.participant_event_reg_cat_id 
-                                                        and  tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id);`;
+                                                        and  tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id and tecsm.is_deleted = false);`;
 
 
-            let insertIntoScoreTable = `insert into t_participant_event_score (participant_event_reg_cat_id, event_cat_staff_map_id, score, created_by, created_date)
-                                            select tperc.participant_event_reg_cat_id, tecsm.event_cat_staff_map_id, tts.score, ${loggedInUser}, current_timestamp  from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
+                insertIntoScoreTable = `insert into t_participant_event_score (participant_event_reg_cat_id, event_cat_staff_map_id, score, created_by, created_date, event_participant_registration_id)
+                                            select tperc.participant_event_reg_cat_id, tecsm.event_cat_staff_map_id, tts.score, ${loggedInUser}, current_timestamp, tepr.event_participant_registration_id  from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
                                             join t_event_category_map tecm on tec.event_category_id = tecm.event_category_id 
                                             and tecm.event_id = ${score.eventId} 
                                             join t_event_participant_registration tepr on tts.enrollment_id  = tepr.enrollment_id 
                                         join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
                                             and tperc.event_category_id = tecm.event_cat_map_id 
                                         join t_event_cat_staff_map tecsm on  tecsm.event_category_map_id = tecm.event_cat_map_id 
-                                            and tecsm.user_id = ${score.judge}` ;
+                                            and tecsm.user_id = ${score.judge} and tecsm.is_deleted = false`;
 
+                let deleteResult = await client.query(deleteFromScoreTable);
+                console.log('No. of rows deleted from t_participant_event_score are ', deleteResult.rowCount);
+                let insertedResult = await client.query(insertIntoScoreTable);
+                console.log('No. of rows inserted in t_participant_event_score are :: ', insertedResult.rowCount);
 
-           let deleteResult = await client.query(deleteFromScoreTable);
+            }
 
-           console.log('No. of rows deleted :: ', deleteResult.rowCount);
-            let insertedResult = await client.query(insertIntoScoreTable);
-            console.log('No. of rows inserted :: ', insertedResult.rowCount);
 
 
             if (score.action === 'submit') {
@@ -90,97 +197,6 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
             }
         }
 
-        // } else {
-
-        //     if (userScoreData.action === 'save' || userScoreData.action === 'submit')
-        //         console.log('Judge\'s  {' + userId + ')action is : ' + userScoreData.action + ' no. of participant\'s score to update : ' + userScoreData.scoreData.length)
-        //     else if (userScoreData.action === 'approve')
-        //         console.log('Event co-ordinator (' + userId + ') to approve score.')
-
-        //     await client.query('begin;');
-        //     //Populating user t_participant_event_score;
-
-
-        //     // Score upload save button logic.
-        //     if (userScoreData.action === 'save') {
-        //         const instScrQry = `INSERT INTO t_participant_event_score
-        //                         (participant_event_reg_cat_id, event_cat_staff_map_id, score, created_by, is_deleted, created_date )
-        //                     VALUES($1, $2, $3, $4, $5, $6) returning participant_event_score_id; `;
-
-        //         const updateScrQry = `update t_participant_event_score set score=$1, updated_by=$2, updated_date=$3
-        //                           where participant_event_score_id=$4`;
-
-        //         for (let i = 0; i < userScoreData.scoreData.length; i++) {
-
-        //             let paricipant = userScoreData.scoreData[i];
-        //             if (paricipant.scoreRefId == null) {
-        //                 console.log('scoreRefId is null so insterting the record.')
-        //                 let instScrQryValue = [
-        //                     paricipant.partEveRegCatId,
-        //                     paricipant.catStaffMapId,
-        //                     paricipant.score,
-        //                     userId,
-        //                     false,
-        //                     new Date().toUTCString()
-        //                 ];
-        //                 await client.query(instScrQry, instScrQryValue)
-        //             } else {
-        //                 console.log('scoreRefId is ' + paricipant.scoreRefId + ' so updating the record.')
-        //                 let updateScrQryValue = [
-        //                     paricipant.score,
-        //                     userId,
-        //                     new Date().toUTCString(),
-        //                     paricipant.scoreRefId
-        //                 ];
-        //                 await client.query(updateScrQry, updateScrQryValue)
-        //             }
-        //         }
-        //         await client.query(`commit;`);
-        //         connCloseFlag = true;
-        //     }
-
-        //     //score upload submit button logic   
-        //     if (userScoreData.action === 'submit') {
-
-        //         let updateSubmittedStatus = `update t_event_cat_staff_map set is_score_submitted = true
-        //                                   where event_id = ${userScoreData.eventId} and user_id= ${userId};`;
-
-        //         await client.query(updateSubmittedStatus);
-        //         console.log(`Updated is_score_submitted for event id: ${userScoreData.eventId}`)
-        //         userScoreData.action = 'save';
-        //         console.log('Calling same function(persistParticipantScore) to save all \'Submit\' action data.');
-        //         persistParticipantScore(userScoreData, userId)
-        //         client.query(`commit;`);
-        //     }
-
-        //     // when event co-ordinator approves the score, Approve button logic. 
-        //     if (userScoreData.action === 'approve') {
-
-        //         let query = ` update t_event_cat_staff_map set is_score_approved = true 
-        //                         where event_id = ${userScoreData.eventId} 
-        //                         and user_id = ${userScoreData.judgeId}	
-        //                         and event_category_map_id in (
-        //                                                 select event_cat_map_id  from t_event_category_map 
-        //                                                                         where event_category_id = ${userScoreData.catId} 
-        //                                                                         and event_id = ${userScoreData.eventId});`
-        //         await client.query(query);
-        //         console.log(`User ${userId} approved score for category: ${userScoreData.catId}, Judge: ${userScoreData.judgeId}, Event: ${userScoreData.eventId}`);
-
-        //         // Check whether to calculate overall score or not
-        //         await calculateScore(client, userScoreData.eventId, userScoreData.catMapId)
-        //             .catch((error) => {
-        //                 throw error;
-        //             });
-
-        //         client.query(`commit;`);
-        //     }
-
-        //     return {
-        //         data: {
-        //             status: 'success'
-        //         }
-        //     }
-        //   }
     } catch (error) {
 
         await client.query('rollback;');

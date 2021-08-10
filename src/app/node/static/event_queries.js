@@ -451,17 +451,25 @@ const getAttachmentsByEveId = `select event_attachment_id, attachment_type, atta
                                 
                                 
 const isExamPresent = `select distinct te.event_id, te.start_date 
-                                from t_event te,t_school_term_detail tstd 
-                                where te.event_type = 'Sunday School Midterm Exam'
-                                and to_date( $1 ,'yyyy-mm-dd') between tstd.term_start_date and tstd.term_end_date 
-                                and te.start_date between tstd.term_start_date and tstd.term_end_date`;
+                        from t_event te
+                        JOIN t_event_organization teo on te.event_id = teo.event_id,
+                        t_school_term_detail tstd
+                        where te.event_type = 'Sunday School Midterm Exam'
+                        and teo.org_id = $2
+                        and to_date( $1, 'yyyy-mm-dd') between tstd.term_start_date and tstd.term_end_date 
+                        and te.start_date between tstd.term_start_date and tstd.term_end_date 
+                        and te.is_deleted = false`;
 
 
 const isFinalExamPresent = `select distinct te.event_id, te.start_date 
-                                from t_event te,t_school_term_detail tstd 
+                                from t_event te
+                                JOIN t_event_organization teo on te.event_id = teo.event_id,
+                                t_school_term_detail tstd
                                 where te.event_type = 'Sunday School Final Exam'
-                                and to_date( $1 ,'yyyy-mm-dd') between tstd.term_start_date and tstd.term_end_date 
-                                and te.start_date between tstd.term_start_date and tstd.term_end_date`;
+                                and teo.org_id = $2
+                                and to_date( $1, 'yyyy-mm-dd') between tstd.term_start_date and tstd.term_end_date 
+                                and te.start_date between tstd.term_start_date and tstd.term_end_date
+                                and te.is_deleted = false`;
 
 const getGradesData = `select * from t_organization where parent_org_id IN (select org_id from t_organization where parent_org_id IN 
                                 (select org_id from t_organization where org_id= $1));`; 
@@ -470,6 +478,31 @@ const getTeachersData = `select vt.user_id,
                             concat(vt.title, '. ', vt.first_name, ' ', vt.middle_name, ' ', vt.last_name) as name,
                             vt.primary_grades
                             from v_teacher vt where vt.org_id = $1`;
+
+const getSelectedTeachersData = `select distinct vt.user_id, tecsm.event_cat_staff_map_id, tecsm.role_id,
+                                    concat(vt.title, '. ', vt.first_name, ' ', vt.middle_name, ' ', vt.last_name) as name,
+                                    vt.primary_grades
+                                    from v_teacher vt
+                                    left join t_event_cat_staff_map tecsm on tecsm.user_id = vt.user_id
+                                    and vt.org_id = $1 
+                                    and tecsm.event_id = $2
+                                    where tecsm.is_deleted = false
+                                    union 
+                                    select distinct vt.user_id, 0, 0,
+                                    concat(vt.title, '. ', vt.first_name, ' ', vt.middle_name, ' ', vt.last_name) as name,
+                                    vt.primary_grades
+                                    from v_teacher vt
+                                    left join t_event_cat_staff_map tecsm on tecsm.user_id = vt.user_id
+                                    and vt.org_id = $1 
+                                    where tecsm.is_deleted = false;`;
+
+const getCategoryId = 'select event_category_id from t_event_category tec where lower(tec."name") = lower($1);';
+                          
+const delEvalAssignment = `update t_event_cat_staff_map set is_deleted = $1 where event_id = $2;`;
+
+const getCatMapId = `select event_cat_map_id from t_event_category_map tecm where event_id = $1 and event_category_id = $2;`;
+
+const insertStaffCatExamMapping = `insert into t_event_cat_staff_map (event_id, event_category_map_id, user_id, role_id,role_type, is_deleted) values $1 returning event_cat_staff_map_id`;
 
 
 module.exports = {
@@ -521,5 +554,10 @@ module.exports = {
     isExamPresent,
     isFinalExamPresent,
     getGradesData,
-    getTeachersData
+    getTeachersData,
+    getSelectedTeachersData,
+    getCategoryId,
+    delEvalAssignment,
+    getCatMapId,
+    insertStaffCatExamMapping
 }

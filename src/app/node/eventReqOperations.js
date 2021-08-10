@@ -378,23 +378,40 @@ async function insertEvents(eventsData, loggedInUser) {
         let eventId = eventsData.eventId;
         let response = { eventId: eventsData.eventId }
 
-        let isExamPresentresult = await client.query(queries.isExamPresent, [eventsData.startDate]);
-        if (isExamPresentresult.rowCount > 0) {
-            client.query("commit;");
-            response.status = "eventAlreadyExists";
-            return ({
-                data: response
-            })
+        if (eventsData.eventType == "Sunday School Midterm Exam") {
+            if (eventsData.orgId) {
+                if (eventsData.orgId.length > 0) {
+                    for (let org of eventsData.orgId) {
+                        let isExamPresentresult = await client.query(queries.isExamPresent, [eventsData.startDate, org]);
+                        if (isExamPresentresult.rowCount > 0) {
+                            client.query("commit;");
+                            response.status = "eventAlreadyExists";
+                            return ({
+                                data: response
+                            })
+                        }
+                    }
+                }
+            }
         }
 
-        let isFinalExamPresentresult = await client.query(queries.isFinalExamPresent, [eventsData.startDate]);
-        if (isFinalExamPresentresult.rowCount > 0) {
-            client.query("commit;");
-            response.status = "eventAlreadyExists";
-            return ({
-                data: response
-            })
+        if (eventsData.eventType == "Sunday School Final Exam") {
+            if (eventsData.orgId) {
+                if (eventsData.orgId.length > 0) {
+                    for (let org of eventsData.orgId) {
+                        let isFinalExamPresentresult = await client.query(queries.isFinalExamPresent, [eventsData.startDate, org]);
+                        if (isFinalExamPresentresult.rowCount > 0) {
+                            client.query("commit;");
+                            response.status = "eventAlreadyExists";
+                            return ({
+                                data: response
+                            })
+                        }
+                    }
+                }
+            }
         }
+
 
 
         console.log(`Processing request for ${eventsData.eventId} event Id and ${eventsData.sectionCode == undefined
@@ -751,23 +768,41 @@ async function insertEvents(eventsData, loggedInUser) {
             case "event_grade_evaluator_assignment": {
                 if (eventsData.gradeEvalAssign) {
 
-                    for (let row of eventsData.gradeEvalAssign) {
-                        const delEvals = `update t_event_cat_staff_map set is_deleted = true where event_id = ${eventsData.eventId};`;
-                        await client.query(delEvals);
+                    if (eventsData.eventType == "Sunday School Final Exam" || eventsData.eventType === 'Sunday School Midterm Exam') {
+
+                        let getCatRes = await client.query(queries.getCategoryId, [eventsData.eventType]);
+                        if (getCatRes.rowCount > 0) {
+                            // Deleting existing evaluator mapping.
+                            let delEvalRes = await client.query(queries.delEvalAssignment, [true, eventsData.eventId]);
+                            console.debug(`for event ${eventsData.eventId}, ${delEvalRes.rowCount} records have been marked deleted.`)
+
+                            let insertCatMapRes = await client.query(queries.insertCatMap, [eventsData.eventId, getCatRes.rows[0].event_category_id]);
+                            let catMapId = 0;
+                            if (insertCatMapRes.rowCount > 0) {
+                                catMapId = insertCatMapRes.rows[0].event_cat_map_id;
+                            } else {
+                                let resGetCatMapId = await client.query(queries.getCatMapId, [eventsData.eventId, getCatRes.rows[0].event_category_id]);
+                                catMapId = resGetCatMapId.rows[0].event_cat_map_id;
+                            }
+
+                            let tempArr = [];
+                            for (let evalAssObj of eventsData.gradeEvalAssign) {
+                                if (evalAssObj.evaluator.length > 0 && evalAssObj.evaluator.length !== 0) {
+                                    tempArr.push(`( ${eventsData.eventId}, ${catMapId}, ${evalAssObj.evaluator[0].userId}, ${evalAssObj.gradeOrgId}, '${'Evaluator'}',  ${false} )`);
+                                }
+                            }
+                            if (tempArr.length > 0) {
+                                let tempQuery = queries.insertStaffCatExamMapping.replace('$1', tempArr.join(','));
+                                let insRes = await client.query(tempQuery);
+                                console.debug(`Newly inserted staff mapping's event_cat_staff_map_ids are  : ${JSON.stringify(insRes.rows)}`)
+                            }
+
+
+                        } else throw `Category ${eventsData.eventType} not found in db.`;
+
+
                     }
 
-                    for (let row of eventsData.gradeEvalAssign) {
-                        if (eventsData.eventType == "Sunday School Midterm Exam") {
-                            const insertEvals = `insert into t_event_cat_staff_map (event_id, event_category_map_id, user_id, role_id,role_type, is_deleted) values($1, $2, $3, $4, $5, $6);`;
-                            await client.query(insertEvals, [eventsData.eventId, '1031', row.evaluator[0].userId, row.gradeOrgId, 'Evaluator', false]);
-                        }
-                        if (eventsData.eventType == "Sunday School Final Exam") {
-                            if (row.evaluator.length > 0 || row.evaluator != "") {
-                                const insertEvals = `insert into t_event_cat_staff_map (event_id, event_category_map_id, user_id, role_id,role_type, is_deleted) values($1, $2, $3, $4, $5, $6);`;
-                                await client.query(insertEvals, [eventsData.eventId, '1032', row.evaluator[0].userId, row.gradeOrgId, 'Evaluator', false]);
-                            }
-                        }
-                    }
                 }
                 break;
             }
@@ -810,7 +845,7 @@ async function insertEvents(eventsData, loggedInUser) {
                 }
                 case "event_grade_evaluator_assignment": {
                     console.log("eventsData.orgId", eventsData.orgId);
-                    response.event_grade_evaluator_assignment = await getSectionWiseData(loggedInUser, eventsData.orgId, "event_grade_evaluator_assignment", eventsData.eventType, client);
+                    response.event_grade_evaluator_assignment = await getSectionWiseData(eventsData.orgId, eventsData.eventId, "event_grade_evaluator_assignment", eventsData.eventType, client);
                     break;
                 }
             }//switch
@@ -1014,7 +1049,8 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             let gradesData = [];
             let teachersData = [];
             let allData = [];
-            let gradesDataResult = await client.query(queries.getGradesData, [eventId]);
+            let selectedTeachersData = [];
+            let gradesDataResult = await client.query(queries.getGradesData, [loggedInUser]);
 
             for (let row of gradesDataResult.rows) {
                 gradesData.push({
@@ -1023,12 +1059,26 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                 });
             }
 
-            let teachersDataResult = await client.query(queries.getTeachersData, [eventId]);
+            let teachersDataResult = await client.query(queries.getTeachersData, [loggedInUser]);
             for (let row of teachersDataResult.rows) {
                 teachersData.push({
                     "userId": row.user_id,
                     "name": row.name,
-                    "primaryGrades": row.primary_grades
+                    "primaryGrades": row.primary_grades,
+                    "eventCatStaffMapId": row.event_cat_staff_map_id,
+                    "roleId": row.role_id
+                });
+            }
+
+
+            let selectedTeachersDataResult = await client.query(queries.getSelectedTeachersData, [loggedInUser, eventId]);
+            for (let row of selectedTeachersDataResult.rows) {
+                selectedTeachersData.push({
+                    "userId": row.user_id,
+                    "name": row.name,
+                    "primaryGrades": row.primary_grades,
+                    "eventCatStaffMapId": row.event_cat_staff_map_id,
+                    "roleId": row.role_id
                 });
             }
 
@@ -1062,7 +1112,8 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             return {
                 "gradesData": gradesData,
                 "teachersData": teachersData,
-                "allData": allData
+                "allData": allData,
+                "selectedTeachersData": selectedTeachersData
             }
         }
     }

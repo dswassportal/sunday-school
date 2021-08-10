@@ -348,7 +348,7 @@ export class TeacherSearchComponent implements OnInit {
     const params = {
       columnGroups: true,
       allColumns: true,
-      fileName: `filtered_result`,
+      fileName: `Teacher_Search_Result`,
     };
     this.gridApi.exportDataAsCsv(params);
   }
