@@ -50,6 +50,7 @@ export class SundaySchoolAttendanceComponent implements OnInit {
   loggedInUser: any;
   termData: any;
   formattedDate: any;
+  allStudentsData: any;
 
   dropdownSettingForGrades: IDropdownSettings = {
     singleSelection: true,
@@ -124,7 +125,7 @@ export class SundaySchoolAttendanceComponent implements OnInit {
 
 
     this.apiService.callGetService(`getGradeAttendance?schoolId=${this.selectedRowJson.schoolId}&grade=${this.selectedRowJson.grades[0].gradeId}&date=${this.formattedDate}`).subscribe((res) => {
-      // this.rowData = res.data.attendanceData;
+      this.allStudentsData = res.data.attendanceData;
       this.studentAttendanceGridApi.setRowData(res.data.attendanceData);
       this.studentAttendanceGridApi.forEachNode(
         (node: any) => {
@@ -168,14 +169,34 @@ export class SundaySchoolAttendanceComponent implements OnInit {
     let selectedGridData = this.studentAttendanceGridApi.getSelectedRows();
     // let allGridData = this.rowData;
 
-    for (let row of selectedGridData) {
-      let gridData =
-      {
-        "student_id": row.student_id,
-        "has_attended": true
+    for(let row of this.allStudentsData){
+      let index = selectedGridData.findIndex((item:any)=> item.student_id == row.student_id);
+      if(index >= 0){
+        let gridData =
+        {
+          "student_id": row.student_id,
+          "has_attended": true
+        }
+        finalGridData.push(gridData);
       }
-      finalGridData.push(gridData);
+      else{
+        let gridData =
+        {
+          "student_id": row.student_id,
+          "has_attended": false
+        }
+        finalGridData.push(gridData);
+      }
     }
+
+    // for (let row of selectedGridData) {
+    //   let gridData =
+    //   {
+    //     "student_id": row.student_id,
+    //     "has_attended": true
+    //   }
+    //   finalGridData.push(gridData);
+    // }
 
     // for (let row of allGridData) {
     //   let index = finalGridData.findIndex((item: any) => item.student_id === row.student_id);

@@ -171,8 +171,7 @@ const getGradeWiseAttendance = `
                                                             ON         c.org_id = child_org.org_id )
                                                             SELECT org_id FROM child_orgs))
                                         and to2.org_id = $3
-                                    left join t_sunday_school_attendace tssa on tssd.school_id = tssa.school_id
-                                    and tssa.teacher_id = $1 
+                                    left join t_sunday_school_attendace tssa on tssd.school_id = tssa.school_id                               
                                     and tssd.student_id = tssa.student_id 
                                     and tssa.attendance_date = to_date($4, 'yyyy-mm-dd')
                                     and tssa.school_term_detail_id = tstd.school_term_detail_id 
@@ -191,7 +190,7 @@ const deleteExistingAttendance = `delete from t_sunday_school_attendace where su
                                     select tssa.sunday_school_attendace_id from t_temp_attendance tta 
                                     join t_sunday_school_attendace tssa on tssa.school_term_detail_id = $1
                                     and tta.user_id = tssa.student_id and tssa.attendance_date = to_date($4, 'yyyy-mm-dd')
-                                    and tssa.school_id = $2 and tssa.grade_id = $3 and tssa.teacher_id = $5);`;       
+                                    and tssa.school_id = $2 and tssa.grade_id = $3);`;       
                                     
 const bulkInstetAttendance =     `INSERT INTO t_sunday_school_attendace
                                     (school_id, grade_id, teacher_id, student_id, school_term_detail_id, has_attended, attendance_date, created_by, created_date)
