@@ -153,7 +153,7 @@ export class SundaySchoolAttendanceComponent implements OnInit {
     }
 
     this.apiService.callGetService(`getGradeAttendance?schoolId=${this.selectedRowJson.schoolId}&grade=${gradeId}&date=${this.formattedDate}`).subscribe((res) => {
-      // this.rowData = res.data.attendanceData;
+      this.allStudentsData = res.data.attendanceData;
       this.studentAttendanceGridApi.setRowData(res.data.attendanceData);
       this.studentAttendanceGridApi.forEachNode(
         (node: any) => {
