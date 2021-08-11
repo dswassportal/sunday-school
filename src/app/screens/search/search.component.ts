@@ -270,7 +270,7 @@ export class SearchComponent implements OnInit {
           }
           dioceseArray.push(Json);
           this.dioceseData = dioceseArray;
-        }
+        } 
        
       }
 
@@ -391,6 +391,10 @@ export class SearchComponent implements OnInit {
     this.studentLastName = '';
     this.studentPhoneNumber = '';
     this.studentEmail = '';
+    this.searchFormGroup.get('dioceseName').setValue([]);
+    this.searchFormGroup.get('regionName').setValue([]);
+    this.searchFormGroup.get('parishName').setValue([]);
+    this.searchFormGroup.get('id').setValue([]);
   }
 
   cancel() {

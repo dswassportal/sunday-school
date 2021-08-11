@@ -25,8 +25,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="row">
-
+                <div class="row" style="padding-bottom: 1.6%;">
 
                     <ng-multiselect-dropdown style="padding-top: 0.6%;" class="col-md-6" id="grades"
                         placeholder="Select Grade" [settings]="dropdownSettingsGrades" [data]="gradeData"
@@ -36,14 +35,16 @@
 
 
                     <mat-form-field class="col-md-6">
-                        <mat-label>Choose a date</mat-label>
+                        <mat-label>Attendance date</mat-label>
                         <input [max] = "maxDate" formControlName="attendanceDate" (dateChange)="dateChange($event)" matInput [matDatepickerFilter]="myFilter" [matDatepicker]="picker">
                         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                         <mat-datepicker #picker></mat-datepicker>
                     </mat-form-field>
 
                 </div>
-            
+
+               
+                <span style="font-style: italic; font-size: small;">&nbsp;* Please select checkbox for marking attendance</span>
 
                 <ag-grid-angular style="width: auto; height: 500px;" class="ag-theme-alpine mt-3" [rowData]="rowData "
                     [columnDefs]="columnDefs" (gridReady)="onGridReady($event)" [pagination]="true"

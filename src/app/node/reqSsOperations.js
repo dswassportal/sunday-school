@@ -377,7 +377,7 @@ async function postSSAttendance(attData, loggedInUser) {
 
                 // Delete existing attendance record
                 let attDelRes = await client.query(queries.deleteExistingAttendance,
-                    [attData.termRefId, attData.schoolId, attData.gradeId, attData.attendanceDate, attData.teacherId]);
+                    [attData.termRefId, attData.schoolId, attData.gradeId, attData.attendanceDate]);
 
                 console.debug(`${attDelRes.rowCount} rows were deleted for attendance from t_sunday_school_attendace!`);
 
