@@ -377,8 +377,6 @@ export class SearchComponent implements OnInit {
 
   clearSearch() {
 
-    
-
     this.dioceseName = '';
     this.regionName = '';
     this.orgId = '';
