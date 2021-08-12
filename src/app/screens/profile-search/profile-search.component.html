@@ -56,7 +56,10 @@
                         <mat-form-field class="col-md-4">
                             <mat-label>Member Id</mat-label>
                             <input id="memberId" [(ngModel)]="memberId" matInput formControlName="memberId" />
-                        </mat-form-field>
+                            <mat-error *ngIf="profileSearchFormGroup.controls.memberId.touched && profileSearchFormGroup.controls.memberId.invalid">
+                            <span *ngIf="profileSearchFormGroup.controls.memberId.invalid">Member Id must be of 7 digits</span>
+                            </mat-error>
+                            </mat-form-field>
                     <mat-form-field class="col-md-4">
                         <mat-label>First Name</mat-label>
                         <input id="firstName" [(ngModel)]="firstName" matInput formControlName="firstName" />
