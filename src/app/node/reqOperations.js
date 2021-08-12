@@ -184,29 +184,30 @@ async function processGetUserMetaDataRequest(uid) {
         //             where firebase_id = '${firebaseToken}';`
 
         let query = `select distinct vu.user_id, vu.email_id,
-         vu.title, vu.first_name, vu.middle_name, vu.last_name,
-				vu.nick_name, vu.dob,
-                 vu.mobile_no,
-				vu.address_line1, vu.address_line2,
-                 vu.address_line3, vu.city, vu.state,
-                  vu.postal_code, vu.country
-				,vu.home_phone_no, vu.baptismal_name, 
-                vu.marital_status, vu.date_of_marriage,
-                 vu.about_yourself,
-				vu.role_name, 
-                vu.menu_name,
-                vu.url menu_url,
-                vu.firebase_id fbuid,
-                vu.icon_path menu_icon,
-                vu.family_id, 
-                 vu.perm_name, 
-                 vu.user_org org_name, 
-                 vu.user_org_id org_id,
-                 vu.is_family_head,
-                 vu.is_approved,
-                 vu.membership_type   
-                from v_user vu where user_id = '${uid}' and coalesce(role_start_date, current_date) <= current_date 
-                and coalesce(role_end_date , current_date) >= current_date;`
+        vu.title, vu.first_name, vu.middle_name, vu.last_name,
+               vu.nick_name, vu.dob,
+                vu.mobile_no,
+               vu.address_line1, vu.address_line2,
+                vu.address_line3, vu.city, vu.state,
+                 vu.postal_code, vu.country
+               ,vu.home_phone_no, vu.baptismal_name, 
+               vu.marital_status, vu.date_of_marriage,
+                vu.about_yourself,
+               vu.role_name, 
+               vu.menu_name,
+               vu.url menu_url,
+               vu.menu_sequence,
+               vu.firebase_id fbuid,
+               vu.icon_path menu_icon,
+               vu.family_id, 
+                vu.perm_name, 
+                vu.user_org org_name, 
+                vu.user_org_id org_id,
+                vu.is_family_head,
+                vu.is_approved,
+                vu.membership_type   
+               from v_user vu where user_id = '${uid}' and coalesce(role_start_date, current_date) <= current_date 
+               and coalesce(role_end_date , current_date) >= current_date order by vu.menu_sequence;`
 
         let lastLoggedIn = `select 
                                     action_timestamp as last_logged_in
@@ -1290,8 +1291,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                 const insertSundaySchoolDtlsValues = [
                     userData.userId,
                     userData.sunSchoolId,
-                    userData.sunSchoolGrade,
-                    userData.sunSchoolAcaYrStrtDate == '' ? null : userData.sunSchoolAcaYrStrtDate,
+                    userData.sunSchoolGrade,                    userData.sunSchoolAcaYrStrtDate == '' ? null : userData.sunSchoolAcaYrStrtDate,
                     userData.sunSchoolAcaYrEndDate == '' ? null : userData.sunSchoolAcaYrEndDate,
                     userData.termDetailId
                 ];

@@ -81,6 +81,7 @@ export class SearchComponent implements OnInit {
   states!: any[];
   selectedCountry: any;
   mobileNumber: any;
+  parentLasttName: any;
   rolesData: any;
   homePhoneNumber: any;
   alluserdata: any;
@@ -142,7 +143,7 @@ export class SearchComponent implements OnInit {
   teacherPhoneNumber!: string;
   teacherEmail!: string;
   parentFirstName!: string;
-  parentLasttName!: string;
+  //parentLasttName!: string;
   parentPhoneNumber!: string;
   parentEmail!: string;
   studentFirstName!: string;
@@ -239,7 +240,7 @@ export class SearchComponent implements OnInit {
       teacherPhoneNumber: new FormControl('',Validators.required),
       teacherEmail: new FormControl('', [Validators.required,Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
       parentFirstName: new FormControl('',Validators.required),
-      parentLastName: new FormControl('',Validators.required),
+      parentLasttName: new FormControl('',Validators.required),
       parentPhoneNumber: new FormControl('',Validators.required),
       parentEmail: new FormControl('', [Validators.required,Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
       studentFirstName: new FormControl('',Validators.required),
@@ -375,6 +376,8 @@ export class SearchComponent implements OnInit {
   }
 
   clearSearch() {
+
+    
 
     this.dioceseName = '';
     this.regionName = '';
@@ -564,7 +567,7 @@ export class SearchComponent implements OnInit {
   checkValid() {
     if(this.searchFormGroup.get('teacherFirstName').valid || this.searchFormGroup.get('teacherLastName').valid || this.searchFormGroup.get('teacherPhoneNumber').valid
     || this.searchFormGroup.get('teacherEmail').valid|| this.searchFormGroup.get('dioceseName').valid || this.searchFormGroup.get('regionName').valid 
-    || this.searchFormGroup.get('parishName').valid || this.searchFormGroup.get('parentFirstName').valid || this.searchFormGroup.get('parentLastName').valid 
+    || this.searchFormGroup.get('parishName').valid || this.searchFormGroup.get('parentFirstName').valid || this.searchFormGroup.get('parentLasttName').valid 
     || this.searchFormGroup.get('parentPhoneNumber').valid || this.searchFormGroup.get('parentEmail').valid || this.searchFormGroup.get('studentFirstName').valid
     || this.searchFormGroup.get('studentLastName').valid || this.searchFormGroup.get('studentPhoneNumber').valid || this.searchFormGroup.get('studentEmail').valid)
      {

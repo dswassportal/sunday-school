@@ -256,7 +256,7 @@ export class ProfileSearchComponent implements OnInit {
       dioceseName: new FormControl('',Validators.required),
       regionName: new FormControl('',Validators.required),
       parishName: new FormControl('',Validators.required),
-      memberId: new FormControl('',Validators.required),
+      memberId: new FormControl('',[Validators.required, Validators.maxLength(7)]),
       firstName: new FormControl('',Validators.required),
       lastName: new FormControl('',Validators.required),
       phoneNumber: new FormControl('',Validators.required),
