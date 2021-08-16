@@ -79,7 +79,7 @@
                     </mat-form-field>
 
                     <mat-form-field class="form-field col-12 col-md-6">
-                        <input matInput type="input" [matDatepicker]="picker" [max]="max_date" formControlName="dob" id="dob" placeholder="DoB">
+                        <input matInput type="input" [matDatepicker]="picker" (dateChange)="signUpdobChange($event)"[max]="max_date" formControlName="dob" id="dob" placeholder="DoB">
                         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                         <mat-datepicker #picker></mat-datepicker>
                         <mat-error *ngIf="signUpForm.controls.dob.touched && signUpForm.controls.dob.invalid">

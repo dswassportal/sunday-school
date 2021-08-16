@@ -10,6 +10,7 @@ import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
 import { AuthService } from '../../services/auth.service'
 import { FamilyMemberDetails } from '../family-member-details/family-member-details.dataService';
 const moment = _rollupMoment || _moment;
+import { formatDate } from '@angular/common';
 
 class CustomDateAdapter extends NativeDateAdapter {
   format(date: Date, displayFormat: Object): string {
@@ -93,6 +94,7 @@ export class MemberDetailsComponent implements OnInit {
   termId3: any;
   SSchoolsApitermEndtDate: any;
   SSchoolsApitermStartDate: any;
+  formattedDobDate:any;
 
 
   ngOnInit(): void {
@@ -404,13 +406,19 @@ export class MemberDetailsComponent implements OnInit {
     }
   }
 
+  dateChange(event: any) {
+    this.formattedDobDate = event.value;
+    this.formattedDobDate = formatDate(this.formattedDobDate, 'yyyy-MM-dd', 'en');
+    
+  }
+
   updateUserProfile() {
 
 
     this.myprofileform.value.userId = this.memberData.userId;
     this.myprofileform.value.updatedBy = this.memberData.userId;
     this.myprofileform.value.orgId = this.memberData.orgId;
-
+    this.myprofileform.value.dob = this.formattedDobDate;
 
     let payloadJson = {
       ...this.myprofileform.value,

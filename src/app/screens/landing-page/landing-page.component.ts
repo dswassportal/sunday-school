@@ -15,6 +15,7 @@ import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { ReplaySubject } from 'rxjs';
 import { Router } from '@angular/router';
+import { formatDate } from '@angular/common';
 
 const moment = _rollupMoment || _moment;
 
@@ -83,6 +84,8 @@ export class LandingPageComponent implements OnInit{
   minDate = new Date();
   titles!: any[];
   maritalstatus!:any[];
+  formattedRoleEndDate: any;
+  formattedRoleStrtDate: any;
   error = {validatePhoneNumber: true};
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
     private http: HttpClient, private formBuilder: FormBuilder, public router: Router) { }
@@ -92,6 +95,16 @@ export class LandingPageComponent implements OnInit{
     this.params = params;
     this.data = params.value;
   }
+
+  // dateChangeRoleStart(event: any) {
+  //   this.formattedRoleStrtDate = event.value;
+  //   this.formattedRoleStrtDate = formatDate(this.formattedRoleStrtDate, 'yyyy-MM-dd', 'en');
+  // }
+
+  // dateChangeRoleEnd(event: any){
+  //   this.formattedRoleEndDate = event.value;
+  //   this.formattedRoleEndDate = formatDate(this.formattedRoleEndDate, 'yyyy-MM-dd', 'en');
+  // }
 
   ngOnInit(): void {
 
@@ -427,7 +440,53 @@ export class LandingPageComponent implements OnInit{
       //this.updateuserinfo.value.mobileNo = this.mobileNumber;
       //this.updateuserinfo.value.homePhoneNo = this.homePhoneNumber;
       let dob = this.updateuserinfo.value.dob;
-      this.apiService.callPostService(`updateUserRoles`, this.updateuserinfo.value ).subscribe((res: any) => {
+      let rolesArray = [];
+      for(let row of this.updateuserinfo.value.roles){
+        let rolesPayload =
+        {
+          "roleId": row.roleId,
+          "role": row.role,
+          "orgId": row.orgId,
+          "roleStartDate": row.roleStartDate == null ? null : formatDate(row.roleStartDate, 'yyyy-MM-dd', 'en'),
+          "roleEndDate": row.roleEndDate == null ? null : formatDate(row.roleEndDate, 'yyyy-MM-dd', 'en'),
+        }
+        rolesArray.push(rolesPayload);
+      }
+
+      let payload = 
+      {
+        "title": this.updateuserinfo.value.title,
+        "firstName": this.updateuserinfo.value.firstName,
+        "middleName": this.updateuserinfo.value.middleName,
+        "lastName": this.updateuserinfo.value.lastName,
+        "nickName": this.updateuserinfo.value.nickName,
+        "baptismalName": this.updateuserinfo.value.baptismalName,
+        "dob": this.updateuserinfo.value.dob,
+        "mobileNo": this.updateuserinfo.value.mobileNo,
+        "homePhoneNo": this.updateuserinfo.value.homePhoneNo,
+        "emailAddress": this.updateuserinfo.value.emailAddress,
+        "addressLine1": this.updateuserinfo.value.addressLine1,
+        "addressLine2": this.updateuserinfo.value.addressLine2,
+        "addressLine3": this.updateuserinfo.value.addressLine3,
+        "city": this.updateuserinfo.value.city,
+        "postalCode": this.updateuserinfo.value.postalCode,
+        "state": this.updateuserinfo.value.state,
+        "country": this.updateuserinfo.value.country,
+        "parish": this.updateuserinfo.value.parish,
+        "maritalStatus": this.updateuserinfo.value.maritalStatus,
+        "dateofMarriage": this.updateuserinfo.value.dateofMarriage,
+        "aboutYourself": this.updateuserinfo.value.aboutYourself,
+        "isFamilyHead": this.updateuserinfo.value.isFamilyHead,
+        "roles": rolesArray,
+        "userId": this.updateuserinfo.value.userId,
+        "updatedBy": this.updateuserinfo.value.updatedBy,
+        "orgId": this.updateuserinfo.value.orgId
+      }
+
+      console.log("payload", payload);
+
+     
+      this.apiService.callPostService(`updateUserRoles`, payload ).subscribe((res: any) => {
         if (res.data.status = "success") {
           this.uiCommonUtils.showSnackBar("User Profile Updated Successfully!", "success", 3000);
         }
