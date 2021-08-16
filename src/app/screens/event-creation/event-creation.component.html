@@ -144,7 +144,7 @@
                                     <!-- (dateChange)="comparisonEventStartdateValidator()" -->
                                     <!-- (dateChange)="comparisonEventStartandRegiStartdateValidator()"
                                         (dateChange)="comparisonEventStartandRegiEnddateValidator()" -->
-                                    <input [min]="minDate" matInput id="startDate" formControlName="startDate"
+                                    <input [min]="minDate" (dateChange)="dateChangeEventStartDate($event)" matInput id="startDate" formControlName="startDate"
                                         [matDatepicker]="startatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="startatpicker">
                                     </mat-datepicker-toggle>
@@ -169,7 +169,7 @@
 
                                     <!-- (dateChange)="comparisonEventEnddateValidator()" -->
                                     <mat-label>Event End Date</mat-label>
-                                    <input [min]="minDate" matInput id="endDate" formControlName="endDate"
+                                    <input [min]="minDate" (dateChange)="dateChangeEventEndDate($event)" matInput id="endDate" formControlName="endDate"
                                         [matDatepicker]="endatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="endatpicker">
                                     </mat-datepicker-toggle>
@@ -192,7 +192,7 @@
                                     <!-- (dateChange)="comparisonRegiStartdatedateValidator()"
                                         (dateChange)="comparisontRegiStartdateandEventStarValidator()" -->
                                     <mat-label>Registration Start Date</mat-label>
-                                    <input matInput id="registrationStartDate" formControlName="registrationStartDate"
+                                    <input matInput id="registrationStartDate" (dateChange)="dateChangeEventRegistrationStartDate($event)" formControlName="registrationStartDate"
                                         [matDatepicker]="registrationStartatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationStartatpicker">
                                     </mat-datepicker-toggle>
@@ -216,7 +216,7 @@
                                     <!-- (dateChange)="comparisonRegiEnddateandEventStartValidator()" -->
 
                                     <mat-label>Registration End Date</mat-label>
-                                    <input (dateChange)="comparisonRegiEnddateValidator()" [min]="minDate" matInput
+                                    <input (dateChange)="comparisonRegiEnddateValidator()" (dateChange)="dateChangeEventRegistrationEndtDate($event)" [min]="minDate" matInput
                                         id="registrationEndDate" formControlName="registrationEndDate"
                                         [matDatepicker]="registrationEndatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationEndatpicker">

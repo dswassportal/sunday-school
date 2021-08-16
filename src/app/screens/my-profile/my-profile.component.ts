@@ -10,6 +10,7 @@ import { default as _rollupMoment } from 'moment';
 import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
 import { AuthService } from '../../services/auth.service'
 const moment = _rollupMoment || _moment;
+import { formatDate } from '@angular/common';
 
 
 class CustomDateAdapter extends NativeDateAdapter {
@@ -51,6 +52,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   dropdownSettingsSundaySchoolName: any;
   dropdownSettingsSundaySchoolGrade: any;
   dropdownSettingsSchoolGrade: any;
+  formattedDate: any;
   /*MarrirdOptions: any[] = [
     { value: "unmarried", viewValue: "unmarried" },
     { value: "married", viewValue: "married" }
@@ -604,7 +606,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         this.myprofileform.value.termDetailId = this.SSchoolsApitermId;
         this.myprofileform.value.sunSchoolId = this.termId2;
         this.alluserdata.isStudent = this.myprofileform.value.isStudent;
-
+        this.myprofileform.value.dob = this.formattedDate;
 
         let currFHValue = this.myprofileform.value.isFamilyHead;
         if (currFHValue === true || currFHValue == 'true')
@@ -696,6 +698,16 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
   }
 
+  myFilter = (d: Date | null): boolean => {
+    const day = (d || new Date()).getDay();
+    return day === 1 || day === 2 || day === 3 || day === 4 || day === 5 || day === 6 || day === 0;
+  }
+
+  dateChange(event: any) {
+    this.formattedDate = event.value;
+    this.formattedDate = formatDate(this.formattedDate, 'yyyy-MM-dd', 'en');
+    
+  }
   invokeApi(payload: any) {
     this.apiService.callPostService(`updateUserRoles`,
       payload

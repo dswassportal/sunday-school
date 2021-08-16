@@ -8,6 +8,7 @@ import { Moment } from 'moment';
 import * as _moment from 'moment';
 import { default as _rollupMoment } from 'moment';
 import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
+import { formatDate } from '@angular/common';
 
 const moment = _rollupMoment || _moment;
 
@@ -40,7 +41,7 @@ export class SignUpComponent implements OnInit {
   minDate = new Date();
   titles!: any[];
   memberships!: any[];
-
+  formatteddobSignupForm:any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -86,6 +87,7 @@ export class SignUpComponent implements OnInit {
   signUp() {
     var password = this.signUpForm.controls.password.value;
     var confirmPassword = this.signUpForm.controls.cnfmpwd.value;
+    this.signUpForm.value.dob = this.formatteddobSignupForm;
     if (password !== confirmPassword) {
       alert("Passwords do not match.");
       // return false;
@@ -140,7 +142,11 @@ export class SignUpComponent implements OnInit {
       alert("Select Date in Past");
     }
   }
-
+  signUpdobChange(event: any){
+    this.formatteddobSignupForm = event.value;
+    this.formatteddobSignupForm = formatDate(this.formatteddobSignupForm, 'yyyy-MM-dd', 'en');
+    console.log("Formatted dob on sign up form :: " + this.formatteddobSignupForm);
+  }
   onUserNameFocusOut(event: any) {
     let userName = event.target.value.trim();
     if (userName.length > 0) {

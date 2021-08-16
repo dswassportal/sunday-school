@@ -21,7 +21,7 @@ import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { ElementRef } from '@angular/core';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
-
+import { formatDate } from '@angular/common';
 
 class CustomDateAdapter extends NativeDateAdapter {
   format(date: Date, displayFormat: Object): string {
@@ -107,8 +107,10 @@ export class EventCreationComponent implements OnInit {
   isEvalSecNextButtonRequired: any;
   selectedEvaluatorsDropdown: any;
 
-
-
+  formattedEventStartDate:any;
+  formattedEventEndDate:any;
+  formattedEventRegisrtationStartDate:any;
+  formattedEventRegisrtationEndDate:any
 
 
 
@@ -1175,10 +1177,14 @@ export class EventCreationComponent implements OnInit {
       "eventCoordinator": eventCoordinator,
       "orgType": this.eventsDataFormGroup.value.orgType,
       "orgId": orgId,
-      "startDate": this.eventsDataFormGroup.value.startDate,
-      "endDate": this.eventsDataFormGroup.value.endDate,
-      "registrationStartDate": this.eventsDataFormGroup.value.registrationStartDate,
-      "registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate,
+      //"startDate": this.eventsDataFormGroup.value.startDate,
+      "startDate": this.formattedEventStartDate,
+      //"endDate": this.eventsDataFormGroup.value.endDate,
+      "endDate": this.formattedEventEndDate,
+      //"registrationStartDate": this.eventsDataFormGroup.value.registrationStartDate,
+      "registrationStartDate":this.formattedEventRegisrtationStartDate,
+      //"registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate,
+      "registrationEndDate": this.formattedEventRegisrtationEndDate,
       "eventUrl": this.eventsDataFormGroup.value.eventUrl,
       "description": this.eventsDataFormGroup.value.description
     }
@@ -1188,7 +1194,8 @@ export class EventCreationComponent implements OnInit {
     //create/update event for CWC for event_details section
     if (this.eventType == 'CWC' || this.eventType == 'Talent Competition' || this.eventType == 'Talent Show') {
       if (this.isSingleDayEvent == true) {
-        this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        //this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
         payload.endDate = this.eventsDataFormGroup.value.endDate;
       }
       payload.sectionCode = 'event_details';
@@ -1198,7 +1205,8 @@ export class EventCreationComponent implements OnInit {
 
     if (this.eventType == 'TTC' || this.eventType == 'Teachers Training') {
       if (this.isSingleDayEvent == true) {
-        this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        //this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
         payload.endDate = this.eventsDataFormGroup.value.endDate;
       }
       payload.sectionCode = 'event_details';
@@ -1208,7 +1216,8 @@ export class EventCreationComponent implements OnInit {
 
     if (this.eventType == 'Bible Reading' || this.eventType == 'Diploma Exam' || this.eventType == 'OVBS' || this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam') {
       if (this.isSingleDayEvent == true) {
-        this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        //this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
         payload.endDate = this.eventsDataFormGroup.value.endDate;
       }
       payload.sectionCode = 'event_details';
@@ -1817,6 +1826,29 @@ export class EventCreationComponent implements OnInit {
     }
 
 
+  }
+  dateChangeEventStartDate(event: any){
+    this.formattedEventStartDate = event.value;
+    this.formattedEventStartDate = formatDate(this.formattedEventStartDate, 'yyyy-MM-dd', 'en');
+    
+  }
+
+  dateChangeEventEndDate(event: any){
+    this.formattedEventEndDate = event.value;
+    this.formattedEventEndDate = formatDate(this.formattedEventEndDate, 'yyyy-MM-dd', 'en');
+    
+  }
+
+  dateChangeEventRegistrationStartDate(event: any){
+    this.formattedEventRegisrtationStartDate = event.value;
+    this.formattedEventRegisrtationStartDate = formatDate(this.formattedEventRegisrtationStartDate, 'yyyy-MM-dd', 'en');
+    
+  }
+
+  dateChangeEventRegistrationEndtDate(event: any){
+    this.formattedEventRegisrtationEndDate = event.value;
+    this.formattedEventRegisrtationEndDate = formatDate(this.formattedEventRegisrtationEndDate, 'yyyy-MM-dd', 'en');
+    
   }
   //Event start Date Validator that is EentStartDate>RegistrationEndDate
   comparisonEventStartandRegiEnddateValidator(): any {
