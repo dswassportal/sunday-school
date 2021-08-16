@@ -86,6 +86,7 @@ export class LandingPageComponent implements OnInit{
   maritalstatus!:any[];
   formattedRoleEndDate: any;
   formattedRoleStrtDate: any;
+  formattedDobDate:any;
   error = {validatePhoneNumber: true};
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
     private http: HttpClient, private formBuilder: FormBuilder, public router: Router) { }
@@ -425,6 +426,11 @@ export class LandingPageComponent implements OnInit{
     });
   }
 
+  dateChange(event: any){
+    this.formattedDobDate = event.value;
+    this.formattedDobDate = formatDate(this.formattedDobDate, 'yyyy-MM-dd', 'en');
+    console.log("formatted Dob Date :: " + this.formattedDobDate);
+  }
   updateUserProfile() {
     if (this.updateuserinfo.invalid) {
       this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
@@ -461,7 +467,8 @@ export class LandingPageComponent implements OnInit{
         "lastName": this.updateuserinfo.value.lastName,
         "nickName": this.updateuserinfo.value.nickName,
         "baptismalName": this.updateuserinfo.value.baptismalName,
-        "dob": this.updateuserinfo.value.dob,
+        //"dob": this.updateuserinfo.value.dob,
+        "dob": this.formattedDobDate,
         "mobileNo": this.updateuserinfo.value.mobileNo,
         "homePhoneNo": this.updateuserinfo.value.homePhoneNo,
         "emailAddress": this.updateuserinfo.value.emailAddress,
@@ -482,8 +489,6 @@ export class LandingPageComponent implements OnInit{
         "updatedBy": this.updateuserinfo.value.updatedBy,
         "orgId": this.updateuserinfo.value.orgId
       }
-
-      console.log("payload", payload);
 
      
       this.apiService.callPostService(`updateUserRoles`, payload ).subscribe((res: any) => {
