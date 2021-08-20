@@ -32,6 +32,7 @@ import { ExamRegistrationComponent } from './screens/exam-registration/exam-regi
 import { FamilyMemberDetailsComponent } from './screens/family-member-details/family-member-details.component';
 import { MemberDetailsComponent } from './screens/member-details/member-details.component';
 import { AuthGuard } from './auth-guard.guard';
+import { EventSearchComponent } from './screens/event-search/event-search.component';
 
 
 const routes: Routes = [
@@ -69,6 +70,7 @@ const routes: Routes = [
       { path: 'examRegistration', component: ExamRegistrationComponent },
       { path: 'familyMemberDetails', component: FamilyMemberDetailsComponent },
       { path: 'memberDetails', component: MemberDetailsComponent},
+      { path: 'eventSearch', component: EventSearchComponent},
       // { path: 'testEvent',component:UserProfileComponent},
     ]
   },
