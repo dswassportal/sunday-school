@@ -18,7 +18,7 @@
 
                 <div class="row form-group">
                     <mat-form-field class="form-field col-2">
-                            <mat-select id="title" formControlName = "title" placeholder="title" >
+                            <mat-select id="title" formControlName = "title" placeholder="Title" >
                                 <mat-option *ngFor = "let title of titles; index as i" [value]=title>{{title}}</mat-option>
                               </mat-select>
                     </mat-form-field>
@@ -124,7 +124,7 @@
                                             <mat-option value="non-member">Non-member</mat-option>
                                             <mat-option value="guest">Guest</mat-option>
                                     </mat-select> -->
-                                    <mat-select id="memberType" formControlName = "memberType" placeholder="memberType" >
+                                    <mat-select id="memberType" formControlName = "memberType" placeholder="Member Type" >
                                         <mat-option *ngFor = "let membership of memberships; index as i" [value]=membership>{{membership}}</mat-option>
                                       </mat-select>
                             </mat-form-field>
