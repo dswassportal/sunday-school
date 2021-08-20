@@ -93,7 +93,7 @@
                                                         </mat-form-field>
                                                         <mat-form-field class="col-md">
                                                                 <mat-label>Date of Birth</mat-label>
-                                                                <input matInput type="input" [matDatepicker]="picker"
+                                                                <input matInput type="input" [matDatepicker]="picker" (dateChange)="dateChange($event)"
                                                                         id="dob" formControlName="dob" [max]=max_date>
                                                                 <mat-datepicker-toggle matSuffix [for]="picker">
                                                                 </mat-datepicker-toggle>

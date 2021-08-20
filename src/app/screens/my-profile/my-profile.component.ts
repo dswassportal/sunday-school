@@ -615,7 +615,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
           this.myprofileform.value.isFamilyHead = false;
         else if (currFHValue === '')
           this.myprofileform.value.isFamilyHead = this.alluserdata.isFamilyHead
-
+                                                            
 
         // let currisStudentValue = this.myprofileform.value.isStudent;
         // if (currisStudentValue === false || currisStudentValue == 'yes')
@@ -657,6 +657,29 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
             })
           }
         } else {
+          let memberDetails = [];
+          for(let row of this.myprofileform.value.memberDetails){
+            let json ={
+              "title": row.title,
+              "firstName": row.firstName,
+              "middleName": row.middleName,
+              "lastName": row.lastName,
+              "relationship": row.relationship,
+              "baptismalName": row.baptismalName,
+              "dob": row.dob == null ? null : formatDate(row.dob, 'yyyy-MM-dd', 'en'),
+              "mobileNo": row.mobileNo,
+              "emailId": row.emailId,
+              "userId": row.userId,
+              "userName": row.userName,
+              "isMemberFamilyHead": row.isMemberFamilyHead,
+            }
+            memberDetails.push(json);
+          }
+
+          this.myprofileform.value.memberDetails = [];
+          this.myprofileform.value.memberDetails = memberDetails;
+
+
           let payloadJson = {
             ...this.myprofileform.value,
             ...this.studentDetailsForm.value,

@@ -88,6 +88,7 @@ import { ExamRegistrationComponent } from './screens/exam-registration/exam-regi
 import { FamilyMemberDetailsComponent } from './screens/family-member-details/family-member-details.component';
 import { MemberDetailsComponent } from './screens/member-details/member-details.component';
 import { AuthGuard } from './auth-guard.guard';
+import { EventSearchComponent } from './screens/event-search/event-search.component';
 
 
 @NgModule({
@@ -128,7 +129,8 @@ import { AuthGuard } from './auth-guard.guard';
         EventExamRegistrationComponent,
         ExamRegistrationComponent,
         FamilyMemberDetailsComponent,
-        MemberDetailsComponent
+        MemberDetailsComponent,
+        EventSearchComponent
     //UserProfileComponent,
     //OvbsRegistrationComponent
   ],

@@ -65,8 +65,12 @@ async function searchStudents(filterParamJson, loggedInUser) {
         } else if (filterParamJson.code === 'parish_search') {
             filterConditions = getParishSearchQueryConditions(filterParamJson);
             viewToQuery = ' v_organization vo ';
+        } else if(filterParamJson.code === 'event_search_cwc'){
+            filterConditions = getEventSearchQueryConditions(filterParamJson);
+            viewToQuery = ' v_event_report ver ';
         }
 
+        console.log("filterParamJson", filterParamJson);
         //----------------------------------   Search By Parish, Diocese, Regions Conditions --------------------------------------//
         if (isValidNumber(filterParamJson.dioceseId))
             filterConditions.andConditions.push(`diocese_id = ${filterParamJson.dioceseId}`);
@@ -105,7 +109,8 @@ async function searchStudents(filterParamJson, loggedInUser) {
                                             ON         c.org_id = child_org.parent_org_id ) SELECT *
                                                 FROM   child_orgs)`;
 
-        console.debug(query)
+      
+        console.debug(query);
         searchResultResp = [];
         let result = await client.query(query);
         console.debug('Search result rows found : ' + result.rowCount);
@@ -304,6 +309,71 @@ function getParishSearchQueryConditions(filterParamJson) {
         'orConditions': orConditions
     }
 }
+
+
+function getEventSearchQueryConditions(filterParamJson) {
+
+    let andConditions = [];
+    let orConditions = [];
+
+    //And conditions
+    // if (isValidString(filterParamJson.parishOrganization)){
+    //     andConditions.push(`lower(ver.name) like lower('%${filterParamJson.parishOrganization}%')`)
+    // } // sunday school name
+    if (isValidString(filterParamJson.eventType)){
+        andConditions.push(`lower(ver.event_type) like lower('%${filterParamJson.eventType}%')`)
+    }
+    if (isValidString(filterParamJson.eventName)){
+        andConditions.push(`lower(ver.event_name) like lower('%${filterParamJson.eventName}%')`)
+    }
+    // if (isValidString(filterParamJson.eventStatus)){
+    //     andConditions.push(`lower(ver.name) like lower('%${filterParamJson.eventStatus}%')`)
+    // }
+    if (isValidString(filterParamJson.eventCategory)){
+        andConditions.push(`lower(ver.category_name) like lower('%${filterParamJson.eventCategory}%')`)
+    }
+    // if (isValidString(filterParamJson.eventGroup)){
+    //     andConditions.push(`lower(ver.name) like lower('%${filterParamJson.eventGroup}%')`)
+    // }
+    if (isValidString(filterParamJson.partfirstName)){
+        andConditions.push(`lower(ver.participant_first_name) like lower('%${filterParamJson.partfirstName}%')`)
+    }
+    if (isValidString(filterParamJson.partLastName)){
+        andConditions.push(`lower(ver.participant_last_name) like lower('%${filterParamJson.partLastName}%')`)
+    }
+    if (isValidString(filterParamJson.partRole)){
+        andConditions.push(`lower(ver.participant_role) like lower('%${filterParamJson.partRole}%')`)
+    }
+    if (isValidString(filterParamJson.registrationId)){
+        andConditions.push(`lower(ver.enrollment_id) like lower('%${filterParamJson.registrationId}%')`)
+    }
+    // if (isValidString(filterParamJson.registeredBy)){
+    //     andConditions.push(`lower(ver.name) like lower('%${filterParamJson.registeredBy}%')`)
+    // }
+    if (isValidString(filterParamJson.registrationStatus)){
+        andConditions.push(`lower(ver.registration_status) like lower('%${filterParamJson.registrationStatus}%')`)
+    }
+    if (isValidString(filterParamJson.startDate)){
+        andConditions.push(`lower(ver.event_start_date) like lower('%${filterParamJson.startDate}%')`)
+    }
+    if (isValidString(filterParamJson.endDate)){
+        andConditions.push(`lower(ver.event_end_date) like lower('%${filterParamJson.endDate}%')`)
+    }
+    if (isValidString(filterParamJson.regStartDate)){
+        andConditions.push(`lower(ver.registration_start_date) like lower('%${filterParamJson.regStartDate}%')`)
+    }
+    if (isValidString(filterParamJson.regEndDate)){
+        andConditions.push(`lower(ver.registration_end_date) like lower('%${filterParamJson.regEndDate}%')`)
+    }
+ 
+
+    return {
+        'andConditions': andConditions,
+        'orConditions': orConditions
+    }
+}
+
+
 
 // async function getSearchables(loggedInUser) {
 

@@ -1286,6 +1286,42 @@ async function getEventType() {
 
         metadata.eventType = eventType;
 
+        let eventCategories = [];
+        const eventCategoriesQuery = `select event_category_id, name from t_event_category where is_deleted = false;`;
+        let categoriesResponse = await client.query(eventCategoriesQuery);
+        for(let row of categoriesResponse.rows){
+            let catJson = {
+                "catId": row.event_category_id,
+                "categoryName": row.name
+            }
+            eventCategories.push(catJson);
+        }
+        metadata.eventCategories = eventCategories;
+
+        let gradeGroups = [];
+        const gradeGroupsQuery = `select grade_group_id, group_name from t_grade_group where is_deleted = false;`;
+        let gradeGroupsResponse = await client.query(gradeGroupsQuery);
+        for(let row of gradeGroupsResponse.rows){
+            let groupsJson = {
+                "groupId": row.grade_group_id,
+                "groupName": row.group_name
+            }
+            gradeGroups.push(groupsJson);
+        }
+        metadata.gradeGroups = gradeGroups;
+
+        let sundaySchools = [];
+        const sundaySchoolsQuery = `select org_id, name from t_organization where org_type = 'Sunday School' and is_deleted = false;`;
+        let sundaySchoolsResponse = await client.query(sundaySchoolsQuery);
+        for(let row of sundaySchoolsResponse.rows){
+            let sundaySchoolsJson = {
+                "orgId": row.org_id,
+                "sundaySchoolsName": row.name
+            }
+            sundaySchools.push(sundaySchoolsJson);
+        }
+        metadata.sundaySchools = sundaySchools;
+
         return ({
             data: {
                 status: 'success',

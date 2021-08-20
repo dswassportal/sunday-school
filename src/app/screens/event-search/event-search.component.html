@@ -1,0 +1,598 @@
+<div class="container mt-4">
+    <mat-card class="shadow">
+
+        <h1 class="heading" style="font-family: poppins;">Event Search</h1>
+
+        <!-- <div class="example-action-buttons">
+    <button mat-button (click)="accordion.openAll()">Expand All</button>
+    <button mat-button (click)="accordion.closeAll()">Collapse All</button>
+  </div> -->
+        <mat-accordion class="example-headers-align" multi>
+
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        Search Criteria
+                    </mat-panel-title>
+                    <!-- <mat-panel-description>
+                        Search Details
+                       
+                    </mat-panel-description> -->
+
+                </mat-expansion-panel-header>
+                <form [formGroup]="parishSearchFormGroup">
+                    <div class="row" style="margin-top: 1%; ">
+                        <label style="font-family: poppins;text-align: left; margin-left: 1.2vw;">Diocese
+                            :</label>
+                        <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw; "
+                            id="dioceseName" placeholder="Select Diocese" [data]="dioceseData"
+                            [settings]="dropdownSettingsDiocese" formControlName="dioceseName"
+                            (onSelectAll)="onSelectAll($event)">
+                        </ng-multiselect-dropdown>
+                    </div>
+
+                    <div class="row" style="margin-top: 1%;">
+                        <label style="font-family: poppins;text-align: left; margin-left: 1.2vw;">Region
+                            :</label>
+                        <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw; "
+                            id="regionId" placeholder="Select Region" [data]="regionData"
+                            (onSelect)="onOrgSelectForMultiSelect($event)" [settings]="dropdownSettingsRegion"
+                            formControlName="regionName" (onSelectAll)="onSelectAll($event)">
+                        </ng-multiselect-dropdown>
+                    </div>
+                    <div class="row" style="margin-top: 1%;">
+                        <label style="font-family: poppins;text-align: left; margin-left: 1.2vw;">Parish
+                            :</label>
+                        <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw;"
+                            placeholder="Select Parish"
+                            [settings]="dropdownSettingsParish" [data]="parishData" formControlName="parishName"
+                            id="parishName" (onSelectAll)="onSelectAll($event)">
+                        </ng-multiselect-dropdown>
+                    </div>
+
+                    <div class="row" style="margin-top: 1%;">
+                        <label style="font-family: poppins;text-align: left; margin-left: 1.2vw;">Parish
+                            Organization:</label>
+                        <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw;"
+                            placeholder="Select Parish Organization"
+                            [settings]="dropdownSettingsParishOrg" [data]="parishOrgData" formControlName="parishOrganization"
+                            id="parishOrganization" (onSelectAll)="onSelectAll($event)">
+                        </ng-multiselect-dropdown>
+                    </div>
+
+                    <div class="row" style="margin-top: 1%;">
+                        <div class="col-md-4">
+                            <label style="font-family: poppins;text-align: left; margin-left: 0.2vw;">Event Type
+                                :</label>
+                            <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-12" id="eventType"
+                                placeholder="Event Type" [settings]="dropdownSettingsEventType" [data]="eventList"
+                                formControlName="eventType" (onSelectAll)="onSelectAll($event)">
+                            </ng-multiselect-dropdown>
+                            <!-- (onSelect)="eventTypeSelChange()" -->
+                        </div>
+                        <div class="col-md-4">
+                            <label style="font-family: poppins;text-align: left; margin-left: 1.1vw;">Event Name
+                                :</label>
+                            <mat-form-field class="col-md-12" style="margin-top: -1.5%;">
+                                <input id="eventName" matInput formControlName="eventName"
+                                    placeholder="Enter event name" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label style="font-family: poppins;text-align: left; margin-left: 0.2vw;">Event
+                                Status:</label>
+                            <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw;"
+                                placeholder="Select Event Status" [settings]="dropdownSettingsEventStatus"
+                                [data]="eventStatusData" formControlName="eventStatus" id="eventStatus"
+                                (onSelectAll)="onSelectAll($event)">
+                            </ng-multiselect-dropdown>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label style="font-family: poppins;text-align: left; margin-left: 0.2vw;">Event
+                                Category:</label>
+                            <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw;"
+                                placeholder="Select Event Category"
+                                [settings]="dropdownSettingsEventCategory" [data]="eventCategoryData" formControlName="eventCategory"
+                                id="eventCategory" (onSelectAll)="onSelectAll($event)">
+                            </ng-multiselect-dropdown>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label style="font-family: poppins;text-align: left; margin-left: 0.2vw;">Event
+                                Group:</label>
+                            <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw;"
+                                placeholder="Select Event Group"
+                                [settings]="dropdownSettingsEventGroup" [data]="eventGroupData" formControlName="eventGroup"
+                                id="eventGroup" (onSelectAll)="onSelectAll($event)">
+                            </ng-multiselect-dropdown>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label style="font-family: poppins;text-align: left; margin-left: 0.2vw;">Registration Status:
+                                </label>
+                            <ng-multiselect-dropdown class="col-md-12" style="font-family: poppins; margin-right: 1vw;"
+                                placeholder="Select Registration Status"
+                                [settings]="dropdownSettingsRegistrationStatus" [data]="registrationStatusData" formControlName="registrationStatus"
+                                id="registrationStatus" (onSelectAll)="onSelectAll($event)">
+                            </ng-multiselect-dropdown>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <mat-form-field class="col-md-4" style="margin-top: -1.5%;">
+                            <input id="partfirstName" matInput formControlName="partfirstName"
+                                placeholder="Enter Participant First Name" />
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-4" style="margin-top: -1.5%;">
+                            <input id="partLastName" matInput formControlName="partLastName"
+                                placeholder="Enter Participant Last Name" />
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-4" style="margin-top: -1.5%;">
+                            <input id="partRole" matInput formControlName="partRole"
+                                placeholder="Enter Participant Role" />
+                        </mat-form-field>
+
+                    </div>
+
+
+                    <div class="row">
+                        <mat-form-field class="col-md-6" style="margin-top: -1.5%;">
+                            <input id="registrationId" matInput formControlName="registrationId" placeholder="Registration Id" />
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-6" style="margin-top: -1.5%;">
+                            <input id="registeredBy" matInput formControlName="registeredBy" placeholder="Registered By" />
+                        </mat-form-field>
+
+                        <!-- <mat-form-field class="col-md-4" style="margin-top: -1.5%;">
+                            <input id="registrationStatus" matInput formControlName="registrationStatus"
+                                placeholder="Registration Status" />
+                        </mat-form-field> -->
+                    </div>
+
+
+                    <div class="row">
+                        <mat-form-field class="col-md-6">
+                            <mat-label>Event Start Date</mat-label>
+                            <input matInput id="startDate" formControlName="startDate"
+                                [matDatepicker]="startdatepicker">
+                            <mat-datepicker-toggle matSuffix [for]="startdatepicker">
+                            </mat-datepicker-toggle>
+                            <mat-datepicker #startdatepicker></mat-datepicker>
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-6">
+                            <mat-label>Event End Date</mat-label>
+                            <input matInput id="endDate" formControlName="endDate" [matDatepicker]="enddatepicker">
+                            <mat-datepicker-toggle matSuffix [for]="enddatepicker">
+                            </mat-datepicker-toggle>
+                            <mat-datepicker #enddatepicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="row">
+                        <mat-form-field class="col-md-6">
+                            <mat-label>Event Registration Start Date</mat-label>
+                            <input matInput id="regStartDate" formControlName="regStartDate"
+                                [matDatepicker]="regstartdatepicker">
+                            <mat-datepicker-toggle matSuffix [for]="regstartdatepicker">
+                            </mat-datepicker-toggle>
+                            <mat-datepicker #regstartdatepicker></mat-datepicker>
+                        </mat-form-field>
+
+                        <mat-form-field class="col-md-6">
+                            <mat-label>Event Registration End Date</mat-label>
+                            <input matInput id="regEndDate" formControlName="regEndDate"
+                                [matDatepicker]="regenddatepicker">
+                            <mat-datepicker-toggle matSuffix [for]="regenddatepicker">
+                            </mat-datepicker-toggle>
+                            <mat-datepicker #regenddatepicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+
+
+
+                </form>
+            </mat-expansion-panel>
+
+        </mat-accordion>
+
+        <div class="row" style="padding-top: 1%;">
+            <div class="col text-center">
+                <button mat-button type="submit" class="mbutton mr-1 allButton" (click)="clearSearch()">
+                    <span class="allButtonSpan">Clear</span>
+                </button>
+                <!--  -->
+
+                <button mat-button [disabled]='checkValid()' type="submit" (click)="accordion.closeAll()"
+                    (click)="onSearchClick()" mat-button class="mbutton allButton">
+                    <span class="allButtonSpan">Search</span>
+                </button>
+            </div>
+        </div>
+
+
+        <div class="d-flex" style="margin-right: 1.4%;">
+            <button mat-button class="col-2 ml-auto border" (click)="onBtExport()">
+                <mat-icon>file_download</mat-icon>
+            </button>
+        </div>
+
+        <div class="container mt-3" style="overflow: hidden;">
+
+            <ag-grid-angular style="width: auto; height: 450px;" class="ag-theme-alpine mt-3" [rowData]="rowData "
+                [columnDefs]="columnDefs" [pagination]="true" rowSelection='multiple'
+                (selectionChanged)="onSelectionChanged($event)" (gridReady)="onGridReady($event)"
+                [checkboxSelection]="true" [gridOptions]="gridOptions" (rowClicked)='onRowClicked($event)'>
+            </ag-grid-angular>
+        </div>
+    </mat-card>
+</div>
+
+<div class="col-md-12">
+
+    <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true" data-backdrop="false">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Edit User Profile</h4>
+                    <button mat-button class="ml-auto" data-dismiss="modal" (click)="resetForm()">
+                        <mat-icon>clear</mat-icon>
+                    </button>
+                </div>
+                <div class="modal-body p-4 border m-3 rounded">
+
+                    <form [formGroup]="updateuserinfo">
+
+                        <div class="row">
+                            <mat-form-field class="col-2">
+
+                                <mat-select id="title" formControlName="title" placeholder="title">
+                                    <mat-option *ngFor="let title of titles; index as i" [value]=title>{{title}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field class="col">
+                                <mat-label>First Name</mat-label>
+                                <input style="text-transform: capitalize;" id="firstName" matInput
+                                    formControlName="firstName" required />
+                            </mat-form-field>
+
+                            <mat-form-field class="col-md">
+                                <mat-label>Middle Name</mat-label>
+                                <input style="text-transform: capitalize;" id="middleName" matInput
+                                    formControlName="middleName" />
+                            </mat-form-field>
+                            <mat-form-field class="col-md">
+                                <mat-label>Last Name</mat-label>
+                                <input style="text-transform: capitalize;" id="lastName" matInput
+                                    formControlName="lastName" required />
+                            </mat-form-field>
+
+                        </div>
+                        <div class="row">
+                            <mat-form-field class="col-md">
+                                <mat-label>Nick Name</mat-label>
+                                <input style="text-transform: capitalize;" id="lastName" matInput
+                                    formControlName="nickName" />
+                            </mat-form-field>
+                            <mat-form-field class="col-md">
+                                <mat-label>Baptismal Name</mat-label>
+                                <input style="text-transform: capitalize;" id="baptismalName" matInput
+                                    formControlName="baptismalName" />
+                            </mat-form-field>
+                            <mat-form-field class="col-md">
+                                <mat-label>Date of Birth</mat-label>
+                                <input matInput type="input" [matDatepicker]="picker" id="dob" formControlName="dob"
+                                    [max]=max_date>
+                                <mat-datepicker-toggle matSuffix [for]="picker">
+                                </mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                        <div class="row">
+                            <mat-form-field class="col-md-4">
+                                <mat-label style="padding-left: 15%;">Mobile Number *</mat-label>
+
+                                <ngx-mat-intl-tel-input id="mobileNo" matInput (keypress)="keyPress($event)"
+                                    [onlyCountries]="['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true"
+                                    [maxLength]="['10']" [enableAutoCountrySelect]="true" name="mobileNo"
+                                    formControlName="mobileNo" [preferredCountries]="['us']" [enableRequired]="true">
+                                </ngx-mat-intl-tel-input>
+                                <mat-error
+                                    *ngIf="updateuserinfo.controls.mobileNo.touched && updateuserinfo.controls.mobileNo.invalid">
+                                    <span *ngIf="updateuserinfo.controls['mobileNo']?.errors?.validatePhoneNumber">Enter
+                                        10 digit number.</span>
+                                </mat-error>
+                            </mat-form-field>
+                            <mat-form-field class="col-md-4">
+                                <mat-label style="padding-left: 15%;">Home Phone Number
+                                </mat-label>
+
+                                <ngx-mat-intl-tel-input id="homePhoneNo" matInput (keypress)="keyPress($event)"
+                                    [onlyCountries]="['us','in','ca']" [enableSearch]="true" [enablePlaceholder]="true"
+                                    [maxLength]="['10']" [enableAutoCountrySelect]="true" name="homePhoneNo"
+                                    formControlName="homePhoneNo" [preferredCountries]="['us']" [enableRequired]="true">
+                                </ngx-mat-intl-tel-input>
+                                <mat-error
+                                    *ngIf="updateuserinfo.controls.homePhoneNo.touched && updateuserinfo.controls.homePhoneNo.invalid">
+
+                                    <span
+                                        *ngIf="updateuserinfo.controls['homePhoneNo']?.errors?.validatePhoneNumber">Enter
+                                        10 digit number.</span>
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field class="col-md-4">
+                                <mat-label>Email Address</mat-label>
+                                <input id="emailAddress" matInput formControlName="emailAddress"
+                                    placeholder="Enter Email Address" readonly />
+                                <mat-error
+                                    *ngIf="updateuserinfo.controls.emailAddress.touched && updateuserinfo.controls.emailAddress.invalid">
+                                    <span *ngIf="updateuserinfo.controls.emailAddress.errors.required">This
+                                        field is mandatory.</span>
+                                    <span *ngIf="updateuserinfo.controls.emailAddress.errors.pattern">invalid
+                                        email id.</span>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <div class="row">
+                            <mat-form-field class="col-md-12">
+                                <mat-label>Address Line 1</mat-label>
+                                <input id="addressLine1" matInput formControlName="addressLine1"
+                                    placeholder="Enter Address" />
+                            </mat-form-field>
+                        </div>
+                        <div class="row">
+                            <mat-form-field class="col-md-12">
+                                <mat-label>Address Line 2</mat-label>
+                                <input id="addressLine2" matInput formControlName="addressLine2"
+                                    placeholder="Enter Address" />
+                            </mat-form-field>
+                        </div>
+                        <div class="row">
+                            <mat-form-field class="col-md-12">
+                                <mat-label>Address Line 3</mat-label>
+                                <input id="addressLine3" matInput formControlName="addressLine3"
+                                    placeholder="Enter Address" />
+                            </mat-form-field>
+                        </div>
+                        <div class="row">
+                            <mat-form-field class="col-md-4">
+                                <mat-label>City</mat-label>
+                                <input id="city" matInput formControlName="city" placeholder="Enter Address" />
+                            </mat-form-field>
+
+                            <mat-form-field class="col-md-4">
+                                <mat-label>Postal Code</mat-label>
+                                <input id="postalCode" matInput formControlName="postalCode"
+                                    placeholder="Enter Address" />
+                            </mat-form-field>
+                            <mat-form-field class="col-md-4">
+                                <mat-label>Parish</mat-label>
+                                <input id="parish" matInput formControlName="parish" readonly />
+
+                            </mat-form-field>
+                        </div>
+
+
+
+                        <div class="row">
+                            <mat-form-field class="col-md-6">
+                                <mat-label>Country</mat-label>
+                                <select matNativeControl id="country" formControlName="country"
+                                    placeholder="Select Country" [(ngModel)]="selectedCountry"
+                                    (change)="changeCountry($event)">
+                                    <option *ngFor="let country of countries" [value]="country.countryName">
+                                        {{country.countryName}}</option>
+                                </select>
+                            </mat-form-field>
+                            <mat-form-field class="col-md-6">
+                                <mat-label>State/Province</mat-label>
+                                <select matNativeControl id="state" formControlName="state"
+                                    placeholder="Select State/Province">
+                                    <option *ngFor="let state of states" [value]="state">{{state}}</option>
+                                </select>
+                            </mat-form-field>
+                        </div>
+                        <div class="row">
+                            <mat-form-field class="col-md">
+                                <mat-label>Marital Status</mat-label>
+                                <select matNativeControl id="maritalStatus" formControlName="maritalStatus"
+                                    placeholder="Enter Country">
+                                    <option value="married">Married</option>
+                                    <option value="unmarried">Unmarried</option>
+                                </select>
+                            </mat-form-field>
+                            <mat-form-field class="col-md">
+                                <mat-label>Date of Marriage</mat-label>
+                                <input matInput type="input" [matDatepicker]="marriageDatepicker" id="dateofMarriage"
+                                    formControlName="dateofMarriage" [max]=max_date
+                                    [disabled]="updateuserinfo.value.maritalStatus=='unmarried'">
+                                <mat-datepicker-toggle matSuffix [for]="marriageDatepicker">
+                                </mat-datepicker-toggle>
+                                <mat-datepicker #marriageDatepicker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                        <div class="row">
+                            <mat-form-field class="col-md-12">
+                                <mat-label>About Yourself</mat-label>
+                                <textarea id="aboutYourself" matInput formControlName="aboutYourself"
+                                    placeholder="About Your self"></textarea>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="row" style="color:gray">
+                            <label id="example-radio-group-label" class="ml-3">Is Family
+                                Head? </label>
+                            <mat-radio-group aria-label="Select an option" formControlName="isFamilyHead">
+                                <mat-radio-button class="ml-1" value="true">Yes
+                                </mat-radio-button>
+                                <mat-radio-button class="ml-1" value="false" [checked]=true>No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+
+
+                        <div *ngIf="hasRolePermission" class="roleSection">
+                            <mat-divider
+                                style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
+                            </mat-divider>
+                            <div class="row" style="padding-top: 1%;">
+                                <div class="col-md-6">
+                                    <h2>Role Assignment</h2>
+                                </div>
+                                <div class="col-md-6 col text-right">
+                                    <button mat-button (click)="onaddbtnclick()">
+                                        <mat-icon>add</mat-icon>
+                                        <span style="padding-top: 2%;font-size: 16px;">Add</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <fieldset>
+                                <div formArrayName="roles"
+                                    *ngFor="let item of updateuserinfo.get('roles')['controls']; let i = index;">
+                                    <div [formGroupName]="i" style="display:contents">
+
+                                        <div class="row">
+
+
+                                            <mat-form-field class="col-md-3">
+                                                <mat-label>Role
+                                                </mat-label>
+                                                <select matNativeControl required formControlName="roleId">
+                                                    <!-- <option value="null" hidden>Select Role</option>                                  -->
+                                                    <option *ngFor="let role of roledata;" [value]=role.id>
+                                                        {{role.name}}
+                                                    </option>
+                                                </select>
+                                            </mat-form-field>
+
+
+                                            <mat-form-field class="col-md-3">
+                                                <mat-label [for]="i">
+                                                    Access Level
+                                                    Type</mat-label>
+                                                <select id="{{ i }}" matNativeControl required formControlName="role"
+                                                    (change)="onOrgSelect($event)">
+                                                    <option *ngFor="let org of orgs" [value]="org.orgtype">
+                                                        {{org.orgtype}}
+                                                    </option>
+                                                </select>
+                                            </mat-form-field>
+
+                                            <mat-form-field class="col-md-4">
+                                                <mat-label [for]="i">
+                                                    Access Level ID
+                                                </mat-label>
+                                                <select id="{{ i }}" matNativeControl required formControlName="orgId">
+                                                    <option *ngFor="let orgDetail of getOrgDetailsArrByindex(i)"
+                                                        [value]=orgDetail.id>
+                                                        {{orgDetail.name}}
+                                                    </option>
+                                                </select>
+                                                <!-- <select *ngFor="let where of onOrgSelect(updateuserinfo.controls['roles']?.value[i]?.role)" value="{{where}}">{{where}}</select> -->
+                                            </mat-form-field>
+
+
+                                            <div class="col-md-2 col text-right">
+                                                <button (click)="onremovebtnclick(i)" mat-button>
+                                                    <mat-icon>delete
+                                                    </mat-icon>
+                                                    <span>Delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <mat-form-field class="col-md-6">
+
+                                                <mat-label>Role Start
+                                                    Date</mat-label>
+                                                <input matInput id="roleStartDate" formControlName="roleStartDate"
+                                                    [matDatepicker]="roleStartDate">
+                                                <mat-datepicker-toggle matSuffix [for]="roleStartDate">
+                                                </mat-datepicker-toggle>
+                                                <mat-datepicker #roleStartDate>
+                                                </mat-datepicker>
+                                            </mat-form-field>
+
+
+                                            <mat-form-field class="col-md-6">
+
+                                                <mat-label>Role End Date
+                                                </mat-label>
+                                                <input matInput id="roleEndDate" [min]="minDate"
+                                                    formControlName="roleEndDate" [matDatepicker]="roleEndDate"
+                                                    (dateChange)="comparisonRegiEnddateValidator()">
+                                                <mat-datepicker-toggle matSuffix [for]="roleEndDate">
+                                                </mat-datepicker-toggle>
+                                                <mat-datepicker #roleEndDate>
+                                                </mat-datepicker>
+
+                                                <!-- <div *ngIf="i.controls.roleEndDate.roleEndDateErrorFlag">
+                                                                            <div *ngIf="p.hasError('required', 'name')">Required</div>  
+                                                                    </div> -->
+
+                                                <mat-error
+                                                    *ngIf="item.controls.roleEndDate.hasError('invaliddaterange')">
+                                                    Role end date cannot be earlier than role start date
+                                                </mat-error>
+
+                                            </mat-form-field>
+                                        </div>
+
+                                        <mat-divider style="padding-bottom: 1.6%;">
+                                        </mat-divider>
+
+
+
+
+
+                                    </div>
+
+                                </div>
+
+                            </fieldset>
+                            <mat-divider
+                                style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 12px;">
+                            </mat-divider>
+                        </div>
+
+
+
+
+                        <div class="row" style="padding-top: 1%;">
+                            <div class="col text-center">
+
+
+                                <button mat-button type="submit" routerLinkActive="active" class="mbutton mr-1"
+                                    (click)="cancel()">Cancel</button>
+
+                                <button mat-button type="submit" mat-button [disabled]="!updateuserinfo.dirty"
+                                    class="mbutton" (click)="updateUserProfile()">
+                                    Update</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
