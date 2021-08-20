@@ -442,9 +442,10 @@ const getEventDefForUpdateEvent = `select distinct event_id, event_type, event_n
                                     event_end_date, event_url, ve.org_type, ve.org_id, ve.org_name, 
                                     exam_start_date, exam_end_date,  ve.coordinator_id,
                                     concat(tu.title,'. ', tu.first_name,' ', tu.middle_name,' ', tu.last_name,'(', to2."name" ,')') coo_name
-                                    from v_event ve join t_user tu on tu.user_id = ve.coordinator_id
-                                    join t_organization to2 on to2.org_id = tu.org_id 
-                                    where ve.is_deleted != true and ve.event_id =  $1;`;            
+                                    from v_event ve 
+                                    left join t_user tu on tu.user_id = ve.coordinator_id
+                                    left join t_organization to2 on to2.org_id = tu.org_id 
+                                    where ve.is_deleted = false and ve.event_id = $1;`;            
                                     
 const getAttachmentsByEveId = `select event_attachment_id, attachment_type, attachment_name  
                                 from t_event_attachment tea where event_id = $1;`   
