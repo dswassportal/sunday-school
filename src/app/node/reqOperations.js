@@ -1473,6 +1473,10 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                     }
                 }
             }
+            else if(userData.memberDetails.length === 0){
+                const deleteAllFamilyMembers = `update t_person_family set is_deleted = true where family_id = $1 and relationship != 'Family Head';`;
+                await client.query(deleteAllFamilyMembers, [userData.familyId]);
+            }
         }
 
         /**********************Insert -> t_user_role_mapping ************************* */
