@@ -654,6 +654,10 @@ export class EventCreationComponent implements OnInit {
           eventUrl: this.eventsDataUpdate.eventUrl,
           description: this.eventsDataUpdate.description
         });
+        this.dateChangeEventStartDate({value:this.eventsDataUpdate.startDate});
+        this.dateChangeEventEndDate({value:this.eventsDataUpdate.endDate});
+        this.dateChangeEventRegistrationStartDate({value:this.eventsDataUpdate.registrationStartDate});
+        this.dateChangeEventRegistrationEndtDate({value:this.eventsDataUpdate.registrationEndDate});
 
       }
 
@@ -975,7 +979,7 @@ export class EventCreationComponent implements OnInit {
 
     //for getting event co ordinator as per event type
     if (this.eventType == 'CWC') {
-      this.rolesData = ['CWC Coordinator'];
+      this.rolesData = ['CWC Coordinator', 'Diocesan CWC Coordinator'];
       let roleData =
       {
         "data": {
@@ -989,7 +993,7 @@ export class EventCreationComponent implements OnInit {
     }
 
     if (this.eventType == 'TTC') {
-      this.rolesData = ['TTC Exam Coordinator'];
+      this.rolesData = ['TTC Exam Coordinator', 'Diocesan TTC Exam Coordinator'];
       let roleData =
       {
         "data": {

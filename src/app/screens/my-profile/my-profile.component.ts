@@ -357,7 +357,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         aboutYourself: this.alluserdata.aboutYourself,
         userId: this.alluserdata.userId,
       });
-
+      this.dateChange({value:this.alluserdata.dob});
       this.studentDetailsForm.patchValue({
         studentAcaDtlId: this.alluserdata.studentAcademicdetails[0].studentAcademicDetailId,
         studentId: this.alluserdata.studentAcademicdetails[0].studentId,

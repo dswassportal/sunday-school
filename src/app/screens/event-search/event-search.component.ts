@@ -423,6 +423,21 @@ export class EventSearchComponent implements OnInit {
     if(this.parishSearchFormGroup.value.eventType[0].eventType == "CWC" || this.parishSearchFormGroup.value.eventType[0].eventType == 'Talent Competition' || this.parishSearchFormGroup.value.eventType[0].eventType == 'Talent Show'){
         code = 'event_search_cwc';
     }
+    if(this.parishSearchFormGroup.value.eventType[0].eventType == "OVBS" || this.parishSearchFormGroup.value.eventType[0].eventType == "Bible Reading"){
+      code = 'event_search_ovbs';
+    }
+    if(this.parishSearchFormGroup.value.eventType[0].eventType == "Sunday School Midterm Exam"){
+      code = 'event_search_ss_midterm_exam';
+    }
+    if(this.parishSearchFormGroup.value.eventType[0].eventType == "Sunday School Final Exam" || this.parishSearchFormGroup.value.eventType[0].eventType == "Diploma Exam"){
+      code = 'event_search_ss_finalterm_exam';
+    }
+    if(this.parishSearchFormGroup.value.eventType[0].eventType == "TTC"){
+      code = 'event_search_ttc_exam';
+    }
+    if(this.parishSearchFormGroup.value.eventType[0].eventType == "Teachers Training"){
+      code = 'event_search_teachers_training';
+    }
 
     let payload = {
       
@@ -453,7 +468,11 @@ export class EventSearchComponent implements OnInit {
       if (res.data.status == "success") {
         let columnsArray: any = [];
         for(let row of res.data.displayConfig){   
-          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, suppressSizeToFit: true, flex: 1, resizable: true }
+          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, width:200,
+            // cellRenderer: (data: any) => {
+            //   return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+            // },
+           }
           columnsArray.push(json);
         } 
         this.columnDefs = columnsArray;

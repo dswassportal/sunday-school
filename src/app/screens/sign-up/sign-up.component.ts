@@ -9,6 +9,7 @@ import * as _moment from 'moment';
 import { default as _rollupMoment } from 'moment';
 import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
 import { formatDate } from '@angular/common';
+import { IDropdownSettings } from 'ng-multiselect-dropdown';
 
 const moment = _rollupMoment || _moment;
 
@@ -41,7 +42,8 @@ export class SignUpComponent implements OnInit {
   minDate = new Date();
   titles!: any[];
   memberships!: any[];
-  formatteddobSignupForm:any;
+  formatteddobSignupForm: any;
+  dropdownSettingsParish: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -49,6 +51,18 @@ export class SignUpComponent implements OnInit {
     private AuthService: AuthService,
     private apiService: ApiService
   ) { }
+
+
+  dropdownSettingForParish: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'id',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
 
 
   ngOnInit(): void {
@@ -66,6 +80,8 @@ export class SignUpComponent implements OnInit {
       orgId: new FormControl('', Validators.required),
       abtyrslf: new FormControl('')
     });
+
+    this.dropdownSettingsParish = this.dropdownSettingForParish;
 
     this.max_date = new Date;
     this.apiService.getParishListData().subscribe(res => {
@@ -97,9 +113,27 @@ export class SignUpComponent implements OnInit {
         return
       }
       else {
+
+        let payloadjson = {
+          "title": this.signUpForm.value.title,
+          "firstName": this.signUpForm.value.firstName,
+          "lastName": this.signUpForm.value.lastName,
+          "email": this.signUpForm.value.email,
+          "userName": this.signUpForm.value.userName,
+          "dob": this.signUpForm.value.dob,
+          "password": this.signUpForm.value.password,
+          "cnfmpwd": this.signUpForm.value.cnfmpwd,
+          "mobileNo": this.signUpForm.value.mobileNo,
+          "memberType": this.signUpForm.value.memberType,
+          "orgId": this.signUpForm.value.orgId.length == 0 ? null : this.signUpForm.value.orgId[0].id,
+          "abtyrslf": this.signUpForm.value.abtyrslf,
+          "middleName": null,
+          "fbId": this.signUpForm.value.fbId
+        }
+
         //this.signUpForm.value.mobileNo = this.contactNo;
-        this.signUpForm.value.middleName = null;
-        this.AuthService.SignUp(this.signUpForm.value).then((data) => {
+        //this.signUpForm.value.middleName = null;
+        this.AuthService.SignUp(payloadjson).then((data) => {
           console.log(JSON.stringify(data));
         })
         console.log("user registered");
@@ -122,6 +156,10 @@ export class SignUpComponent implements OnInit {
     }
   }
 
+  onSelectAll(items: any) {
+    console.log(items);
+  }
+
   cancel() {
     this.router.navigate(['/signin']);
   }
@@ -142,7 +180,7 @@ export class SignUpComponent implements OnInit {
       alert("Select Date in Past");
     }
   }
-  signUpdobChange(event: any){
+  signUpdobChange(event: any) {
     this.formatteddobSignupForm = event.value;
     this.formatteddobSignupForm = formatDate(this.formatteddobSignupForm, 'yyyy-MM-dd', 'en');
     console.log("Formatted dob on sign up form :: " + this.formatteddobSignupForm);
@@ -150,14 +188,14 @@ export class SignUpComponent implements OnInit {
   onUserNameFocusOut(event: any) {
     let userName = event.target.value.trim();
     if (userName.length > 0) {
-        this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res:any)=>{
-          if(res.data.status === "success"){
-            if(res.data.isTaken === true){
-              return this.signUpForm.controls['userName'].setErrors({'invalid': true });
-            }else
+      this.apiService.callGetService(`isUserNameTaken?userName=${userName}`).subscribe((res: any) => {
+        if (res.data.status === "success") {
+          if (res.data.isTaken === true) {
+            return this.signUpForm.controls['userName'].setErrors({ 'invalid': true });
+          } else
             return;
-          }
-        })
+        }
+      })
     }
   }
 

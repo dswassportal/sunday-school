@@ -65,7 +65,12 @@ async function searchStudents(filterParamJson, loggedInUser) {
         } else if (filterParamJson.code === 'parish_search') {
             filterConditions = getParishSearchQueryConditions(filterParamJson);
             viewToQuery = ' v_organization vo ';
-        } else if(filterParamJson.code === 'event_search_cwc'){
+        } else if(filterParamJson.code === 'event_search_cwc' || 
+                  filterParamJson.code === 'event_search_ovbs' ||
+                  filterParamJson.code === 'event_search_ss_midterm_exam' ||
+                  filterParamJson.code === 'event_search_ss_finalterm_exam' ||
+                  filterParamJson.code === 'event_search_ttc_exam' ||
+                  filterParamJson.code === 'event_search_teachers_training'){
             filterConditions = getEventSearchQueryConditions(filterParamJson);
             viewToQuery = ' v_event_report ver ';
         }
