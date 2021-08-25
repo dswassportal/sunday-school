@@ -132,11 +132,20 @@
                     </div>
                     <div class="form-group row">
                             
-                            <mat-form-field class="form-field col-md" >
+                            <!-- <mat-form-field class="form-field col-md" >
                                     <mat-select id="orgId" formControlName = "orgId" placeholder="Parish" required>
                                       <mat-option *ngFor = "let parish of parishList" [value]=parish.id>{{parish.name}} </mat-option>
                                     </mat-select>
-                                  </mat-form-field>
+                            </mat-form-field> -->
+
+
+                        <ng-multiselect-dropdown style="padding-top: 0.6%;" class="col-md-12" id="orgId"
+                            placeholder="Select Parish" [settings]="dropdownSettingsParish" [data]="parishList"
+                            formControlName="orgId" (onSelectAll)="onSelectAll($event)">
+                        </ng-multiselect-dropdown>
+
+
+
                     </div>
 
                 <div class="form-group row justify-content-center">
