@@ -40,13 +40,17 @@
                 </div>
 
                 <div class="form-group row justify-content-center">
-                    <mat-form-field class="form-field col-md-6">
+                    <mat-form-field class="form-field col-md-12">
                         <input type="text" matInput formControlName="email" id="email" placeholder="Email" required>
                         <mat-error *ngIf="signUpForm.controls.email.touched && signUpForm.controls.email.invalid">
                             <span *ngIf="signUpForm.controls.email.errors.required">This field is mandatory.</span>
                             <span *ngIf="signUpForm.controls.email.errors.pattern">This field is invalid.</span>
                         </mat-error>
                     </mat-form-field>
+
+                 
+                </div>
+                <div class="row">
 
                     <mat-form-field class="form-field col-md-6">
                         <input type="text" matInput formControlName="userName" (focusout)="onUserNameFocusOut($event)" id="userName" placeholder="User Name" required>
@@ -58,9 +62,8 @@
                         <mat-error *ngIf="signUpForm.controls['userName'].hasError('invalid')">Username is already taken</mat-error>
                                    
                     </mat-form-field>
-                </div>
-                <div class="row">
-                    <mat-form-field class="form-field col col-md">
+
+                    <mat-form-field class="form-field col-md-6">
                         <!-- <mat-label style="padding-left: 23%;">Mobile Number</mat-label>
                         <input matInput type="text" ng2TelInput (ng2TelOutput)="getNumber($event)" formControlName="mobileNo" id="mobileNo" maxLength="10" (keypress)="keyPress($event)" required style="width: fit-content;"/>
                         <mat-error *ngIf="signUpForm.controls.mobileNo.touched && signUpForm.controls.mobileNo.invalid">
@@ -78,7 +81,7 @@
                         </mat-error>
                     </mat-form-field>
 
-                    <mat-form-field class="form-field col-12 col-md-6">
+                    <!-- <mat-form-field class="form-field col-12 col-md-6">
                         <input matInput type="input" [matDatepicker]="picker" (dateChange)="signUpdobChange($event)"[max]="max_date" formControlName="dob" id="dob" placeholder="DoB">
                         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                         <mat-datepicker #picker></mat-datepicker>
@@ -86,7 +89,7 @@
                             <span *ngIf="signUpForm.controls.dob.errors.required">This field is mandatory.</span>
                             <span *ngIf="signUpForm.controls.dob.errors.pattern">This field is invalid.</span>
                         </mat-error>
-                    </mat-form-field>
+                    </mat-form-field> -->
                  </div>
 <!-- 
                 <div class="form-group row justify-content-center">
@@ -138,8 +141,8 @@
                                     </mat-select>
                             </mat-form-field> -->
 
-
-                        <ng-multiselect-dropdown style="padding-top: 0.6%;" class="col-md-12" id="orgId"
+                            <label style="padding-left: 2%;">Parish :</label>
+                        <ng-multiselect-dropdown class="col-md-12" id="orgId"
                             placeholder="Select Parish" [settings]="dropdownSettingsParish" [data]="parishList"
                             formControlName="orgId" (onSelectAll)="onSelectAll($event)">
                         </ng-multiselect-dropdown>

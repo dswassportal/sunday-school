@@ -739,6 +739,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         localStorage.setItem('chUserMetaData', JSON.stringify(res.data.metaData));
         this.uiCommonUtils.showSnackBar("Profile updated successfully!", "success", 3000);
         this.isDirty = false;
+        window.location.reload();
       }
       else
         this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
