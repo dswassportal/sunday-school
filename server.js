@@ -8,7 +8,9 @@ const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions
 const processSSRequest = require(`./src/app/node/reqSsOperations`)
 const processFileUpload = require(`./src/app/node/reqFileUpload`)
 const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOperations`);
-const studentSearch =  require(`./src/app/node/search/studentSearch`)
+const studentSearch = require(`./src/app/node/search/studentSearch`)
+const firebaseAdminUtils = require('./src/app/node/firebase/firebaseAdminUtils')
+
 
 const fileUpload = require('express-fileupload');
 express = require('express')
@@ -23,6 +25,47 @@ app.listen(process.env.PORT || port, () => {
 });
 
 app.use(compression())
+app.use(express.json());
+app.use('*', cors())
+
+const openEndpoints = ['/api', '/api/getEmail', '/api/getParishData', '/api/getLookupMasterData'];
+
+app.use((req, res, next) => {
+  let currEndpoint;
+  if (req.url.indexOf('?')) {
+    currEndpoint = req.url.split('?')[0];
+  } else
+    currEndpoint = req.url;
+  if (req.header('Authorization') === undefined)
+    req.header('Authorization') = '';
+  console.log(req.header('Authorization').length === 0, openEndpoints.indexOf(currEndpoint) >= 0);
+  if (req.header('Authorization').length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) {
+    next();
+  } else if (req.header('Authorization').length !== 0) {
+    firebaseAdminUtils.varifyUserToken(req.header('Authorization')).then(idToken => {
+      next()
+    }).catch(error => {
+      console.error('oAuth token validation failed!!', error);
+      res.send({
+        data: {
+          status: 'failed',
+          errorCode: 401,
+          errorMsg: 'Session expired!'
+        }
+      });
+      res.end();
+    });
+  } else {
+    res.send({
+      data: {
+        status: 'failed',
+        errorCode: 400,
+        errorMsg: 'Bad request!'
+      }
+    });
+    res.end();
+  }
+});
 
 var corsOptions = {
   "origin": '*',
