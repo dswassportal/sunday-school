@@ -454,10 +454,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
         let getuserRecords =
             `SELECT DISTINCT vu.user_id,
                         vu.email_id,
-                        vu.title,
-                        vu.first_name,
-                        vu.middle_name,
-                        vu.last_name,
+                        concat(vu.title, '. ', vu.first_name, ' ', vu.last_name) as "name",
                         vu.nick_name,
                         vu.dob,
                         vu.mobile_no,
@@ -477,8 +474,10 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                         vu.user_org_id user_org_id,
                         vu.user_org_type user_org_type,
                         membership_type,
-                        vu.user_org parish_name
+                        vu.user_org parish_name,
+                        tu.created_date
                     FROM  v_user vu
+                    join t_user tu on tu.user_id = vu.user_id 
                     WHERE ${condition} vu.user_org_id IN ${hierarchicalQry} order by user_id desc;`
 
         /****************Removed from projection by Sudip ********************* */
@@ -491,14 +490,47 @@ async function getuserRecords(userType, loggedInUser, eventId) {
 
         //console.log('Executing query : ' + getuserRecords)
 
+        if (userType == 'approved_requests') {
+            getuserRecords =
+                `SELECT DISTINCT vu.user_id,
+                        vu.email_id,
+                        concat(vu.title, '. ', vu.first_name, ' ', vu.last_name) as "name",
+                        vu.nick_name,
+                        vu.dob,
+                        vu.mobile_no,
+                        vu.address_line1,
+                        vu.address_line2,
+                        vu.address_line3,
+                        vu.city,
+                        vu.state,
+                        vu.postal_code,
+                        vu.country ,
+                        vu.home_phone_no,
+                        vu.baptismal_name,
+                        vu.marital_status,
+                        vu.date_of_marriage,
+                        vu.about_yourself,
+                        vu.is_family_head,
+                        vu.user_org_id user_org_id,
+                        vu.user_org_type user_org_type,
+                        membership_type,
+                        vu.user_org parish_name,
+                        tuol.performed_date,
+                        tuol.performed_by
+                    FROM  v_user vu
+                    join t_user_operation_log tuol on tuol.user_id = vu.user_id
+                    WHERE vu.user_id IN 
+                    (select tuol.user_id from t_user_operation_log tuol where tuol.performed_by = ${loggedInUser}) 
+                    AND vu.user_org_id IN  ${hierarchicalQry} order by user_id desc;`
+        }
+
         if (userType == 'rejected') {
 
             getuserRecords = ` select                      
                                 th.user_id, 
-                                th.title,
-                                th.first_name,
-                                th.last_name,
+                                concat(th.title, '. ', th.first_name, ' ', th.last_name) as "name",
                                 tol.reason,
+                                tol.performed_date as "rejected_Date",
                                 (select "name" from t_organization to2 where org_id = th.org_id) parish_name,
                                 th.member_type  
                                 from t_user_history th inner join t_user_operation_log tol 
@@ -573,15 +605,12 @@ async function getuserRecords(userType, loggedInUser, eventId) {
 
             }
         } catch (error) { }
-
         let res = await client.query(getuserRecords);
-
         let user = {}
         let users = [];
         /****************Commented by Sudip ********************* */
         // let roles = [];
         let userid = 0;
-
         if (res && res.rowCount > 0) {
             // console.log("res.rowCount :" + res.rowCount);
             for (let row of res.rows) {
@@ -607,6 +636,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     user.middleNmae = row.middle_name;
                     user.lastName = row.last_name;
                     user.nickName = row.nick_name;
+                    user.name = row.name;
                     user.dob = row.dob;
                     user.mobileNo = row.mobile_no;
                     user.addressLine1 = row.address_line1;
@@ -629,7 +659,10 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     user.memberType = row.membership_type;
                     user.membershipType = row.member_type;
                     user.parish_name = row.parish_name;
-                    user.pickedDate = row.ttc_exam_date
+                    user.pickedDate = row.ttc_exam_date;
+                    user.approvedDate = row.performed_date;
+                    user.rejectedDate = row.rejected_Date;
+                    user.requestDate = row.created_date;
 
                     // if(userid == 0){
                     //     userid = row.user_id;
@@ -1291,7 +1324,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                 const insertSundaySchoolDtlsValues = [
                     userData.userId,
                     userData.sunSchoolId,
-                    userData.sunSchoolGrade,                    userData.sunSchoolAcaYrStrtDate == '' ? null : userData.sunSchoolAcaYrStrtDate,
+                    userData.sunSchoolGrade, userData.sunSchoolAcaYrStrtDate == '' ? null : userData.sunSchoolAcaYrStrtDate,
                     userData.sunSchoolAcaYrEndDate == '' ? null : userData.sunSchoolAcaYrEndDate,
                     userData.termDetailId
                 ];
@@ -1473,7 +1506,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                     }
                 }
             }
-            else if(userData.memberDetails.length === 0){
+            else if (userData.memberDetails.length === 0) {
                 const deleteAllFamilyMembers = `update t_person_family set is_deleted = true where family_id = $1 and relationship != 'Family Head';`;
                 await client.query(deleteAllFamilyMembers, [userData.familyId]);
             }

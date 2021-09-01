@@ -107,9 +107,11 @@ export class ApprovalRequestsComponent implements OnInit {
 
   }
 
+  usersType: any;
 
   onFilteringRadioButtonChange(event: any) {
-    console.log(event)
+    console.log(event);
+    this.usersType = event.value;
     this.getUnapprovedUserData(event.value);
 
   }
@@ -119,10 +121,17 @@ export class ApprovalRequestsComponent implements OnInit {
 
       if (usertype == 'approval_requests') {
         this.columnDefs = [
-          { headerName: 'First Name', field: 'firstName', resizable: true,sortable: true, filter: true, width: 170, checkboxSelection: true },
-          { headerName: 'Last Name', field: 'lastName' ,resizable: true, sortable: true, filter: true, width: 170 },
-          { headerName: 'Member Type', field: 'memberType',resizable: true, sortable: true, filter: true, width: 150 },
-          { headerName: 'Parish', field: 'parish_name',resizable: true, sortable: true, filter: true, width: 450 },
+          { headerName: 'Name', field: 'name', resizable: true, sortable: true, filter: true, width: 370, checkboxSelection: true },
+          //{ headerName: 'First Name', field: 'firstName', resizable: true, sortable: true, filter: true, width: 170, checkboxSelection: true },
+          //{ headerName: 'Last Name', field: 'lastName', resizable: true, sortable: true, filter: true, width: 170 },
+          { headerName: 'Member Type', field: 'memberType', resizable: true, sortable: true, filter: true, width: 150 },
+          { headerName: 'Parish', field: 'parish_name', resizable: true, sortable: true, filter: true, width: 450 },
+          {
+            headerName: 'Request Date', field: 'requestDate', resizable: true, sortable: true, filter: true, width: 150,
+            cellRenderer: (data: any) => {
+              return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+            }
+          },
           // { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
           //{ headerName: 'State', field: 'state', sortable: true, filter: true, width: 150 },
           //{ headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 150 },
@@ -130,57 +139,85 @@ export class ApprovalRequestsComponent implements OnInit {
         ]
       } else if (usertype == 'rejected') {
         this.columnDefs = [
-          { headerName: 'First Name', field: 'firstName',resizable: true, sortable: true, filter: true, width: 170, checkboxSelection: true },
-          { headerName: 'Last Name', field: 'lastName',resizable: true, sortable: true, filter: true, width: 170 },
-          { headerName: 'Member Type', field: 'memberTypeForRejected',resizable: true, sortable: true, filter: true, width: 150 },
-          { headerName: 'Parish', field: 'parish_name',resizable: true, sortable: true, filter: true, width: 450 },
-          // { headerName: 'City', field: 'city', sortable: true, filter: true, width: 150 },
-          //{ headerName: 'State', field: 'state', sortable: true, filter: true, width: 150 },
-          //{ headerName: 'Postal Code', field: 'postalCode', sortable: true, filter: true, width: 150 },
-          { headerName: 'Reason', field: 'reason',resizable: true, sortable: true, filter: true, width: 180 }
+          { headerName: 'Name', field: 'name', resizable: true, sortable: true, filter: true, width: 370, checkboxSelection: true },
+          //{ headerName: 'Member Type', field: 'memberTypeForRejected', resizable: true, sortable: true, filter: true, width: 150 },
+          { headerName: 'Parish', field: 'parish_name', resizable: true, sortable: true, filter: true, width: 450 },
+          { headerName: 'Reject Reason', field: 'reason', resizable: true, sortable: true, filter: true, width: 200 },
+          {
+            headerName: 'Rejected Date', field: 'rejectedDate', resizable: true, sortable: true, filter: true, width: 200,
+            cellRenderer: (data: any) => {
+              return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+            }
+          },
+        ]
+      } else if (usertype == 'approved_requests') {
+        this.columnDefs = [
+          { headerName: 'Name', field: 'name', resizable: true, sortable: true, filter: true, width: 370, checkboxSelection: true },
+          //{ headerName: 'First Name', field: 'firstName', resizable: true, sortable: true, filter: true, width: 170, checkboxSelection: true },
+          //{ headerName: 'Last Name', field: 'lastName', resizable: true, sortable: true, filter: true, width: 170 },
+          { headerName: 'Member Type', field: 'memberType', resizable: true, sortable: true, filter: true, width: 140 },
+          { headerName: 'Parish', field: 'parish_name', resizable: true, sortable: true, filter: true, width: 450 },
+          {
+            headerName: 'Approval Date', field: 'approvedDate', resizable: true, sortable: true, filter: true, width: 200,
+            cellRenderer: (data: any) => {
+              return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+            }
+          },
         ]
       }
-
       //console.log(res.data.metaData);
       this.rowData = res.data.metaData;
     });
   }
 
   onRowClicked(event: any) {
-    $("#imagemodal").modal("show");
-    // this.router.navigate(['/dashboard/myprofile']);
-    let rowData = event;
-    this.selectedUserData = event.data;
-    console.log(this.selectedUserData);
-    let i = rowData.rowIndex;
+    if (this.usersType == "approval_requests" || this.usersType == "rejected") {
+      $("#imagemodal").modal("show");
+      // this.router.navigate(['/dashboard/myprofile']);
+      let rowData = event;
+      this.selectedUserData = event.data;
+      console.log(this.selectedUserData);
+      let i = rowData.rowIndex;
 
-    this.reqDisableForm.disable();
+      this.reqDisableForm.disable();
 
-    this.reqDisableForm.patchValue({
-      title: this.selectedUserData.title,
-      firstName: this.selectedUserData.firstName,
-      middleName: this.selectedUserData.middleNmae,
-      lastName: this.selectedUserData.lastName,
-      nickName: this.selectedUserData.nickName,
-      batismalName: this.selectedUserData.batismalName,
-      dob: this.selectedUserData.dob,
-      mobileNo: this.selectedUserData.mobileNo,
-      homePhoneNo: this.selectedUserData.homePhoneNo,
-      emailAddress: this.selectedUserData.emailId,
-      addressLine1: this.selectedUserData.addressLine1,
-      addressLine2: this.selectedUserData.addressLine2,
-      addressLine3: this.selectedUserData.addressLine3,
-      city: this.selectedUserData.city,
-      postalCode: this.selectedUserData.postalCode,
-      state: this.selectedUserData.state,
-      country: this.selectedUserData.country,
-      parish: this.selectedUserData.parish_name,
-      maritalStatus: this.selectedUserData.maritalStatus,
-      dateofMarriage: this.selectedUserData.dateofMarriage,
-      aboutYourself: this.selectedUserData.aboutYourself,
-      isFamilyHead: this.selectedUserData.isFamilyHead,
-      memberType: this.selectedUserData.memberType,
-    })
+      this.reqDisableForm.patchValue({
+        title: this.selectedUserData.title,
+        firstName: this.selectedUserData.firstName,
+        middleName: this.selectedUserData.middleNmae,
+        lastName: this.selectedUserData.lastName,
+        nickName: this.selectedUserData.nickName,
+        batismalName: this.selectedUserData.batismalName,
+        dob: this.selectedUserData.dob,
+        mobileNo: this.selectedUserData.mobileNo,
+        homePhoneNo: this.selectedUserData.homePhoneNo,
+        emailAddress: this.selectedUserData.emailId,
+        addressLine1: this.selectedUserData.addressLine1,
+        addressLine2: this.selectedUserData.addressLine2,
+        addressLine3: this.selectedUserData.addressLine3,
+        city: this.selectedUserData.city,
+        postalCode: this.selectedUserData.postalCode,
+        state: this.selectedUserData.state,
+        country: this.selectedUserData.country,
+        parish: this.selectedUserData.parish_name,
+        maritalStatus: this.selectedUserData.maritalStatus,
+        dateofMarriage: this.selectedUserData.dateofMarriage,
+        aboutYourself: this.selectedUserData.aboutYourself,
+        isFamilyHead: this.selectedUserData.isFamilyHead,
+        memberType: this.selectedUserData.memberType,
+      })
+
+    }
+  }
+
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `Users_Data`,
+    };
+    this.gridApi.exportDataAsCsv(params);
   }
 
   onUserReject() {
