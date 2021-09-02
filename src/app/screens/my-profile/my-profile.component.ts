@@ -140,7 +140,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   memberships!: any[];
   error = { validatePhoneNumber: true };
   isFamilyMember: any;
-  isFamilyHeadRadiobtn: boolean = false;
+  isMemberFamilyHead!: boolean;
   selectedRowData: any;
   selectedUrl: any;
 
@@ -532,7 +532,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         emailId: e.emailId,
         userId: e.userId,
         userName: e.userName,
-        isMemberFamilyHead: e.isMemberFamilyHead
+        isMemberFamilyHead: e.isMemberFamilyHead == true ? "true" : "false"
       }));
     });
     return formArray;
