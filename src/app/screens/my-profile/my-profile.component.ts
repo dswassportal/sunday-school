@@ -666,7 +666,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
               "lastName": row.lastName,
               "relationship": row.relationship,
               "baptismalName": row.baptismalName,
-              "dob": row.dob == "" ? null : formatDate(row.dob, 'yyyy-MM-dd', 'en'),
+              "dob": row.dob == null ? null : formatDate(row.dob, 'yyyy-MM-dd', 'en'),
               "mobileNo": row.mobileNo,
               "emailId": row.emailId,
               "userId": row.userId,
@@ -727,9 +727,14 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
   }
 
   dateChange(event: any) {
+    // this.formattedDate = event.value;
+    // this.formattedDate = formatDate(this.formattedDate, 'yyyy-MM-dd', 'en');
     this.formattedDate = event.value;
-    this.formattedDate = formatDate(this.formattedDate, 'yyyy-MM-dd', 'en');
-    
+    if(this.formattedDate == null){
+      this.formattedDate = null;
+    }else{
+      this.formattedDate = formatDate(this.formattedDate, 'yyyy-MM-dd', 'en');
+    }
   }
   invokeApi(payload: any) {
     this.apiService.callPostService(`updateUserRoles`,
