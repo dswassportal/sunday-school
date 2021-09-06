@@ -363,7 +363,7 @@ export class SearchComponent implements OnInit {
       if (res.data.status == "success") {
         let columnsArray: any = [];
         for (let row of res.data.displayConfig) {
-          let json = { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, width: 200 }
+          let json = { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, width: 200, resizable:true }
           columnsArray.push(json);
         }
         this.columnDefs = columnsArray;

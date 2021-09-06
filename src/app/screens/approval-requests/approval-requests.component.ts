@@ -171,7 +171,8 @@ export class ApprovalRequestsComponent implements OnInit {
   }
 
   onRowClicked(event: any) {
-    if (this.usersType == "approval_requests" || this.usersType == "rejected") {
+    //|| this.usersType == "rejected"
+    if (this.usersType == "approval_requests") {
       $("#imagemodal").modal("show");
       // this.router.navigate(['/dashboard/myprofile']);
       let rowData = event;
