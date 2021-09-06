@@ -138,7 +138,7 @@ export class ApprovalRequestsComponent implements OnInit {
           { headerName: 'Actions', field: 'action', cellRendererFramework: ReqRendererComponent, width: 170 }
         ]
       } else if (usertype == 'rejected') {
-        this.columnDefs = [
+        this.columnDefs = [  
           { headerName: 'Name', field: 'name', resizable: true, sortable: true, filter: true, width: 370, checkboxSelection: true },
           //{ headerName: 'Member Type', field: 'memberTypeForRejected', resizable: true, sortable: true, filter: true, width: 150 },
           { headerName: 'Parish', field: 'parish_name', resizable: true, sortable: true, filter: true, width: 450 },
@@ -149,6 +149,7 @@ export class ApprovalRequestsComponent implements OnInit {
               return data.value ? (new Date(data.value)).toLocaleDateString() : '';
             }
           },
+          { headerName: 'Rejected By', field: 'rejectedBy', resizable: true, sortable: true, filter: true, width: 200 },
         ]
       } else if (usertype == 'approved_requests') {
         this.columnDefs = [
