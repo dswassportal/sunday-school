@@ -534,6 +534,8 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                 concat(th.title, '. ', th.first_name, ' ', th.last_name) as "name",
                                 tol.reason,
                                 tol.performed_date as "rejected_Date",
+                                tol.performed_by, 
+                                (select concat(tu.title, '. ', tu.first_name, ' ', tu.middle_name , ' ', tu.last_name) as "rejected_by" from t_user tu where tol.performed_by = tu.user_id),
                                 (select "name" from t_organization to2 where org_id = th.org_id) parish_name,
                                 th.member_type  
                                 from t_user_history th inner join t_user_operation_log tol 
@@ -666,6 +668,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                     user.approvedDate = row.performed_date;
                     user.rejectedDate = row.rejected_Date;
                     user.requestDate = row.created_date;
+                    user.rejectedBy = row.rejected_by;
 
                     // if(userid == 0){
                     //     userid = row.user_id;
