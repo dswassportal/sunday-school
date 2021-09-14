@@ -580,8 +580,8 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       mobileNo: new FormControl('', [Validators.required]),
       emailId: new FormControl('', [Validators.required, Validators.email,Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]),
       userId: new FormControl(''),
-      userName: new FormControl('', [Validators.required, Validators.pattern('^[ A-Za-z0-9_.-]*$')]),
-      isMemberFamilyHead: new FormControl('')
+      userName: new FormControl('', [Validators.pattern('^[ A-Za-z0-9_.-]*$')]),
+      isMemberFamilyHead: new FormControl("false")
     });
   }
   //event handler for the select element's change event
@@ -666,7 +666,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
               "lastName": row.lastName,
               "relationship": row.relationship,
               "baptismalName": row.baptismalName,
-              "dob": row.dob == null ? null : formatDate(row.dob, 'yyyy-MM-dd', 'en'),
+              "dob": row.dob == null || row.dob == "" ? null : formatDate(row.dob, 'yyyy-MM-dd', 'en'),
               "mobileNo": row.mobileNo,
               "emailId": row.emailId,
               "userId": row.userId,

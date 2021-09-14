@@ -436,7 +436,7 @@
                     <span *ngIf="myprofileform.memberDetails.controls.username.errors.required">This field is mandatory.</span>
                     <span *ngIf="myprofileform.memberDetails.controls.username.errors.pattern">Enter valid mailid.</span>
                 </mat-error> -->
-                <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName').errors?.required">Username is Required</mat-error>
+                <!-- <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName').errors?.required">Username is Required</mat-error> -->
                 <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName').errors?.pattern">Enter valid Username</mat-error>
                 <!-- <mat-error *ngIf="myprofileform.get('memberDetails').controls[i].get('userName')?.hasError('invalid')">Enter valid Username</mat-error> -->
                 

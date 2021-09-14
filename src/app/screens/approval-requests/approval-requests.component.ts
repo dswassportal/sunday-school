@@ -105,6 +105,8 @@ export class ApprovalRequestsComponent implements OnInit {
       this.memberships = res.data.memberships;
     })
 
+    this.usersType = "approval_requests";
+    
   }
 
   usersType: any;
