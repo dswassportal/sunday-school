@@ -384,6 +384,16 @@ export class EventSearchComponent implements OnInit {
       }
       this.regionData = regionDataArray;
 
+      let parishDataArray: any = [];
+      for (let row of res.data.metaData.allParishes) {
+            let json = {
+              "parishId": row.parishId,
+              "parishName": row.parishName
+            }
+            parishDataArray.push(json);
+        }
+      this.parishData = parishDataArray;
+
 
     })
    
@@ -401,19 +411,19 @@ export class EventSearchComponent implements OnInit {
 
   onOrgSelectForMultiSelect(event: any) {
 
-    let parishDataArray: any = [];
-    for (let row of this.allDioceseRegionParishData) {
-      if (event.regionId == row.regionId) {
-        for (let row1 of row.parishes) {
-          let json = {
-            "parishId": row1.parishId,
-            "parishName": row1.parishName
-          }
-          parishDataArray.push(json);
-        }
-      }
-    }
-    this.parishData = parishDataArray;
+    // let parishDataArray: any = [];
+    // for (let row of this.allDioceseRegionParishData) {
+    //   if (event.regionId == row.regionId) {
+    //     for (let row1 of row.parishes) {
+    //       let json = {
+    //         "parishId": row1.parishId,
+    //         "parishName": row1.parishName
+    //       }
+    //       parishDataArray.push(json);
+    //     }
+    //   }
+    // }
+    // this.parishData = parishDataArray;
 
   }
 

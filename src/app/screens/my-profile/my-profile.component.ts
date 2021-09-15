@@ -187,7 +187,7 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
     this.studentDetailsForm = this.formBuilder.group({
       studentAcaDtlId: new FormControl('', Validators.required),
       studentId: new FormControl('', Validators.required),
-      schoolName: new FormControl('', Validators.required),
+      schoolName: new FormControl(''),
       schoolGrade: new FormControl('', Validators.required),
       studntAcaYrStrtDate: new FormControl('', Validators.required),
       studntAcaYrEndDate: new FormControl('', Validators.required),

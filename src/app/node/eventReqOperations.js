@@ -1198,6 +1198,23 @@ async function getRegionAndParish() {
 
         metadata.regions = regions;
 
+
+        let allParishes = [];
+      
+
+        let getallParishes = `select org_id, name from t_organization where org_type = 'Parish';`;
+        let resParishes = await client.query(getallParishes);
+        if(resParishes.rowCount > 0){
+            for(let row of resParishes.rows){
+                parishdata = {};
+                parishdata.parishId = row.org_id;
+                parishdata.parishName = row.name;
+                allParishes.push(parishdata);
+            }
+        }
+
+        metadata.allParishes = allParishes;
+
         return ({
             data: {
                 status: 'success',
