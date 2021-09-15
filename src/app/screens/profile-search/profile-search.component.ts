@@ -583,67 +583,67 @@ onremovebtnclick(index: any) {
   }
   
   onRowClicked(event: any) {
-    $("#imagemodal").modal("show");
-    let rowData = event;
-    this.selectedUserData = event.data;
-    this.apiService.callGetService(`getRolesByUserId?userId=${this.selectedUserData.userId}`).subscribe((res) => {
-      this.rolesData = res.data.roles;
+    // $("#imagemodal").modal("show");
+    // let rowData = event;
+    // this.selectedUserData = event.data;
+    // this.apiService.callGetService(`getRolesByUserId?userId=${this.selectedUserData.userId}`).subscribe((res) => {
+    //   this.rolesData = res.data.roles;
 
-      this.rolesArr = [];
-      this.rolesData.forEach((e: any) => {
-        if (this.rolesArr.indexOf(e) <= 0) {
+    //   this.rolesArr = [];
+    //   this.rolesData.forEach((e: any) => {
+    //     if (this.rolesArr.indexOf(e) <= 0) {
   
-          for (let i = 0; i < this.orgs.length; i++) {
-            if (this.orgs[i].orgtype == e.orgType) {
-              e.orgDetails = this.orgs[i].details;
-            }
-          }
-          this.rolesArr.push(e);
-        }
-      });
-      this.updateuserinfo.setControl('roles', this.setRoles(this.rolesData));
-    });
+    //       for (let i = 0; i < this.orgs.length; i++) {
+    //         if (this.orgs[i].orgtype == e.orgType) {
+    //           e.orgDetails = this.orgs[i].details;
+    //         }
+    //       }
+    //       this.rolesArr.push(e);
+    //     }
+    //   });
+    //   this.updateuserinfo.setControl('roles', this.setRoles(this.rolesData));
+    // });
 
 
-    let i = rowData.rowIndex;
-    this.userId = this.selectedUserData.userId;
+    // let i = rowData.rowIndex;
+    // this.userId = this.selectedUserData.userId;
 
-    this.apiService.getParishListData().subscribe(res => {
-      for (let i = 0; i < res.data.metaData.Parish.length; i++) {
-        this.parishList = res.data.metaData.Parish;
-      }
-    });
+    // this.apiService.getParishListData().subscribe(res => {
+    //   for (let i = 0; i < res.data.metaData.Parish.length; i++) {
+    //     this.parishList = res.data.metaData.Parish;
+    //   }
+    // });
 
 
-    this.updateuserinfo.patchValue({
-      title: this.selectedUserData.title,
-      firstName: this.selectedUserData.firstName,
-      middleName: this.selectedUserData.middleNmae,
-      lastName: this.selectedUserData.lastName,
-      nickName: this.selectedUserData.nickName,
-      baptismalName: this.selectedUserData.baptismalName,
-      dob: this.selectedUserData.dob,
-      mobileNo: this.selectedUserData.mobileNo,
-      homePhoneNo: this.selectedUserData.homePhoneNo,
-      emailAddress: this.selectedUserData.emailId,
-      addressLine1: this.selectedUserData.addressLine1,
-      addressLine2: this.selectedUserData.addressLine2,
-      addressLine3: this.selectedUserData.addressLine3,
-      city: this.selectedUserData.city,
-      postalCode: this.selectedUserData.postalCode,
-      state: this.selectedUserData.state,
-      country: this.selectedUserData.country,
-      parish: this.selectedUserData.parish_name,
-      maritalStatus: this.selectedUserData.maritalStatus,
-      dateofMarriage: this.selectedUserData.dateofMarriage,
-      aboutYourself: this.selectedUserData.aboutYourself,
-      isFamilyHead: this.selectedUserData.isFamilyHead,
+    // this.updateuserinfo.patchValue({
+    //   title: this.selectedUserData.title,
+    //   firstName: this.selectedUserData.firstName,
+    //   middleName: this.selectedUserData.middleNmae,
+    //   lastName: this.selectedUserData.lastName,
+    //   nickName: this.selectedUserData.nickName,
+    //   baptismalName: this.selectedUserData.baptismalName,
+    //   dob: this.selectedUserData.dob,
+    //   mobileNo: this.selectedUserData.mobileNo,
+    //   homePhoneNo: this.selectedUserData.homePhoneNo,
+    //   emailAddress: this.selectedUserData.emailId,
+    //   addressLine1: this.selectedUserData.addressLine1,
+    //   addressLine2: this.selectedUserData.addressLine2,
+    //   addressLine3: this.selectedUserData.addressLine3,
+    //   city: this.selectedUserData.city,
+    //   postalCode: this.selectedUserData.postalCode,
+    //   state: this.selectedUserData.state,
+    //   country: this.selectedUserData.country,
+    //   parish: this.selectedUserData.parish_name,
+    //   maritalStatus: this.selectedUserData.maritalStatus,
+    //   dateofMarriage: this.selectedUserData.dateofMarriage,
+    //   aboutYourself: this.selectedUserData.aboutYourself,
+    //   isFamilyHead: this.selectedUserData.isFamilyHead,
     
-    })
+    // })
 
-    this.patchCountryState(this.selectedUserData.country);
+    // this.patchCountryState(this.selectedUserData.country);
 
-    this.selectedUserRole = this.selectedUserData.roles;
+    // this.selectedUserRole = this.selectedUserData.roles;
    
   }
 
