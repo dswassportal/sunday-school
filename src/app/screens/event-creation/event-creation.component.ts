@@ -107,10 +107,10 @@ export class EventCreationComponent implements OnInit {
   isEvalSecNextButtonRequired: any;
   selectedEvaluatorsDropdown: any;
 
-  formattedEventStartDate:any;
-  formattedEventEndDate:any;
-  formattedEventRegisrtationStartDate:any;
-  formattedEventRegisrtationEndDate:any
+  formattedEventStartDate: any;
+  formattedEventEndDate: any;
+  formattedEventRegisrtationStartDate: any;
+  formattedEventRegisrtationEndDate: any
 
 
 
@@ -130,7 +130,7 @@ export class EventCreationComponent implements OnInit {
   eventsDataUpdate: any;
   rolesArr: any[] = [];
   orgs!: any[];
-  isLinear!: boolean;
+  isLinear: boolean = true;
   eventFormLabel!: boolean;
   evntTypedisabled!: boolean;
   venuesdataOfdata!: any[];
@@ -156,6 +156,10 @@ export class EventCreationComponent implements OnInit {
   isGradewiseEvaluatorsRequired: any;
   gradewiseEvaluatorDropdownValues: any;
   dropdownSettingsEvaluatorDropdownValues: any;
+  isSavebtnRequired: any;
+  isSavebtnRequiredGradeEval: any;
+  isSavebtnRequiredTT: any;
+
 
   error: any;
   fileUpload = { status: '', message: '', filePath: '' };
@@ -654,19 +658,21 @@ export class EventCreationComponent implements OnInit {
           eventUrl: this.eventsDataUpdate.eventUrl,
           description: this.eventsDataUpdate.description
         });
-        this.dateChangeEventStartDate({value:this.eventsDataUpdate.startDate});
-        this.dateChangeEventEndDate({value:this.eventsDataUpdate.endDate});
-        this.dateChangeEventRegistrationStartDate({value:this.eventsDataUpdate.registrationStartDate});
-        this.dateChangeEventRegistrationEndtDate({value:this.eventsDataUpdate.registrationEndDate});
+        this.dateChangeEventStartDate({ value: this.eventsDataUpdate.startDate });
+        this.dateChangeEventEndDate({ value: this.eventsDataUpdate.endDate });
+        this.dateChangeEventRegistrationStartDate({ value: this.eventsDataUpdate.registrationStartDate });
+        this.dateChangeEventRegistrationEndtDate({ value: this.eventsDataUpdate.registrationEndDate });
 
       }
 
       // For Label And button Show update
       if (this.selectedRowJson.event_Id != undefined || this.selectedRowJson.event_Id != null) {
         this.eventFormLabel = true; // update screen
+        this.isLinear = false;
       }
       else {
         this.eventFormLabel = false; // insert screen
+        this.isLinear = true;
       }
       this.selectedRowJson.event_Id = null;
 
@@ -977,6 +983,16 @@ export class EventCreationComponent implements OnInit {
       }
     }
 
+    if (this.eventType == 'Diploma Exam') {
+      this.isSavebtnRequired = true;
+    }
+    if (this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam') {
+      this.isSavebtnRequiredGradeEval = true;
+    }
+    if (this.eventType == 'Teachers Training') {
+      this.isSavebtnRequiredTT = true;
+    }
+
     //for getting event co ordinator as per event type
     if (this.eventType == 'CWC') {
       this.rolesData = ['CWC Coordinator', 'Diocesan CWC Coordinator'];
@@ -1156,6 +1172,11 @@ export class EventCreationComponent implements OnInit {
 
 
     }
+    else {
+      if (this.eventFormLabel == false) { // insert screen
+        this.uiCommonUtils.showSnackBar("Please fill all mandatory fields!", "error", 3000);
+      }
+    }
 
 
     let eventCoordinator: any = [];
@@ -1186,7 +1207,7 @@ export class EventCreationComponent implements OnInit {
       //"endDate": this.eventsDataFormGroup.value.endDate,
       "endDate": this.formattedEventEndDate,
       //"registrationStartDate": this.eventsDataFormGroup.value.registrationStartDate,
-      "registrationStartDate":this.formattedEventRegisrtationStartDate,
+      "registrationStartDate": this.formattedEventRegisrtationStartDate,
       //"registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate,
       "registrationEndDate": this.formattedEventRegisrtationEndDate,
       "eventUrl": this.eventsDataFormGroup.value.eventUrl,
@@ -1278,6 +1299,11 @@ export class EventCreationComponent implements OnInit {
       payload.eventType = this.eventType;
       payload.eventId = this.eventId;
       this.createUpdateEvents(payload);
+    }
+
+
+    if (this.eventType == 'Bible Reading' || this.eventType == 'Diploma Exam' || this.eventType == 'OVBS' || this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam' || this.eventType == 'TTC' || this.eventType == 'Teachers Training') {
+      this.onEventDetailsSectionNextBtnClick();
     }
 
   }
@@ -1469,6 +1495,18 @@ export class EventCreationComponent implements OnInit {
       payload.eventType = this.eventType;
       payload.eventId = this.eventId;
       this.createUpdateEvents(payload);
+    }
+
+
+
+    if (this.eventType == 'CWC' || this.eventType == 'Talent Competition') {
+      this.onEventJudgeAssignSectionNextBtn();
+    }
+    if (this.eventType == 'Talent Show') {
+      this.onEventProctorAssignSectionNextBtn();
+    }
+    if (this.eventType == 'Bible Reading' || this.eventType == 'OVBS' || this.eventType == 'Teachers Training') {
+      this.onEventVenueAssignSectionNextBtn();
     }
   }
 
@@ -1831,28 +1869,28 @@ export class EventCreationComponent implements OnInit {
 
 
   }
-  dateChangeEventStartDate(event: any){
+  dateChangeEventStartDate(event: any) {
     this.formattedEventStartDate = event.value;
     this.formattedEventStartDate = formatDate(this.formattedEventStartDate, 'yyyy-MM-dd', 'en');
-    
+
   }
 
-  dateChangeEventEndDate(event: any){
+  dateChangeEventEndDate(event: any) {
     this.formattedEventEndDate = event.value;
     this.formattedEventEndDate = formatDate(this.formattedEventEndDate, 'yyyy-MM-dd', 'en');
-    
+
   }
 
-  dateChangeEventRegistrationStartDate(event: any){
+  dateChangeEventRegistrationStartDate(event: any) {
     this.formattedEventRegisrtationStartDate = event.value;
     this.formattedEventRegisrtationStartDate = formatDate(this.formattedEventRegisrtationStartDate, 'yyyy-MM-dd', 'en');
-    
+
   }
 
-  dateChangeEventRegistrationEndtDate(event: any){
+  dateChangeEventRegistrationEndtDate(event: any) {
     this.formattedEventRegisrtationEndDate = event.value;
     this.formattedEventRegisrtationEndDate = formatDate(this.formattedEventRegisrtationEndDate, 'yyyy-MM-dd', 'en');
-    
+
   }
   //Event start Date Validator that is EentStartDate>RegistrationEndDate
   comparisonEventStartandRegiEnddateValidator(): any {
