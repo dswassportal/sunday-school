@@ -35,13 +35,17 @@ app.use((req, res, next) => {
     currEndpoint = req.url.split('?')[0];
   } else
     currEndpoint = req.url;
+	let headerToken = ""
   if (req.header('Authorization') === undefined)
-    req.header('Authorization') = '';
-  console.log(req.header('Authorization').length === 0, openEndpoints.indexOf(currEndpoint) >= 0);
-  if (req.header('Authorization').length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) {
+		headerToken = ""
+   else 
+		headerToken	= req.header('Authorization')
+	
+  console.log(headerToken.length === 0, openEndpoints.indexOf(currEndpoint) >= 0);
+  if (headerToken.length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) {
     next();
-  } else if (req.header('Authorization').length !== 0) {
-    firebaseAdminUtils.varifyUserToken(req.header('Authorization')).then(idToken => {
+  } else if (headerToken.length !== 0) {
+    firebaseAdminUtils.varifyUserToken(headerToken).then(idToken => {
       next()
     }).catch(error => {
       console.error('oAuth token validation failed!!', error);
