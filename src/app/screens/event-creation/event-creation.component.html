@@ -280,8 +280,8 @@
                             </div>
 
                             <div>
-                                <button (click)="onEventDetailsSectionNextBtnClick()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Save And Next</span>
+                                <button class="mbutton saveButton" class="mbutton saveButton" (click)="onEventDetailsSectionNextBtnClick()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -384,8 +384,8 @@
                         </div>
 
                         <div style="padding-top: 2%;">
-                            <button (click)="onEventCategoriesSectionNextBtn()" mat-raised-button matStepperNext>
-                                <span style="font-family: poppins;">Save And Next</span>
+                            <button class="mbutton saveButton" (click)="onEventCategoriesSectionNextBtn()" mat-raised-button matStepperNext>
+                                <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                             </button>
                         </div>
 
@@ -486,8 +486,8 @@
 
 
                             <div style="padding-top: 2%;">
-                                <button (click)="onEventGroupsSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Save And Next</span>
+                                <button class="mbutton saveButton" (click)="onEventGroupsSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
                         </div>
@@ -550,8 +550,8 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 4%;">
-                                <button (click)="onEventCatGroupMapSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Save And Next</span>
+                                <button class="mbutton saveButton" (click)="onEventCatGroupMapSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -582,8 +582,8 @@
 
 
                             <div *ngIf="!isSavebtnRequiredTT" style="padding-top: 2%; padding-bottom: 2%;">
-                                <button (click)="onEventVenueAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Save And Next</span>
+                                <button class="mbutton saveButton" (click)="onEventVenueAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -657,8 +657,8 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 4%;">
-                                <button (click)="onEventProctorAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Save And Next</span>
+                                <button class="mbutton saveButton" (click)="onEventProctorAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -818,8 +818,8 @@
                             </fieldset>
 
                             <div style="padding-top: 4%; padding-bottom: 4%;">
-                                <button (click)="onEventJudgeAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Save And Next</span>
+                                <button class="mbutton saveButton" (click)="onEventJudgeAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -864,9 +864,9 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 2%;">
-                                <button *ngIf="isEvalSecNextButtonRequired"
+                                <button class="mbutton saveButton" *ngIf="isEvalSecNextButtonRequired"
                                     (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Save And Next</span>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -936,9 +936,9 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 2%;">
-                                <button *ngIf="isEvalSecNextButtonRequired"
+                                <button class="mbutton saveButton" *ngIf="isEvalSecNextButtonRequired"
                                     (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Save And Next</span>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -966,7 +966,7 @@
                 <div class="container">
                     <form [formGroup]="questionnaireDataFormGroup">
 
-                        <ng-template matStepLabel class="col-md-12">
+                        <ng-template matStepLabel>
                             <div class="col-md-12" (click)="onEventEvaluatorAssignSectionNextBtn()">
                                 <span class="stepLableStyle"><b>Event Questionaries</b></span>
                             </div>

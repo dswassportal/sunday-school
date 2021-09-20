@@ -995,11 +995,12 @@ export class EventCreationComponent implements OnInit {
 
     //for getting event co ordinator as per event type
     if (this.eventType == 'CWC') {
-      this.rolesData = ['CWC Coordinator', 'Diocesan CWC Coordinator'];
+      //this.rolesData = ['CWC Coordinator', 'Diocesan CWC Coordinator'];
+      let role = 'CWC Coordinator';
       let roleData =
       {
         "data": {
-          "rolesData": this.rolesData
+          "rolesData": role
         }
       }
       this.apiService.getProctorData(roleData).subscribe(res => {
@@ -1009,11 +1010,12 @@ export class EventCreationComponent implements OnInit {
     }
 
     if (this.eventType == 'TTC') {
-      this.rolesData = ['TTC Exam Coordinator', 'Diocesan TTC Exam Coordinator'];
+      //this.rolesData = ['TTC Exam Coordinator', 'Diocesan TTC Exam Coordinator'];
+      let roles = 'TTC Exam Coordinator';
       let roleData =
       {
         "data": {
-          "rolesData": this.rolesData
+          "rolesData": roles
         }
       }
       this.apiService.getProctorData(roleData).subscribe(res => {
@@ -1023,11 +1025,42 @@ export class EventCreationComponent implements OnInit {
     }
 
     if (this.eventType == 'OVBS') {
-      this.rolesData = ['OVBS Coordinator'];
+      //this.rolesData = ['OVBS Coordinator'];
+      let roles = 'OVBS Coordinator';
       let roleData =
       {
         "data": {
-          "rolesData": this.rolesData
+          "rolesData": roles
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+    if (this.eventType == 'Bible Reading') {
+      //this.rolesData = ['Diploma Exam Coordinator'];
+      let roles = 'Bible Reading Coordinator';
+      let roleData =
+      {
+        "data": {
+          "rolesData": roles
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
+    if (this.eventType == 'Talent Show') {
+      //this.rolesData = ['Talent Show Coordinator'];
+      let roles = 'Talent Show Coordinator';
+      let roleData =
+      {
+        "data": {
+          "rolesData": roles
         }
       }
       this.apiService.getProctorData(roleData).subscribe(res => {
@@ -1037,11 +1070,12 @@ export class EventCreationComponent implements OnInit {
     }
 
     if (this.eventType == 'Diploma Exam') {
-      this.rolesData = ['Diploma Exam Coordinator'];
+      //this.rolesData = ['Diploma Exam Coordinator'];
+      let roles = 'Diploma Exam Coordinator';
       let roleData =
       {
         "data": {
-          "rolesData": this.rolesData
+          "rolesData": roles
         }
       }
       this.apiService.getProctorData(roleData).subscribe(res => {
@@ -1053,11 +1087,12 @@ export class EventCreationComponent implements OnInit {
 
 
     if (this.eventType == 'Talent Competition') {
-      this.rolesData = ['Regional Talent Competition Coordinator'];
+      //this.rolesData = ['Regional Talent Competition Coordinator'];
+      let roles = 'Talent Competition Coordinator';
       let roleData =
       {
         "data": {
-          "rolesData": this.rolesData
+          "rolesData": roles
         }
       }
       this.apiService.getProctorData(roleData).subscribe(res => {
@@ -1065,6 +1100,22 @@ export class EventCreationComponent implements OnInit {
         console.log("this.proctorData", this.proctorData);
       });
     }
+
+    if (this.eventType == 'Teachers Training') {
+      //this.rolesData = ['Teachers Training Coordinator'];
+      let roles = 'Teachers Training Coordinator';
+      let roleData =
+      {
+        "data": {
+          "rolesData": roles
+        }
+      }
+      this.apiService.getProctorData(roleData).subscribe(res => {
+        this.proctorData = res.data.metaData.proctorData;
+        console.log("this.proctorData", this.proctorData);
+      });
+    }
+
 
 
     if (this.eventType == 'Sunday School Midterm Exam') {
