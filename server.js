@@ -36,16 +36,12 @@ app.use((req, res, next) => {
   } else
     currEndpoint = req.url;
 
-  console.log('Current Url is : ' + currEndpoint);
-  
   let headerToken = ""
   if (req.header('Authorization') === undefined)
 		headerToken = ""
    else 
 		headerToken	= req.header('Authorization')
-	
-  console.log('Authorization : ' + headerToken);
- 
+  
   if ((headerToken.length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) || req.url.indexOf('api')) {
     next();
   } else if (headerToken.length !== 0) {
