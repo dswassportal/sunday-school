@@ -35,13 +35,17 @@ app.use((req, res, next) => {
     currEndpoint = req.url.split('?')[0];
   } else
     currEndpoint = req.url;
-	let headerToken = ""
+
+  console.log('Current Url is : ' + currEndpoint);
+  
+  let headerToken = ""
   if (req.header('Authorization') === undefined)
 		headerToken = ""
    else 
 		headerToken	= req.header('Authorization')
 	
-  console.log(headerToken.length === 0, openEndpoints.indexOf(currEndpoint) >= 0);
+  console.log('Authorization' : ' + headerToken);
+ 
   if (headerToken.length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) {
     next();
   } else if (headerToken.length !== 0) {
