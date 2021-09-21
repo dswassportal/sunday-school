@@ -993,8 +993,18 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             //to create regionwise judges list.
             let regList = [];
             if (regionsList.rowCount > 0) {
+                let judgerole = '';
+                if(eventType == "CWC"){
+                    judgerole = '%CWC Judge%';
+                }
+                if(eventType == "Talent Competition"){
+                    judgerole = '%Talent Competition Judge%';
+                }
+                if(eventType == "Talent Show"){
+                    judgerole = '%Talent Show Judge%';
+                }
                 for (let region of regionsList.rows[0].region_array) {
-                    let judgesList = await client.query(queries.getJudgesByEventRegion, [region.regionId, '%Judge%']);
+                    let judgesList = await client.query(queries.getJudgesByEventRegion, [region.regionId, judgerole]);
                     if (judgesList.rowCount > 0) {
                         region.judges = judgesList.rows[0].judge_list;
                         regList.push(region);
@@ -1124,13 +1134,13 @@ async function getRegionWiseJudges(loggedInUser, regionId, eventType) {
     let client = await dbConnections.getConnection();
     try {
         let judgerole = '';
-        if(eventType = "CWC"){
+        if(eventType == "CWC"){
             judgerole = '%CWC Judge%';
         }
-        if(eventType = "Talent Competition"){
+        if(eventType == "Talent Competition"){
             judgerole = '%Talent Competition Judge%';
         }
-        if(eventType = "Talent Show"){
+        if(eventType == "Talent Show"){
             judgerole = '%Talent Show Judge%';
         }
         let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, judgerole]);

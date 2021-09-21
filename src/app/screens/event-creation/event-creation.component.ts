@@ -547,7 +547,7 @@ export class EventCreationComponent implements OnInit {
       eventId: '',
       name: new FormControl('', Validators.required),
       eventType: new FormControl('', Validators.required),
-      eventCoordinator: new FormControl('', Validators.required),
+      eventCoordinator: new FormControl(''),
       orgType: new FormControl('', Validators.required),
       orgId: new FormControl(''),
       startDate: new FormControl(''),
@@ -1616,6 +1616,24 @@ export class EventCreationComponent implements OnInit {
       this.createUpdateEvents(payloadGradeEval);
       this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
       console.log("payloadGradeEval", payloadGradeEval);
+    }
+
+
+    let allVenuesData = this.venuesGridApi.getSelectedRows();
+    let venues: any = [];
+    for (let venue of allVenuesData) {
+      venues.push(venue.venueId);
+    }
+
+    if (this.eventType == 'Teachers Training') {
+      this.eventsDataFormGroup.value.eventId = this.eventId;
+      let payload: any = {};
+      payload.venues = venues;
+      payload.sectionCode = 'event_venue_assignment';
+      payload.eventType = this.eventType;
+      payload.eventId = this.eventId;
+      this.createUpdateEvents(payload);
+      this.uiCommonUtils.showSnackBar("Saved successfully!", "success", 3000);
     }
 
 
