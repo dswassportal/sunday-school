@@ -44,7 +44,7 @@ app.use((req, res, next) => {
    else 
 		headerToken	= req.header('Authorization')
 	
-  console.log('Authorization' : ' + headerToken);
+  console.log('Authorization : ' + headerToken);
  
   if (headerToken.length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) {
     next();
