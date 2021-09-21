@@ -46,7 +46,7 @@ app.use((req, res, next) => {
 	
   console.log('Authorization : ' + headerToken);
  
-  if (headerToken.length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) {
+  if ((headerToken.length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) || req.url.indexOf('api')) {
     next();
   } else if (headerToken.length !== 0) {
     firebaseAdminUtils.varifyUserToken(headerToken).then(idToken => {
