@@ -461,7 +461,7 @@ export class EventCreationComponent implements OnInit {
   }
 
   onRegionSelect(item: any) {
-    this.apiService.callGetService(`getRegionWiseJudges?regionId=${item.regionId}`).subscribe((res) => {
+    this.apiService.callGetService(`getRegionWiseJudges?regionId=${item.regionId}&eventType=${this.eventType}`).subscribe((res) => {
       this.judgesDropdownValues = res.data.judges;
     });
 

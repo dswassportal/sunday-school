@@ -913,7 +913,7 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             return result.rows[0].venue_list;
         }
         case "event_proctor_assignment": {
-
+        
             let proctorList = await client.query(queries.getProctorsByEventId, [eventId, `%${eventType}%proctor%`]);
             let venueList = await client.query(queries.getVenusNameAndIsByEventLevel, [eventId]);
             return {
@@ -1119,11 +1119,21 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
     }
 }
 
-async function getRegionWiseJudges(loggedInUser, regionId) {
+async function getRegionWiseJudges(loggedInUser, regionId, eventType) {
 
     let client = await dbConnections.getConnection();
     try {
-        let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, '%Judge%']);
+        let judgerole = '';
+        if(eventType = "CWC"){
+            judgerole = '%CWC Judge%';
+        }
+        if(eventType = "Talent Competition"){
+            judgerole = '%Talent Competition Judge%';
+        }
+        if(eventType = "Talent Show"){
+            judgerole = '%Talent Show Judge%';
+        }
+        let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, judgerole]);
 
         return ({
             data: {

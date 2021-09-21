@@ -860,7 +860,7 @@ app.get('/api/getRegionWiseJudges', function (req, res) {
   console.log("getRegionWiseJudges called... to fetch " + req.query.regionId);
   // let loggedInUser = decodeUser(req)
   try {
-    processEventRequest.getRegionWiseJudges('', req.query.regionId)
+    processEventRequest.getRegionWiseJudges('', req.query.regionId, req.query.eventType)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
