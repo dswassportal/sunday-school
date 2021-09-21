@@ -25,7 +25,7 @@ app.listen(process.env.PORT || port, () => {
 
 app.use(compression())
 app.use(express.json());
-app.use('*', cors())
+// app.use('*', cors())
 
 const openEndpoints = ['/api', '/api/getEmail', '/api/getParishData', '/api/getLookupMasterData'];
 
