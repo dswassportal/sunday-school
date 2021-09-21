@@ -14,7 +14,7 @@
                 </button>
             </div>
         </div>
-        <mat-vertical-stepper [linear]="false" #stepper>
+        <mat-vertical-stepper [linear]="isLinear" #stepper>
 
             <mat-step [stepControl]="eventsDataFormGroup">
 
@@ -22,7 +22,9 @@
 
                     <form [formGroup]="eventsDataFormGroup">
                         <ng-template matStepLabel>
-                            <span class="stepLableStyle"><b>Event Details</b></span>
+                            <div class="col-md-12">
+                                <span class="stepLableStyle"><b>Event Details</b></span>
+                            </div>
                         </ng-template>
                         <div class="form-container">
 
@@ -39,20 +41,20 @@
 
                             <div class="row">
 
-                             
+
                                 <!-- [disabled]="evntTypedisabled" -->
-                                
-                               
+
+
                                 <div class="col-md-6">
-                                    <label  style="font-family: poppins;text-align: left; ">Event Type :</label>
-                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="eventType" 
-                                    placeholder="Event Type" [settings]="dropdownSettingsEventType"
-                                    [data]="eventList" [disabled]="evntTypedisabled" formControlName="eventType" (onSelect)="eventTypeSelChange()"
-                                    (onSelectAll)="onSelectAll($event)">
-                                </ng-multiselect-dropdown>
-                               
-                            </div>
-                            
+                                    <label style="font-family: poppins;text-align: left; ">Event Type * :</label>
+                                    <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="eventType"
+                                        placeholder="Event Type" [settings]="dropdownSettingsEventType"
+                                        [data]="eventList" [disabled]="evntTypedisabled" formControlName="eventType"
+                                        (onSelect)="eventTypeSelChange()" (onSelectAll)="onSelectAll($event)">
+                                    </ng-multiselect-dropdown>
+
+                                </div>
+
                                 <!-- <mat-form-field class="col-md-6">
                                     <mat-select required id="eventType" (selectionChange)="eventTypeSelChange()"
                                         formControlName="eventType" placeholder="Event Type">
@@ -64,14 +66,14 @@
 
 
                                 <div class="col-md-6">
-                                    <label  style="font-family: poppins;text-align: left; ">Event Co-ordinator :</label>
-                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="eventCoordinator"
-                                    placeholder="Event Co-ordinator"
-                                    [settings]="dropdownSettingsEventCoordinator" [data]="proctorData"
-                                    formControlName="eventCoordinator" (onSelectAll)="onSelectAll($event)">
-                                </ng-multiselect-dropdown>
-                           
-                            </div>
+                                    <label style="font-family: poppins;text-align: left; ">Event Co-ordinator :</label>
+                                    <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6"
+                                        id="eventCoordinator" placeholder="Event Co-ordinator"
+                                        [settings]="dropdownSettingsEventCoordinator" [data]="proctorData"
+                                        formControlName="eventCoordinator" (onSelectAll)="onSelectAll($event)">
+                                    </ng-multiselect-dropdown>
+
+                                </div>
                                 <!-- <mat-form-field class="col-md-6">
                                     <mat-select required multiple id="eventCoordinator"
                                         formControlName="eventCoordinator" placeholder="Event Co-ordinator">
@@ -90,14 +92,14 @@
 
                                 <!-- [disabled]="evntTypedisabled" -->
                                 <div class="col-md-6">
-                                    <label  style="font-family: poppins;text-align: left; ">Event Level :</label>
-                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgType" placeholder="Event Level"
-                                     [settings]="dropdownSettingsEventLevel" [data]="orgs" [disabled]="evntTypedisabled"
-                                    (onSelect)="onOrgSelect($event)" formControlName="orgType"
-                                    (onSelectAll)="onSelectAll($event)">
-                                </ng-multiselect-dropdown>
-                               
-                            </div>
+                                    <label style="font-family: poppins;text-align: left; ">Event Level :</label>
+                                    <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgType"
+                                        placeholder="Event Level" [settings]="dropdownSettingsEventLevel" [data]="orgs"
+                                        [disabled]="evntTypedisabled" (onSelect)="onOrgSelect($event)"
+                                        formControlName="orgType" (onSelectAll)="onSelectAll($event)">
+                                    </ng-multiselect-dropdown>
+
+                                </div>
                                 <!-- <mat-form-field class="col-md-6">
                                        <mat-label>Event Level Type</mat-label> 
                                     <mat-select matNativeControl required formControlName="orgType"
@@ -120,15 +122,15 @@
 
 
                                 <div class="col-md-6">
-                                    <label  style="font-family: poppins;text-align: left; ">Event Executed By :</label>
-                                <!-- [disabled]="evntTypedisabled" -->
-                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgId" placeholder="Event Executed By"
-                                     [settings]="dropdownSettingsEventExecutedBy" [data]="orgDetails"  [disabled]="evntTypedisabled"
-                                    formControlName="orgId"
-                                    (onSelectAll)="onSelectAll($event)">
-                                </ng-multiselect-dropdown>
-                               
-                            </div>
+                                    <label style="font-family: poppins;text-align: left; ">Event Executed By :</label>
+                                    <!-- [disabled]="evntTypedisabled" -->
+                                    <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgId"
+                                        placeholder="Event Executed By" [settings]="dropdownSettingsEventExecutedBy"
+                                        [data]="orgDetails" [disabled]="evntTypedisabled" formControlName="orgId"
+                                        (onSelectAll)="onSelectAll($event)">
+                                    </ng-multiselect-dropdown>
+
+                                </div>
 
                             </div>
 
@@ -144,8 +146,8 @@
                                     <!-- (dateChange)="comparisonEventStartdateValidator()" -->
                                     <!-- (dateChange)="comparisonEventStartandRegiStartdateValidator()"
                                         (dateChange)="comparisonEventStartandRegiEnddateValidator()" -->
-                                    <input [min]="minDate" (dateChange)="dateChangeEventStartDate($event)" matInput id="startDate" formControlName="startDate"
-                                        [matDatepicker]="startatpicker">
+                                    <input [min]="minDate" (dateChange)="dateChangeEventStartDate($event)" matInput
+                                        id="startDate" formControlName="startDate" [matDatepicker]="startatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="startatpicker">
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #startatpicker></mat-datepicker>
@@ -169,8 +171,8 @@
 
                                     <!-- (dateChange)="comparisonEventEnddateValidator()" -->
                                     <mat-label>Event End Date</mat-label>
-                                    <input [min]="minDate" (dateChange)="dateChangeEventEndDate($event)" matInput id="endDate" formControlName="endDate"
-                                        [matDatepicker]="endatpicker">
+                                    <input [min]="minDate" (dateChange)="dateChangeEventEndDate($event)" matInput
+                                        id="endDate" formControlName="endDate" [matDatepicker]="endatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="endatpicker">
                                     </mat-datepicker-toggle>
                                     <mat-datepicker #endatpicker></mat-datepicker>
@@ -192,7 +194,9 @@
                                     <!-- (dateChange)="comparisonRegiStartdatedateValidator()"
                                         (dateChange)="comparisontRegiStartdateandEventStarValidator()" -->
                                     <mat-label>Registration Start Date</mat-label>
-                                    <input matInput id="registrationStartDate" (dateChange)="dateChangeEventRegistrationStartDate($event)" formControlName="registrationStartDate"
+                                    <input matInput id="registrationStartDate"
+                                        (dateChange)="dateChangeEventRegistrationStartDate($event)"
+                                        formControlName="registrationStartDate"
                                         [matDatepicker]="registrationStartatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationStartatpicker">
                                     </mat-datepicker-toggle>
@@ -216,8 +220,9 @@
                                     <!-- (dateChange)="comparisonRegiEnddateandEventStartValidator()" -->
 
                                     <mat-label>Registration End Date</mat-label>
-                                    <input (dateChange)="comparisonRegiEnddateValidator()" (dateChange)="dateChangeEventRegistrationEndtDate($event)" [min]="minDate" matInput
-                                        id="registrationEndDate" formControlName="registrationEndDate"
+                                    <input (dateChange)="comparisonRegiEnddateValidator()"
+                                        (dateChange)="dateChangeEventRegistrationEndtDate($event)" [min]="minDate"
+                                        matInput id="registrationEndDate" formControlName="registrationEndDate"
                                         [matDatepicker]="registrationEndatpicker">
                                     <mat-datepicker-toggle matSuffix [for]="registrationEndatpicker">
                                     </mat-datepicker-toggle>
@@ -260,7 +265,8 @@
                                 <label>Event Documents:</label>
 
                                 <form enctype="multipart/form-data">
-                                    <input type="file" name="documents" (change)="onSelectedFile($event)" required multiple>
+                                    <input type="file" name="documents" (change)="onSelectedFile($event)" required
+                                        multiple>
                                 </form>
 
 
@@ -274,8 +280,8 @@
                             </div>
 
                             <div>
-                                <button (click)="onEventDetailsSectionNextBtnClick()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Next</span>
+                                <button class="mbutton saveButton" class="mbutton saveButton" (click)="onEventDetailsSectionNextBtnClick()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -293,9 +299,13 @@
 
                     <form [formGroup]="eventCategoriesFormGroup">
                         <ng-template matStepLabel>
-                            <span class="stepLableStyle"><b>Event Categories</b></span>
-                            <div class="stepDisplayMessageStyle" mat-dialog-content>We list from Config Table By Event(if applicable).
-                             Allow user to add new categories & delete category in section .</div>
+                            <div class="col-md-12" (click)="onEventDetailsSectionNextBtnClick()">
+                                <span class="stepLableStyle"><b>Event Categories</b></span>
+                                <div class="stepDisplayMessageStyle" mat-dialog-content>We list from Config Table By
+                                    Event(if applicable).
+                                    Allow user to add new categories & delete category in section .</div>
+                            </div>
+
                         </ng-template>
                         <div class="form-container">
 
@@ -374,8 +384,8 @@
                         </div>
 
                         <div style="padding-top: 2%;">
-                            <button (click)="onEventCategoriesSectionNextBtn()" mat-raised-button matStepperNext>
-                                <span style="font-family: poppins;">Next</span>
+                            <button class="mbutton saveButton" (click)="onEventCategoriesSectionNextBtn()" mat-raised-button matStepperNext>
+                                <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                             </button>
                         </div>
 
@@ -388,9 +398,12 @@
                 <div class="container">
                     <form [formGroup]="eventGroupsFormGroup">
                         <ng-template matStepLabel>
-                            <span class="stepLableStyle"><b>Event Groups</b></span><div class="stepDisplayMessageStyle" mat-dialog-content>We list group from Config Table By Event(if applicable).
-                                 Allow user to add new Group & delete Group in section .</div>
-
+                            <div class="col-md-12" (click)="onEventCategoriesSectionNextBtn()">
+                                <span class="stepLableStyle"><b>Event Groups</b></span>
+                                <div class="stepDisplayMessageStyle" mat-dialog-content>We list group from Config Table
+                                    By Event(if applicable).
+                                    Allow user to add new Group & delete Group in section .</div>
+                            </div>
                         </ng-template>
                         <div class="form-container">
 
@@ -473,8 +486,8 @@
 
 
                             <div style="padding-top: 2%;">
-                                <button (click)="onEventGroupsSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Next</span>
+                                <button class="mbutton saveButton" (click)="onEventGroupsSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
                         </div>
@@ -487,9 +500,13 @@
                 <div class="container">
                     <form [formGroup]="eventCatGroupMapFormGroup">
                         <ng-template matStepLabel>
-                            <span class="stepLableStyle"><b>Event Category Group Mapping</b></span>
-                            <div class="stepDisplayMessageStyle" mat-dialog-content>We allow user to map Categories And Group from Category Define
-                                and Group Define in the <br> above 2 Section.Allow user to Unmap/Remove Mapping if Required.</div>
+                            <div class="col-md-12" (click)="onEventGroupsSectionNextBtn()">
+                                <span class="stepLableStyle"><b>Event Category Group Mapping</b></span>
+                                <div class="stepDisplayMessageStyle" mat-dialog-content>We allow user to map Categories
+                                    And Group from Category Define
+                                    and Group Define in the <br> above 2 Section.Allow user to Unmap/Remove Mapping if
+                                    Required.</div>
+                            </div>
                         </ng-template>
                         <div class="form-container">
 
@@ -502,19 +519,22 @@
 
                                         <div class="row" style="padding-top: 4%;">
                                             <div class="col-md-6">
-                                                <label  style="font-family: poppins;text-align: left; ">categoryName :</label>
-                                            <mat-form-field class="col-md-12">
-                                                <input matNativeControl readonly id="categoryName" matInput
-                                                    formControlName="categoryName" placeholder="Category Name" />
-                                            </mat-form-field>
+                                                <label style="font-family: poppins;text-align: left; ">categoryName
+                                                    :</label>
+                                                <mat-form-field class="col-md-12">
+                                                    <input matNativeControl readonly id="categoryName" matInput
+                                                        formControlName="categoryName" placeholder="Category Name" />
+                                                </mat-form-field>
                                             </div>
                                             <div class="col-md-6">
-                                                <label  style="font-family: poppins;text-align: left; ">Event Executed By :</label>
-                                            <ng-multiselect-dropdown class="col-md-6" id="groupMapIds"
-                                                placeholder="Select Groups" [settings]="dropdownSettingsGroups"
-                                                [data]="groupsDropdownValues" formControlName="groupMapIds"
-                                                (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)">
-                                            </ng-multiselect-dropdown>
+                                                <label style="font-family: poppins;text-align: left; ">Event Executed By
+                                                    :</label>
+                                                <ng-multiselect-dropdown class="col-md-6" id="groupMapIds"
+                                                    placeholder="Select Groups" [settings]="dropdownSettingsGroups"
+                                                    [data]="groupsDropdownValues" formControlName="groupMapIds"
+                                                    (onSelect)="onItemSelect($event)"
+                                                    (onSelectAll)="onSelectAll($event)">
+                                                </ng-multiselect-dropdown>
                                             </div>
                                         </div>
 
@@ -530,8 +550,8 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 4%;">
-                                <button (click)="onEventCatGroupMapSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Next</span>
+                                <button class="mbutton saveButton" (click)="onEventCatGroupMapSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -545,9 +565,12 @@
                 <div class="container">
                     <form [formGroup]="eventVenueAssignFormGroup">
                         <ng-template matStepLabel>
-                            <span class="stepLableStyle"><b>Event Venue Assignment</b></span>
-                            <div class="stepDisplayMessageStyle" mat-dialog-content>We List Venue Associated to the Event Type & Org.
-                                 Allow users To Add Or Remove Venue From This Section.</div>
+                            <div class="col-md-12" (click)="onEventCatGroupMapSectionNextBtn()">
+                                <span class="stepLableStyle"><b>Event Venue Assignment</b></span>
+                                <div class="stepDisplayMessageStyle" mat-dialog-content>We List Venue Associated to the
+                                    Event Type & Org.
+                                    Allow users To Add Or Remove Venue From This Section.</div>
+                            </div>
                         </ng-template>
                         <div class="form-container">
 
@@ -558,14 +581,27 @@
                             </ag-grid-angular>
 
 
-                            <div style="padding-top: 2%; padding-bottom: 2%;">
-                                <button (click)="onEventVenueAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Next</span>
+                            <div *ngIf="!isSavebtnRequiredTT" style="padding-top: 2%; padding-bottom: 2%;">
+                                <button class="mbutton saveButton" (click)="onEventVenueAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
                         </div>
                     </form>
+
+                    <div class="row" *ngIf="isSavebtnRequiredTT" style="padding-top: 1%;">
+                        <div class="col text-center ">
+                            <!-- 5px 6px 2px #363535; 
+                            text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+                                #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+                            background-color: white;-->
+                            <button mat-raised-button type="submit" class="mbutton saveButton" (click)="createEvent()">
+                                <span class="rounded saveButtonSpan"> Save</span>
+
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </mat-step>
 
@@ -573,8 +609,11 @@
                 <div class="container">
                     <form [formGroup]="eventProctorAssignFormGroup">
                         <ng-template matStepLabel>
-                            <span class="stepLableStyle"><b>Event Proctor Assignment</b></span>
-                            <div class="stepDisplayMessageStyle" mat-dialog-content>For Each Venue In The Above Event Section - Allow user to Assign Proctor,Remove Proctor.</div>
+                            <div class="col-md-12" (click)="onEventVenueAssignSectionNextBtn()">
+                                <span class="stepLableStyle"><b>Event Proctor Assignment</b></span>
+                                <div class="stepDisplayMessageStyle" mat-dialog-content>For Each Venue In The Above
+                                    Event Section - Allow user to Assign Proctor,Remove Proctor.</div>
+                            </div>
                         </ng-template>
                         <div class="form-container">
 
@@ -587,20 +626,23 @@
 
                                         <div class="row" style="padding-top: 4%;">
                                             <div class="col-md-6">
-                                                <label  style="font-family: poppins;text-align: left;margin-left: 1.2vw; ">Venue Name :</label>
-                                            <mat-form-field class="col-md-12">
-                                                <input matNativeControl readonly id="venueName" matInput
-                                                    formControlName="venueName" placeholder="Venue Name" />
-                                            </mat-form-field>
-                                        </div>
+                                                <label
+                                                    style="font-family: poppins;text-align: left;margin-left: 1.2vw; ">Venue
+                                                    Name :</label>
+                                                <mat-form-field class="col-md-12">
+                                                    <input matNativeControl readonly id="venueName" matInput
+                                                        formControlName="venueName" placeholder="Venue Name" />
+                                                </mat-form-field>
+                                            </div>
                                             <div class="col-md-6">
-                                                <label  style="font-family: poppins;text-align: left; ">Proctor :</label>
-                                            <ng-multiselect-dropdown class="col-md-6" id="proctorId"
-                                                placeholder="Select Proctor" [settings]="dropdownSettingsProctor"
-                                                [data]="proctorDropdownValues" formControlName="proctorId"
-                                                (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)">
-                                            </ng-multiselect-dropdown>
-                                        </div>
+                                                <label style="font-family: poppins;text-align: left; ">Proctor :</label>
+                                                <ng-multiselect-dropdown class="col-md-6" id="proctorId"
+                                                    placeholder="Select Proctor" [settings]="dropdownSettingsProctor"
+                                                    [data]="proctorDropdownValues" formControlName="proctorId"
+                                                    (onSelect)="onItemSelect($event)"
+                                                    (onSelectAll)="onSelectAll($event)">
+                                                </ng-multiselect-dropdown>
+                                            </div>
                                         </div>
 
                                         <mat-divider
@@ -615,8 +657,8 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 4%;">
-                                <button (click)="onEventProctorAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Next</span>
+                                <button class="mbutton saveButton" (click)="onEventProctorAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -630,9 +672,13 @@
                 <div class="container">
                     <form [formGroup]="eventJudgeAssignFormGroup">
                         <ng-template matStepLabel>
-                            <span class="stepLableStyle"><b>Event Judge Assignment</b></span>
-                            <div class="stepDisplayMessageStyle" mat-dialog-content>For Each Category & Group In The Above Mapping. 
-                                Allow One Or More Judges & delete the Judges.</div>
+                            <div class="col-md-12" (click)="onEventProctorAssignSectionNextBtn()">
+                                <span class="stepLableStyle"><b>Event Judge Assignment</b></span>
+                                <div class="stepDisplayMessageStyle" mat-dialog-content>For Each Category & Group In The
+                                    Above Mapping.
+                                    Allow One Or More Judges & delete the Judges.</div>
+                            </div>
+
                         </ng-template>
                         <div class="form-container">
 
@@ -695,7 +741,9 @@
                                                                 <div class="row">
 
                                                                     <div class="col-md-6">
-                                                                        <label  style="font-family: poppins;text-align: left; ">Region :</label>
+                                                                        <label
+                                                                            style="font-family: poppins;text-align: left; ">Region
+                                                                            :</label>
                                                                         <ng-multiselect-dropdown class="col-md-12"
                                                                             id="regions" placeholder="Select Region"
                                                                             [settings]="dropdownSettingsRegion"
@@ -726,7 +774,9 @@
                                                                 <div class="row">
 
                                                                     <div class="col-md-12">
-                                                                        <label  style="font-family: poppins;text-align: left; ">Judges :</label>
+                                                                        <label
+                                                                            style="font-family: poppins;text-align: left; ">Judges
+                                                                            :</label>
                                                                         <ng-multiselect-dropdown class="col-md-12"
                                                                             placeholder="Select Judges"
                                                                             [settings]="dropdownSettingsJudges"
@@ -768,8 +818,8 @@
                             </fieldset>
 
                             <div style="padding-top: 4%; padding-bottom: 4%;">
-                                <button (click)="onEventJudgeAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Next</span>
+                                <button class="mbutton saveButton" (click)="onEventJudgeAssignSectionNextBtn()" mat-raised-button matStepperNext>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
@@ -783,16 +833,20 @@
             <mat-step *ngIf="isEvaluatorRequired" [stepControl]="eventEvaluatorAssignFormGroup">
                 <div class="container">
                     <form [formGroup]="eventEvaluatorAssignFormGroup">
-                        <ng-template matStepLabel> 
-                            <span class="stepLableStyle"><b>Event Evaluator Assignment</b></span>
-                            <div class="stepDisplayMessageStyle" mat-dialog-content>Applicable To Exam Only. Allow One Or More Evaluator Setup
-                                Event Type - Diploma,TTC,Sunday School Mid Term And Sunday School Final Term.</div>
+                        <ng-template matStepLabel>
+                            <div class="col-md-12" (click)="onEventJudgeAssignSectionNextBtn()">
+                                <span class="stepLableStyle"><b>Event Evaluator Assignment</b></span>
+                                <div class="stepDisplayMessageStyle" mat-dialog-content>Applicable To Exam Only. Allow
+                                    One Or More Evaluator Setup
+                                    Event Type - Diploma,TTC,Sunday School Mid Term And Sunday School Final Term.</div>
+                            </div>
                         </ng-template>
                         <div class="form-container">
 
 
                             <div class="row" style="padding-top: 2%; padding-bottom: 16%;">
-                                <label  style="font-family: poppins;text-align: left; margin-left: 1.2vw;">Evaluators :</label>
+                                <label style="font-family: poppins;text-align: left; margin-left: 1.2vw;">Evaluators
+                                    :</label>
                                 <ng-multiselect-dropdown class="col-md-12" id="evaluators"
                                     placeholder="Select Evaluators" [settings]="dropdownSettingsEvaluator"
                                     [data]="evaluatorDropdownValues" formControlName="evaluators"
@@ -810,15 +864,28 @@
 
 
                             <div style="padding-top: 4%; padding-bottom: 2%;">
-                                <button *ngIf="isEvalSecNextButtonRequired"
+                                <button class="mbutton saveButton" *ngIf="isEvalSecNextButtonRequired"
                                     (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Next</span>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
 
                         </div>
                     </form>
+
+                    <div class="row" *ngIf="isSavebtnRequired" style="padding-top: 1%;">
+                        <div class="col text-center ">
+                            <!-- 5px 6px 2px #363535; 
+                            text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+                                #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+                            background-color: white;-->
+                            <button mat-raised-button type="submit" class="mbutton saveButton" (click)="createEvent()">
+                                <span class="rounded saveButtonSpan"> Save</span>
+
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </mat-step>
 
@@ -826,56 +893,71 @@
             <mat-step *ngIf="isGradewiseEvaluatorsRequired" [stepControl]="eventGradeEvalAssignFormGroup">
                 <div class="container">
                     <form [formGroup]="eventGradeEvalAssignFormGroup">
-                        <ng-template matStepLabel> 
-                            <span class="stepLableStyle"><b>Event Evaluator Assignment</b></span>
-                            <div class="stepDisplayMessageStyle" mat-dialog-content>Applicable To Exam Only. Allow One Or More Evaluator Setup
-                                Event Type - Sunday School Mid Term And Sunday School Final Term.</div>
+                        <ng-template matStepLabel>
+                            <div class="col-md-12" (click)="onEventEvaluatorAssignSectionNextBtn()">
+                                <span class="stepLableStyle"><b>Event Grade Evaluator Assignment</b></span>
+                                <div class="stepDisplayMessageStyle" mat-dialog-content>Applicable To Exam Only. Allow
+                                    One Or More Evaluator Setup
+                                    Event Type - Sunday School Mid Term And Sunday School Final Term.</div>
+                            </div>
                         </ng-template>
                         <div class="form-container">
 
                             <div class="row" formArrayName="gradeEvalFormArray"
-                            *ngFor="let item of eventGradeEvalAssignFormGroup.get('gradeEvalFormArray')['controls']; let i = index;">
+                                *ngFor="let item of eventGradeEvalAssignFormGroup.get('gradeEvalFormArray')['controls']; let i = index;">
 
-                            <div class="container" style="padding-left: 2%;" [formGroupName]="i">
-
-
-
-                                <div class="row" style="padding-top: 4%;">
-
-                                    <mat-form-field class="col-md-6" style="padding-top: 3%;">
-                                        <input id="grade" matInput formControlName="grade" readonly
-                                            placeholder="Grade" />
-                                    </mat-form-field>
-
-                                    <div class="col-md-6">
-                                    <label  style="font-family: poppins;text-align: left; ">Evaluator :</label>
-                                    <ng-multiselect-dropdown id="evaluator"
-                                        placeholder="Select Evaluator" [settings]="dropdownSettingsEvaluatorDropdownValues"
-                                        [data]="gradewiseEvaluatorDropdownValues" formControlName="evaluator"
-                                        (onSelect)="onItemSelect($event)"
-                                        (onSelectAll)="onSelectAll($event)">
-                                    </ng-multiselect-dropdown>
-                                </div>
+                                <div class="container" style="padding-left: 2%;" [formGroupName]="i">
 
 
-                                </div>
+
+                                    <div class="row" style="padding-top: 4%;">
+
+                                        <mat-form-field class="col-md-6" style="padding-top: 3%;">
+                                            <input id="grade" matInput formControlName="grade" readonly
+                                                placeholder="Grade" />
+                                        </mat-form-field>
+
+                                        <div class="col-md-6">
+                                            <label style="font-family: poppins;text-align: left; ">Evaluator :</label>
+                                            <ng-multiselect-dropdown id="evaluator" placeholder="Select Evaluator"
+                                                [settings]="dropdownSettingsEvaluatorDropdownValues"
+                                                [data]="gradewiseEvaluatorDropdownValues" formControlName="evaluator"
+                                                (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)">
+                                            </ng-multiselect-dropdown>
+                                        </div>
+
+
+                                    </div>
 
                                 </div>
                             </div>
 
-                           
+
 
 
                             <div style="padding-top: 4%; padding-bottom: 2%;">
-                                <button *ngIf="isEvalSecNextButtonRequired"
+                                <button class="mbutton saveButton" *ngIf="isEvalSecNextButtonRequired"
                                     (click)="onEventEvaluatorAssignSectionNextBtn()" mat-raised-button matStepperNext>
-                                    <span style="font-family: poppins;">Next</span>
+                                    <span class="rounded saveButtonSpan" style="font-family: poppins;">Save And Next</span>
                                 </button>
                             </div>
 
 
                         </div>
                     </form>
+
+                    <div class="row" *ngIf="isSavebtnRequiredGradeEval" style="padding-top: 1%;">
+                        <div class="col text-center ">
+                            <!-- 5px 6px 2px #363535; 
+                            text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+                                #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+                            background-color: white;-->
+                            <button mat-raised-button type="submit" class="mbutton saveButton" (click)="createEvent()">
+                                <span class="rounded saveButtonSpan"> Save</span>
+
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </mat-step>
 
@@ -883,9 +965,13 @@
             <mat-step *ngIf="isQuestionnaireRequired" [stepControl]="questionnaireDataFormGroup">
                 <div class="container">
                     <form [formGroup]="questionnaireDataFormGroup">
+
                         <ng-template matStepLabel>
-                            <span class="stepLableStyle"><b>Event Questionaries</b></span>
+                            <div class="col-md-12" (click)="onEventEvaluatorAssignSectionNextBtn()">
+                                <span class="stepLableStyle"><b>Event Questionaries</b></span>
+                            </div>
                         </ng-template>
+
                         <div class="form-container">
 
                             <div style="margin-left: 83.7%; padding-bottom: 1%;" class="row">
@@ -942,6 +1028,20 @@
                                     </div>
                                 </div>
                             </fieldset>
+
+                            <div class="row" style="padding-top: 1%;">
+                                <div class="col text-center ">
+                                    <!-- 5px 6px 2px #363535; 
+                                    text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
+                                        #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+                                    background-color: white;-->
+                                    <button mat-raised-button type="submit" class="mbutton saveButton"
+                                        (click)="createEvent()">
+                                        <span class="rounded saveButtonSpan"> Save</span>
+
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- <div>
@@ -960,22 +1060,11 @@
 
 
 
-        <mat-divider
+        <!-- <mat-divider
             style="position: relative;background-color:rgb(136, 88, 25);height: 2px;margin-top: 4%;margin-bottom: 3%;">
-        </mat-divider>
+        </mat-divider> -->
 
-        <div class="row" style="padding-top: 1%;">
-            <div class="col text-center ">
-                <!-- 5px 6px 2px #363535; 
-                text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 
-                    #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
-                background-color: white;-->
-                <button mat-raised-button type="submit" class="mbutton saveButton" (click)="createEvent()" >
-                    <span class="rounded saveButtonSpan"> Save</span>
-                
-                </button>
-            </div>
-        </div>
+
 
 
     </mat-card>

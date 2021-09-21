@@ -913,7 +913,7 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             return result.rows[0].venue_list;
         }
         case "event_proctor_assignment": {
-
+        
             let proctorList = await client.query(queries.getProctorsByEventId, [eventId, `%${eventType}%proctor%`]);
             let venueList = await client.query(queries.getVenusNameAndIsByEventLevel, [eventId]);
             return {
@@ -993,8 +993,18 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             //to create regionwise judges list.
             let regList = [];
             if (regionsList.rowCount > 0) {
+                let judgerole = '';
+                if(eventType == "CWC"){
+                    judgerole = '%CWC Judge%';
+                }
+                if(eventType == "Talent Competition"){
+                    judgerole = '%Talent Competition Judge%';
+                }
+                if(eventType == "Talent Show"){
+                    judgerole = '%Talent Show Judge%';
+                }
                 for (let region of regionsList.rows[0].region_array) {
-                    let judgesList = await client.query(queries.getJudgesByEventRegion, [region.regionId, '%Judge%']);
+                    let judgesList = await client.query(queries.getJudgesByEventRegion, [region.regionId, judgerole]);
                     if (judgesList.rowCount > 0) {
                         region.judges = judgesList.rows[0].judge_list;
                         regList.push(region);
@@ -1119,11 +1129,21 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
     }
 }
 
-async function getRegionWiseJudges(loggedInUser, regionId) {
+async function getRegionWiseJudges(loggedInUser, regionId, eventType) {
 
     let client = await dbConnections.getConnection();
     try {
-        let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, '%Judge%']);
+        let judgerole = '';
+        if(eventType == "CWC"){
+            judgerole = '%CWC Judge%';
+        }
+        if(eventType == "Talent Competition"){
+            judgerole = '%Talent Competition Judge%';
+        }
+        if(eventType == "Talent Show"){
+            judgerole = '%Talent Show Judge%';
+        }
+        let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, judgerole]);
 
         return ({
             data: {
@@ -1361,11 +1381,11 @@ async function getProctorData(userData) {
         let metadata = {};
         console.log("userData", JSON.stringify(userData));
 
-        var roles = "'" + userData.rolesData.join("','") + "'";
+        //var roles = "'" + userData.rolesData.join("','") + "'";
 
         let getProctorData = `select distinct user_id, 
 		concat(title,'. ', first_name ,' ',middle_name,' ',last_name,'(', user_org, ')') "name"
-		from v_user where role_name  in (${roles});`;
+		from v_user where role_name like '%${userData.rolesData}%';`;
 
         let res = await client.query(getProctorData);
         if (res && res.rowCount > 0) {
