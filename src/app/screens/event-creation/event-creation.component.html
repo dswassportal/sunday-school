@@ -127,7 +127,7 @@
                                     <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgId"
                                         placeholder="Event Executed By" [settings]="dropdownSettingsEventExecutedBy"
                                         [data]="orgDetails" [disabled]="evntTypedisabled" formControlName="orgId"
-                                        (onSelectAll)="onSelectAll($event)">
+                                        (onSelect)="onParishSelect($event)" (onSelectAll)="onSelectAll($event)">
                                     </ng-multiselect-dropdown>
 
                                 </div>

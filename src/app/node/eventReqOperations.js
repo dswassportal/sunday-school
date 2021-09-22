@@ -913,7 +913,7 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             return result.rows[0].venue_list;
         }
         case "event_proctor_assignment": {
-        
+
             let proctorList = await client.query(queries.getProctorsByEventId, [eventId, `%${eventType}%proctor%`]);
             let venueList = await client.query(queries.getVenusNameAndIsByEventLevel, [eventId]);
             return {
@@ -994,13 +994,13 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
             let regList = [];
             if (regionsList.rowCount > 0) {
                 let judgerole = '';
-                if(eventType == "CWC"){
+                if (eventType == "CWC") {
                     judgerole = '%CWC Judge%';
                 }
-                if(eventType == "Talent Competition"){
+                if (eventType == "Talent Competition") {
                     judgerole = '%Talent Competition Judge%';
                 }
-                if(eventType == "Talent Show"){
+                if (eventType == "Talent Show") {
                     judgerole = '%Talent Show Judge%';
                 }
                 for (let region of regionsList.rows[0].region_array) {
@@ -1134,13 +1134,13 @@ async function getRegionWiseJudges(loggedInUser, regionId, eventType) {
     let client = await dbConnections.getConnection();
     try {
         let judgerole = '';
-        if(eventType == "CWC"){
+        if (eventType == "CWC") {
             judgerole = '%CWC Judge%';
         }
-        if(eventType == "Talent Competition"){
+        if (eventType == "Talent Competition") {
             judgerole = '%Talent Competition Judge%';
         }
-        if(eventType == "Talent Show"){
+        if (eventType == "Talent Show") {
             judgerole = '%Talent Show Judge%';
         }
         let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, judgerole]);
@@ -1220,12 +1220,12 @@ async function getRegionAndParish() {
 
 
         let allParishes = [];
-      
+
 
         let getallParishes = `select org_id, name from t_organization where org_type = 'Parish';`;
         let resParishes = await client.query(getallParishes);
-        if(resParishes.rowCount > 0){
-            for(let row of resParishes.rows){
+        if (resParishes.rowCount > 0) {
+            for (let row of resParishes.rows) {
                 parishdata = {};
                 parishdata.parishId = row.org_id;
                 parishdata.parishName = row.name;
@@ -1326,7 +1326,7 @@ async function getEventType() {
         let eventCategories = [];
         const eventCategoriesQuery = `select event_category_id, name from t_event_category where is_deleted = false;`;
         let categoriesResponse = await client.query(eventCategoriesQuery);
-        for(let row of categoriesResponse.rows){
+        for (let row of categoriesResponse.rows) {
             let catJson = {
                 "catId": row.event_category_id,
                 "categoryName": row.name
@@ -1338,7 +1338,7 @@ async function getEventType() {
         let gradeGroups = [];
         const gradeGroupsQuery = `select grade_group_id, group_name from t_grade_group where is_deleted = false;`;
         let gradeGroupsResponse = await client.query(gradeGroupsQuery);
-        for(let row of gradeGroupsResponse.rows){
+        for (let row of gradeGroupsResponse.rows) {
             let groupsJson = {
                 "groupId": row.grade_group_id,
                 "groupName": row.group_name
@@ -1350,7 +1350,7 @@ async function getEventType() {
         let sundaySchools = [];
         const sundaySchoolsQuery = `select org_id, name from t_organization where org_type = 'Sunday School' and is_deleted = false;`;
         let sundaySchoolsResponse = await client.query(sundaySchoolsQuery);
-        for(let row of sundaySchoolsResponse.rows){
+        for (let row of sundaySchoolsResponse.rows) {
             let sundaySchoolsJson = {
                 "orgId": row.org_id,
                 "sundaySchoolsName": row.name
@@ -1575,6 +1575,51 @@ async function getEventById(eventId) {
     }
 }
 
+async function getPrincipalByParish(orgId) {
+
+    let client = await dbConnections.getConnection();
+    try {
+        const getPrincipalData = `select 
+        concat(tu.first_name ,' ',  tu.middle_name , ' ', tu.last_name) as "principal_name" , tu.user_id ,
+        to2."name" , to2.org_type , tosa.role_type 
+        from t_organization to2 
+        join t_organization_staff_assignment tosa on to2.org_id = tosa.org_id 
+        join t_user tu on tosa.user_id = tu.user_id 
+        where to2.parent_org_id = $1 and tosa.role_type = 'Sunday School Principal';`;
+        let result = await client.query(getPrincipalData , [orgId]);
+
+        metaData = {};
+        let principalData = [];
+        if(result.rowCount > 0){
+            for(let row of result.rows){
+                let data = {};
+                data.userId = row.user_id;
+                data.name = row.principal_name;
+                principalData.push(data);
+            }
+        }
+
+        metaData.principalData = principalData;
+
+
+        return ({
+            data: {
+                status: 'success',
+                eventData: metaData
+            }
+        })
+
+    } catch (err) {
+        console.error(`reqOperations.js::getPrincipalByParish() inner try block --> error : ${err}`)
+        console.log("Transaction ROLLBACK called");
+        return (errorHandling.handleDBError('transactionError'));
+    } finally {
+        client.release(false);
+    }
+
+}
+
+
 
 
 module.exports = {
@@ -1589,5 +1634,6 @@ module.exports = {
     getEventForRegistration,
     deleteEvents,
     getRegionWiseJudges,
-    getEventById
+    getEventById,
+    getPrincipalByParish
 }

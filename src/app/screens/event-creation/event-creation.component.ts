@@ -318,11 +318,16 @@ export class EventCreationComponent implements OnInit {
 
   getData() {
 
-    this.apiService.getRegionAndParish().subscribe((res: any) => {
-      this.regionList = res.data.metaData.regions;
+    this.apiService.callGetService(`getRegionAndParish`).subscribe((res) => {
+      this.gradeListDropdownValues = res.data.grades;
     });
 
-    this.apiService.getEventType().subscribe((res: any) => {
+    // this.apiService.getRegionAndParish().subscribe((res: any) => {
+    //   this.regionList = res.data.metaData.regions;
+    // });
+
+
+    this.apiService.callGetService(`getEventType`).subscribe((res) => {
       this.eventList = res.data.metaData.eventType;
       this.eventcategorydata = res.data.metaData.eventType;
 
@@ -355,13 +360,55 @@ export class EventCreationComponent implements OnInit {
       }
     });
 
-    this.apiService.getUserRoleData().subscribe(res => {
+    // this.apiService.getEventType().subscribe((res: any) => {
+    //   this.eventList = res.data.metaData.eventType;
+    //   this.eventcategorydata = res.data.metaData.eventType;
+
+    //   let eventType: any;
+    //   if (this.eventFormLabel == false) {   // insert screen
+    //     eventType = this.eventsDataFormGroup.value.eventType[0].eventType;
+    //   }
+    //   else {
+    //     eventType = this.eventsDataFormGroup.value.eventType[0];
+    //   }
+
+
+    //   // For showing and hiding different sections and fields as per eventType
+    //   for (let i = 0; i < this.eventList.length; i++) {
+    //     if (this.eventList[i].eventType == eventType) {
+    //       this.isVenueRequired = this.eventList[i].isVenueRequired;
+    //       this.isProctorRequired = this.eventList[i].isProctorRequired;
+    //       this.isJudgeRequired = this.eventList[i].isJudgeRequired;
+    //       this.isSchoolGradeRequired = this.eventList[i].isSchoolGradeRequired;
+    //       this.isCategoryRequired = this.eventList[i].isCategoryRequired;
+    //       this.isSingleDayEvent = this.eventList[i].isSingleDayEvent;
+    //       this.isSchoolGroupRequired = this.eventList[i].isSchoolGroupRequired;
+    //       this.isEvaluatorRequired = this.eventList[i].isEvaluatorRequired;
+    //       this.isQuestionnaireRequired = this.eventList[i].isQuestionnaireRequired;
+    //       this.isAttachmentRequired = this.eventList[i].isAttachmentRequired;
+    //       this.isUrlRequired = this.eventList[i].isUrlRequired;
+    //       this.isGradewiseEvaluatorsRequired = this.eventList[i].isGradewiseEvaluatorsRequired;
+    //       this.eventType = this.eventList[i].eventType;
+    //     }
+    //   }
+    // });
+
+    this.apiService.callGetService(`getRoleMetaData`).subscribe((res) => {
       this.orgs = res.data.metadata.orgs;
       try {
         let temp = { orgtype: this.eventsDataUpdate.orgType, id: this.eventsDataUpdate.executedBy[0].orgId };
         this.onOrgSelect(temp);
       } catch (err) { }
     });
+
+    // this.apiService.getUserRoleData().subscribe(res => {
+    //   this.orgs = res.data.metadata.orgs;
+    //   try {
+    //     let temp = { orgtype: this.eventsDataUpdate.orgType, id: this.eventsDataUpdate.executedBy[0].orgId };
+    //     this.onOrgSelect(temp);
+    //   } catch (err) { }
+    // });
+
 
   }
 
@@ -713,6 +760,16 @@ export class EventCreationComponent implements OnInit {
         this.orgDetails = this.orgs[i].details;
       }
     }
+  }
+
+  // For getting sunday school principal by using parish
+  onParishSelect(event: any) {
+    if (this.eventType == "Sunday School Midterm Exam" || this.eventType == "Sunday School Midterm Exam") {
+      this.apiService.callGetService(`getPrincipalByParish?orgId=${event.id}`).subscribe((res) => {
+          this.proctorData = res.data.eventData.principalData;
+      });
+    }
+
   }
 
 
@@ -1215,6 +1272,11 @@ export class EventCreationComponent implements OnInit {
 
       venuesDatanew.orgType = this.eventsDataFormGroup.value.orgType;
       venuesDatanew.orgId = this.eventsDataFormGroup.value.orgId;
+
+      // this.apiService.callPostService('getVenues', venuesDatanew).subscribe((res) => {
+      //   this.venuesList = res.data.venueList;
+      //   console.log("venuesList", this.venuesList);
+      // });
 
       this.apiService.getVenues({ data: venuesDatanew }).subscribe((res: any) => {
         this.venuesList = res.data.venueList;
