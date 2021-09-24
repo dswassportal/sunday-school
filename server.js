@@ -476,7 +476,8 @@ app.get('/api/getRegionAndParish', function (req, res) {
 app.get('/api/getEventType', function (req, res) {
   console.log("getEventType called with : " + JSON.stringify(req.query.fbuid));
   try {
-    processEventRequest.getEventType()
+    let loggedInUser = decodeUser(req);
+    processEventRequest.getEventType(loggedInUser)
       .then((data) => {
         // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);

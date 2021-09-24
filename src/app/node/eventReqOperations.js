@@ -1269,32 +1269,52 @@ async function getRegionAndParish() {
     }
 }
 
-async function getEventType() {
+async function getEventType(loggedInUser) {
 
     let client = await dbConnections.getConnection();
     try {
         let metadata = {};
         let eventType = [];
 
-        let getEventType = `select tet.name event_type, 
-        tet.is_venue_required, 
-        tet.is_proctor_required, 
-        tet.is_judge_required, 
-        tet.is_school_grade_required,
-        tet.is_category_required,
-        tet.is_single_day_event,
-        tet.is_school_group_required,
-        tet.is_evaluator_required,
-        tet.is_questionnaire_required,
-        tet.is_attachment_required,
-        tet.is_url_required,
-        tec.event_category_id, 
-        tec.name event_category_name, 
-        tec.description,
-        tet.is_gradewise_evaluators_required
-        from t_event_type tet , t_event_category tec 
-        where tet.is_deleted = false 
-        and tec.event_type_id = tet.event_type_id order by tet."sequence";`
+        let getEventType = `select distinct 
+                            tet.name event_type, 
+                            tet.is_venue_required, 
+                            tet.is_proctor_required, 
+                            tet.is_judge_required, 
+                            tet.is_school_grade_required,
+                            tet.is_category_required,
+                            tet.is_single_day_event,
+                            tet.is_school_group_required,
+                            tet.is_evaluator_required,
+                            tet.is_questionnaire_required,
+                            tet.is_attachment_required,
+                            tet.is_url_required,
+                            tet.is_gradewise_evaluators_required,
+                            tet."sequence"
+                            from t_event_type tet
+                            join t_event_visibility_role_config tevrc on tevrc.event_type_id = tet.event_type_id 
+                            join t_user_role_mapping turm on tevrc.role_id = turm.role_id 
+                            where turm.user_id = ${loggedInUser} order by tet."sequence";`; 
+
+        // let getEventType = `select tet.name event_type, 
+        // tet.is_venue_required, 
+        // tet.is_proctor_required, 
+        // tet.is_judge_required, 
+        // tet.is_school_grade_required,
+        // tet.is_category_required,
+        // tet.is_single_day_event,
+        // tet.is_school_group_required,
+        // tet.is_evaluator_required,
+        // tet.is_questionnaire_required,
+        // tet.is_attachment_required,
+        // tet.is_url_required,
+        // tec.event_category_id, 
+        // tec.name event_category_name, 
+        // tec.description,
+        // tet.is_gradewise_evaluators_required
+        // from t_event_type tet , t_event_category tec 
+        // where tet.is_deleted = false 
+        // and tec.event_type_id = tet.event_type_id order by tet."sequence";`
         let res = await client.query(getEventType);
 
         if (res && res.rowCount > 0) {

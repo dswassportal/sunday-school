@@ -495,7 +495,7 @@ export class EventSearchComponent implements OnInit {
       if (res.data.status == "success") {
         let columnsArray: any = [];
         for(let row of res.data.displayConfig){   
-          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, width:200,
+          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, width:200, resizable: true
             // cellRenderer: (data: any) => {
             //   return data.value ? (new Date(data.value)).toLocaleDateString() : '';
             // },
