@@ -678,26 +678,26 @@ onremovebtnclick(index: any) {
 
   onDelete() {
 
-    let selectedRows = this.gridApi.getSelectedRows();
-    for (let i = 0; i < selectedRows.length; i++) {
-      // console.log("Users for Delete", selectedRows[i].userId);
-      this.deleteUser.push(selectedRows[i].userId);
-      //this.deleteUser = selectedRows[i].userId;
-    }
+    // let selectedRows = this.gridApi.getSelectedRows();
+    // for (let i = 0; i < selectedRows.length; i++) {
+    //   // console.log("Users for Delete", selectedRows[i].userId);
+    //   this.deleteUser.push(selectedRows[i].userId);
+    //   //this.deleteUser = selectedRows[i].userId;
+    // }
 
-    console.log("Users for Delete", this.deleteUser);
-    let payload = {
-      "data": {
-        "deleteUser": this.deleteUser
-      }
-    }
-    this.apiService.deleteUser(payload).subscribe((res: any) => {
-      if (res.data.status = "success") {
-        this.uiCommonUtils.showSnackBar("User Record Deleted Successfully!", "success", 3000);
-      }
-    })
-    this.getUserData();
-    console.log("Records Deleted...");
+    // console.log("Users for Delete", this.deleteUser);
+    // let payload = {
+    //   "data": {
+    //     "deleteUser": this.deleteUser
+    //   }
+    // }
+    // this.apiService.deleteUser(payload).subscribe((res: any) => {
+    //   if (res.data.status = "success") {
+    //     this.uiCommonUtils.showSnackBar("User Record Deleted Successfully!", "success", 3000);
+    //   }
+    // })
+    // this.getUserData();
+    // console.log("Records Deleted...");
   }
 
   onSearchChange(event: any) {

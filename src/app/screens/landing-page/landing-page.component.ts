@@ -291,11 +291,17 @@ export class LandingPageComponent implements OnInit{
     let i = rowData.rowIndex;
     this.userId = this.selectedUserData.userId;
 
-    this.apiService.getParishListData().subscribe(res => {
+    this.apiService.callGetService(`getParishData`).subscribe((res) => {
       for (let i = 0; i < res.data.metaData.Parish.length; i++) {
         this.parishList = res.data.metaData.Parish;
       }
     });
+
+    // this.apiService.getParishListData().subscribe(res => {
+    //   for (let i = 0; i < res.data.metaData.Parish.length; i++) {
+    //     this.parishList = res.data.metaData.Parish;
+    //   }
+    // });
 
 
     this.updateuserinfo.patchValue({
@@ -522,17 +528,30 @@ export class LandingPageComponent implements OnInit{
 
     console.log("Users for Delete", this.deleteUser);
     let payload = {
-      "data": {
         "deleteUser": this.deleteUser
-      }
     }
-    this.apiService.deleteUser(payload).subscribe((res: any) => {
+    this.apiService.callPostService('deleteUsers', payload).subscribe((res: any) => {
       if (res.data.status = "success") {
         this.uiCommonUtils.showSnackBar("User Record Deleted Successfully!", "success", 3000);
       }
-    })
+    });
     this.getUserData();
     console.log("Records Deleted...");
+
+    // let payload = {
+    //   "data": {
+    //     "deleteUser": this.deleteUser
+    //   }
+    // }
+
+    // this.apiService.deleteUser(payload).subscribe((res: any) => {
+    //   if (res.data.status = "success") {
+    //     this.uiCommonUtils.showSnackBar("User Record Deleted Successfully!", "success", 3000);
+    //   }
+    // })
+    // this.getUserData();
+    // console.log("Records Deleted...");
+
   }
 
   changeCountry(country: any) {

@@ -1765,6 +1765,7 @@ async function getProctorData(userData) {
 
     let client = await dbConnections.getConnection();
     try {
+        console.log("userData", userData);
         let metadata = {};
         // console.log("userData", userData);
         let getProctorData = `select user_id, CONCAT(first_name, ' ',last_name) as name from v_user where user_org_id = ${userData};`

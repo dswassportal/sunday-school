@@ -766,7 +766,7 @@ export class EventCreationComponent implements OnInit {
   onParishSelect(event: any) {
     if (this.eventType == "Sunday School Midterm Exam" || this.eventType == "Sunday School Midterm Exam") {
       this.apiService.callGetService(`getPrincipalByParish?orgId=${event.id}`).subscribe((res) => {
-          this.proctorData = res.data.eventData.principalData;
+        this.proctorData = res.data.eventData.principalData;
       });
     }
 
@@ -1056,11 +1056,13 @@ export class EventCreationComponent implements OnInit {
       let role = 'CWC Coordinator';
       let roleData =
       {
-        "data": {
-          "rolesData": role
-        }
+        "rolesData": role
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      // this.apiService.getProctorData(roleData).subscribe(res => {
+      //   this.proctorData = res.data.metaData.proctorData;
+      //   console.log("this.proctorData", this.proctorData);
+      // });
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
@@ -1071,14 +1073,16 @@ export class EventCreationComponent implements OnInit {
       let roles = 'TTC Exam Coordinator';
       let roleData =
       {
-        "data": {
-          "rolesData": roles
-        }
+        "rolesData": roles
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
+      // this.apiService.getProctorData(roleData).subscribe(res => {
+      //   this.proctorData = res.data.metaData.proctorData;
+      //   console.log("this.proctorData", this.proctorData);
+      // });
     }
 
     if (this.eventType == 'OVBS') {
@@ -1086,14 +1090,22 @@ export class EventCreationComponent implements OnInit {
       let roles = 'OVBS Coordinator';
       let roleData =
       {
-        "data": {
-          "rolesData": roles
-        }
+        "rolesData": roles
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
+      // let roleData =
+      // {
+      //   "data": {
+      //     "rolesData": roles
+      //   }
+      // }
+      // this.apiService.getProctorData(roleData).subscribe(res => {
+      //   this.proctorData = res.data.metaData.proctorData;
+      //   console.log("this.proctorData", this.proctorData);
+      // });
     }
 
     if (this.eventType == 'Bible Reading') {
@@ -1101,14 +1113,16 @@ export class EventCreationComponent implements OnInit {
       let roles = 'Bible Reading Coordinator';
       let roleData =
       {
-        "data": {
-          "rolesData": roles
-        }
+        "rolesData": roles
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
+      // this.apiService.getProctorData(roleData).subscribe(res => {
+      //   this.proctorData = res.data.metaData.proctorData;
+      //   console.log("this.proctorData", this.proctorData);
+      // });
     }
 
     if (this.eventType == 'Talent Show') {
@@ -1116,14 +1130,16 @@ export class EventCreationComponent implements OnInit {
       let roles = 'Talent Show Coordinator';
       let roleData =
       {
-        "data": {
-          "rolesData": roles
-        }
+        "rolesData": roles
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
+      // this.apiService.getProctorData(roleData).subscribe(res => {
+      //   this.proctorData = res.data.metaData.proctorData;
+      //   console.log("this.proctorData", this.proctorData);
+      // });
     }
 
     if (this.eventType == 'Diploma Exam') {
@@ -1131,14 +1147,16 @@ export class EventCreationComponent implements OnInit {
       let roles = 'Diploma Exam Coordinator';
       let roleData =
       {
-        "data": {
-          "rolesData": roles
-        }
+        "rolesData": roles
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
+      // this.apiService.getProctorData(roleData).subscribe(res => {
+      //   this.proctorData = res.data.metaData.proctorData;
+      //   console.log("this.proctorData", this.proctorData);
+      // });
     }
 
 
@@ -1148,14 +1166,16 @@ export class EventCreationComponent implements OnInit {
       let roles = 'Talent Competition Coordinator';
       let roleData =
       {
-        "data": {
-          "rolesData": roles
-        }
+        "rolesData": roles
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
+      // this.apiService.getProctorData(roleData).subscribe(res => {
+      //   this.proctorData = res.data.metaData.proctorData;
+      //   console.log("this.proctorData", this.proctorData);
+      // });
     }
 
     if (this.eventType == 'Teachers Training') {
@@ -1163,14 +1183,16 @@ export class EventCreationComponent implements OnInit {
       let roles = 'Teachers Training Coordinator';
       let roleData =
       {
-        "data": {
-          "rolesData": roles
-        }
+        "rolesData": roles
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
+      // this.apiService.getProctorData(roleData).subscribe(res => {
+      //   this.proctorData = res.data.metaData.proctorData;
+      //   console.log("this.proctorData", this.proctorData);
+      // });
     }
 
 
@@ -1179,11 +1201,9 @@ export class EventCreationComponent implements OnInit {
       this.rolesData = ['Sunday School Event Coordinator'];
       let roleData =
       {
-        "data": {
-          "rolesData": this.rolesData
-        }
+        "rolesData": this.rolesData
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
@@ -1194,11 +1214,9 @@ export class EventCreationComponent implements OnInit {
       this.rolesData = ['Sunday School Event Coordinator'];
       let roleData =
       {
-        "data": {
-          "rolesData": this.rolesData
-        }
+        "rolesData": this.rolesData
       }
-      this.apiService.getProctorData(roleData).subscribe(res => {
+      this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
         this.proctorData = res.data.metaData.proctorData;
         console.log("this.proctorData", this.proctorData);
       });
@@ -1228,11 +1246,9 @@ export class EventCreationComponent implements OnInit {
         this.rolesData = ['CWC Competition Proctor', 'CWC Coordinator'];
         let roleData =
         {
-          "data": {
-            "rolesData": this.rolesData
-          }
+          "rolesData": this.rolesData
         }
-        this.apiService.getProctorData(roleData).subscribe(res => {
+        this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
           this.proctorData = res.data.metaData.proctorData;
           console.log("this.proctorData", this.proctorData);
         });
@@ -1242,11 +1258,9 @@ export class EventCreationComponent implements OnInit {
         this.rolesData = ['TTC Exam Proctor', 'TTC Exam Coordinator'];
         let roleData =
         {
-          "data": {
-            "rolesData": this.rolesData
-          }
+          "rolesData": this.rolesData
         }
-        this.apiService.getProctorData(roleData).subscribe(res => {
+        this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
           this.proctorData = res.data.metaData.proctorData;
           console.log("this.proctorData", this.proctorData);
         });
@@ -1256,11 +1270,9 @@ export class EventCreationComponent implements OnInit {
         this.rolesData = ['OVBS Coordinator'];
         let roleData =
         {
-          "data": {
-            "rolesData": this.rolesData
-          }
+            "rolesData": this.rolesData  
         }
-        this.apiService.getProctorData(roleData).subscribe(res => {
+        this.apiService.callPostService('getProctorData', roleData).subscribe((res) => {
           this.proctorData = res.data.metaData.proctorData;
           console.log("this.proctorData", this.proctorData);
         });
@@ -1278,10 +1290,10 @@ export class EventCreationComponent implements OnInit {
       //   console.log("venuesList", this.venuesList);
       // });
 
-      this.apiService.getVenues({ data: venuesDatanew }).subscribe((res: any) => {
-        this.venuesList = res.data.venueList;
-        console.log("venuesList", this.venuesList);
-      });
+      // this.apiService.getVenues({ data: venuesDatanew }).subscribe((res: any) => {
+      //   this.venuesList = res.data.venueList;
+      //   console.log("venuesList", this.venuesList);
+      // });
 
 
     }
@@ -1792,6 +1804,7 @@ export class EventCreationComponent implements OnInit {
 
     //this.onRegionSelect({ regionId: data.categories[0].regionsJudgesArray[0].regions[0].regionId });
     // {emitEvent: true, onlySelf: true}
+
     this.eventJudgeAssignFormGroup.patchValue(data);
 
 

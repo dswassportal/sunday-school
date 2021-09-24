@@ -935,28 +935,47 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                 for (let row of judgeMapping.rows) {
                     let index = respObj.findIndex((item) => item.catId == row.cat_id);
                     if (index < 0) {
-                        let tempJObj = {
-                            catId: row.cat_id,
-                            categoryName: row.cat_name,
-                            catMapId: row.cat_map_id,
-                            regionsJudgesArray: [
-                                {
-                                    regions: [
-                                        {
-                                            regionId: row.org_id,
-                                            regionName: row.region_name
-                                        }
-                                    ],
-                                    judges: [
-                                        {
-                                            judgeId: row.user_id,
-                                            judgeName: row.judge_name
-                                        }
-                                    ]
-                                }
-                            ]
+                        let tempJObj = {};
+                        if(row.org_id){
+                            tempJObj = {
+                                catId: row.cat_id,
+                                categoryName: row.cat_name,
+                                catMapId: row.cat_map_id,
+                                regionsJudgesArray: [
+                                    {
+                                        regions: [
+                                            {
+                                                regionId: row.org_id,
+                                                regionName: row.region_name
+                                            }
+                                        ],
+                                        judges: [
+                                            {
+                                                judgeId: row.user_id,
+                                                judgeName: row.judge_name
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                            respObj.push(tempJObj);
                         }
-                        respObj.push(tempJObj)
+                        if(row.org_id == null){
+                            tempJObj = {
+                                catId: row.cat_id,
+                                categoryName: row.cat_name,
+                                catMapId: row.cat_map_id,
+                                regionsJudgesArray: [
+                                    {
+                                        regions: '',
+                                        judges: ''
+                                    }
+                                ]
+                            }
+                            respObj.push(tempJObj);
+                        }
+                      
+                       
                     } else {
                         let regIndex = respObj[index].regionsJudgesArray.findIndex(item => item.regions[0].regionId == row.org_id)
                         if (regIndex < 0) {

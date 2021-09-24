@@ -306,13 +306,19 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
       //   this.countries = res.data.countryState;
       // })
 
-      this.apiService.getParishListData().subscribe(res => {
+      this.apiService.callGetService(`getParishData`).subscribe((res) => {
         for (let i = 0; i < res.data.metaData.Parish.length; i++) {
           this.parishList = res.data.metaData.Parish;
         }
-
-        //console.log(this.parishList);
       });
+
+      // this.apiService.getParishListData().subscribe(res => {
+      //   for (let i = 0; i < res.data.metaData.Parish.length; i++) {
+      //     this.parishList = res.data.metaData.Parish;
+      //   }
+
+      //   //console.log(this.parishList);
+      // });
 
       this.apiService.callGetService('getLookupMasterData?types=title,grade,relationship,martial status').subscribe((res: any) => {
         this.titles = res.data["titles"];
@@ -322,11 +328,17 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
 
       })
 
-      this.apiService.getCountryStates().subscribe((res: any) => {
+      this.apiService.callGetService(`getCountryStates`).subscribe((res) => {
         this.countries = res.data.countryState;
         // console.log("Countries", this.countries);
         this.patchCountryState(this.alluserdata.country);
-      })
+      });
+
+      // this.apiService.getCountryStates().subscribe((res: any) => {
+      //   this.countries = res.data.countryState;
+      //   // console.log("Countries", this.countries);
+      //   this.patchCountryState(this.alluserdata.country);
+      // })
 
 
 
@@ -437,12 +449,18 @@ export class MyProfileComponent implements OnInit, ComponentCanDeactivate {
         abtyrslf: this.alluserdata.aboutYourself,
       });
 
-      this.apiService.getParishListData().subscribe(res => {
-
+      this.apiService.callGetService(`getParishData`).subscribe((res) => {
         for (let i = 0; i < res.data.metaData.Parish.length; i++) {
           this.parishList = res.data.metaData.Parish;
         }
-      })
+      });
+
+      // this.apiService.getParishListData().subscribe(res => {
+
+      //   for (let i = 0; i < res.data.metaData.Parish.length; i++) {
+      //     this.parishList = res.data.metaData.Parish;
+      //   }
+      // })
 
       this.apiService.callGetService('getLookupMasterData?types=title,membership').subscribe((res: any) => {
         this.titles = res.data.titles;
