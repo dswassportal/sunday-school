@@ -1320,6 +1320,13 @@ export class EventCreationComponent implements OnInit {
       this.eventsDataFormGroup.value.orgType = this.eventsDataFormGroup.value.orgType[0].orgtype;
     }
 
+    if (this.eventFormLabel == true) {   // update screen
+      if (this.eventsDataFormGroup.value.orgType) {
+        this.eventsDataFormGroup.value.orgType = this.eventsDataFormGroup.value.orgType[0];
+      }
+    }
+   
+
     let payload: any = {
       "eventId": this.eventId,
       "name": this.eventsDataFormGroup.value.name,
