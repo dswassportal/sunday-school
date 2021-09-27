@@ -40,13 +40,15 @@ async function searchStudents(filterParamJson, loggedInUser) {
                                             order by "sequence";`, [filterParamJson.code, true]);
         } else throw `Recived invalid value for extended search param as ${extendedSearch} `
 
-
+        console.log("configRes.rows", configRes.rows);
         if (configRes.rowCount > 0) {
             configRes.rows.forEach(item => {
-                if (item.expression !== null) {
+                if (item.expression) {
                     projection.push(item.expression)
-                } else if (item.view_column_name !== null)
+                }   
+                else if (item.view_column_name){
                     projection.push(item.view_column_name)
+                }     
             })
         } else throw `for code ${code}, no configrations found`;
 
