@@ -908,7 +908,17 @@ async function getEventData(userId, eventType) {
     let client = await dbConnections.getConnection();
     try {
         let metadata = {};
-        let getEventData = `select * from t_event where is_deleted = false`;
+        let getEventData = `select distinct 
+        te.event_id, 
+        te.name, 
+        te.event_type , 
+        te.description , 
+        te.start_date, 
+        teo.org_type, 
+        te.created_date 
+        from t_event te
+        join t_event_organization teo on te.event_id = teo.event_id 
+        where te.is_deleted = false order by te.created_date desc`;
 
         let condition = ' ';
         let condition2 = ' ';
@@ -1041,6 +1051,7 @@ async function getEventData(userId, eventType) {
                     events.registrationStartDate = row.registration_start_date;
                     events.registrationEndDate = row.registration_end_date;
                     events.orgId = row.org_id;
+                    events.orgType = row.org_type;
                     events.participantId = row.participant_id;
                     events.participantName = row.participant_name;
                     events.registrationId = row.enrollment_id;
@@ -1765,6 +1776,7 @@ async function getProctorData(userData) {
 
     let client = await dbConnections.getConnection();
     try {
+        console.log("userData", userData);
         let metadata = {};
         // console.log("userData", userData);
         let getProctorData = `select user_id, CONCAT(first_name, ' ',last_name) as name from v_user where user_org_id = ${userData};`

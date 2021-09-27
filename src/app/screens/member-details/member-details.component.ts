@@ -163,13 +163,19 @@ export class MemberDetailsComponent implements OnInit {
       }
     });
 
-    this.apiService.getParishListData().subscribe(res => {
+    this.apiService.callGetService(`getParishData`).subscribe((res) => {
       for (let i = 0; i < res.data.metaData.Parish.length; i++) {
         this.parishList = res.data.metaData.Parish;
       }
-
-      //console.log(this.parishList);
     });
+
+    // this.apiService.getParishListData().subscribe(res => {
+    //   for (let i = 0; i < res.data.metaData.Parish.length; i++) {
+    //     this.parishList = res.data.metaData.Parish;
+    //   }
+
+    //   //console.log(this.parishList);
+    // });
 
     this.apiService.callGetService('getLookupMasterData?types=title,grade,relationship,martial status').subscribe((res: any) => {
       this.titles = res.data["titles"];
@@ -179,11 +185,17 @@ export class MemberDetailsComponent implements OnInit {
 
     })
 
-    this.apiService.getCountryStates().subscribe((res: any) => {
+    this.apiService.callGetService(`getCountryStates`).subscribe((res) => {
       this.countries = res.data.countryState;
       // console.log("Countries", this.countries);
       this.patchCountryState(this.alluserdata.country);
-    })
+    });
+
+    // this.apiService.getCountryStates().subscribe((res: any) => {
+    //   this.countries = res.data.countryState;
+    //   // console.log("Countries", this.countries);
+    //   this.patchCountryState(this.alluserdata.country);
+    // })
 
 
     if (this.familyMemberDetails.getSelectedRowData() != undefined) {

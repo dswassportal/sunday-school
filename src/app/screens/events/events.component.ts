@@ -60,22 +60,24 @@ export class EventsComponent implements OnInit {
       this.getIndividualEventData(event_id);
    })
     */
+   
     this.columnDefs = [
       { headerName: 'Event Name', field: 'name', sortable: true, suppressSizeToFit: true, flex: 1, resizable: true, filter: true, width: 170, checkboxSelection: true },
       { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 160 },
+      { headerName: 'Event Level', field: 'orgType', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 160 },
       { headerName: 'Description', field: 'description', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
       {
-        headerName: 'Start Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 170,
+        headerName: 'Event Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 170,
         cellRenderer: (data: any) => {
           return data.value ? (new Date(data.value)).toLocaleDateString() : '';
         }
       },
-      {
-        headerName: 'End Date', field: 'endDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 170,
-        cellRenderer: (data: any) => {
-          return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-        }
-      },
+      // {
+      //   headerName: 'End Date', field: 'endDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 170,
+      //   cellRenderer: (data: any) => {
+      //     return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+      //   }
+      // },
       {
         headerName: 'Actions', field: 'action', suppressSizeToFit: true, flex: 1, resizable: true, cellRendererFramework: ButtonRendererComponent, width: 200,
         cellRendererParams: function (params: any) {

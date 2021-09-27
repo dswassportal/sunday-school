@@ -228,7 +228,8 @@ export class EventSearchComponent implements OnInit {
     this.hasRolePermission = this.uiCommonUtils.hasPermissions("assign_role");
     this.hasDeletePermission = this.uiCommonUtils.hasPermissions("delete_user");
 
-    this.apiService.getEventType().subscribe((res: any) => {
+
+    this.apiService.callGetService(`getEventType`).subscribe((res) => {
       this.eventList = res.data.metaData.eventType;
       this.eventCategoryData = res.data.metaData.eventCategories;
       this.eventGroupData = res.data.metaData.gradeGroups;
@@ -243,6 +244,22 @@ export class EventSearchComponent implements OnInit {
 
       this.registrationStatusData = regStatus;
     });
+
+    // this.apiService.getEventType().subscribe((res: any) => {
+    //   this.eventList = res.data.metaData.eventType;
+    //   this.eventCategoryData = res.data.metaData.eventCategories;
+    //   this.eventGroupData = res.data.metaData.gradeGroups;
+    //   this.parishOrgData = res.data.metaData.sundaySchools;
+    //   let regStatus = [{
+    //     "status":"Registered"
+    //   },
+    //   {
+    //     "status":"Canceled"
+    //   }
+    // ];
+
+    //   this.registrationStatusData = regStatus;
+    // });
 
     this.updateuserinfo = this.formBuilder.group({
       title: new FormControl('', Validators.required),
@@ -478,7 +495,7 @@ export class EventSearchComponent implements OnInit {
       if (res.data.status == "success") {
         let columnsArray: any = [];
         for(let row of res.data.displayConfig){   
-          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, width:200,
+          let json =  { headerName: row.colDisplayName, field: row.colKey, sortable: true, filter: true, width:200, resizable: true
             // cellRenderer: (data: any) => {
             //   return data.value ? (new Date(data.value)).toLocaleDateString() : '';
             // },
@@ -754,26 +771,26 @@ onremovebtnclick(index: any) {
 
   onDelete() {
 
-    let selectedRows = this.gridApi.getSelectedRows();
-    for (let i = 0; i < selectedRows.length; i++) {
-      console.log("Users for Delete", selectedRows[i].userId);
-      this.deleteUser.push(selectedRows[i].userId);
-      //this.deleteUser = selectedRows[i].userId;
-    }
+    // let selectedRows = this.gridApi.getSelectedRows();
+    // for (let i = 0; i < selectedRows.length; i++) {
+    //   console.log("Users for Delete", selectedRows[i].userId);
+    //   this.deleteUser.push(selectedRows[i].userId);
+    //   //this.deleteUser = selectedRows[i].userId;
+    // }
 
-    console.log("Users for Delete", this.deleteUser);
-    let payload = {
-      "data": {
-        "deleteUser": this.deleteUser
-      }
-    }
-    this.apiService.deleteUser(payload).subscribe((res: any) => {
-      if (res.data.status = "success") {
-        this.uiCommonUtils.showSnackBar("User Record Deleted Successfully!", "success", 3000);
-      }
-    })
-    this.getUserData();
-    console.log("Records Deleted...");
+    // console.log("Users for Delete", this.deleteUser);
+    // let payload = {
+    //   "data": {
+    //     "deleteUser": this.deleteUser
+    //   }
+    // }
+    // this.apiService.deleteUser(payload).subscribe((res: any) => {
+    //   if (res.data.status = "success") {
+    //     this.uiCommonUtils.showSnackBar("User Record Deleted Successfully!", "success", 3000);
+    //   }
+    // })
+    // this.getUserData();
+    // console.log("Records Deleted...");
   }
 
   onSearchChange(event: any) {

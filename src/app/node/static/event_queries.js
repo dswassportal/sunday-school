@@ -363,24 +363,24 @@ const deleteCatGroupMapping = `UPDATE t_event_cat_grade_grp_map SET is_deleted =
 const deleteVenues = `delete from t_event_venue WHERE event_id = $1 and venue_id not in ($2);`;        
 
 const getJudgeMapForAssSec = `select distinct  
-                            tecm.event_category_id cat_id,
-                            tec."name" cat_name,
-                            tecm.event_cat_map_id cat_map_id,
-                            concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name,'(',to2."name" ,')') judge_name,
-                            tersm.org_id,
-                            tu.user_id ,
-                            to3."name" region_name,
-                            tec."sequence" 
-                            from t_event_category_map tecm
-                            join t_event_category tec on tecm.event_category_id = tec.event_category_id 
-                            join t_event_cat_staff_map tecsm on tecm.event_cat_map_id = tecsm.event_category_map_id
-                            join t_event_region_staff_map tersm on tersm.event_region_staff_map_id = tecsm.event_region_staff_map_id 
-                            join t_user tu on tecsm.user_id = tu.user_id
-                            join t_organization to2 on to2.org_id = tu.org_id 
-                            join t_organization to3 on to3.org_id = tersm.org_id  
-                            where tecm.event_id = $1 and tecsm.event_id = $1
-                            and tecsm.is_deleted = false and tersm.is_deleted = false
-                            order by tec."sequence", tersm.org_id;`;
+                                tecm.event_category_id cat_id,
+                                tec."name" cat_name,
+                                tecm.event_cat_map_id cat_map_id,
+                                case when tu.title is null then null else concat(tu.title,'. ', tu.first_name, ' ', tu.middle_name , ' ',tu.last_name,'(',to2."name" ,')') end judge_name,                         
+                                tersm.org_id,
+                                tu.user_id ,
+                                to3."name" region_name,
+                                tec."sequence" 
+                                from t_event_category_map tecm
+                                join t_event_category tec on tecm.event_category_id = tec.event_category_id 
+                                left join t_event_cat_staff_map tecsm on tecm.event_cat_map_id = tecsm.event_category_map_id and tecsm.event_id = tecm.event_id and tecsm.is_deleted = false
+                                left join t_event_region_staff_map tersm on tersm.event_region_staff_map_id = tecsm.event_region_staff_map_id and tersm.is_deleted = false
+                                left join t_user tu on tecsm.user_id = tu.user_id
+                                left join t_organization to2 on to2.org_id = tu.org_id 
+                                left join t_organization to3 on to3.org_id = tersm.org_id  
+                                where tecm.event_id = $1 
+                                --and tecsm.is_deleted = false
+                                order by tec."sequence", tersm.org_id;`;
 
 
 const getDefinedQuestionnaire = `select question_id, question, answer_type from t_event_questionnaire teq 

@@ -84,13 +84,21 @@ export class SignUpComponent implements OnInit {
     this.dropdownSettingsParish = this.dropdownSettingForParish;
 
     this.max_date = new Date;
-    this.apiService.getParishListData().subscribe(res => {
 
-      for (let i = 0; i < res.data.metaData.Parish.length; i++) {
-        this.parishList = res.data.metaData.Parish;
-      }
-      console.log(this.parishList);
-    });
+    
+      this.apiService.callGetService(`getParishData`).subscribe((res) => {
+        for (let i = 0; i < res.data.metaData.Parish.length; i++) {
+          this.parishList = res.data.metaData.Parish;
+        }
+      });
+
+    // this.apiService.getParishListData().subscribe(res => {
+
+    //   for (let i = 0; i < res.data.metaData.Parish.length; i++) {
+    //     this.parishList = res.data.metaData.Parish;
+    //   }
+    //   console.log(this.parishList);
+    // });
 
     this.apiService.callGetService('getLookupMasterData?types=title,membership').subscribe((res: any) => {
       this.titles = res.data["titles"];
