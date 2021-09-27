@@ -1002,6 +1002,25 @@ app.get('/api/getEmail', function (req, res) {
   }
 });
 
+app.get('/api/getPrincipalByParish', function (req, res) {
+  console.log("getEmailId called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processEventRequest.getPrincipalByParish(req.query.orgId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getEmailId as : ' + error)
+  }
+});
+
 
 //to decode loggedin user Id from the request context.
 function decodeUser(reqContext) {
