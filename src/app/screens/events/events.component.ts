@@ -64,7 +64,8 @@ export class EventsComponent implements OnInit {
     this.columnDefs = [
       { headerName: 'Event Name', field: 'name', sortable: true, suppressSizeToFit: true, flex: 1, resizable: true, filter: true, width: 170, checkboxSelection: true },
       { headerName: 'Event Type', field: 'event_type', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 160 },
-      { headerName: 'Executed By', field: 'orgType', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 160 },
+      { headerName: 'Executed By', field: 'executedBy', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 170 },
+      { headerName: 'Event Level', field: 'orgType', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 140 },
       // { headerName: 'Description', field: 'description', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true },
       {
         headerName: 'Event Date', field: 'startDate', suppressSizeToFit: true, flex: 1, resizable: true, sortable: true, filter: true, width: 170,

@@ -915,10 +915,12 @@ async function getEventData(userId, eventType) {
         te.description , 
         te.start_date, 
         teo.org_type, 
-        te.created_date 
+        te.created_date,
+        to2.name as executed_by
         from t_event te
         join t_event_organization teo on te.event_id = teo.event_id 
-        where te.is_deleted = false order by te.created_date desc`;
+        join t_organization to2 on to2.org_id = teo.org_id 
+        where te.is_deleted = false order by te.created_date desc;`;
 
         let condition = ' ';
         let condition2 = ' ';
@@ -1059,6 +1061,7 @@ async function getEventData(userId, eventType) {
                     events.isScoreSubmitted = row.is_score_submitted;
                     events.registeredBy = row.registered_by;
                     events.registeredOn = row.registered_on;
+                    events.executedBy = row.executed_by;
                     eventData.push(events);
                 }
                 metadata.eventData = eventData;
