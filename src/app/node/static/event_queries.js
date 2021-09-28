@@ -145,38 +145,38 @@ const insertCatGradeMapping = `INSERT INTO t_event_cat_grade_grp_map(event_cat_m
 
 
 const getVenusAllDetailsByEventLevel = `select jsonb_agg(
-                                        jsonb_build_object(
-                                        'venueId', tv.venue_id,
-                                        'venueName', tv."name",
-                                        'addressLine1', tv.address_line1,
-                                        'addressLine2', tv.address_line2,
-                                        'addressLine3', tv.address_line3,
-                                        'city', tv.city,
-                                        'country', tv.country,
-                                        'postalCode', tv.postal_code,
-                                        'mobileNo', tv.mobile_no,
-                                        'phoneNo', tv.phone_no,
-                                        'mapUrl', tv.map_url,
-                                        'eventVenueMapId', tev.event_venue_id,
-                                        'isSelected', case when tev.event_venue_id is null then false else true end,
-                                        'hasProctor', case when tev.proctor_id is null then false else true end 
-                                        ) order by tev.event_venue_id
-                                    ) venue_list from t_venue tv 
-                                    left join t_event_venue tev on tv.venue_id  = tev.venue_id and tev.event_id = $1
-                                    where tv.is_deleted = false and tv.org_id in 
-                                    (select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
-                                            (WITH recursive child_orgs 
-                                                                    AS (
-                                                                        SELECT org_id
-                                                                        FROM   t_organization parent_org 
-                                                                        WHERE  org_id in (select org_id from t_event_organization teo 
-                                                                                            where teo.event_id = $1)                                                  
-                                                                        UNION
-                                                                        SELECT     child_org.org_id child_id
-                                                                        FROM       t_organization child_org
-                                                                        INNER JOIN child_orgs c
-                                                                        ON         c.org_id = child_org.parent_org_id ) SELECT *
-                                                                            FROM   child_orgs));`;
+    jsonb_build_object(
+    'venueId', tv.venue_id,
+    'venueName', tv."name",
+    'addressLine1', tv.address_line1,
+    'addressLine2', tv.address_line2,
+    'addressLine3', tv.address_line3,
+    'city', tv.city,
+    'country', tv.country,
+    'postalCode', tv.postal_code,
+    'mobileNo', tv.mobile_no,
+    'phoneNo', tv.phone_no,
+    'mapUrl', tv.map_url,
+    'eventVenueMapId', tev.event_venue_id,
+    'isSelected', case when tev.event_venue_id is null then false else true end,
+    'hasProctor', case when tev.proctor_id is null then false else true end 
+    ) order by tev.event_venue_id
+) venue_list from t_venue tv 
+left join t_event_venue tev on tv.venue_id  = tev.venue_id and tev.event_id = $1
+where tv.is_deleted = false and tv.org_id in 
+(select org_id from t_organization to2 where org_type = 'Parish' and to2.is_deleted = false and to2.org_id in
+        (WITH recursive child_orgs 
+                                AS (
+                                    SELECT org_id
+                                    FROM   t_organization parent_org 
+                                    WHERE  org_id in (select org_id from t_event_organization teo 
+                                                        where teo.event_id = $1)                                                  
+                                    UNION
+                                    SELECT     child_org.org_id child_id
+                                    FROM       t_organization child_org
+                                    INNER JOIN child_orgs c
+                                    ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                        FROM   child_orgs));`;
 
 const insertVenueEventMapping = ` insert into t_event_venue ( event_id, venue_id ) 
                                     select $1, $2
