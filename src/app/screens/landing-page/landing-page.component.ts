@@ -143,13 +143,14 @@ export class LandingPageComponent implements OnInit{
     });
 
     this.columnDefs = [
-      { headerName: 'First Name', field: 'firstName',resizable: true, sortable: true, filter: true, width: 170, checkboxSelection: true },
-      { headerName: 'Last Name', field: 'lastName',resizable: true, sortable: true, filter: true, width: 170 },
+      // { headerName: 'First Name', field: 'firstName',resizable: true, sortable: true, filter: true, width: 170, checkboxSelection: true },
+      // { headerName: 'Last Name', field: 'lastName',resizable: true, sortable: true, filter: true, width: 170 },
+      { headerName: 'Name', field: 'name',resizable: true, sortable: true, filter: true, width: 270, checkboxSelection: true },
       { headerName: 'Member Type', field: 'memberType',resizable: true, sortable: true, filter: true, width: 150 },
       { headerName: 'Parish', field: 'parish_name',resizable: true, sortable: true, filter: true, width: 200 },
       { headerName: 'City', field: 'city',resizable: true, sortable: true, filter: true, width: 150 },
       { headerName: 'State', field: 'state',resizable: true, sortable: true, filter: true, width: 150 },
-      { headerName: 'Postal Code', field: 'postalCode',resizable: true, sortable: true, filter: true, width: 140 },
+      // { headerName: 'Postal Code', field: 'postalCode',resizable: true, sortable: true, filter: true, width: 140 },
       {
         headerName: 'Actions', field: 'action', cellRendererFramework: ButtonRendererComponent, width: 140,
         cellRendererParams: function (params: any) {
