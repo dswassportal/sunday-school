@@ -374,25 +374,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                 tempstudentsData = {};
             }
         }
-        // else if(resultStudentsData.rowCount == 0){
-        //     let resultStudentsData = await client.query(queries.getVicePrincipalwiseStudentsData, [loggedInUser, eventId]);
-        //     if (resultStudentsData.rowCount > 0) {
-        //         for (let row of resultStudentsData.rows) {
-        //             tempstudentsData.schoolId = row.school_id;
-        //             tempstudentsData.schoolName = row.school_name;
-        //             tempstudentsData.studentId = row.student_id;
-        //             tempstudentsData.studentName = row.student_name;
-        //             tempstudentsData.schoolGrade = row.school_grade;
-        //             tempstudentsData.hasSelected = row.has_selected;
-        //             tempstudentsData.registrationId = row.enrollment_id;
-        //             tempstudentsData.registeredBy = row.registered_by;
-        //             tempstudentsData.registrationStatus = row.registration_status;
-        //             tempstudentsData.evePartiRegId = row.event_participant_registration_id;
-        //             studentsData.push(tempstudentsData);
-        //             tempstudentsData = {};
-        //         }
-        //     }
-        // }
+      
 
     }
     response.studentsData = studentsData;
@@ -429,21 +411,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                     schoolId = row.school_id;
                 }
             }
-        }
-        // else if(resultStudentsData.rowCount == 0){
-        //     let resultStudentsData = await client.query(queries.getVicePrincipalwiseStudentsData, [loggedInUser, eventId]);
-        //     if (resultStudentsData.rowCount > 0) {
-        //         for (let row of resultStudentsData.rows) {
-        //             if (row.school_id != schoolId) {
-        //                 tempSchools.schoolId = row.school_id;
-        //                 tempSchools.schoolName = row.school_name;
-        //                 schools.push(tempSchools);
-        //                 tempSchools = {};
-        //                 schoolId = row.school_id;
-        //             }
-        //         }
-        //     }
-        // }
+        }  
     }
 
 
