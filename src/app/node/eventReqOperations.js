@@ -496,6 +496,7 @@ async function insertEvents(eventsData, loggedInUser) {
                         }
                     }//Co-ordinator check if
                     console.log(`Event ${eventId}, new event_coordinator_ids are  : ${JSON.stringify(cordArr)}`);
+                    eventsData.eventId = eventId;
                 }//else
                 break;
             }// event_details case block
@@ -908,7 +909,6 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
 
         }
         case "event_venue_assignment": {
-
             let result = await client.query(queries.getVenusAllDetailsByEventLevel, [eventId]);
             return result.rows[0].venue_list;
         }

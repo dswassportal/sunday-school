@@ -168,7 +168,9 @@ const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_use
                                     tepr.enrollment_id,
                                     tepr.registration_status,
                                     case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
-                                        else null end registered_by
+                                        else null end registered_by,
+                                    case when tepr.updated_date is null then tepr.created_date else tepr.updated_date end 
+                                    registered_on
                                     from t_organization_staff_Assignment tosa 
                                     join t_organization torg on tosa.org_id = torg.org_id
                                     join t_student_sundayschool_dtl tssd on tssd.school_grade = torg.name

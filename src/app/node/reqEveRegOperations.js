@@ -370,6 +370,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                 tempstudentsData.registeredBy = row.registered_by;
                 tempstudentsData.registrationStatus = row.registration_status;
                 tempstudentsData.evePartiRegId = row.event_participant_registration_id;
+                tempstudentsData.registeredOn = row.registered_on;
                 studentsData.push(tempstudentsData);
                 tempstudentsData = {};
             }
