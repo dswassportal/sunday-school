@@ -313,7 +313,7 @@
                                                                         <h2>Role Assignment</h2>
                                                                 </div>
                                                                 <div class="col-md-6 col text-right">
-                                                                        <button mat-button (click)="onaddbtnclick()">
+                                                                        <button mat-raised-button (click)="onaddbtnclick()">
                                                                                 <mat-icon>add</mat-icon>
                                                                                 <span
                                                                                         style="padding-top: 2%;font-size: 16px;">Add</span>
@@ -330,10 +330,10 @@
                                                                                 <div class="row">
 
 
+                                                                                     
                                                                                         <mat-form-field
                                                                                                 class="col-md-3">
-                                                                                                <mat-label>Role
-                                                                                                </mat-label>
+                                                                                                <label style="font-family: poppins;text-align: left; padding-bottom: 3%; ">Role :</label>
                                                                                                 <select matNativeControl
                                                                                                         required
                                                                                                         formControlName="roleId">
@@ -345,8 +345,10 @@
                                                                                                 </select>
                                                                                         </mat-form-field>
 
+                                                                                        
 
-                                                                                        <mat-form-field
+
+                                                                                        <!-- <mat-form-field
                                                                                                 class="col-md-3">
                                                                                                 <mat-label [for]="i">
                                                                                                         Access Level
@@ -361,9 +363,31 @@
                                                                                                                 {{org.orgtype}}
                                                                                                         </option>
                                                                                                 </select>
-                                                                                        </mat-form-field>
+                                                                                        </mat-form-field> -->
 
-                                                                                        <mat-form-field
+
+                                                                                        <div class="col-md-3">
+                                                                                                <label style="font-family: poppins;text-align: left; ">Access Level :</label>
+                                                                                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgType"
+                                                                                                    placeholder="Access Level" [settings]="dropdownSettingsEventLevel" [data]="orgs"
+                                                                                                    (onSelect)="onOrgSelect($event)"
+                                                                                                    formControlName="role" (onSelectAll)="onSelectAll($event)">
+                                                                                                </ng-multiselect-dropdown>
+                                                            
+                                                                                        </div>
+
+                                                                                        <div class="col-md-4">
+                                                                                                <label style="font-family: poppins;text-align: left; ">Access Level ID :</label>
+                                                                                
+                                                                                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgId"
+                                                                                                    placeholder="Access Level ID" [settings]="dropdownSettingsEventExecutedBy"
+                                                                                                    [data]="orgDetails" formControlName="orgId"
+                                                                                                    (onSelectAll)="onSelectAll($event)">
+                                                                                                </ng-multiselect-dropdown>
+                                                            
+                                                                                        </div>
+
+                                                                                        <!-- <mat-form-field
                                                                                                 class="col-md-4">
                                                                                                 <mat-label [for]="i">
                                                                                                         Access Level ID
@@ -377,14 +401,14 @@
                                                                                                                 {{orgDetail.name}}
                                                                                                         </option>
                                                                                                 </select>
-                                                                                                <!-- <select *ngFor="let where of onOrgSelect(updateuserinfo.controls['roles']?.value[i]?.role)" value="{{where}}">{{where}}</select> -->
-                                                                                        </mat-form-field>
+                                                                                                <!-- <select *ngFor="let where of onOrgSelect(updateuserinfo.controls['roles']?.value[i]?.role)" value="{{where}}">{{where}}</select> 
+                                                                                        </mat-form-field> -->
 
 
                                                                                         <div
-                                                                                                class="col-md-2 col text-right">
+                                                                                                class="col-md-1 col text-right" style="padding-top: 2.4%;">
                                                                                                 <button (click)="onremovebtnclick(i)"
-                                                                                                        mat-button>
+                                                                                                mat-raised-button>
                                                                                                         <mat-icon>delete
                                                                                                         </mat-icon>
                                                                                                         <span>Delete</span>
