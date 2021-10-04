@@ -127,46 +127,39 @@ const getTTCEventData = `    select distinct
 //                          where tssd.school_id IN (select org_id from t_organization_staff_Assignment where role_type = 'Sunday School Principal' and user_id= $1 );`;
 
 
-const getPrincipalwiseStudentsData = ` select distinct tssd.student_id, tssd.school_grade,tosa.user_id as "teacher_user_id",concat(tu1.title,'. ',tu1.first_name,' ', tu1.middle_name, ' ', tu1.last_name) as "teacher_name",
-torg.name as "school_name", tssd.school_id,
-                                      concat(tu.title, '. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) as "student_name",
-                                      tosa.user_id as "principal_user_id",
-                                      tepr.event_participant_registration_id,
-                                      case when tepr.event_participant_registration_id is null then false else true end has_selected,
-                                      tepr.enrollment_id,
-                                      tepr.registration_status,
-                                      case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
-                                      else null end registered_by
-                                      from t_student_sundayschool_dtl tssd
-                                              join t_organization torg on torg.org_id = tssd.school_id 
-                                          join t_user tu on tu.user_id = tssd.student_id 
-                                          join t_organization_staff_Assignment tosa on tosa.org_id = tssd.school_id
-                                          join t_user tu1 on tu1.user_id = tosa.user_id
-                                          left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
-                                          and tepr.event_id = $2
-                                          left join t_user tu2 on tu2.user_id = tepr.created_by 
-                                          where tosa.role_type = 'Sunday School Principal' and tosa.user_id = $1`;
+const getPrincipalwiseStudentsData = `select distinct  tssd.student_id, tssd.school_grade,
+tosa2.user_id as "teacher_user_id",
+concat(tu1.title,'. ',tu1.first_name,' ', tu1.middle_name, ' ', tu1.last_name) as "teacher_name",
+tssd.term_id ,
+to2.name as "school_name", 
+tssd.school_id,
+concat(tu.title, '. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) as "student_name",
+tosa.user_id as "principal_user_id",
+tepr.event_participant_registration_id,
+case when tepr.event_participant_registration_id is null then false else true end has_selected,
+tepr.enrollment_id,
+tepr.registration_status,
+case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
+else null end registered_by,
+case when tepr.updated_date is null then tepr.created_date else tepr.updated_date end registered_on
+from t_student_sundayschool_dtl tssd
+    join t_organization torg on torg.parent_org_id = tssd.school_id and tssd.school_grade = torg."name" 
+    join t_organization to2 on to2.org_id = torg.parent_org_id 
+    join t_user tu on tu.user_id = tssd.student_id 
+    join t_organization_staff_Assignment tosa on tosa.org_id = tssd.school_id 
+           and tosa.is_deleted = false and tosa.is_primary = true and tosa.role_type in ('Sunday School Principal', 'Sunday School Vice Principal')
+    join t_school_term_detail tstd1  on tosa.school_term_detail_id  = tstd1.school_term_detail_id  
+        and CURRENT_DATE > tstd1.term_start_date  
+        and CURRENT_DATE < tstd1.term_end_date
+     join t_organization_staff_Assignment tosa2 on tosa2.org_id = torg.org_id	
+            and tosa2.is_deleted = false and tosa2.is_primary = true and tosa2.role_type = 'Sunday School Teacher'
+            and tosa2.school_term_detail_id = tosa.school_term_detail_id 	
+    join t_user tu1 on tu1.user_id = tosa2.user_id 
+    left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
+    and tepr.event_id = $2
+    left join t_user tu2 on tu2.user_id = tepr.created_by
+where tosa.user_id = $1;`;
 
-
-const getVicePrincipalwiseStudentsData = ` select distinct tssd.student_id, tssd.school_grade,tosa.user_id as "teacher_user_id",concat(tu1.title,'. ',tu1.first_name,' ', tu1.middle_name, ' ', tu1.last_name) as "teacher_name",
-                                          torg.name as "school_name", tssd.school_id,
-                                                                                concat(tu.title, '. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) as "student_name",
-                                                                                tosa.user_id as "principal_user_id",
-                                                                                tepr.event_participant_registration_id,
-                                                                                case when tepr.event_participant_registration_id is null then false else true end has_selected,
-                                                                                tepr.enrollment_id,
-                                                                                tepr.registration_status,
-                                                                                case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
-                                                                                else null end registered_by
-                                                                                from t_student_sundayschool_dtl tssd
-                                                                                        join t_organization torg on torg.org_id = tssd.school_id 
-                                                                                    join t_user tu on tu.user_id = tssd.student_id 
-                                                                                    join t_organization_staff_Assignment tosa on tosa.org_id = tssd.school_id
-                                                                                    join t_user tu1 on tu1.user_id = tosa.user_id
-                                                                                    left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
-                                                                                    and tepr.event_id = $2
-                                                                                    left join t_user tu2 on tu2.user_id = tepr.created_by 
-                                                                                    where tosa.role_type = 'Sunday School Vice Principal' and tosa.user_id = $1`;                                          
 
 const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_user_id", torg.name as "school_grade", tssd.school_id, tssd.student_id, torg1.name as "school_name",
                                     concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) as "student_name",
@@ -175,7 +168,9 @@ const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_use
                                     tepr.enrollment_id,
                                     tepr.registration_status,
                                     case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
-                                        else null end registered_by
+                                        else null end registered_by,
+                                    case when tepr.updated_date is null then tepr.created_date else tepr.updated_date end 
+                                    registered_on
                                     from t_organization_staff_Assignment tosa 
                                     join t_organization torg on tosa.org_id = torg.org_id
                                     join t_student_sundayschool_dtl tssd on tssd.school_grade = torg.name
@@ -355,7 +350,6 @@ module.exports = {
     cancelTTCRegistation,
     getGradeGroups,
     getPrincipalwiseStudentsData,
-    getVicePrincipalwiseStudentsData,
     getTeacherwiseStudentData
 }
 

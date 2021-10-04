@@ -350,6 +350,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
             tempstudentsData.evePartiRegId = row.event_participant_registration_id;
             tempstudentsData.staffId = row.teacher_user_id;
             tempstudentsData.staffName = row.teacher_name;
+            tempstudentsData.registeredOn = row.registered_on;
             studentsData.push(tempstudentsData);
             tempstudentsData = {};
         }
@@ -369,29 +370,12 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                 tempstudentsData.registeredBy = row.registered_by;
                 tempstudentsData.registrationStatus = row.registration_status;
                 tempstudentsData.evePartiRegId = row.event_participant_registration_id;
+                tempstudentsData.registeredOn = row.registered_on;
                 studentsData.push(tempstudentsData);
                 tempstudentsData = {};
             }
         }
-        else if(resultStudentsData.rowCount == 0){
-            let resultStudentsData = await client.query(queries.getVicePrincipalwiseStudentsData, [loggedInUser, eventId]);
-            if (resultStudentsData.rowCount > 0) {
-                for (let row of resultStudentsData.rows) {
-                    tempstudentsData.schoolId = row.school_id;
-                    tempstudentsData.schoolName = row.school_name;
-                    tempstudentsData.studentId = row.student_id;
-                    tempstudentsData.studentName = row.student_name;
-                    tempstudentsData.schoolGrade = row.school_grade;
-                    tempstudentsData.hasSelected = row.has_selected;
-                    tempstudentsData.registrationId = row.enrollment_id;
-                    tempstudentsData.registeredBy = row.registered_by;
-                    tempstudentsData.registrationStatus = row.registration_status;
-                    tempstudentsData.evePartiRegId = row.event_participant_registration_id;
-                    studentsData.push(tempstudentsData);
-                    tempstudentsData = {};
-                }
-            }
-        }
+      
 
     }
     response.studentsData = studentsData;
@@ -428,25 +412,24 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                     schoolId = row.school_id;
                 }
             }
-        }
-        else if(resultStudentsData.rowCount == 0){
-            let resultStudentsData = await client.query(queries.getVicePrincipalwiseStudentsData, [loggedInUser, eventId]);
-            if (resultStudentsData.rowCount > 0) {
-                for (let row of resultStudentsData.rows) {
-                    if (row.school_id != schoolId) {
-                        tempSchools.schoolId = row.school_id;
-                        tempSchools.schoolName = row.school_name;
-                        schools.push(tempSchools);
-                        tempSchools = {};
-                        schoolId = row.school_id;
-                    }
-                }
-            }
-        }
+        }  
     }
 
 
     response.schools = schools;
+
+    response.venues = [];
+    let venueRes = await client.query(queries.getVenuesByEventId, [eventId])
+    if (venueRes.rowCount > 0) {
+        for (let row of venueRes.rows) {
+            response.venues.push({
+                name: row.name,
+                eventVenueId: row.event_venue_id
+            })
+        }
+    }
+
+
     return response;
 }
 

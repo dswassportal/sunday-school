@@ -102,7 +102,7 @@ export class ExamRegistrationComponent implements OnInit {
     this.selectedEventType = splitedURL[splitedURL.length - 1];
     console.log("currentURL is last value: " + this.selectedEventType);
 
-    this.columnDefs = this.getColDef();
+   
 
     if (this.eventExamRegistration.getSelectedRowData() != undefined) {
       this.selectedRowJson = this.eventExamRegistration.getSelectedRowData();
@@ -142,6 +142,8 @@ export class ExamRegistrationComponent implements OnInit {
       this.venuesDataFormGroup.patchValue({
         venues: res.data.eventData.selectedVenue
       });
+      
+      this.columnDefs = this.getColDef();
 
 
       this.regEndDate = this.eventData.regEndDate;
@@ -183,6 +185,7 @@ export class ExamRegistrationComponent implements OnInit {
       this.gradesData = newArray;
       this.schoolNameData = this.eventData.schools;
       this.regGridApi.setRowData(this.eventData.studentsData);
+     
       //this.parishNameSelChange({ orgId: this.staffData.orgId });
 
       this.regGridApi.forEachNode(
@@ -212,20 +215,39 @@ export class ExamRegistrationComponent implements OnInit {
 
   getColDef() {
 
-    return this.columnDefs = [
-      { headerName: 'Student Name', field: 'studentName', resizable: true, width: 330, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
-      { headerName: 'Grade', field: 'schoolGrade', width: 150, resizable: true, sortable: true, filter: true },
-      { headerName: 'Teacher Name', field: 'staffName', width: 250, resizable: true, sortable: true, filter: true, },
-      { headerName: 'Registration Id', field: 'registrationId', width: 150, resizable: true, sortable: true, filter: true },
-      { headerName: 'Registered By', field: 'registeredBy', width: 150, resizable: true, sortable: true, filter: true },
-      {
-        headerName: 'Registered On', field: 'registeredOn', width: 200, resizable: true, sortable: true, filter: true,
-        cellRenderer: (data: any) => {
-          return data.value ? (new Date(data.value)).toLocaleDateString() : '';
-        }
-      },
-      { headerName: 'Registration Status', field: 'registrationStatus', width: 200, resizable: true, sortable: true, filter: true, },
-    ];
+    if(this.eventData.studentsData[0].staffName){
+      return this.columnDefs = [
+        { headerName: 'Student Name', field: 'studentName', resizable: true, width: 330, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
+        { headerName: 'Grade', field: 'schoolGrade', width: 150, resizable: true, sortable: true, filter: true },
+        { headerName: 'Teacher Name', field: 'staffName', width: 250, resizable: true, sortable: true, filter: true, },
+        { headerName: 'Registration Id', field: 'registrationId', width: 150, resizable: true, sortable: true, filter: true },
+        { headerName: 'Registered By', field: 'registeredBy', width: 150, resizable: true, sortable: true, filter: true },
+        {
+          headerName: 'Registered On', field: 'registeredOn', width: 200, resizable: true, sortable: true, filter: true,
+          cellRenderer: (data: any) => {
+            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+          }
+        },
+        { headerName: 'Registration Status', field: 'registrationStatus', width: 200, resizable: true, sortable: true, filter: true, },
+      ];
+    }
+    else{
+      return this.columnDefs = [
+        { headerName: 'Student Name', field: 'studentName', resizable: true, width: 330, sortable: true, filter: true, headerCheckboxSelection: true, checkboxSelection: true },
+        { headerName: 'Grade', field: 'schoolGrade', width: 150, resizable: true, sortable: true, filter: true },
+        { headerName: 'Registration Id', field: 'registrationId', width: 150, resizable: true, sortable: true, filter: true },
+        { headerName: 'Registered By', field: 'registeredBy', width: 150, resizable: true, sortable: true, filter: true },
+        {
+          headerName: 'Registered On', field: 'registeredOn', width: 200, resizable: true, sortable: true, filter: true,
+          cellRenderer: (data: any) => {
+            return data.value ? (new Date(data.value)).toLocaleDateString() : '';
+          }
+        },
+        { headerName: 'Registration Status', field: 'registrationStatus', width: 200, resizable: true, sortable: true, filter: true, },
+      ];
+    }
+
+   
   }
 
 
