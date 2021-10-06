@@ -447,6 +447,9 @@ export class EventSearchComponent implements OnInit {
   onSearchClick() {
     
     let code!: string;
+    if(this.parishSearchFormGroup.value.eventType.length == 0){
+      this.uiCommonUtils.showSnackBar("Please Select Event Type!", "error", 3000);
+    }
     if(this.parishSearchFormGroup.value.eventType[0].eventType == "CWC" || this.parishSearchFormGroup.value.eventType[0].eventType == 'Talent Competition' || this.parishSearchFormGroup.value.eventType[0].eventType == 'Talent Show'){
         code = 'event_search_cwc';
     }

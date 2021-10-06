@@ -1,11 +1,17 @@
-const processRequest = require(`${__dirname}/reqOperations`);
-const processUserRequest = require(`${__dirname}/userReqOperations`)
-const processMiscRequest = require(`${__dirname}/miscReqOperations`)
-const processEventTemp = require(`${__dirname}/reqEventTemp`)
-const processEventRequest = require(`./eventReqOperations`)
-const processScoreRequest = require(`./reqScoreOperations`)
-const processAttendaceRequest = require(`./reqAttendanceOperartions`)
-const dbConnections = require(`${__dirname}/dbConnection`);
+const processRequest = require(`${__dirname}/src/app/node/reqOperations`);
+const processUserRequest = require(`${__dirname}/src/app/node/userReqOperations`)
+const processMiscRequest = require(`${__dirname}/src/app/node/miscReqOperations`)
+const processEventTemp = require(`${__dirname}/src/app/node/reqEventTemp`)
+const processEventRequest = require(`./src/app/node/eventReqOperations`)
+const processScoreRequest = require(`./src/app/node/reqScoreOperations`)
+const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions`)
+const processSSRequest = require(`./src/app/node/reqSsOperations`)
+const processFileUpload = require(`./src/app/node/reqFileUpload`)
+const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOperations`);
+const studentSearch = require(`./src/app/node/search/studentSearch`)
+const firebaseAdminUtils = require('./src/app/node/firebase/firebaseAdminUtils')
+
+const fileUpload = require('express-fileupload');
 express = require('express')
 const cors = require('cors')
 var app = express();
@@ -18,6 +24,51 @@ app.listen(process.env.PORT || port, () => {
 });
 
 app.use(compression())
+app.use(express.json());
+// app.use('*', cors())
+
+const openEndpoints = ['/api', '/api/getEmail', '/api/getParishData', '/api/getLookupMasterData'];
+
+app.use((req, res, next) => {
+  let currEndpoint;
+  if (req.url.indexOf('?')) {
+    currEndpoint = req.url.split('?')[0];
+  } else
+    currEndpoint = req.url;
+
+  let headerToken = ""
+  if (req.header('Authorization') === undefined)
+		headerToken = ""
+   else 
+		headerToken	= req.header('Authorization')
+  
+  if ((headerToken.length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) || req.url.indexOf('api')) {
+    next();
+  } else if (headerToken.length !== 0) {
+    firebaseAdminUtils.varifyUserToken(headerToken).then(idToken => {
+      next()
+    }).catch(error => {
+      console.error('oAuth token validation failed!!', error);
+      res.send({
+        data: {
+          status: 'failed',
+          errorCode: 401,
+          errorMsg: 'Session expired!'
+        }
+      });
+      res.end();
+    });
+  } else {
+    res.send({
+      data: {
+        status: 'failed',
+        errorCode: 400,
+        errorMsg: 'Bad request!'
+      }
+    });
+    res.end();
+  }
+});
 
 var corsOptions = {
   "origin": '*',
@@ -34,14 +85,52 @@ process.on('SIGTERM', () => {
 app.use(express.json());
 app.use('*', cors())
 
-//let basePath = __dirname.split('\\src\\app\\node')[0];
-//console.log(`Final path is ${path.join(basePath + "/dist/church/index.html")}`)
-app.use(express.static("../../../dist/church"));
+app.use(express.static(path.join(__dirname + "/dist/church")));
 
 app.get('/', function (req, res) {
-  // res.sendFile(path.join(basePath + "/dist/church/index.html"));
-  res.sendFile('../../../dist/church/index.html');
+  res.sendFile(path.join(__dirname + "/dist/church/index.html"));
+  //res.sendFile('./dist/church/index.html');
 });
+
+function getUserHome() {
+
+  return process.env[(process.platform == 'win32')
+    ? 'USERPROFILE' : 'HOME'];
+}
+
+app.use(fileUpload({
+  useTempFiles: false,
+  tempFileDir: getUserHome(),
+}));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '/dist/church/index.html'));
+});
+
+app.post('/api/uploadfile', (req, res) => {
+console.log('/api/uploadfile called... for event : ' + req.query.eventId )
+  try {
+
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).send('No files were uploaded.');
+    }
+  
+    processFileUpload.eventDocUpload(req.files, req.query.eventId).then((data) => {
+      res.send(data)
+      res.end();
+    })
+ 
+  } catch (error) {
+    res.send(error)
+    res.end();
+  }
+
+});
+
+
+
+
+
 
 app.post('/api/signUp', function (req, res) {
   console.log("signUp called with : " + JSON.stringify(req.body));
@@ -106,16 +195,8 @@ app.get('/api/getRoleMetadata', function (req, res) {
 });
 
 app.get('/api/getUserMetaData', function (req, res) {
-  console.log("signUp called with : " + JSON.stringify(req.query.uid));
+  console.log("getUserMetaData called with : " + JSON.stringify(req.query.uid));
 
-  let reqContextData = {
-    actType: 'LOG_IN',
-    sessionId: req.header('Authorization'),
-    ipAddr: req.connection.remoteAddress,
-    userAgent: req.get('User-Agent'),
-    userId: req.query.uid
-  }
-  processMiscRequest.handleLogIn_LogOut(reqContextData)
   try {
     processRequest.processGetUserMetaDataRequest(req.query.uid)
       .then((data) => {
@@ -154,7 +235,7 @@ app.get('/api/getEventCategory', function (req, res) {
 app.get('/api/getEventData', function (req, res) {
   console.log("getEventData called with : " + req.query.user);
   let loggedInUser = decodeUser(req)
-  try {
+  try { 
     processRequest.getEventData(loggedInUser, req.query.eventType)
       .then((data) => {
         //     console.log(`Returning with response : ${JSON.stringify(data)}`)
@@ -193,7 +274,8 @@ app.get('/api/getParishData', function (req, res) {
 app.post('/api/insertEvents', function (req, res) {
   console.log("insertevents called with : " + JSON.stringify(req.body));
   try {
-    processEventRequest.insertEvents(req.body.data)
+    let loggedInUser = decodeUser(req)
+    processEventRequest.insertEvents(req.body.data, loggedInUser)
       .then((data) => {
         // console.log(`Returning with resonse : ${data}`)
         res.send(data);
@@ -213,11 +295,21 @@ app.post('/api/insertEvents', function (req, res) {
 app.post('/api/updateUserRoles', function (req, res) {
   console.log("updateUserRoles called with : " + JSON.stringify(req.body));
   try {
-    processRequest.processUpdateUserRoles(req.body.data)
+    let loggedInUser = decodeUser(req);
+    processRequest.processUpdateUserRoles(req.body.data, loggedInUser)
       .then((data) => {
-        /// console.log(`Returning with resonse : ${data}`)
-        res.send(data);
-        res.end();
+        if (req.body.data.respondWith) {
+          if (req.body.data.respondWith === `user_meta_data`) {
+            processRequest.processGetUserMetaDataRequest(loggedInUser).then((metaData) => {
+              data.data.metaData = metaData.data.metaData;
+              res.send(data);
+              res.end();
+            })
+          }
+        } else {
+          res.send(data);
+          res.end();
+        }
       }).catch((error) => {
         //console.log(`Returning with resonse : ${error}`)
         res.send(error);
@@ -268,9 +360,10 @@ app.post('/api/deleteUsers', function (req, res) {
 
 //Endpoint to set user is_approved status 
 app.post('/api/setUserApprovalState', function (req, res) {
-  console.log("setUserApprovalState called with : " + JSON.stringify(req.body));
+  console.debug("setUserApprovalState called with : " + JSON.stringify(req.body));
   try {
-    processUserRequest.setUserApprovalState(req.body.data)
+    let loggedInUser = decodeUser(req);
+    processUserRequest.setUserApprovalState(req.body.data, loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -312,11 +405,11 @@ app.post('/api/updateEvent', function (req, res) {
   try {
     processEventRequest.updateEvent(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${data}`)
+        // console.log(`Returning with resonse : ${data}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -331,11 +424,11 @@ app.post('/api/getProctorData', function (req, res) {
   try {
     processEventRequest.getProctorData(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -349,11 +442,11 @@ app.post('/api/getVenues', function (req, res) {
   try {
     processEventRequest.getVenues(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -367,11 +460,11 @@ app.get('/api/getRegionAndParish', function (req, res) {
   try {
     processEventRequest.getRegionAndParish()
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -383,13 +476,14 @@ app.get('/api/getRegionAndParish', function (req, res) {
 app.get('/api/getEventType', function (req, res) {
   console.log("getEventType called with : " + JSON.stringify(req.query.fbuid));
   try {
-    processEventRequest.getEventType()
+    let loggedInUser = decodeUser(req);
+    processEventRequest.getEventType(loggedInUser)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        //console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -404,11 +498,11 @@ app.get('/api/getMembers', function (req, res) {
   try {
     processMiscRequest.getMembers(req.query.fbuid)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -424,11 +518,11 @@ app.get('/api/getEventQuestionnaireData', function (req, res) {
   try {
     processEventRequest.getEventQuestionnaireData()
       .then((data) => {
-        console.log(`Returning with response : ${JSON.stringify(data)}`)
+        //  console.log(`Returning with response : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with response : ${error}`)
+        //console.log(`Returning with response : ${error}`)
         res.send(error);
         res.end();
       })
@@ -439,15 +533,16 @@ app.get('/api/getEventQuestionnaireData', function (req, res) {
 
 
 app.get('/api/getEventForRegistration', function (req, res) {
-  console.log("getEventForRegistration called with : " + JSON.stringify(req.query.fbuid));
+  console.log("getEventForRegistration called with ");
+  let loggedInUser = decodeUser(req)
   try {
-    processEventRequest.getEventForRegistration()
+    processEventRequest.getEventForRegistration(loggedInUser)
       .then((data) => {
-        console.log(`Returning with response : ${JSON.stringify(data)}`)
+        // console.log(`Returning with response : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with response : ${error}`)
+        //console.log(`Returning with response : ${error}`)
         res.send(error);
         res.end();
       })
@@ -460,13 +555,23 @@ app.get('/api/getEventForRegistration', function (req, res) {
 app.get('/api/getUserApprovalStatus', function (req, res) {
   console.log("getUserApprovalStatus called with : " + JSON.stringify(req.query.fbuid));
   try {
-    processMiscRequest.getUserApprovalStatus(req.query.fbuid)
+    
+  let reqContextData = {
+    actType: 'LOG_IN',
+    sessionId: req.header('Authorization'),
+    ipAddr: req.connection.remoteAddress,
+    userAgent: req.get('User-Agent')
+  }
+
+   
+
+    processMiscRequest.getUserApprovalStatus(req.query.fbuid, reqContextData)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        //   console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -480,11 +585,11 @@ app.post('/api/updateBasicProfile', function (req, res) {
   try {
     processUserRequest.updateUnApprovedUser(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -525,7 +630,7 @@ app.get('/api/getEvent', function (req, res) {
   console.log("getEvent called...");
   let loggedInUser = decodeUser(req)
   try {
-    processEventTemp.getEventById(req.query.id, req.query.isParticipant, loggedInUser)
+    processEventRequest.getEventById(req.query.id, req.query.isParticipant, loggedInUser)
       .then((data) => {
         res.send(data);
         res.end();
@@ -542,7 +647,7 @@ app.post('/api/registerEvent', function (req, res) {
   console.log("registerEvent called...");
   let loggedInUser = decodeUser(req)
   try {
-    processEventTemp.eventRegistration(req.body.data, loggedInUser)
+    processRegRequests.eventRegistration(req.body.data, loggedInUser)
       .then((data) => {
         res.send(data);
         res.end();
@@ -570,7 +675,7 @@ app.get('/api/getParticipants', function (req, res) {
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Error with resonse : ${error}`)
+        //console.log(`Error with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -589,7 +694,7 @@ app.post('/api/postScore', function (req, res) {
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -624,11 +729,11 @@ app.post('/api/deleteEvents', function (req, res) {
   try {
     processEventRequest.deleteEvents(req.body.data)
       .then((data) => {
-        console.log(`Returning with resonse : ${data}`)
+        //console.log(`Returning with resonse : ${data}`)
         res.send(data);
         res.end();
       }).catch((error) => {
-        console.log(`Returning with resonse : ${error}`)
+        // console.log(`Returning with resonse : ${error}`)
         res.send(error);
         res.end();
       })
@@ -654,6 +759,314 @@ app.post('/api/postAttendance', function (req, res) {
       })
   } catch (error) {
     console.error('Error in postAttendance as : ' + error)
+  }
+});
+
+app.get('/api/getScoreByCategory', function (req, res) {
+  console.log("getScoreByCategory called...");
+  // let loggedInUser =  decodeUser(req)
+  try {
+    processScoreRequest.getScoreByCategory(req.query.eventId, req.query.catId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getScoreByCategory as : ' + error)
+  }
+});
+
+app.get('/api/getSSchools', function (req, res) {
+  console.log("getSSchools called...");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getSSchoolData(loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getSSchools as : ' + error)
+  }
+});
+
+app.get('/api/getLookupMasterData', function (req, res) {
+  console.log("getLookupMasterData called... to fetch " + req.query.types);
+  // let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getLookupMasterData(req.query.types)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getLookupMasterData as : ' + error)
+  }
+});
+
+app.get('/api/getRolesByUserId', function (req, res) {
+  console.log("getRolesByUserId called... to fetch " + req.query.userId);
+  // let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getRolesByUserId(req.query.userId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getRolesByUserId as : ' + error)
+  }
+});
+
+app.post('/api/setStaffAssignment', function (req, res) {
+  console.log("setStaffAssignment called...");
+  let loggedInUser = decodeUser(req)
+  try {
+    processUserRequest.setStaffAssignment(req.body.data, loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in setStaffAssignment as : ' + error)
+  }
+});
+
+app.get('/api/getRegionWiseJudges', function (req, res) {
+  console.log("getRegionWiseJudges called... to fetch " + req.query.regionId);
+  // let loggedInUser = decodeUser(req)
+  try {
+    processEventRequest.getRegionWiseJudges('', req.query.regionId, req.query.eventType)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getRegionWiseJudges as : ' + error)
+  }
+});
+
+app.get('/api/getStaffAssmtBySchool', function (req, res) {
+  console.log("getStaffAssmtBySchool called... to fetch " + req.query.schoolId);
+  //let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getStaffAssmtBySchool(req.query.schoolId,req.query.term, '')
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getStaffAssmtBySchool as : ' + error)
+  }
+});
+
+app.get('/api/getEventDef', function (req, res) {
+  console.log("getEventDef called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processRegRequests.getEventDef(req.query.eventId, loggedInUser, req.query.participantId, req.query.regMethod)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getEventDef as : ' + error)
+  }
+});
+
+app.get('/api/getAssignedGrades', function (req, res) {
+  console.log("getAssignedGrades called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getAssignedGrades(loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getAssignedGrades as : ' + error)
+  }
+});
+
+
+app.get('/api/getGradeAttendance', function (req, res) {
+  console.log("getGradeAttendance called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.getGradeAttendance(loggedInUser, req.query.schoolId, req.query.grade, req.query.date)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getGradeAttendance as : ' + error)
+  }
+});
+
+
+app.post('/api/postSSAttendance', function (req, res) {
+  console.log("postAttendance called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    processSSRequest.postSSAttendance(req.body.data, loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in postSSAttendance as : ' + error)
+  }
+});
+
+app.post('/api/searchStudents', function (req, res) {
+  console.log("searchStudents called... ");
+  let loggedInUser = decodeUser(req)
+  try {
+    studentSearch.searchStudents(req.body.data, loggedInUser)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in searchStudents as : ' + error)
+  }
+});
+
+
+app.get('/api/getEventDoc', function (req, res) {
+  console.log("getEventDoc called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processFileUpload.getEventDoc(req.query.docId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getEventDoc as : ' + error)
+  }
+});
+
+app.get('/api/isUserNameTaken', function (req, res) {
+  console.log("isUserNameTaken called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.isUserNameTaken(req.query.userName)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in isUserNameTaken as : ' + error)
+  }
+});
+
+app.get('/api/getEmail', function (req, res) {
+  console.log("getEmailId called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processMiscRequest.getEmail(req.query.userName)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getEmailId as : ' + error)
+  }
+});
+
+
+app.get('/api/getPrincipalByParish', function (req, res) {
+  console.log("getEmailId called... ");
+  //let loggedInUser = decodeUser(req)
+  try {
+    processEventRequest.getPrincipalByParish(req.query.orgId)
+      .then((data) => {
+        //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
+        res.send(data);
+        res.end();
+      }).catch((error) => {
+        //console.log(`Returning with resonse : ${error}`)
+        res.send(error);
+        res.end();
+      })
+  } catch (error) {
+    console.error('Error in getEmailId as : ' + error)
   }
 });
 

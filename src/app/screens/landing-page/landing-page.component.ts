@@ -16,6 +16,7 @@ import { MatSelect } from '@angular/material/select';
 import { ReplaySubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { formatDate } from '@angular/common';
+import { IDropdownSettings } from 'ng-multiselect-dropdown';
 
 const moment = _rollupMoment || _moment;
 
@@ -40,7 +41,7 @@ class CustomDateAdapter extends NativeDateAdapter {
 })
 
 
-export class LandingPageComponent implements OnInit{
+export class LandingPageComponent implements OnInit {
 
   // @ViewChild('agGrid') agGrid: AgGridAngular;
   gridOptions: any;
@@ -55,7 +56,7 @@ export class LandingPageComponent implements OnInit{
   updateuserinfo: any;
   roles: any;
   roledata!: any[];
-  orgs!: any[];
+  orgs: any = [];
   orgDetails!: any;
   item: any;
   userId: any;
@@ -83,11 +84,14 @@ export class LandingPageComponent implements OnInit{
   roleEndDateErrorFlag: any;
   minDate = new Date();
   titles!: any[];
-  maritalstatus!:any[];
+  maritalstatus!: any[];
   formattedRoleEndDate: any;
   formattedRoleStrtDate: any;
-  formattedDobDate:any;
-  error = {validatePhoneNumber: true};
+  formattedDobDate: any;
+  dropdownSettingsEventLevel: any;
+  dropdownSettingsEventExecutedBy: any;
+  formattedRolesData: any = [];
+  error = { validatePhoneNumber: true };
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
     private http: HttpClient, private formBuilder: FormBuilder, public router: Router) { }
   // this.gridOptions = <GridOptions>{};
@@ -96,6 +100,28 @@ export class LandingPageComponent implements OnInit{
     this.params = params;
     this.data = params.value;
   }
+
+  dropdownSettingsForEventLevel: IDropdownSettings = {
+    singleSelection: true,
+    idField: 'orgtype',
+    textField: 'orgtype',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
+
+  dropdownSettingsForEventExecutedBy: IDropdownSettings = {
+    singleSelection: false,
+    idField: 'id',
+    textField: 'name',
+    selectAllText: 'Select All',
+    unSelectAllText: 'UnSelect All',
+    itemsShowLimit: 10,
+    allowSearchFilter: true,
+    maxHeight: 100
+  };
 
   // dateChangeRoleStart(event: any) {
   //   this.formattedRoleStrtDate = event.value;
@@ -145,11 +171,11 @@ export class LandingPageComponent implements OnInit{
     this.columnDefs = [
       // { headerName: 'First Name', field: 'firstName',resizable: true, sortable: true, filter: true, width: 170, checkboxSelection: true },
       // { headerName: 'Last Name', field: 'lastName',resizable: true, sortable: true, filter: true, width: 170 },
-      { headerName: 'Name', field: 'name',resizable: true, sortable: true, filter: true, width: 270, checkboxSelection: true },
-      { headerName: 'Member Type', field: 'memberType',resizable: true, sortable: true, filter: true, width: 150 },
-      { headerName: 'Parish', field: 'parish_name',resizable: true, sortable: true, filter: true, width: 200 },
-      { headerName: 'City', field: 'city',resizable: true, sortable: true, filter: true, width: 150 },
-      { headerName: 'State', field: 'state',resizable: true, sortable: true, filter: true, width: 150 },
+      { headerName: 'Name', field: 'name', resizable: true, sortable: true, filter: true, width: 270, checkboxSelection: true },
+      { headerName: 'Member Type', field: 'memberType', resizable: true, sortable: true, filter: true, width: 150 },
+      { headerName: 'Parish', field: 'parish_name', resizable: true, sortable: true, filter: true, width: 200 },
+      { headerName: 'City', field: 'city', resizable: true, sortable: true, filter: true, width: 150 },
+      { headerName: 'State', field: 'state', resizable: true, sortable: true, filter: true, width: 150 },
       // { headerName: 'Postal Code', field: 'postalCode',resizable: true, sortable: true, filter: true, width: 140 },
       {
         headerName: 'Actions', field: 'action', cellRendererFramework: ButtonRendererComponent, width: 140,
@@ -162,6 +188,9 @@ export class LandingPageComponent implements OnInit{
     ];
 
     this.getUserData();
+
+    this.dropdownSettingsEventLevel = this.dropdownSettingsForEventLevel;
+    this.dropdownSettingsEventExecutedBy = this.dropdownSettingsForEventExecutedBy;
 
     this.max_date = new Date;
 
@@ -181,10 +210,10 @@ export class LandingPageComponent implements OnInit{
       console.log("Roles Data:", this.orgs);
     })
 
-	this.apiService.callGetService('getLookupMasterData?types=title,martial status').subscribe((res: any) => {
+    this.apiService.callGetService('getLookupMasterData?types=title,martial status').subscribe((res: any) => {
       this.titles = res.data["titles"];
-      this.maritalstatus =res.data["martial statuss"];
-    
+      this.maritalstatus = res.data["martial statuss"];
+
     });
 
     //   this.apiService.callGetService('getuserRecords?type=approved').subscribe((res) => {
@@ -229,8 +258,8 @@ export class LandingPageComponent implements OnInit{
   }
 
 
-   //Role End Date Validator that is roleEndDate>roleStartDate
-   comparisonRegiEnddateValidator(): any {
+  //Role End Date Validator that is roleEndDate>roleStartDate
+  comparisonRegiEnddateValidator(): any {
     let regiStartDate = this.updateuserinfo.value.roles['roleStartDate'];
     let regiEndDate = this.updateuserinfo.value.roles['roleEndDate'];
 
@@ -276,7 +305,7 @@ export class LandingPageComponent implements OnInit{
       this.rolesArr = [];
       this.rolesData.forEach((e: any) => {
         if (this.rolesArr.indexOf(e) <= 0) {
-  
+
           for (let i = 0; i < this.orgs.length; i++) {
             if (this.orgs[i].orgtype == e.orgType) {
               e.orgDetails = this.orgs[i].details;
@@ -285,7 +314,40 @@ export class LandingPageComponent implements OnInit{
           this.rolesArr.push(e);
         }
       });
-      this.updateuserinfo.setControl('roles', this.setRoles(this.rolesData));
+
+      console.log("rolesarray", this.rolesArr);
+
+
+     
+
+      for (let row of this.rolesData) {
+        let orgName: any;
+
+        for(let row1 of this.orgs){
+          for(let row2 of row1.details){
+            if(row2.id == row.orgId){
+              orgName = row2.name;
+            }
+          } 
+        }
+
+        let json = {
+          "roleId": row.roleId,
+          "orgtype": [row.orgType],
+          "orgId": [
+            {
+              "id": row.orgId,
+              "name": orgName
+            }
+          ],
+          "roleStartDate": row.roleStartDate,
+          "roleEndDate": row.roleEndDate
+        }
+        this.formattedRolesData.push(json);
+      }
+      console.log("this.formattedRolesData", this.formattedRolesData);
+      this.updateuserinfo.setControl('roles', this.setRoles(this.formattedRolesData));
+      this.formattedRolesData = [];
     });
 
 
@@ -328,13 +390,13 @@ export class LandingPageComponent implements OnInit{
       dateofMarriage: this.selectedUserData.dateofMarriage,
       aboutYourself: this.selectedUserData.aboutYourself,
       isFamilyHead: this.selectedUserData.isFamilyHead,
-    
+
     })
 
     this.patchCountryState(this.selectedUserData.country);
 
     this.selectedUserRole = this.selectedUserData.roles;
-   
+
   }
 
   telInputObject(obj: any) {
@@ -344,46 +406,47 @@ export class LandingPageComponent implements OnInit{
 
   setRoles(selectedUserRole: any): FormArray {
     const formArray = new FormArray([]);
+    console.log("selectedUserRole", selectedUserRole);
     selectedUserRole.forEach((e: any) => {
 
       formArray.push(this.formBuilder.group({
         roleId: e.roleId,
-        role: e.orgType,
-        orgId: e.orgId,
+        role: [e.orgtype],
+        orgId: [e.orgId],
         roleStartDate: e.roleStartDate,
         roleEndDate: e.roleEndDate
       }));
 
-      this.onOrgSelect({
-        "target": {
-          "value": e.orgType
-        }
-      });
+      // this.onOrgSelect({
+      //   "target": {
+      //     "value": e.orgType
+      //   }
+      // });
     });
     return formArray;
   }
 
-  onOrgSelect(event: any) {
-    console.log(event);
-    // console.log("Org Name", event.target.value);
-    this.selectedOrg = event.target.value;
-    let orgIndex = event.target.id;
-    if (orgIndex == undefined)
-      orgIndex = 0;
-    else
-      orgIndex = parseInt(orgIndex)
-    console.log("Dropdown Index:", orgIndex);
+  // onOrgSelect(event: any) {
+  //   console.log(event);
+  //   // console.log("Org Name", event.target.value);
+  //   this.selectedOrg = event.target.value;
+  //   let orgIndex = event.target.id;
+  //   if (orgIndex == undefined)
+  //     orgIndex = 0;
+  //   else
+  //     orgIndex = parseInt(orgIndex)
+  //   console.log("Dropdown Index:", orgIndex);
 
-    for (let i = 0; i < this.orgs.length; i++) {
-      if (this.orgs[i].orgtype == this.selectedOrg) {
-        this.rolesArr[orgIndex].orgDetails = this.orgs[i].details;
-        this.orgDetails = this.orgs[i].details;
-      }
-    }
+  //   for (let i = 0; i < this.orgs.length; i++) {
+  //     if (this.orgs[i].orgtype == this.selectedOrg) {
+  //       this.rolesArr[orgIndex].orgDetails = this.orgs[i].details;
+  //       this.orgDetails = this.orgs[i].details;
+  //     }
+  //   }
 
-    // const select = this.orgs.find(_ => _.type == type);
-    // return select ? select.values : select;
-  }
+  //   // const select = this.orgs.find(_ => _.type == type);
+  //   // return select ? select.values : select;
+  // }
 
 
   getOrgDetailsArrByindex(i: any) {
@@ -417,7 +480,7 @@ export class LandingPageComponent implements OnInit{
       role: [null, Validators.required],
       orgId: [null, Validators.required],
       roleStartDate: [null],
-      roleEndDate: [null ]
+      roleEndDate: [null]
     });
   }
 
@@ -433,7 +496,7 @@ export class LandingPageComponent implements OnInit{
     });
   }
 
-  dateChange(event: any){
+  dateChange(event: any) {
     this.formattedDobDate = event.value;
     this.formattedDobDate = formatDate(this.formattedDobDate, 'yyyy-MM-dd', 'en');
     console.log("formatted Dob Date :: " + this.formattedDobDate);
@@ -442,72 +505,72 @@ export class LandingPageComponent implements OnInit{
     if (this.updateuserinfo.invalid) {
       this.uiCommonUtils.showSnackBar("Please fill out all required fields!", "error", 3000);
     }
-    else 
-    if (this.updateuserinfo.value.roles.length == 0) {
-      this.uiCommonUtils.showSnackBar("User should have atleast one Role!", "error", 3000);
-    }
-    else {
-      this.updateuserinfo.value.userId = this.userId;
-      this.updateuserinfo.value.updatedBy = this.loggedInUser;
-      this.updateuserinfo.value.orgId = this.selectedUserData.orgId;
-      //this.updateuserinfo.value.mobileNo = this.mobileNumber;
-      //this.updateuserinfo.value.homePhoneNo = this.homePhoneNumber;
-      let dob = this.updateuserinfo.value.dob;
-      let rolesArray = [];
-      for(let row of this.updateuserinfo.value.roles){
-        let rolesPayload =
+    else
+      if (this.updateuserinfo.value.roles.length == 0) {
+        this.uiCommonUtils.showSnackBar("User should have atleast one Role!", "error", 3000);
+      }
+      else {
+        this.updateuserinfo.value.userId = this.userId;
+        this.updateuserinfo.value.updatedBy = this.loggedInUser;
+        this.updateuserinfo.value.orgId = this.selectedUserData.orgId;
+        //this.updateuserinfo.value.mobileNo = this.mobileNumber;
+        //this.updateuserinfo.value.homePhoneNo = this.homePhoneNumber;
+        let dob = this.updateuserinfo.value.dob;
+        let rolesArray = [];
+        for (let row of this.updateuserinfo.value.roles) {
+          let rolesPayload =
+          {
+            "roleId": row.roleId,
+            "role": row.role.length == 0 ? null : row.role[0].orgtype,
+            "orgId": row.orgId.length == 0 ? null : row.orgId[0].id,
+            "roleStartDate": row.roleStartDate == null ? null : formatDate(row.roleStartDate, 'yyyy-MM-dd', 'en'),
+            "roleEndDate": row.roleEndDate == null ? null : formatDate(row.roleEndDate, 'yyyy-MM-dd', 'en'),
+          }
+          rolesArray.push(rolesPayload);
+        }
+
+        let payload =
         {
-          "roleId": row.roleId,
-          "role": row.role,
-          "orgId": row.orgId,
-          "roleStartDate": row.roleStartDate == null ? null : formatDate(row.roleStartDate, 'yyyy-MM-dd', 'en'),
-          "roleEndDate": row.roleEndDate == null ? null : formatDate(row.roleEndDate, 'yyyy-MM-dd', 'en'),
+          "title": this.updateuserinfo.value.title,
+          "firstName": this.updateuserinfo.value.firstName,
+          "middleName": this.updateuserinfo.value.middleName,
+          "lastName": this.updateuserinfo.value.lastName,
+          "nickName": this.updateuserinfo.value.nickName,
+          "baptismalName": this.updateuserinfo.value.baptismalName,
+          //"dob": this.updateuserinfo.value.dob,
+          "dob": this.formattedDobDate,
+          "mobileNo": this.updateuserinfo.value.mobileNo,
+          "homePhoneNo": this.updateuserinfo.value.homePhoneNo,
+          "emailAddress": this.updateuserinfo.value.emailAddress,
+          "addressLine1": this.updateuserinfo.value.addressLine1,
+          "addressLine2": this.updateuserinfo.value.addressLine2,
+          "addressLine3": this.updateuserinfo.value.addressLine3,
+          "city": this.updateuserinfo.value.city,
+          "postalCode": this.updateuserinfo.value.postalCode,
+          "state": this.updateuserinfo.value.state,
+          "country": this.updateuserinfo.value.country,
+          "parish": this.updateuserinfo.value.parish,
+          "maritalStatus": this.updateuserinfo.value.maritalStatus,
+          "dateofMarriage": this.updateuserinfo.value.dateofMarriage,
+          "aboutYourself": this.updateuserinfo.value.aboutYourself,
+          "isFamilyHead": this.updateuserinfo.value.isFamilyHead,
+          "roles": rolesArray,
+          "userId": this.updateuserinfo.value.userId,
+          "updatedBy": this.updateuserinfo.value.updatedBy,
+          "orgId": this.updateuserinfo.value.orgId
         }
-        rolesArray.push(rolesPayload);
+
+
+        this.apiService.callPostService(`updateUserRoles`, payload).subscribe((res: any) => {
+          if (res.data.status = "success") {
+            this.uiCommonUtils.showSnackBar("User Profile Updated Successfully!", "success", 3000);
+          }
+          this.getUserData();
+        })
+        this.updateuserinfo.reset();
+        $("#imagemodal").modal("hide");
+
       }
-
-      let payload = 
-      {
-        "title": this.updateuserinfo.value.title,
-        "firstName": this.updateuserinfo.value.firstName,
-        "middleName": this.updateuserinfo.value.middleName,
-        "lastName": this.updateuserinfo.value.lastName,
-        "nickName": this.updateuserinfo.value.nickName,
-        "baptismalName": this.updateuserinfo.value.baptismalName,
-        //"dob": this.updateuserinfo.value.dob,
-        "dob": this.formattedDobDate,
-        "mobileNo": this.updateuserinfo.value.mobileNo,
-        "homePhoneNo": this.updateuserinfo.value.homePhoneNo,
-        "emailAddress": this.updateuserinfo.value.emailAddress,
-        "addressLine1": this.updateuserinfo.value.addressLine1,
-        "addressLine2": this.updateuserinfo.value.addressLine2,
-        "addressLine3": this.updateuserinfo.value.addressLine3,
-        "city": this.updateuserinfo.value.city,
-        "postalCode": this.updateuserinfo.value.postalCode,
-        "state": this.updateuserinfo.value.state,
-        "country": this.updateuserinfo.value.country,
-        "parish": this.updateuserinfo.value.parish,
-        "maritalStatus": this.updateuserinfo.value.maritalStatus,
-        "dateofMarriage": this.updateuserinfo.value.dateofMarriage,
-        "aboutYourself": this.updateuserinfo.value.aboutYourself,
-        "isFamilyHead": this.updateuserinfo.value.isFamilyHead,
-        "roles": rolesArray,
-        "userId": this.updateuserinfo.value.userId,
-        "updatedBy": this.updateuserinfo.value.updatedBy,
-        "orgId": this.updateuserinfo.value.orgId
-      }
-
-     
-      this.apiService.callPostService(`updateUserRoles`, payload ).subscribe((res: any) => {
-        if (res.data.status = "success") {
-          this.uiCommonUtils.showSnackBar("User Profile Updated Successfully!", "success", 3000);
-        }
-        this.getUserData();
-      })
-      this.updateuserinfo.reset();
-      $("#imagemodal").modal("hide");
-
-    }
   }
 
   onGridReady(params: any) {
@@ -529,7 +592,7 @@ export class LandingPageComponent implements OnInit{
 
     console.log("Users for Delete", this.deleteUser);
     let payload = {
-        "deleteUser": this.deleteUser
+      "deleteUser": this.deleteUser
     }
     this.apiService.callPostService('deleteUsers', payload).subscribe((res: any) => {
       if (res.data.status = "success") {
@@ -574,6 +637,33 @@ export class LandingPageComponent implements OnInit{
     }
   }
 
+  //miscellaneous
+  onItemSelect(item: any) {
+    console.log(item);
+  }
+  onSelectAll(items: any) {
+    console.log(items);
+  }
+
+  // For relational dropdown ie. orgId and orgType
+  onOrgSelect(event: any) {
+    console.log(event);
+
+    this.selectedOrg = event.orgtype;
+
+    let orgIndex = event.id;
+    if (orgIndex == undefined)
+      orgIndex = 0;
+    else
+      orgIndex = parseInt(orgIndex)
+    console.log("Dropdown Index:", orgIndex);
+
+    for (let i = 0; i < this.orgs.length; i++) {
+      if (this.orgs[i].orgtype == this.selectedOrg) {
+        this.orgDetails = this.orgs[i].details;
+      }
+    }
+  }
 
 
 }
