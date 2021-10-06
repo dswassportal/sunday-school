@@ -161,25 +161,25 @@ from t_student_sundayschool_dtl tssd
 where tosa.user_id = $1;`;
 
 
-const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_user_id", torg.name as "school_grade", tssd.school_id, tssd.student_id, torg1.name as "school_name",
-                                    concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) as "student_name",
-                                    tepr.event_participant_registration_id,
-                                    case when tepr.event_participant_registration_id is null then false else true end has_selected,
-                                    tepr.enrollment_id,
-                                    tepr.registration_status,
-                                    case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
-                                        else null end registered_by,
-                                    case when tepr.updated_date is null then tepr.created_date else tepr.updated_date end 
-                                    registered_on
-                                    from t_organization_staff_Assignment tosa 
-                                    join t_organization torg on tosa.org_id = torg.org_id
-                                    join t_student_sundayschool_dtl tssd on tssd.school_id = torg.parent_org_id
-                                    join t_organization torg1 on torg1.org_id = tssd.school_id
-                                    join t_user tu on tu.user_id = tssd.student_id
-                                    left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
-                                    and tepr.event_id = $2
-                                    left join t_user tu2 on tu2.user_id = tepr.created_by 
-                                    where tosa.role_type = 'Sunday School Teacher' and tosa.user_id = $1 order by tssd.school_id;`;
+const getTeacherwiseStudentData = `     select distinct tosa.user_id as "teacher_user_id", torg.name as "school_grade", tssd.school_id, tssd.student_id, torg1.name as "school_name",
+concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) as "student_name",
+tepr.event_participant_registration_id,
+case when tepr.event_participant_registration_id is null then false else true end has_selected,
+tepr.enrollment_id,
+tepr.registration_status,
+case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
+    else null end registered_by,
+case when tepr.updated_date is null then tepr.created_date else tepr.updated_date end 
+registered_on
+from t_organization_staff_Assignment tosa 
+join t_organization torg on tosa.org_id = torg.org_id
+join t_student_sundayschool_dtl tssd on tssd.school_grade = torg.name and tssd.school_id = torg.parent_org_id 
+join t_organization torg1 on torg1.org_id = tssd.school_id
+join t_user tu on tu.user_id = tssd.student_id
+left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
+and tepr.event_id = $2
+left join t_user tu2 on tu2.user_id = tepr.created_by 
+where tosa.role_type = 'Sunday School Teacher' and tosa.user_id = $1 order by tssd.school_id;`;
 
 
 const getParticipantRolesFormLookup = `select jsonb_agg(
