@@ -764,7 +764,7 @@ export class EventCreationComponent implements OnInit {
 
   // For getting sunday school principal by using parish
   onParishSelect(event: any) {
-    if (this.eventType == "Sunday School Midterm Exam" || this.eventType == "Sunday School Midterm Exam") {
+    if (this.eventType == "Sunday School Midterm Exam" || this.eventType == "Sunday School Final Exam") {
       this.apiService.callGetService(`getPrincipalByParish?orgId=${event.id}`).subscribe((res) => {
         this.proctorData = res.data.eventData.principalData;
       });

@@ -173,7 +173,7 @@ const getTeacherwiseStudentData = ` select distinct tosa.user_id as "teacher_use
                                     registered_on
                                     from t_organization_staff_Assignment tosa 
                                     join t_organization torg on tosa.org_id = torg.org_id
-                                    join t_student_sundayschool_dtl tssd on tssd.school_grade = torg.name
+                                    join t_student_sundayschool_dtl tssd on tssd.school_id = torg.parent_org_id
                                     join t_organization torg1 on torg1.org_id = tssd.school_id
                                     join t_user tu on tu.user_id = tssd.student_id
                                     left join t_event_participant_registration tepr on tepr.user_id = tssd.student_id
