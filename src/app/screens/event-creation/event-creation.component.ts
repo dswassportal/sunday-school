@@ -781,7 +781,7 @@ export class EventCreationComponent implements OnInit {
       if (res.data.status == "success") {
         this.eventId = res.data.eventId;
 
-        if (this.eventId) {
+        if (this.eventId && this.eventType != "TTC") {
           this.apiService.uploadfiles(`uploadfile?eventId=${this.eventId}`, this.formData).subscribe((res: any) => {
             if (res.data.status == "success") {
               console.log("success");

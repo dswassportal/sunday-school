@@ -402,10 +402,11 @@ export class ProfileSearchComponent implements OnInit {
     };
     this.gridApi.exportDataAsCsv(params);
   }
-
   
 
   clearSearch() {
+
+    this.profileSearchFormGroup.reset();
 
     this.dioceseName ='';
     this.regionName= '' ;

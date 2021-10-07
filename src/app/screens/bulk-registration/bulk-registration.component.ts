@@ -215,24 +215,31 @@ export class BulkRegistrationComponent implements OnInit {
       staffRegistration.push(tempArray);
     }
 
-    let payload = {
+    if(this.venuesDataFormGroup.value.venues.length > 0){
+      let payload = {
 
-      "eventId": this.eventId,
-      "eventType": this.selectedRowJson.event_type,
-      "regMethod": "bulk",
-      "eventVenueId": this.venuesDataFormGroup.value.venues[0].eventVenueId,
-      "staffRegistration": staffRegistration
-
+        "eventId": this.eventId,
+        "eventType": this.selectedRowJson.event_type,
+        "regMethod": "bulk",
+        "eventVenueId": this.venuesDataFormGroup.value.venues[0].eventVenueId,
+        "staffRegistration": staffRegistration
+  
+      }
+  
+  
+      this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
+        if (res.data.status == "success") {
+          this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
+        }
+        else
+          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+      });
+    }
+    else{
+      this.uiCommonUtils.showSnackBar("Please select venue!", "error", 3000);
     }
 
-
-    this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
-      if (res.data.status == "success") {
-        this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
-      }
-      else
-        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-    });
+  
 
   }
 
