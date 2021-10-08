@@ -245,8 +245,8 @@
                             <div class="row">
                                 <mat-form-field *ngIf="isUrlRequired" class="col-md-12">
 
-                                    <input id="eventUrl" matInput formControlName="eventUrl"
-                                        placeholder="Enter Event URL" />
+                                    <input id="eventUrl" readonly matInput formControlName="eventUrl"
+                                        placeholder="Event URL" />
                                     <!-- <mat-error
                                         *ngIf="eventsDataFormGroup.controls.eventUrl.touched && eventsDataFormGroup.controls.eventUrl.invalid">
                                         <span *ngIf="eventsDataFormGroup.controls.eventUrl.errors.required">This field

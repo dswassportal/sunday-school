@@ -5,16 +5,21 @@ const queries = require('./static/reqEveRegOperations_queries');
 const common = require('./dbCommonUtills');
 
 
-async function getEventDef(eventId, loggedInUserId, participantId, regMethod) {
-
-    if (!eventId || !loggedInUserId) throw "getEventDef::invalid query parameters recived in request.";
+async function getEventDef(eventId, loggedInUserId, participantId, regMethod, eventCode) {
+    
+    //if (!eventId || !loggedInUserId) throw "getEventDef::invalid query parameters recived in request.";
     let client = await dbConnections.getConnection();
 
     try {
-
         //Get event section config.
         let response = {};
         let temp = {};
+        if(eventCode != null){
+            const getEventId = `select event_id from t_event te where event_url = '${eventCode}';`;
+            let result = await client.query(getEventId);
+            eventId = result.rows[0].event_id;
+        }
+        
         let eveConfigRes = await client.query(queries.getEventSectionConfigByEveType, [eventId]);
         if (eveConfigRes.rowCount > 0)
             temp = eveConfigRes.rows[0].event_sec_config
@@ -32,7 +37,7 @@ async function getEventDef(eventId, loggedInUserId, participantId, regMethod) {
         } else {
             //in case of indivisual registration
             console.debug(`Fetching data for indivisual event registration on of event type '${temp.eventType}' for event ${eventId}`);
-            await getEventDefinationForIndivisualUser(client, eventId, participantId)
+            await getEventDefinationForIndivisualUser(client, eventId, participantId, eventCode)
                 .then(data => response = data)
                 .catch(error => { throw 'Error in reqEveRegOperations.js::getEventDefinationForIndivisualUser() as ' + error });
         }
@@ -56,10 +61,68 @@ async function getEventDef(eventId, loggedInUserId, participantId, regMethod) {
 
 }
 
-async function getEventDefinationForIndivisualUser(client, eventId, participantId) {
+async function getEventDefinationForIndivisualUser(client, eventId, participantId, eventCode) {
 
     let response = {};
-    let result = await client.query(queries.getEventData, [eventId, participantId]);
+    let condition = ' ';
+
+    if(eventCode != null){
+        condition =  ' And te.event_url = $3 ';  
+    }
+
+    const getEventData = `select distinct te.event_id,
+                        te."name" event_name,
+                        te.event_type,
+                        tepr.registration_status,
+                        tepr.event_participant_registration_id,
+                        tepr.enrollment_id,
+                        tepr.user_id,
+                        te.description,
+                        tepr.role,
+                        tepr.event_venue_id selected_event_venue_id,
+                        tgg.grade_group_id,
+                        tgg.group_name, 
+                        te.start_date,
+                        te.end_date,
+                        te.registration_start_date,
+                        te.registration_end_date,
+                        te.event_url,
+                        tea.attachment_name,
+                        tea.attachment_type,
+                        tea.event_attachment_id,
+                        tea.file_name,
+                        tv.venue_id,
+                        case when tperc.event_category_id is null then false else true end has_cat_selected,
+                        tv."name" venue_name,
+                        tec."name" cat_name, 
+                        tec.event_category_id,
+                        tecm.event_cat_map_id,
+                        tev.event_venue_id,
+                        teq.question_id,
+                        teq.question,
+                        teq.answer_type,
+                        teqr.answer ,
+                        tec."sequence"  
+                        from t_event te 
+                        left join t_event_participant_registration tepr on tepr.event_id = te.event_id 
+                            and tepr.user_id = $2 and tepr.event_id = $1 and tepr.is_deleted != true
+                        left join t_event_attachment tea on tea.event_id = $1
+                        left join t_event_venue tev on tev.event_id = $1
+                        left join t_venue tv on tv.venue_id = tev.venue_id
+                        left join t_event_category_map tecm on tecm.event_id = $1
+                        left join t_event_category tec on tecm.event_category_id = tec.event_category_id
+                        left join t_participant_event_reg_cat tperc 
+                            on tperc.event_participant_registration_id = tepr.event_participant_registration_id 
+                            and  tecm.event_cat_map_id = tperc.event_category_id 
+                            and tperc.is_deleted != true
+                        left join t_event_questionnaire teq on teq.event_id = $1
+                        left join t_event_question_response teqr 
+                            on teqr.event_participant_registration_id = tepr.event_participant_registration_id 
+                            and teq.question_id = teqr.question_id
+                        left join t_grade_group tgg on tgg.grade_group_id =  tepr.grade_group_id
+                        where te.event_id = $1 ${condition} order by tec."sequence";`;
+
+    let result = await client.query(getEventData, [eventId, participantId, eventCode]);
     if (result.rowCount > 0) {
         for (let row of result.rows) {
             if (response.eventId == undefined) {
@@ -552,7 +615,7 @@ async function eventRegistration(eventData, loggedInUser) {
 
                     if (staff.evePartiRegId !== undefined && staff.evePartiRegId !== null) eventPartiArr.push(staff.evePartiRegId);
 
-                    if (staff.evePartiRegId === undefined || staff.evePartiRegId === '' || staff.evePartiRegId === null ) {
+                    if (staff.evePartiRegId === undefined || staff.evePartiRegId === '' || staff.evePartiRegId === null) {
                         let registrationId = await generateUniqueEnrollmentId(client);
                         bulkRegister.push(`( ${eventData.eventId}, ${staff.staffId}, ${null}, ${false}, ${loggedInUser},
                                                              '${new Date().toUTCString()}', '${registrationId}', ${eventData.eventVenueId}, 'Registered', ${null})`);

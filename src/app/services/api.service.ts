@@ -18,6 +18,19 @@ export class ApiService {
   constructor(private http: HttpClient, private uiCommonUtils: uiCommonUtils) {
 
     console.log('Application url set to : ' + environment.apiUrl);
+    let urlMapping = window.location.href;
+    let splittedUrl = urlMapping.split("=");
+    let eventId = splittedUrl[1];
+    let isValidUrl = urlMapping.includes("upcoming_events");
+    if (isValidUrl == true) {
+      console.log("urlMapping :", urlMapping);
+      localStorage.setItem('flyerUrl', urlMapping + ' ' + 'eventId-' + eventId);
+    }
+    else {
+      localStorage.setItem('flyerUrl', "");
+    }
+
+
   }
   private _baseUrl = environment.apiUrl;
 
