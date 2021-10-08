@@ -30,11 +30,13 @@ export class UserProfileComponent implements OnInit {
     }
     else {
       console.log("222");
-      let splittedEventId = flyUrl.split("-");
+      console.log("flyUrl 222", flyUrl);
+      let splittedEventId = flyUrl.split(" ");
       let eventId!: string;
       eventId = splittedEventId[1]; 
       let eventType = "upcoming_events";
       this.router.navigate(['/dashboard/cwcregistration/', eventType]);
+      console.log("eventId 222", eventId);
       localStorage.setItem('flyerEventId', eventId);
     }
     localStorage.setItem('flyerUrl', '');

@@ -24,7 +24,7 @@ export class ApiService {
     let isValidUrl = urlMapping.includes("upcoming_events");
     if (isValidUrl == true) {
       console.log("urlMapping :", urlMapping);
-      localStorage.setItem('flyerUrl', urlMapping + ' ' + 'eventId-' + eventId);
+      localStorage.setItem('flyerUrl', urlMapping + '' + 'eventId ' + eventId);
     }
     else {
       localStorage.setItem('flyerUrl', "");
