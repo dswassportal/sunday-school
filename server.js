@@ -899,7 +899,7 @@ app.get('/api/getEventDef', function (req, res) {
   console.log("getEventDef called... ");
   let loggedInUser = decodeUser(req)
   try {
-    processRegRequests.getEventDef(req.query.eventId, loggedInUser, req.query.participantId, req.query.regMethod)
+    processRegRequests.getEventDef(req.query.eventId, loggedInUser, req.query.participantId, req.query.regMethod, req.query.eventcode)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
