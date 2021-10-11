@@ -14,11 +14,14 @@ async function getEventDef(eventId, loggedInUserId, participantId, regMethod, ev
         //Get event section config.
         let response = {};
         let temp = {};
-        if(eventCode != 'null'){
-            const getEventId = `select event_id from t_event te where event_url = '${eventCode}';`;
-            let result = await client.query(getEventId);
-            eventId = result.rows[0].event_id;
+        if(eventCode){
+            if(eventCode != 'null'){
+                const getEventId = `select event_id from t_event te where event_url = '${eventCode}';`;
+                let result = await client.query(getEventId);
+                eventId = result.rows[0].event_id;
+            }
         }
+       
         
         let eveConfigRes = await client.query(queries.getEventSectionConfigByEveType, [eventId]);
         if (eveConfigRes.rowCount > 0)
