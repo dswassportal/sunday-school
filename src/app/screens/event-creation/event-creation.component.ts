@@ -704,7 +704,7 @@ export class EventCreationComponent implements OnInit {
           endDate: this.eventsDataUpdate.endDate,
           registrationStartDate: this.eventsDataUpdate.registrationStartDate,
           registrationEndDate: this.eventsDataUpdate.registrationEndDate,
-          eventUrl: "http://localhost:4200/#/dashboard/cwcregistration/upcoming_events?id=" + '' + this.eventsDataUpdate.eventUrl,
+          eventUrl: "http://church-webapp.herokuapp.com/#/dashboard/cwcregistration/upcoming_events?id=" + '' + this.eventsDataUpdate.eventUrl,
           description: this.eventsDataUpdate.description
         });
         this.dateChangeEventStartDate({ value: this.eventsDataUpdate.startDate });

@@ -14,7 +14,7 @@ async function getEventDef(eventId, loggedInUserId, participantId, regMethod, ev
         //Get event section config.
         let response = {};
         let temp = {};
-        if(eventCode != null){
+        if(eventCode != 'null'){
             const getEventId = `select event_id from t_event te where event_url = '${eventCode}';`;
             let result = await client.query(getEventId);
             eventId = result.rows[0].event_id;
@@ -66,7 +66,7 @@ async function getEventDefinationForIndivisualUser(client, eventId, participantI
     let response = {};
     let condition = ' ';
 
-    if(eventCode != null){
+    if(eventCode != 'null'){
         condition =  ' And te.event_url = $3 ';  
     }
 
@@ -121,8 +121,12 @@ async function getEventDefinationForIndivisualUser(client, eventId, participantI
                             and teq.question_id = teqr.question_id
                         left join t_grade_group tgg on tgg.grade_group_id =  tepr.grade_group_id
                         where te.event_id = $1 ${condition} order by tec."sequence";`;
-
-    let result = await client.query(getEventData, [eventId, participantId, eventCode]);
+    if(eventCode == 'null'){
+         result = await client.query(getEventData, [eventId, participantId]);
+    }
+    else{
+         result = await client.query(getEventData, [eventId, participantId, eventCode]);
+    }
     if (result.rowCount > 0) {
         for (let row of result.rows) {
             if (response.eventId == undefined) {
