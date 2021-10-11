@@ -100,6 +100,7 @@ export class EventRegistrationComponent implements OnInit {
         { headerName: 'Registration Id', field: 'registrationId', width:200, resizable: true, sortable: true, filter: true },
         { headerName: 'Registration Status', field: 'registrationStatus', width:200, resizable: true, sortable: true, filter: true },
         { headerName: 'Participant Name', field: 'participantName', width:200, resizable: true, sortable: true, filter: true },
+        { headerName: 'Score', field: 'overallScore', width:200, resizable: true, sortable: true, filter: true },
       ];
     }
     if (event.value == "completed_events") {

@@ -1002,7 +1002,10 @@ async function getEventData(userId, eventType) {
         if (eventType === 'upcoming_events') {
             res = await client.query(reqOpQueries.getUpcomingEvents, [userId]);
         } else if (eventType === 'registered_events') {
-            res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [userId]);
+            res = await client.query(reqOpQueries.getAllRegisteredEventsAndScore, [userId]);
+            if (res && res.rowCount == 0) {
+               res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [userId]);
+            }
         } else if (eventType === 'attendance') {
             // and event_start_date >= current_date
             res = await client.query(reqOpQueries.getEventForAttendance, [userId]);
@@ -1062,6 +1065,7 @@ async function getEventData(userId, eventType) {
                     events.registeredBy = row.registered_by;
                     events.registeredOn = row.registered_on;
                     events.executedBy = row.executed_by;
+                    events.overallScore = row.overall_score;
                     eventData.push(events);
                 }
                 metadata.eventData = eventData;
