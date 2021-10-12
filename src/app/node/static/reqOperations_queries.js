@@ -28,9 +28,9 @@ join t_event_participant_registration tepr on te.event_id = tepr.event_id
 and tepr.is_deleted != true 
 and tepr.user_id in (select family_member_id from t_person_relationship tpr 
 where tpr.family_head_id = $1 union select $1 ) 
-join t_participant_event_overall_score tpeos on tpeos.event_participant_registration_id = tepr.event_participant_registration_id 
-join	t_user tu on tepr.user_id = tu.user_id and tu.is_deleted != true
-join	t_user tu2 on tepr.created_by = tu2.user_id ;`;                            
+left join t_participant_event_overall_score tpeos on tpeos.event_participant_registration_id = tepr.event_participant_registration_id 
+join t_user tu on tepr.user_id = tu.user_id and tu.is_deleted != true
+join t_user tu2 on tepr.created_by = tu2.user_id ;`;                            
                             
 const getAllregisteredEventsWithFamilyMemrs = `select distinct  te.event_id, te."name", te.event_type, 
                                                      te.start_date, te.end_date, 
