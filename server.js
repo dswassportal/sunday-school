@@ -708,8 +708,9 @@ app.post('/api/postScore', function (req, res) {
 app.get('/api/getEventCatsAndStaffById', function (req, res) {
   console.log("getEventCatsAndStaffById called... with  event ID:" + req.query.id);
   // let loggedInUser =  decodeUser(req)
+  let loggedInUser = decodeUser(req);
   try {
-    processEventTemp.getEventCatsAndStaffById(req.query.id)
+    processEventTemp.getEventCatsAndStaffById(req.query.id, loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
