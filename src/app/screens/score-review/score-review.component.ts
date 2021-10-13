@@ -101,10 +101,11 @@ export class ScoreReviewComponent implements OnInit {
     this.selectedEventData = event.data;
     this.disableApproveBtn = true;
     $("#imagemodal").modal("show");
+    
 
     this.apiService.callGetService(`getEventCatsAndStaffById?id=${event.data.event_Id}`).subscribe((respData) => {
 
-
+    
       if (respData.data.status == 'failed') {
         this.scoreApprovalRowData = [];
         this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
@@ -135,11 +136,15 @@ export class ScoreReviewComponent implements OnInit {
                 this.disableApproveBtn = false;
                 this.scoreApprovalColDef = this.getParticipantDefArr(true);
               }
+              if(respData.data.isApproved == true){
+                this.disableApproveBtn = true;
+              }
             }
           });
 
         }
       }
+    
     });
   }
 
@@ -163,12 +168,17 @@ export class ScoreReviewComponent implements OnInit {
           this.scoreApprovalColDef = this.getParticipantDefArr(true);
         }
       }
+      if(respData.data.isApproved == true){
+        this.disableApproveBtn = true;
+      }
     });
   }
 
   handleScoreApproveBtnClick() {
 
     let confmMsgSt = `Scores cannot be updated after approval, Please click \'Ok\' to proceed.`;
+    let payload = {};
+    let scoreArr: any = [];
     if (confirm(confmMsgSt)) {
       this.handleSaveApproveBtnClick();
 
@@ -177,12 +187,31 @@ export class ScoreReviewComponent implements OnInit {
         return;
       } else {
 
-        let payload = {
+        let scoreData = this.getParticipantScoreArray();
+        console.log("scoreData", scoreData);
+
+
+
+        if (scoreData.length == 0) {
+          this.uiCommonUtils.showSnackBar('Nothing to save!', 'error', 3000)
+          return;
+        } else {
+        
+        
+        scoreData.forEach(element => {
+          scoreArr.push(element)
+        });
+        //payload.scoreArr = scoreArr;
+        }
+
+        payload = {
           action: 'approve',
           eventId: this.selectedEventData.event_Id,
           judgeId: this.selectedJudge,
           catId: this.selectedCat,
-          catMapId: this.scoreApprovalRowData[0].catMapId
+          catMapId: this.scoreApprovalRowData[0].catMapId,
+          scoreArr: scoreArr
+
         };
 
         this.apiService.callPostService('postScore', payload).subscribe((response) => {
@@ -309,7 +338,7 @@ export class ScoreReviewComponent implements OnInit {
   getParticipantScoreArray(): any[] {
 
     let scoreData: any = [];
-    let consolidatedArr: any = []
+    let consolidatedArr: any = [];
     let judges: any = [];
 
     let catIndex = this.catNameArr.findIndex((catItem:any) => catItem.categoryId == this.selectedCat)
