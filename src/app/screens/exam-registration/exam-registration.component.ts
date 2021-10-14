@@ -287,15 +287,18 @@ export class ExamRegistrationComponent implements OnInit {
 
     }
 
-
-    this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
-      if (res.data.status == "success") {
-        this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
-      }
-      else
-        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-    });
-
+    if(this.venuesDataFormGroup.value.venues.length == 0){
+      this.uiCommonUtils.showSnackBar("Please select venue!", "error", 3000);
+    }
+    else{
+      this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
+        if (res.data.status == "success") {
+          this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
+        }
+        else
+          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+      });
+    }
   }
 
   onCancelRegistrationClick() {

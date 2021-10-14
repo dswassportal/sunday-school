@@ -166,7 +166,7 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
 
 }
 
-async function getEventCatsAndStaffById(eventId) {
+async function getEventCatsAndStaffById(eventId, loggedInUser) {
 
     let client = await dbConnections.getConnection();
     try {
@@ -186,9 +186,9 @@ async function getEventCatsAndStaffById(eventId) {
                                                 AS (
                                                     SELECT org_id
                                                     FROM   t_organization parent_org 
-                                                    WHERE  org_id = 2  
-                                    --                                         in (select turc.org_id from t_user tu join t_user_role_context turc 
-                                    --						 									on tu.user_id = turc.user_id and turc.user_id = 1301) 
+                                                    WHERE  org_id in 
+                                                                             (select turc.org_id from t_user tu join t_user_role_context turc 
+                                						 									on tu.user_id = turc.user_id and turc.user_id = ${loggedInUser}) 
                                                     UNION
                                                     SELECT     child_org.org_id child_id
                                                     FROM       t_organization child_org

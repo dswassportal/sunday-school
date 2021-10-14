@@ -159,6 +159,8 @@ export class EventCreationComponent implements OnInit {
   isSavebtnRequired: any;
   isSavebtnRequiredGradeEval: any;
   isSavebtnRequiredTT: any;
+  flyercode: any;
+  eventcode: any;
 
 
   error: any;
@@ -702,7 +704,7 @@ export class EventCreationComponent implements OnInit {
           endDate: this.eventsDataUpdate.endDate,
           registrationStartDate: this.eventsDataUpdate.registrationStartDate,
           registrationEndDate: this.eventsDataUpdate.registrationEndDate,
-          eventUrl: this.eventsDataUpdate.eventUrl,
+          eventUrl: "https://dswa-ss-portal.herokuapp.com/#/dashboard/cwcregistration/upcoming_events?id=" + '' + this.eventsDataUpdate.eventUrl,
           description: this.eventsDataUpdate.description
         });
         this.dateChangeEventStartDate({ value: this.eventsDataUpdate.startDate });
@@ -781,7 +783,7 @@ export class EventCreationComponent implements OnInit {
       if (res.data.status == "success") {
         this.eventId = res.data.eventId;
 
-        if (this.eventId) {
+        if (this.eventId && this.eventType != "TTC") {
           this.apiService.uploadfiles(`uploadfile?eventId=${this.eventId}`, this.formData).subscribe((res: any) => {
             if (res.data.status == "success") {
               console.log("success");
@@ -1106,6 +1108,25 @@ export class EventCreationComponent implements OnInit {
       //   this.proctorData = res.data.metaData.proctorData;
       //   console.log("this.proctorData", this.proctorData);
       // });
+      if(this.eventFormLabel == false){  // insert screen
+        function makeRandom(lengthOfCode: number, possible: string) {
+          let text = "";
+          for (let i = 0; i < lengthOfCode; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+          }
+          return text;
+        }
+        let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        const lengthOfCode = 10;
+        this.flyercode = makeRandom(lengthOfCode, possible);
+        console.log("this.flyercode", this.flyercode);
+        this.eventcode = this.flyercode;
+        this.flyercode = "https://dswa-ss-portal.herokuapp.com/#/dashboard/cwcregistration/upcoming_events?id="+ this.flyercode;
+  
+        this.eventsDataFormGroup.patchValue({
+          eventUrl : this.flyercode
+        });
+      }
     }
 
     if (this.eventType == 'Bible Reading') {
@@ -1342,7 +1363,7 @@ export class EventCreationComponent implements OnInit {
       "registrationStartDate": this.formattedEventRegisrtationStartDate,
       //"registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate,
       "registrationEndDate": this.formattedEventRegisrtationEndDate,
-      "eventUrl": this.eventsDataFormGroup.value.eventUrl,
+      "eventUrl": this.eventcode,
       "description": this.eventsDataFormGroup.value.description
     }
 

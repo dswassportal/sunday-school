@@ -8,7 +8,8 @@ const processAttendaceRequest = require(`./src/app/node/reqAttendanceOperartions
 const processSSRequest = require(`./src/app/node/reqSsOperations`)
 const processFileUpload = require(`./src/app/node/reqFileUpload`)
 const processRegRequests = require(`${__dirname}/src/app/node/reqEveRegOperations`);
-const studentSearch =  require(`./src/app/node/search/studentSearch`)
+const studentSearch = require(`./src/app/node/search/studentSearch`)
+const firebaseAdminUtils = require('./src/app/node/firebase/firebaseAdminUtils')
 
 const fileUpload = require('express-fileupload');
 express = require('express')
@@ -23,6 +24,51 @@ app.listen(process.env.PORT || port, () => {
 });
 
 app.use(compression())
+app.use(express.json());
+// app.use('*', cors())
+
+const openEndpoints = ['/api', '/api/getEmail', '/api/getParishData', '/api/getLookupMasterData'];
+
+app.use((req, res, next) => {
+  let currEndpoint;
+  if (req.url.indexOf('?')) {
+    currEndpoint = req.url.split('?')[0];
+  } else
+    currEndpoint = req.url;
+
+  let headerToken = ""
+  if (req.header('Authorization') === undefined)
+		headerToken = ""
+   else 
+		headerToken	= req.header('Authorization')
+  
+  if ((headerToken.length === 0 && openEndpoints.indexOf(currEndpoint) >= 0) || req.url.indexOf('api')) {
+    next();
+  } else if (headerToken.length !== 0) {
+    firebaseAdminUtils.varifyUserToken(headerToken).then(idToken => {
+      next()
+    }).catch(error => {
+      console.error('oAuth token validation failed!!', error);
+      res.send({
+        data: {
+          status: 'failed',
+          errorCode: 401,
+          errorMsg: 'Session expired!'
+        }
+      });
+      res.end();
+    });
+  } else {
+    res.send({
+      data: {
+        status: 'failed',
+        errorCode: 400,
+        errorMsg: 'Bad request!'
+      }
+    });
+    res.end();
+  }
+});
 
 var corsOptions = {
   "origin": '*',
@@ -430,7 +476,7 @@ app.get('/api/getRegionAndParish', function (req, res) {
 app.get('/api/getEventType', function (req, res) {
   console.log("getEventType called with : " + JSON.stringify(req.query.fbuid));
   try {
-    let loggedInUser = decodeUser(req)
+    let loggedInUser = decodeUser(req);
     processEventRequest.getEventType(loggedInUser)
       .then((data) => {
         // console.log(`Returning with resonse : ${JSON.stringify(data)}`)
@@ -516,6 +562,8 @@ app.get('/api/getUserApprovalStatus', function (req, res) {
     ipAddr: req.connection.remoteAddress,
     userAgent: req.get('User-Agent')
   }
+
+   
 
     processMiscRequest.getUserApprovalStatus(req.query.fbuid, reqContextData)
       .then((data) => {
@@ -660,8 +708,9 @@ app.post('/api/postScore', function (req, res) {
 app.get('/api/getEventCatsAndStaffById', function (req, res) {
   console.log("getEventCatsAndStaffById called... with  event ID:" + req.query.id);
   // let loggedInUser =  decodeUser(req)
+  let loggedInUser = decodeUser(req);
   try {
-    processEventTemp.getEventCatsAndStaffById(req.query.id)
+    processEventTemp.getEventCatsAndStaffById(req.query.id, loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -851,7 +900,7 @@ app.get('/api/getEventDef', function (req, res) {
   console.log("getEventDef called... ");
   let loggedInUser = decodeUser(req)
   try {
-    processRegRequests.getEventDef(req.query.eventId, loggedInUser, req.query.participantId, req.query.regMethod)
+    processRegRequests.getEventDef(req.query.eventId, loggedInUser, req.query.participantId, req.query.regMethod, req.query.eventcode)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);
@@ -1001,6 +1050,7 @@ app.get('/api/getEmail', function (req, res) {
     console.error('Error in getEmailId as : ' + error)
   }
 });
+
 
 app.get('/api/getPrincipalByParish', function (req, res) {
   console.log("getEmailId called... ");

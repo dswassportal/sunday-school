@@ -201,13 +201,26 @@ export class CwcregistrationComponent implements OnInit {
       participantIdOrLoggedInUserId = this.loggedInUser;
     }
 
-    this.apiService.callGetService(`getEventDef?eventId=${this.selectedRowJson.event_Id}&participantId=${participantIdOrLoggedInUserId}`).subscribe((res) => {
+    let flyerEventId: any;
+    let eventcode: any;
+    flyerEventId = localStorage.getItem('flyerEventId');
 
+    if(flyerEventId){
+      eventcode = flyerEventId;
+      localStorage.setItem('flyerEventId', '');
+    }
+    else{
+      eventcode = null;
+    }
 
+    console.log("eventcode", eventcode);
+    this.apiService.callGetService(`getEventDef?eventId=${this.selectedRowJson.event_Id}&participantId=${participantIdOrLoggedInUserId}&eventcode=${eventcode}`).subscribe((res) => {
+
+      console.log("res.data", res.data);
       this.isUpdateBtnRequired = false;
       this.eventData = res.data.eventData;
       this.venueList = res.data.eventData.venues;
-
+      this.selectedRowJson.name = this.eventData.name;
       this.groupData = this.eventData.gradeGroup;
 
       this.regEndDate = this.eventData.regEndDate;

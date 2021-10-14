@@ -978,7 +978,7 @@ async function getEventData(userId, eventType) {
                                             ( 1
 --                                                        SELECT a.org_id
 --                                                        FROM   t_user_role_context a, t_user b
---                                                        WHERE  b.user_id = 1301        
+--                                                        WHERE  b.user_id = ${userId}        
 --                                                        AND    a.user_id = b.user_id
                                         ) 
                                     union 
@@ -991,7 +991,46 @@ async function getEventData(userId, eventType) {
                     join t_event te on teo.event_id = te.event_id 
                     join t_event_cat_staff_map tecsm on tecsm.event_id = te.event_id 
                     join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
-                    --where tecsm.is_score_submitted = true
+                    where tecsm.is_score_submitted = false
+                    order by te.end_date desc;`
+            // and event_start_date >= current_date
+
+        }
+        if (eventType === 'approved') {
+
+            getEventData = `select distinct te.event_id,
+                                te."name",
+                                te.event_type,
+                                te.description,
+                                to_char(te.start_date, 'DD-MM-YYYY') start_date,
+                                to_char(te.end_date, 'DD-MM-YYYY') end_date,
+                            tecsm.is_score_submitted,
+                            registration_start_date,
+                            te.registration_end_date,
+                            te.end_date
+                    from t_event_organization teo              
+                    join  (WITH recursive child_orgs 
+                                    AS (
+                                    SELECT org_id
+                                    FROM   t_organization parent_org 
+                                    WHERE  org_id IN
+                                            ( 1
+--                                                        SELECT a.org_id
+--                                                        FROM   t_user_role_context a, t_user b
+--                                                        WHERE  b.user_id = ${userId}        
+--                                                        AND    a.user_id = b.user_id
+                                        ) 
+                                    union 
+                                    SELECT     child_org.org_id child_id
+                                    FROM       t_organization child_org
+                                    INNER JOIN child_orgs c
+                                    ON         c.org_id = child_org.parent_org_id ) SELECT *
+                                        FROM   child_orgs) hqry
+                        on 	teo.org_id  = hqry.org_id 
+                    join t_event te on teo.event_id = te.event_id 
+                    join t_event_cat_staff_map tecsm on tecsm.event_id = te.event_id 
+                    join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
+                    where tecsm.is_score_submitted = true
                     order by te.end_date desc;`
             // and event_start_date >= current_date
 
@@ -1002,7 +1041,11 @@ async function getEventData(userId, eventType) {
         if (eventType === 'upcoming_events') {
             res = await client.query(reqOpQueries.getUpcomingEvents, [userId]);
         } else if (eventType === 'registered_events') {
-            res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [userId]);
+            console.log("user_id", userId);
+            res = await client.query(reqOpQueries.getAllRegisteredEventsAndScore, [userId]);
+            if (res && res.rowCount == 0) {
+               res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [userId]);
+            }
         } else if (eventType === 'attendance') {
             // and event_start_date >= current_date
             res = await client.query(reqOpQueries.getEventForAttendance, [userId]);
@@ -1062,6 +1105,8 @@ async function getEventData(userId, eventType) {
                     events.registeredBy = row.registered_by;
                     events.registeredOn = row.registered_on;
                     events.executedBy = row.executed_by;
+                    events.overallScore = row.overall_score;
+                    events.category = row.category;
                     eventData.push(events);
                 }
                 metadata.eventData = eventData;

@@ -7,7 +7,9 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
     let client = await dbConnections.getConnection();
 
     try {
+        let flag = false;
 
+        console.log("userScoreData", userScoreData);
         for (let score of userScoreData.scoreArr) {
 
             console.log('Updating score for event :' + score.eventId + ' by user ' + score.judge)
@@ -142,6 +144,9 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
                     } else if (pertainingEvt.rowCount > 0) throw `For Sunday School final Term Event ${score.eventId}, Multiple pertaining Midterm exam events found.`;
                     else throw `For Sunday School final Term Event ${score.eventId}, Pertaining Midterm exam event not found.`;
                 }
+
+             
+
             } else {
 
                 // Delete existing records if any
@@ -173,6 +178,17 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
                 let insertedResult = await client.query(insertIntoScoreTable);
                 console.log('No. of rows inserted in t_participant_event_score are :: ', insertedResult.rowCount);
 
+
+                if(userScoreData.action === 'approve' && flag === false){
+                    if(EveTypeResult.rows[0].event_type === 'CWC'){ 
+                        flag = true;
+                        await calculateScore(client, score.eventId, userScoreData.catId);
+                        const setIsApproved = `update t_event_cat_staff_map set is_score_approved = true where event_category_map_id = ${userScoreData.catId} and is_deleted = false;`;
+                        await client.query(setIsApproved);
+                    }
+                }
+    
+
             }
 
 
@@ -190,6 +206,8 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
             await client.query('commit;');
 
         }
+
+       
 
         return {
             data: {
@@ -218,19 +236,21 @@ async function calculateScore(client, eventId, eventCategoryMapId) {
 
     //  await client.query('begin;');
 
+    //and tecsm.is_score_approved = true approved as
     // First check if the score for all the judges is approved 
     let approvedCountQuery = `with approved as (select tecm.event_cat_map_id , count(tecsm.event_cat_staff_map_id) approved
                                     from t_event_category_map tecm, t_event_cat_staff_map tecsm
                                     where tecsm.event_id = tecm.event_id 
                                     and tecsm.event_category_map_id = tecm.event_cat_map_id 
-                                    and tecsm.is_score_approved = true
+                                    and tecsm.is_deleted = false
                                     group by tecm.event_cat_map_id
                                     )	,
                                     total_judges as (select tecm.event_cat_map_id , count(tecsm.event_cat_staff_map_id) total
                                     from t_event_category_map tecm, t_event_cat_staff_map tecsm
                                     where tecsm.event_id = tecm.event_id 
                                     and tecsm.event_category_map_id = tecm.event_cat_map_id 
-                                    and tecsm.role_type = 'Judge'	
+                                    and tecsm.role_type = 'Judge'
+                                    and tecsm.is_deleted = false	
                                     group by tecm.event_cat_map_id
                                     )
                                     select tecm.event_id, tecm.event_cat_map_id, approved.approved approved_count , total_judges.total total_judges_count
@@ -240,15 +260,16 @@ async function calculateScore(client, eventId, eventCategoryMapId) {
                                     where tecm.event_id = ${eventId} and tecm.event_cat_map_id = ${eventCategoryMapId};`
 
     let result = await client.query(approvedCountQuery);
-
+    console.log("result", result.rows);
     console.info('approvedCountQuery result == > ', result.rowCount)
 
     if (result && result.rowCount > 0) {
         console.info("Query result ==>", result.rows[0].approved_count, result.rows[0].total_judges_count);
-        if (result.rows[0].approved_count = result.rows[0].total_judges_count) {
+        if (result.rows[0].approved_count == result.rows[0].total_judges_count) {
 
             console.info('Score is approved for the category. Insert overall score');
 
+            //and tecsm.is_score_approved = true approved as
             //Get the average score for each student
             let insertScore = `insert into t_participant_event_overall_score (
                                         event_category_map_id,
@@ -259,8 +280,9 @@ async function calculateScore(client, eventId, eventCategoryMapId) {
                                     with approved as (select tecm.event_cat_map_id , count(tecsm.event_cat_staff_map_id) approved
                                     from t_event_category_map tecm, t_event_cat_staff_map tecsm
                                     where tecsm.event_id = tecm.event_id 
-                                    and tecsm.event_category_map_id = tecm.event_cat_map_id 
-                                    and tecsm.is_score_approved = true
+                                    and tecsm.event_category_map_id = tecm.event_cat_map_id
+                                    and tecsm.is_deleted = false 
+                                    
                                     group by tecm.event_cat_map_id
                                 )	,
                                 total_score as (select tperc.event_participant_registration_id, tecsm.event_category_map_id event_cat_map_id, 
@@ -281,6 +303,7 @@ async function calculateScore(client, eventId, eventCategoryMapId) {
                                 where tecm.event_id = ${eventId} and tecm.event_cat_map_id = ${eventCategoryMapId};`;
 
             let result = await client.query(insertScore);
+            console.log("666");
 
             console.info("Inserted record count :: ", result.rowCount)
         }
@@ -338,14 +361,17 @@ async function getScoreByCategory(eventId, eventCategoryId) {
                                 join t_event_cat_staff_map tecsm on tecsm.event_id = tecm.event_id and tecsm.event_category_map_id = tecm.event_cat_map_id 
                                 join t_event_participant_registration tepr on tepr.event_id = tecm.event_id and tepr.event_id =  ${eventId}
                                 join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
-                                    and tperc.event_category_id = tecm.event_cat_map_id and tperc.has_attended = true 
-                                left join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id 
+                                    and tperc.event_category_id = tecm.event_cat_map_id  
+                                   
+                                 join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id 
                                 and tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
                                 join t_user tu on tu.user_id = tecsm.user_id
                                 join t_user tu2 on tepr.user_id = tu2.user_id
                                 join t_organization to2 on to2.org_id = tu2.org_id 
                                 where tecm.event_id = ${eventId}  and tecm.event_cat_map_id = ${eventCategoryId} order by 1,2,3;`;
 
+                                //and tperc.has_attended = true  342
+                                //left 343
         let result = await client.query(eventQuery);
 
         if (result && result.rowCount > 0) {
@@ -359,14 +385,11 @@ async function getScoreByCategory(eventId, eventCategoryId) {
                 // Get categories
                 if (enrollmentId == 0) {
                     enrollmentId = row.enrollment_id;
-
                 } else if (row.enrollment_id != enrollmentId) {
                     enrollmentId = row.enrollment_id;
-
                     if (_.findWhere(scores, score) == null) {
                         scores.push(score);
                     }
-
                     score = {};
                 }
 
@@ -387,10 +410,15 @@ async function getScoreByCategory(eventId, eventCategoryId) {
 
         }
 
+        const isScoreApproved = `select event_category_map_id, is_score_approved from t_event_cat_staff_map where event_category_map_id = ${eventCategoryId} and is_deleted = false;`;
+        let res = await client.query(isScoreApproved);
+        isApproved = res.rows[0].is_score_approved;
+
         return ({
             data: {
                 status: 'success',
-                scoreData: scores
+                scoreData: scores,
+                isApproved: isApproved
             }
         })
 
