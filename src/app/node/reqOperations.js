@@ -1041,6 +1041,7 @@ async function getEventData(userId, eventType) {
         if (eventType === 'upcoming_events') {
             res = await client.query(reqOpQueries.getUpcomingEvents, [userId]);
         } else if (eventType === 'registered_events') {
+            console.log("user_id", userId);
             res = await client.query(reqOpQueries.getAllRegisteredEventsAndScore, [userId]);
             if (res && res.rowCount == 0) {
                res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [userId]);
@@ -1105,6 +1106,7 @@ async function getEventData(userId, eventType) {
                     events.registeredOn = row.registered_on;
                     events.executedBy = row.executed_by;
                     events.overallScore = row.overall_score;
+                    events.category = row.category;
                     eventData.push(events);
                 }
                 metadata.eventData = eventData;

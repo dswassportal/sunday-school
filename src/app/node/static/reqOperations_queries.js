@@ -6,7 +6,7 @@ const insUsrOpsLog =  `INSERT INTO t_user_operation_log
                             (user_id, operation_type, reason, performed_by, performed_date)
                             VALUES($1, $2, $3, $4, $5) returning user_id;`;   
 
-const getAllRegisteredEventsAndScore = `select distinct  te.event_id, tpeos.overall_score, te."name", te.event_type, 
+const getAllRegisteredEventsAndScore = `select distinct  te.event_id, tpeos.overall_score, tec."name" as category, tpeos.event_category_map_id ,te."name", te.event_type, 
 te.start_date, te.end_date, 
 te.registration_start_date, te.registration_end_date,
 tepr.enrollment_id, tepr.registration_status, 
@@ -28,9 +28,12 @@ join t_event_participant_registration tepr on te.event_id = tepr.event_id
 and tepr.is_deleted != true 
 and tepr.user_id in (select family_member_id from t_person_relationship tpr 
 where tpr.family_head_id = $1 union select $1 ) 
-left join t_participant_event_overall_score tpeos on tpeos.event_participant_registration_id = tepr.event_participant_registration_id 
+left join t_participant_event_overall_score tpeos on tpeos.event_participant_registration_id = tepr.event_participant_registration_id
+and tepr.event_id = te.event_id 
+left join t_event_category_map tecm on tpeos.event_category_map_id = tecm.event_cat_map_id 
+left join t_event_category tec on tec.event_category_id = tecm.event_category_id 
 join t_user tu on tepr.user_id = tu.user_id and tu.is_deleted != true
-join t_user tu2 on tepr.created_by = tu2.user_id ;`;                            
+join t_user tu2 on tepr.created_by = tu2.user_id;`;                            
                             
 const getAllregisteredEventsWithFamilyMemrs = `select distinct  te.event_id, te."name", te.event_type, 
                                                      te.start_date, te.end_date, 
