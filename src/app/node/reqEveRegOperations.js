@@ -550,7 +550,8 @@ async function eventRegistration(eventData, loggedInUser) {
 
                     // inserting question and their responses filled by the participant.  (t_event_question_response) 
                     if (eventData.questionnaire) {
-                        let insertQueRespValues = [];
+                        if(eventData.questionnaire[0].questionId){
+                            let insertQueRespValues = [];
                         for (let question of eventData.questionnaire)
                             insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, '${question.answer}', ${eventData.participantId}, '${new Date().toUTCString()}')`);
 
@@ -559,7 +560,9 @@ async function eventRegistration(eventData, loggedInUser) {
                             let regQueRes = await client.query(tempQuery);
                             if (regQueRes.rowCount > 0)
                                 console.debug(`for participant ${eventData.participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regQueRes.rows)}`);
-                        } else console.log(" No questionnaire were found to process.");
+                        } 
+                        }
+                        else console.log("No questionnaire were found to process.");
                     }
                 }
             } else if (eventData.enrollmentId !== null || eventData.enrollmentId !== undefined) {
