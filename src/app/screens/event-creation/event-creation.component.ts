@@ -1121,7 +1121,7 @@ export class EventCreationComponent implements OnInit {
         this.flyercode = makeRandom(lengthOfCode, possible);
         console.log("this.flyercode", this.flyercode);
         this.eventcode = this.flyercode;
-        this.flyercode = "http://localhost:4200/#/dashboard/flyerLink/upcoming_events?id="+ this.flyercode;
+        this.flyercode = "http://church-webapp.herokuapp.com/#/dashboard/cwcregistration/upcoming_events?id="+ this.flyercode;
   
         this.eventsDataFormGroup.patchValue({
           eventUrl : this.flyercode
