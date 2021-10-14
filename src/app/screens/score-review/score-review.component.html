@@ -2,8 +2,8 @@
 
 
     <div class="row mt-2 d-flex" style="justify-content: center;margin: 5px;">
-        <mat-radio-group aria-label="Select User Types to filter">
-            <mat-radio-button value="pending_requests" checked>Pending Approvals</mat-radio-button>
+        <mat-radio-group (change)='onFilteringRadioButtonChange($event)' aria-label="Select User Types to filter">
+            <mat-radio-button value="review_pending" checked>Pending Approvals</mat-radio-button>
             &nbsp;&nbsp;&nbsp;&nbsp;
             <!-- <mat-radio-button  value="approved">Approved</mat-radio-button>&nbsp;&nbsp;&nbsp;&nbsp; -->
             <mat-radio-button value="approved">Approved</mat-radio-button>

@@ -62,7 +62,7 @@ export class ScoreReviewComponent implements OnInit {
 
     this.scoreApprovalColDef = this.getParticipantDefArr(false);
 
-    let userId = this.uiCommonUtils.getUserMetaDataJson().userId
+    let userId = this.uiCommonUtils.getUserMetaDataJson().userId;
 
     this.apiService.callGetService(`getEventData?user=${userId}&eventType=review_pending`).subscribe((respData: any) => {
 
@@ -92,6 +92,27 @@ export class ScoreReviewComponent implements OnInit {
   selectedEventData: any = {}
   masterData: any;
   disableApproveBtn: boolean = false;
+
+
+  onFilteringRadioButtonChange(event: any){
+
+    let userId = this.uiCommonUtils.getUserMetaDataJson().userId;
+    this.apiService.callGetService(`getEventData?user=${userId}&eventType=${event.value}`).subscribe((respData: any) => {
+
+      if (respData.data.status == 'failed') {
+        this.eventRowData = [];
+        this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
+        return;
+      }
+
+      if (respData.data.metaData.eventData) {
+        this.eventRowData = respData.data.metaData.eventData
+      } else
+        this.eventRowData = [];
+
+    });
+  }
+
 
   onRowClicked(event: any) {
 
