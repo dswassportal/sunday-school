@@ -989,6 +989,7 @@ async function getEventData(userId, eventType) {
                                         FROM   child_orgs) hqry
                         on 	teo.org_id  = hqry.org_id 
                     join t_event te on teo.event_id = te.event_id 
+                    join t_event_coordinator tec on tec.event_id = te.event_id and tec.user_id = ${userId}  
                     join t_event_cat_staff_map tecsm on tecsm.event_id = te.event_id 
                     join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
                     where tecsm.is_score_submitted = false
@@ -1028,6 +1029,7 @@ async function getEventData(userId, eventType) {
                                         FROM   child_orgs) hqry
                         on 	teo.org_id  = hqry.org_id 
                     join t_event te on teo.event_id = te.event_id 
+                    join t_event_coordinator tec on tec.event_id = te.event_id and tec.user_id = ${userId}  
                     join t_event_cat_staff_map tecsm on tecsm.event_id = te.event_id 
                     join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
                     where tecsm.is_score_submitted = true

@@ -180,7 +180,7 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
 
 
                 if(userScoreData.action === 'approve' && flag === false){
-                    if(EveTypeResult.rows[0].event_type === 'CWC'){ 
+                    if(EveTypeResult.rows[0].event_type === 'CWC' || EveTypeResult.rows[0].event_type === 'Talent Competition'){ 
                         flag = true;
                         await calculateScore(client, score.eventId, userScoreData.catId);
                         const setIsApproved = `update t_event_cat_staff_map set is_score_approved = true where event_category_map_id = ${userScoreData.catId} and is_deleted = false;`;
