@@ -1163,7 +1163,6 @@ async function getRegionWiseJudges(loggedInUser, regionId, eventType) {
             judgerole = '%Talent Show Judge%';
         }
         let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, judgerole]);
-
         return ({
             data: {
                 status: 'success',

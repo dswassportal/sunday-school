@@ -280,6 +280,7 @@ const getRegionsByEventId = `select jsonb_agg(
 
 const getJudgesByEventRegion = `select 
                                 jsonb_agg(
+                                    distinct
                                     jsonb_build_object(
                                         'judgeName',  concat(ve.title,'. ', ve.first_name ,' ', ve.middle_name,' ', ve.last_name,
                                         '(',

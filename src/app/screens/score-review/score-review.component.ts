@@ -94,7 +94,7 @@ export class ScoreReviewComponent implements OnInit {
   disableApproveBtn: boolean = false;
 
 
-  onFilteringRadioButtonChange(event: any){
+  onFilteringRadioButtonChange(event: any) {
 
     let userId = this.uiCommonUtils.getUserMetaDataJson().userId;
     this.apiService.callGetService(`getEventData?user=${userId}&eventType=${event.value}`).subscribe((respData: any) => {
@@ -122,11 +122,11 @@ export class ScoreReviewComponent implements OnInit {
     this.selectedEventData = event.data;
     this.disableApproveBtn = true;
     $("#imagemodal").modal("show");
-    
+
 
     this.apiService.callGetService(`getEventCatsAndStaffById?id=${event.data.event_Id}`).subscribe((respData) => {
 
-    
+
       if (respData.data.status == 'failed') {
         this.scoreApprovalRowData = [];
         this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
@@ -157,7 +157,7 @@ export class ScoreReviewComponent implements OnInit {
                 this.disableApproveBtn = false;
                 this.scoreApprovalColDef = this.getParticipantDefArr(true);
               }
-              if(respData.data.isApproved == true){
+              if (respData.data.isApproved == true) {
                 this.disableApproveBtn = true;
               }
             }
@@ -165,7 +165,7 @@ export class ScoreReviewComponent implements OnInit {
 
         }
       }
-    
+
     });
   }
 
@@ -189,7 +189,7 @@ export class ScoreReviewComponent implements OnInit {
           this.scoreApprovalColDef = this.getParticipantDefArr(true);
         }
       }
-      if(respData.data.isApproved == true){
+      if (respData.data.isApproved == true) {
         this.disableApproveBtn = true;
       }
     });
@@ -217,12 +217,12 @@ export class ScoreReviewComponent implements OnInit {
           this.uiCommonUtils.showSnackBar('Nothing to save!', 'error', 3000)
           return;
         } else {
-        
-        
-        scoreData.forEach(element => {
-          scoreArr.push(element)
-        });
-        //payload.scoreArr = scoreArr;
+
+
+          scoreData.forEach(element => {
+            scoreArr.push(element)
+          });
+          //payload.scoreArr = scoreArr;
         }
 
         payload = {
@@ -265,7 +265,7 @@ export class ScoreReviewComponent implements OnInit {
         scoreArr.push(element)
       });
       payload.scoreArr = scoreArr;
-      
+
       this.apiService.callPostService('postScore', payload).subscribe((response) => {
 
         if (response.data.status == 'failed') {
@@ -289,36 +289,81 @@ export class ScoreReviewComponent implements OnInit {
       { headerName: 'Parish', field: 'org', flex: 1, resizable: true, suppressSizeToFit: true, sortable: true, filter: true }
     ]
     let tempElement: any = {};
-    if (this.scoreApprovalRowData)
-      tempElement = this.scoreApprovalRowData[0];
+    var keys: string[] = [];
+    let isJudgePushed: any[] = [];
 
-    var keys = Object.keys(tempElement);
 
-    for (let judge of this.judgeNameArr) {
+    if (this.scoreApprovalRowData) {
+      for (let row of this.scoreApprovalRowData) {
+        tempElement = row;
+        keys = Object.keys(tempElement);
 
-      if (keys.indexOf(judge.judgeId + "") >= 0) {
+        for (let judge of this.judgeNameArr) {
 
-        let column = {
-          headerName: judge.judgeName, field: `${judge.judgeId}`, flex: 1, editable: isEditable, suppressSizeToFit: true, resizable: true,
-          valueGetter: function (params: any) {
-            return params.data[judge.judgeId];
-          },
-          valueSetter: function (params: any) {
+          if (keys.indexOf(judge.judgeId + "") >= 0) {
 
-            try {
-              let score = parseInt(params.newValue);
-              if (score > 0 && score != NaN)
-                params.data[judge.judgeId] = score;
-              return true;
-            } catch (error) {
-              return false;
-            };
-          },
+            if (isJudgePushed.length == 0) {
+              isJudgePushed.push(judge.judgeId);
+
+              if (isJudgePushed.indexOf(judge.judgeId) >= 0) {
+                let column = {
+                  headerName: judge.judgeName, field: `${judge.judgeId}`, flex: 1, editable: isEditable, suppressSizeToFit: true, resizable: true,
+                  valueGetter: function (params: any) {
+                    return params.data[judge.judgeId];
+                  },
+                  valueSetter: function (params: any) {
+
+                    try {
+                      let score = parseInt(params.newValue);
+                      if (score > 0 && score != NaN)
+                        params.data[judge.judgeId] = score;
+                      return true;
+                    } catch (error) {
+                      return false;
+                    };
+                  },
+                }
+                colArr.push(column);
+
+              }
+            }
+            if (isJudgePushed.indexOf(judge.judgeId) == -1) {
+              isJudgePushed.push(judge.judgeId);
+
+              if (isJudgePushed.indexOf(judge.judgeId) >= 0) {
+                let column = {
+                  headerName: judge.judgeName, field: `${judge.judgeId}`, flex: 1, editable: isEditable, suppressSizeToFit: true, resizable: true,
+                  valueGetter: function (params: any) {
+                    return params.data[judge.judgeId];
+                  },
+                  valueSetter: function (params: any) {
+
+                    try {
+                      let score = parseInt(params.newValue);
+                      if (score > 0 && score != NaN)
+                        params.data[judge.judgeId] = score;
+                      return true;
+                    } catch (error) {
+                      return false;
+                    };
+                  },
+                }
+                colArr.push(column);
+
+              }
+            }
+
+
+
+          }
+
         }
-
-        colArr.push(column)
       }
+
+
     }
+
+    isJudgePushed = [];
 
     colArr.push(
       {
@@ -362,7 +407,7 @@ export class ScoreReviewComponent implements OnInit {
     let consolidatedArr: any = [];
     let judges: any = [];
 
-    let catIndex = this.catNameArr.findIndex((catItem:any) => catItem.categoryId == this.selectedCat)
+    let catIndex = this.catNameArr.findIndex((catItem: any) => catItem.categoryId == this.selectedCat)
 
     this.judgeNameArr.forEach((element: any) => {
       judges.push(element.judgeId + '')

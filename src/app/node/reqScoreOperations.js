@@ -401,10 +401,13 @@ async function getScoreByCategory(eventId, eventCategoryId) {
 
             } // End of for loop
 
-            //console.log("8");
+            console.log("score", score);
             if (_.findWhere(scores, score) == null) {
                 scores.push(score);
             }
+
+            
+            console.log("score1", scores);
 
             //console.log(`Stringified JSON is : ` + JSON.stringify(scores))
 

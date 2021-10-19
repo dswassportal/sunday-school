@@ -704,7 +704,7 @@ export class EventCreationComponent implements OnInit {
           endDate: this.eventsDataUpdate.endDate,
           registrationStartDate: this.eventsDataUpdate.registrationStartDate,
           registrationEndDate: this.eventsDataUpdate.registrationEndDate,
-          eventUrl: "http://church-webapp.herokuapp.com/#/dashboard/cwcregistration/upcoming_events?id=" + '' + this.eventsDataUpdate.eventUrl,
+          eventUrl: "https://dswa-ss-portal.herokuapp.com/#/dashboard/cwcregistration/upcoming_events?id=" + '' + this.eventsDataUpdate.eventUrl,
           description: this.eventsDataUpdate.description
         });
         this.dateChangeEventStartDate({ value: this.eventsDataUpdate.startDate });
@@ -1121,7 +1121,7 @@ export class EventCreationComponent implements OnInit {
         this.flyercode = makeRandom(lengthOfCode, possible);
         console.log("this.flyercode", this.flyercode);
         this.eventcode = this.flyercode;
-        this.flyercode = "http://church-webapp.herokuapp.com/#/dashboard/cwcregistration/upcoming_events?id="+ this.flyercode;
+        this.flyercode = "https://dswa-ss-portal.herokuapp.com/#/dashboard/cwcregistration/upcoming_events?id="+ this.flyercode;
   
         this.eventsDataFormGroup.patchValue({
           eventUrl : this.flyercode
