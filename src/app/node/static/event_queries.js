@@ -399,6 +399,7 @@ const deleteStaffRegionMapping = `update t_event_region_staff_map set is_deleted
 const deleteStaffCatMapping = `update t_event_cat_staff_map set is_deleted= $1, updated_by= $2, updated_date= $3 where event_id = $4;`;
 
 const getSelectedAndAllEvaluators = `select jsonb_agg(
+                                        distinct
                                         jsonb_build_object(
                                             'evalName', concat(ve.title,'. ', ve.first_name ,' ', ve.middle_name,' ', ve.last_name,
                                                         '(',
