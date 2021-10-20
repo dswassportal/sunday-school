@@ -1346,7 +1346,7 @@ export class EventCreationComponent implements OnInit {
         this.eventsDataFormGroup.value.orgType = this.eventsDataFormGroup.value.orgType[0];
       }
     }
-   
+
 
     let payload: any = {
       "eventId": this.eventId,
@@ -1364,7 +1364,8 @@ export class EventCreationComponent implements OnInit {
       //"registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate,
       "registrationEndDate": this.formattedEventRegisrtationEndDate,
       "eventUrl": this.eventcode,
-      "description": this.eventsDataFormGroup.value.description
+      "description": this.eventsDataFormGroup.value.description,
+      "onUpdatePage": this.eventFormLabel
     }
 
 
