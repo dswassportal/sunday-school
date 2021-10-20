@@ -765,9 +765,9 @@ app.post('/api/postAttendance', function (req, res) {
 
 app.get('/api/getScoreByCategory', function (req, res) {
   console.log("getScoreByCategory called...");
-  // let loggedInUser =  decodeUser(req)
+  let loggedInUser =  decodeUser(req);
   try {
-    processScoreRequest.getScoreByCategory(req.query.eventId, req.query.catId)
+    processScoreRequest.getScoreByCategory(req.query.eventId, req.query.catId, loggedInUser)
       .then((data) => {
         //console.log(`Returning with resonse : ${JSON.stringify(data)}`)
         res.send(data);

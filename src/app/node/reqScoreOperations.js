@@ -319,7 +319,7 @@ async function calculateScore(client, eventId, eventCategoryMapId) {
 }
 
 
-async function getScoreByCategory(eventId, eventCategoryId) {
+async function getScoreByCategory(eventId, eventCategoryId, loggedInUser) {
 
     console.log('getScoreByCategory called, Event Id = ' + eventId + ', Category Id = ' + eventCategoryId);
 
@@ -398,7 +398,7 @@ async function getScoreByCategory(eventId, eventCategoryId) {
                                         ( 
                                                  SELECT a.org_id
                                                     FROM   t_user_role_context a, t_user b
-                                                    WHERE  b.user_id = 1896       
+                                                    WHERE  b.user_id = ${loggedInUser}       
                                                     AND    a.user_id = b.user_id
                                     ) 
                                 union 
@@ -413,6 +413,7 @@ async function getScoreByCategory(eventId, eventCategoryId) {
 
                                 //and tperc.has_attended = true  342
                                 //left 343
+
         let result = await client.query(eventQuery);
 
         if (result && result.rowCount > 0) {
