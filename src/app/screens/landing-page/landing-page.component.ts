@@ -113,7 +113,7 @@ export class LandingPageComponent implements OnInit {
   };
 
   dropdownSettingsForEventExecutedBy: IDropdownSettings = {
-    singleSelection: false,
+    singleSelection: true,
     idField: 'id',
     textField: 'name',
     selectAllText: 'Select All',

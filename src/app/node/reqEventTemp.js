@@ -144,6 +144,7 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                 and tev.proctor_id = ${userId}
                                 and tev.event_id = ${eventId}
                                 and tev.is_deleted = false;`
+                                console.log("userId", userId);
 
         } else {
             console.log('Invalid action sent to getParticipant api, action recived to process  : ' + action);

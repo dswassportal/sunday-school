@@ -378,39 +378,42 @@ async function insertEvents(eventsData, loggedInUser) {
         let eventId = eventsData.eventId;
         let response = { eventId: eventsData.eventId }
 
-        if (eventsData.eventType == "Sunday School Midterm Exam") {
-            if (eventsData.orgId) {
-                if (eventsData.orgId.length > 0) {
-                    for (let org of eventsData.orgId) {
-                        let isExamPresentresult = await client.query(queries.isExamPresent, [eventsData.startDate, org]);
-                        if (isExamPresentresult.rowCount > 0) {
-                            client.query("commit;");
-                            response.status = "eventAlreadyExists";
-                            return ({
-                                data: response
-                            })
+        if(eventsData.onUpdatePage != true){
+            if (eventsData.eventType == "Sunday School Midterm Exam") {
+                if (eventsData.orgId) {
+                    if (eventsData.orgId.length > 0) {
+                        for (let org of eventsData.orgId) {
+                            let isExamPresentresult = await client.query(queries.isExamPresent, [eventsData.startDate, org]);
+                            if (isExamPresentresult.rowCount > 0) {
+                                client.query("commit;");
+                                response.status = "eventAlreadyExists";
+                                return ({
+                                    data: response
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+    
+            if (eventsData.eventType == "Sunday School Final Exam") {
+                if (eventsData.orgId) {
+                    if (eventsData.orgId.length > 0) {
+                        for (let org of eventsData.orgId) {
+                            let isFinalExamPresentresult = await client.query(queries.isFinalExamPresent, [eventsData.startDate, org]);
+                            if (isFinalExamPresentresult.rowCount > 0) {
+                                client.query("commit;");
+                                response.status = "eventAlreadyExists";
+                                return ({
+                                    data: response
+                                })
+                            }
                         }
                     }
                 }
             }
         }
-
-        if (eventsData.eventType == "Sunday School Final Exam") {
-            if (eventsData.orgId) {
-                if (eventsData.orgId.length > 0) {
-                    for (let org of eventsData.orgId) {
-                        let isFinalExamPresentresult = await client.query(queries.isFinalExamPresent, [eventsData.startDate, org]);
-                        if (isFinalExamPresentresult.rowCount > 0) {
-                            client.query("commit;");
-                            response.status = "eventAlreadyExists";
-                            return ({
-                                data: response
-                            })
-                        }
-                    }
-                }
-            }
-        }
+      
 
 
 
@@ -1163,7 +1166,6 @@ async function getRegionWiseJudges(loggedInUser, regionId, eventType) {
             judgerole = '%Talent Show Judge%';
         }
         let judgesList = await client.query(queries.getJudgesByEventRegion, [regionId, judgerole]);
-
         return ({
             data: {
                 status: 'success',

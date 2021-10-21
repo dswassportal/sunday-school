@@ -205,11 +205,11 @@ export class CwcregistrationComponent implements OnInit {
     let eventcode: any;
     flyerEventId = localStorage.getItem('flyerEventId');
 
-    if(flyerEventId){
+    if (flyerEventId) {
       eventcode = flyerEventId;
       localStorage.setItem('flyerEventId', '');
     }
-    else{
+    else {
       eventcode = null;
     }
 
@@ -249,10 +249,10 @@ export class CwcregistrationComponent implements OnInit {
             this.participantRoles = [...this.participantRoles];
           }
         }
-        else {   
-            this.participantRoles[1].isDisabled = false;
+        else {
+          this.participantRoles[1].isDisabled = false;
         }
-  
+
         if (this.selectedRowJson.event_type == "CWC" || this.selectedRowJson.event_type == "OVBS") {
           if ((this.participantRoles.code = "Teacher") && (this.participantRoles.code = "Clergy")) {
             this.participantRoles[2].isDisabled = true
@@ -265,7 +265,7 @@ export class CwcregistrationComponent implements OnInit {
           this.participantRoles[3].isDisabled = false;
         }
       }
-     
+
 
 
       if (this.eventData.registrationStatus == "Registered" && this.selectedEventType === 'registered_events') {
@@ -497,17 +497,23 @@ export class CwcregistrationComponent implements OnInit {
 
     }
 
-    this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
-      if (res.data.status == "success") {
-        console.log("res", res);
-        this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
-        this.router.navigate(['/dashboard/eventRegistration/']);
-      }
-      else {
-        this.uiCommonUtils.showSnackBar("Please fill all mandatory fields!", "error", 3000);
-      }
+    if (this.venuesDataFormGroup.value.venues.length == 0) {
+      this.uiCommonUtils.showSnackBar("Please select venue!", "error", 3000);
+    }
+    else {
 
-    });
+      this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
+        if (res.data.status == "success") {
+          console.log("res", res);
+          this.uiCommonUtils.showSnackBar("Registered for event successfully!", "success", 3000);
+          this.router.navigate(['/dashboard/eventRegistration/']);
+        }
+        else {
+          this.uiCommonUtils.showSnackBar("Please fill all mandatory fields!", "error", 3000);
+        }
+
+      });
+    }
 
   }
 
@@ -558,17 +564,23 @@ export class CwcregistrationComponent implements OnInit {
 
     }
 
-    this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
-      if (res.data.status == "success") {
-        console.log("res", res);
-        this.uiCommonUtils.showSnackBar("Event registration updated successfully!", "success", 3000);
-        this.router.navigate(['/dashboard/eventRegistration/']);
-      }
-      else {
-        this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
-      }
+    if (this.venuesDataFormGroup.value.venues.length == 0) {
+      this.uiCommonUtils.showSnackBar("Please select venue!", "error", 3000);
+    }
+    else {
 
-    });
+      this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
+        if (res.data.status == "success") {
+          console.log("res", res);
+          this.uiCommonUtils.showSnackBar("Event registration updated successfully!", "success", 3000);
+          this.router.navigate(['/dashboard/eventRegistration/']);
+        }
+        else {
+          this.uiCommonUtils.showSnackBar("Something went wrong!", "error", 3000);
+        }
+
+      });
+    }
 
 
 
@@ -621,6 +633,7 @@ export class CwcregistrationComponent implements OnInit {
 
     }
 
+
     this.apiService.callPostService('registerEvent', payload).subscribe((res: any) => {
       if (res.data.status == "success") {
         console.log("res", res);
@@ -632,6 +645,7 @@ export class CwcregistrationComponent implements OnInit {
       }
 
     });
+
 
   }
 
