@@ -20,6 +20,7 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
             if (EveTypeResult.rowCount > 0) {
 
                 if (EveTypeResult.rows[0].event_type === 'Sunday School Final Exam' || EveTypeResult.rows[0].event_type === 'Sunday School Midterm Exam') {
+                    console.log("userId", userId);
                     getPaticipantQuery = `select distinct  
                                                     jsonb_agg(
                                                         distinct jsonb_build_object(
@@ -33,7 +34,7 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                                 from t_event_cat_staff_map tecsm
                                                 join  t_event_participant_registration tepr on tecsm.event_id = tepr.event_id 
                                                     and tepr.event_id = ${eventId}  and tecsm.user_id = ${userId} and tecsm.is_deleted = false 
-                                                    and tepr.registration_status = 'Registered'
+                                                    and tepr.registration_status = 'Registered' and tepr.has_attended = true
                                                     join t_event_category_map tecm on tecm.event_id = tepr.event_id 
                                                     left join t_participant_event_score tpes on tpes.event_participant_registration_id = tepr.event_participant_registration_id 
                                                          and tpes.is_deleted = false and tecsm.user_id = ${userId}   
