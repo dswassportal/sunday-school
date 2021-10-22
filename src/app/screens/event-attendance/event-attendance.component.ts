@@ -78,10 +78,11 @@ export class EventAttendanceComponent implements OnInit {
     this.attendanceColDef = [
       { headerName: 'Registration Id', field: 'enrollmentId', headerCheckboxSelection: true, checkboxSelection: true, suppressSizeToFit: true, resizable: true, sortable: true, filter: true, },
       { headerName: 'Participant Name', field : 'participantName', resizable: true, flex : 1 },
-      { headerName: 'Group', field : 'grade', resizable: true, suppressSizeToFit: true},
+      { headerName: 'Group', field : 'group', resizable: true, suppressSizeToFit: true},
       { headerName: 'Role', field : 'role', resizable: true, suppressSizeToFit: true},
       { headerName: 'Participant Parish', field : 'participantParish', resizable: true, flex : 1 },
     ];
+    
 
     //cellRendererFramework: CheckboxRendererComponent, field: 'hasAttended', editable: false 
     let userId = this.uiCommonUtils.getUserMetaDataJson().userId

@@ -123,23 +123,29 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
         } else if (action === 'attendance') {
 
             getPaticipantQuery = ` select jsonb_agg(
+                                    distinct
                                         jsonb_build_object(
                                             'enrollmentId', tepr.enrollment_id,
                                             'isAttendanceSubmitted', tev.is_attendance_submitted,
                                             'hasAttended',  tepr.has_attended ,
                                             --'grade', tepr.school_grade,
+                                            'group', tgg.group_name,
                                             'role', tepr."role", 
                                             'participantId', tepr.user_id ,
                                             'eventPartRegId', tepr.event_participant_registration_id,
                                             'participantName', concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name),
                                             'participantParish', to2."name"
-                                        ) order by tepr.enrollment_id
-                                    ) participants	
+                                        ) 
+                                    ) participants 
                                 from t_event_participant_registration tepr
                                 join t_user tu on tu.user_id = tepr.user_id 
                                         and tu.is_deleted = false 
                                         and tepr.registration_status != 'Canceled'
                                         and tepr.event_id = ${eventId}
+                                join t_student_sundayschool_dtl tssd1 on tssd1.student_id = tu.user_id      
+                                join t_grade_group_detail tggd on tggd.grade = tssd1.school_grade 
+                                join t_grade_group tgg on tggd.grade_group_id = tgg.grade_group_id
+                                join t_student_sundayschool_dtl tssd on tssd.school_grade = tggd.grade                          
                                 join t_organization to2 on to2.org_id = tu.org_id 
                                 join t_event_venue tev on  tepr.event_venue_id = tev.event_venue_id 
                                 and tev.proctor_id = ${userId}
