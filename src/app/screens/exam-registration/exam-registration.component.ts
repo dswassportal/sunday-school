@@ -49,6 +49,7 @@ export class ExamRegistrationComponent implements OnInit {
   schoolNameData: any;
   parishDetailsFormGroup: any;
   gradesData: any;
+  allStudents: any;
 
 
   isVenueRequired: any;
@@ -138,6 +139,7 @@ export class ExamRegistrationComponent implements OnInit {
     this.apiService.callGetService(`getEventDef?eventId=${this.selectedRowJson.event_Id}&participantId=${this.loggedInUser}&regMethod=bulk`).subscribe((res) => {
       this.eventData = res.data.eventData;
       this.venueList = res.data.eventData.venues;
+      this.allStudents = res.data.eventData.studentsData;
 
       this.venuesDataFormGroup.patchValue({
         venues: res.data.eventData.selectedVenue
@@ -266,13 +268,21 @@ export class ExamRegistrationComponent implements OnInit {
 
     let allRegGridData = this.regGridApi.getSelectedRows();
     //this.eventData.staffData[0].sundaySchools[0].staff;
+    console.log("allRegGridData", allRegGridData);
+    console.log("this.allStudents", this.allStudents);
+
+    let userIdsForCancelReg = [];
+    for(let row of this.allStudents){
+      userIdsForCancelReg.push(row.studentId);
+    }
+
 
     let staffRegistration: any = [];
     for (let row of allRegGridData) {
       let tempArray =
       {
         "staffId": row.studentId,
-        "evePartiRegId": row.evePartiRegId
+        "evePartiRegId": row.evePartiRegId,
       }
       staffRegistration.push(tempArray);
     }
@@ -283,7 +293,8 @@ export class ExamRegistrationComponent implements OnInit {
       "eventType": this.selectedRowJson.event_type,
       "regMethod": "bulk",
       "eventVenueId": this.venuesDataFormGroup.value.venues.length == 0 ? null : this.venuesDataFormGroup.value.venues[0].eventVenueId,
-      "staffRegistration": staffRegistration
+      "staffRegistration": staffRegistration,
+      "userIdsForCancelReg": userIdsForCancelReg
 
     }
 

@@ -294,7 +294,7 @@ export class EventCreationComponent implements OnInit {
   };
 
   dropdownSettingsForEvaluatorDropdownValues: IDropdownSettings = {
-    singleSelection: false,
+    singleSelection: true,
     idField: 'userId',
     textField: 'name',
     selectAllText: 'Select All',
