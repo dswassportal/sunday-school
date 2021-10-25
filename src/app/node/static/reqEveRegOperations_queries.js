@@ -136,7 +136,7 @@ tssd.school_id,
 concat(tu.title, '. ', tu.first_name, ' ', tu.middle_name, ' ', tu.last_name) as "student_name",
 tosa.user_id as "principal_user_id",
 tepr.event_participant_registration_id,
-case when tepr.event_participant_registration_id is null then false else true end has_selected,
+case when tepr.registration_status is null or tepr.registration_status = 'Canceled' then false else true end has_selected,
 tepr.enrollment_id,
 tepr.registration_status,
 case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
@@ -164,7 +164,7 @@ where tosa.user_id = $1;`;
 const getTeacherwiseStudentData = `     select distinct tosa.user_id as "teacher_user_id", torg.name as "school_grade", tssd.school_id, tssd.student_id, torg1.name as "school_name",
 concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) as "student_name",
 tepr.event_participant_registration_id,
-case when tepr.event_participant_registration_id is null then false else true end has_selected,
+case when tepr.registration_status is null or tepr.registration_status = 'Canceled' then false else true end has_selected,
 tepr.enrollment_id,
 tepr.registration_status,
 case when tu2.title is not null then concat(tu2.title,'. ',tu2.first_name,' ', tu2.middle_name, ' ', tu2.last_name) 
