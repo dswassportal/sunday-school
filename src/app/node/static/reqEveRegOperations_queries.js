@@ -317,7 +317,7 @@ const updateTTCRegistration = `	UPDATE t_event_participant_registration
 
 const cancelTTCRegistation = `UPDATE t_event_participant_registration
                                 SET updated_by=$1, updated_date=$2, registration_status=$3
-                                WHERE event_id= $4 and event_participant_registration_id not in ($5) returning event_participant_registration_id;`;
+                                WHERE event_id= $4 and user_id in ($5) returning event_participant_registration_id;`;
 
 const getGradeGroups = `select distinct te.event_id, te."name", tgg.group_name, tgg.grade_group_id
                             from t_student_sundayschool_dtl tssd 

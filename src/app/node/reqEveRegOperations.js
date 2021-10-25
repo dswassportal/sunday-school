@@ -636,7 +636,10 @@ async function eventRegistration(eventData, loggedInUser) {
 
                     let regIdString = eventPartiArr.join(',');
                     //To handle unselected teacher's bulk registration
-                    let tempQ1 = queries.cancelTTCRegistation.replace('$5', regIdString);
+                  
+                    console.log("userIds For Cancel Registration", eventData.userIdsForCancelReg);
+                    let usersForCancelReg = eventData.userIdsForCancelReg.join(',');
+                    let tempQ1 = queries.cancelTTCRegistation.replace('$5', usersForCancelReg);
                     let cancelBulkTTCRes = await client.query(tempQ1, [loggedInUser, new Date().toUTCString(), 'Canceled', eventData.eventId]);
                     if (cancelBulkTTCRes.rowCount > 0)
                         console.debug(`for event ${eventData.eventId}, canceled event_participant_registration_ids are: ${JSON.stringify(cancelBulkTTCRes.rows)}`);
