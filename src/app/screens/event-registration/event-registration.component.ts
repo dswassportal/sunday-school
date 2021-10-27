@@ -207,5 +207,16 @@ export class EventRegistrationComponent implements OnInit {
 
   }
 
+  
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `event_list`,
+    };
+    this.gridApi.exportDataAsCsv(params);
+  }
+
 
 }

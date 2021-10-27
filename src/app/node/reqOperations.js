@@ -871,7 +871,7 @@ async function getParishData() {
     //  return new Promise((resolve, reject) => {
 
     try {
-        let getParishData = `select org_id id, name from t_organization where org_type = 'Parish'`
+        let getParishData = `select org_id id, name from t_organization where org_type = 'Parish' order by "name" desc;`
         let result = await client.query(getParishData)
 
 

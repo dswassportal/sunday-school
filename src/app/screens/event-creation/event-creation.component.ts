@@ -782,17 +782,27 @@ export class EventCreationComponent implements OnInit {
     this.apiService.callPostService('insertEvents', payload).subscribe((res: any) => {
       if (res.data.status == "success") {
         this.eventId = res.data.eventId;
-
-        if (this.eventId && this.eventType != "TTC") {
-          this.apiService.uploadfiles(`uploadfile?eventId=${this.eventId}`, this.formData).subscribe((res: any) => {
-            if (res.data.status == "success") {
-              console.log("success");
+     
+          if(res.data.isUpload && res.data.isUpload == true){
+            if (this.eventId && this.eventType != "TTC") {
+              this.apiService.uploadfiles(`uploadfile?eventId=${this.eventId}`, this.formData).subscribe((res: any) => {
+                if (res.data.status == "success") {
+                  console.log("success");
+                  this.formData.forEach((val, key, fD) =>{
+                    // here you can add filtering conditions
+                    this.formData.delete(key)
+                
+                    });
+                }
+                else {
+                  console.log("failed");
+                }
+              });
             }
-            else {
-              console.log("failed");
-            }
-          });
-        }
+          }
+        
+      
+       
 
         if (res.data.event_categories) {
           //this.rowDataCat = res.data.event_categories;
@@ -882,7 +892,6 @@ export class EventCreationComponent implements OnInit {
           this.questionnaireDataFormGroup.setControl('questionnaire', this.setQuestionaireData(res.data.event_questionnaires.questionnaire));
 
         }
-
         if (res.data.event_evaluator_assignment) {
           this.evaluatorDropdownValues = res.data.event_evaluator_assignment;
 
@@ -904,7 +913,6 @@ export class EventCreationComponent implements OnInit {
 
           }
         }
-
         if (res.data.event_grade_evaluator_assignment) {
           let mappedEvaluator: any = [];
           this.gradeEvaluatorAssignmentData = res.data.event_grade_evaluator_assignment;
@@ -1365,7 +1373,8 @@ export class EventCreationComponent implements OnInit {
       "registrationEndDate": this.formattedEventRegisrtationEndDate,
       "eventUrl": this.eventcode,
       "description": this.eventsDataFormGroup.value.description,
-      "onUpdatePage": this.eventFormLabel
+      "onUpdatePage": this.eventFormLabel,
+      "isUpload": true
     }
 
 

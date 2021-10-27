@@ -665,5 +665,15 @@ export class LandingPageComponent implements OnInit {
     }
   }
 
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `users_list`,
+    };
+    this.gridApi.exportDataAsCsv(params);
+  }
+
 
 }
