@@ -1256,7 +1256,7 @@ async function getRegionAndParish() {
         let allParishes = [];
 
 
-        let getallParishes = `select org_id, name from t_organization where org_type = 'Parish';`;
+        let getallParishes = `select org_id, name from t_organization where org_type = 'Parish' order by "name" desc;`;
         let resParishes = await client.query(getallParishes);
         if (resParishes.rowCount > 0) {
             for (let row of resParishes.rows) {
