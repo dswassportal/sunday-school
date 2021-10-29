@@ -22,14 +22,36 @@ var pool = new Pool({
     database: config.database,
     password: config.password,
     port: config.port,
-    max: 10,
+    max: 5,
     idleTimeoutMillis: 3000,
     connectionTimeoutMillis: 10000,
     ssl: {
         rejectUnauthorized: false
     },
-    maxUses: 10000, 
+    maxUses: 10000,
 });
+
+
+// User: nvibskmbyqefco
+// Password : 8caf665358e275ac9bfb9eb23b5a4c6e2a34ddef75e98b4306a44b28b4b9c591
+// Host: ec2-54-216-17-9.eu-west-1.compute.amazonaws.com
+// DB: de92g5782s2hn1
+//Uat db config
+// var pool = new Pool({
+//     user: "udc156qrcu6ilv",
+//     host: "ec2-52-23-45-5.compute-1.amazonaws.com",
+//     database: "d9dtt10i2gpng1",
+//     password: "p0e8afc0c4bbd2ebe84cb9d6a2f8e91c618737f4d299743e16b71e91652e1de26",
+//     port: "5432",
+//     max: 5,
+//     idleTimeoutMillis: 3000,
+//     connectionTimeoutMillis: 10000,
+//     ssl: {
+//         rejectUnauthorized: false
+//     },
+//     maxUses: 10000,
+// });
+
 
 pool.on('connect', client => {
     console.info("Total connections ::", pool.totalCount);

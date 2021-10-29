@@ -503,6 +503,9 @@ async function insertEvents(eventsData, loggedInUser) {
                 }//else
                 break;
             }// event_details case block
+
+           
+
             // To persist event form's event categories section.
             case "event_categories": {
 
@@ -855,6 +858,16 @@ async function insertEvents(eventsData, loggedInUser) {
             }//switch
         }//if  
 
+        console.log("eventsData.isUpload", eventsData.isUpload);
+        if(eventsData.isUpload){
+            if(eventsData.isUpload == true){
+                response.isUpload = true;
+            }
+            else{
+                response.isUpload = false;
+            }
+
+        }
 
         client.query("commit;");
         response.status = "success";
@@ -1243,7 +1256,7 @@ async function getRegionAndParish() {
         let allParishes = [];
 
 
-        let getallParishes = `select org_id, name from t_organization where org_type = 'Parish';`;
+        let getallParishes = `select org_id, name from t_organization where org_type = 'Parish' order by "name" desc;`;
         let resParishes = await client.query(getallParishes);
         if (resParishes.rowCount > 0) {
             for (let row of resParishes.rows) {

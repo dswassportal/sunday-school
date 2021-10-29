@@ -3,6 +3,12 @@
         <div class="form-group form-inline row m-0 p-0">
                 <input type="text" class="form-control col-9 search" (ngModelChange)="onSearchChange($event)"
                         placeholder="Search Here" [(ngModel)]="term">
+                <div class="d-flex" style="margin-right: 1.4%;padding-left:1.1%">
+                        <button mat-button class="col-2 ml-auto border" (click)="onBtExport()">
+                                <mat-icon>file_download</mat-icon>
+                        </button>
+                </div>
+
                 <button *ngIf="hasDeletePermission" mat-button class="col-2 ml-auto border" (click)="onDelete()">
                         <mat-icon>delete</mat-icon>
                         <span>Delete</span>
@@ -93,8 +99,9 @@
                                                         </mat-form-field>
                                                         <mat-form-field class="col-md">
                                                                 <mat-label>Date of Birth</mat-label>
-                                                                <input matInput type="input" [matDatepicker]="picker" (dateChange)="dateChange($event)"
-                                                                        id="dob" formControlName="dob" [max]=max_date>
+                                                                <input matInput type="input" [matDatepicker]="picker"
+                                                                        (dateChange)="dateChange($event)" id="dob"
+                                                                        formControlName="dob" [max]=max_date>
                                                                 <mat-datepicker-toggle matSuffix [for]="picker">
                                                                 </mat-datepicker-toggle>
                                                                 <mat-datepicker #picker></mat-datepicker>
@@ -313,7 +320,8 @@
                                                                         <h2>Role Assignment</h2>
                                                                 </div>
                                                                 <div class="col-md-6 col text-right">
-                                                                        <button mat-raised-button (click)="onaddbtnclick()">
+                                                                        <button mat-raised-button
+                                                                                (click)="onaddbtnclick()">
                                                                                 <mat-icon>add</mat-icon>
                                                                                 <span
                                                                                         style="padding-top: 2%;font-size: 16px;">Add</span>
@@ -330,10 +338,12 @@
                                                                                 <div class="row">
 
 
-                                                                                     
+
                                                                                         <mat-form-field
                                                                                                 class="col-md-3">
-                                                                                                <label style="font-family: poppins;text-align: left; padding-bottom: 3%; ">Role :</label>
+                                                                                                <label
+                                                                                                        style="font-family: poppins;text-align: left; padding-bottom: 3%; ">Role
+                                                                                                        :</label>
                                                                                                 <select matNativeControl
                                                                                                         required
                                                                                                         formControlName="roleId">
@@ -345,7 +355,7 @@
                                                                                                 </select>
                                                                                         </mat-form-field>
 
-                                                                                        
+
 
 
                                                                                         <!-- <mat-form-field
@@ -367,24 +377,40 @@
 
 
                                                                                         <div class="col-md-3">
-                                                                                                <label style="font-family: poppins;text-align: left; ">Access Level :</label>
-                                                                                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgType"
-                                                                                                    placeholder="Access Level" [settings]="dropdownSettingsEventLevel" [data]="orgs"
-                                                                                                    (onSelect)="onOrgSelect($event)"
-                                                                                                    formControlName="role" (onSelectAll)="onSelectAll($event)">
+                                                                                                <label
+                                                                                                        style="font-family: poppins;text-align: left; ">Access
+                                                                                                        Level :</label>
+                                                                                                <ng-multiselect-dropdown
+                                                                                                        style="padding-bottom: 2%;"
+                                                                                                        class="col-md-6"
+                                                                                                        id="orgType"
+                                                                                                        placeholder="Access Level"
+                                                                                                        [settings]="dropdownSettingsEventLevel"
+                                                                                                        [data]="orgs"
+                                                                                                        (onSelect)="onOrgSelect($event)"
+                                                                                                        formControlName="role"
+                                                                                                        (onSelectAll)="onSelectAll($event)">
                                                                                                 </ng-multiselect-dropdown>
-                                                            
+
                                                                                         </div>
 
                                                                                         <div class="col-md-4">
-                                                                                                <label style="font-family: poppins;text-align: left; ">Access Level ID :</label>
-                                                                                
-                                                                                                <ng-multiselect-dropdown style="padding-bottom: 2%;" class="col-md-6" id="orgId"
-                                                                                                    placeholder="Access Level ID" [settings]="dropdownSettingsEventExecutedBy"
-                                                                                                    [data]="orgDetails" formControlName="orgId"
-                                                                                                    (onSelectAll)="onSelectAll($event)">
+                                                                                                <label
+                                                                                                        style="font-family: poppins;text-align: left; ">Access
+                                                                                                        Level ID
+                                                                                                        :</label>
+
+                                                                                                <ng-multiselect-dropdown
+                                                                                                        style="padding-bottom: 2%;"
+                                                                                                        class="col-md-6"
+                                                                                                        id="orgId"
+                                                                                                        placeholder="Access Level ID"
+                                                                                                        [settings]="dropdownSettingsEventExecutedBy"
+                                                                                                        [data]="orgDetails"
+                                                                                                        formControlName="orgId"
+                                                                                                        (onSelectAll)="onSelectAll($event)">
                                                                                                 </ng-multiselect-dropdown>
-                                                            
+
                                                                                         </div>
 
                                                                                         <!-- <mat-form-field
@@ -405,10 +431,10 @@
                                                                                         </mat-form-field> -->
 
 
-                                                                                        <div
-                                                                                                class="col-md-1 col text-right" style="padding-top: 2.4%;">
+                                                                                        <div class="col-md-1 col text-right"
+                                                                                                style="padding-top: 2.4%;">
                                                                                                 <button (click)="onremovebtnclick(i)"
-                                                                                                mat-raised-button>
+                                                                                                        mat-raised-button>
                                                                                                         <mat-icon>delete
                                                                                                         </mat-icon>
                                                                                                         <span>Delete</span>

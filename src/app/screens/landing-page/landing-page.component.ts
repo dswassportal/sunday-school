@@ -389,7 +389,7 @@ export class LandingPageComponent implements OnInit {
       maritalStatus: this.selectedUserData.maritalStatus,
       dateofMarriage: this.selectedUserData.dateofMarriage,
       aboutYourself: this.selectedUserData.aboutYourself,
-      isFamilyHead: this.selectedUserData.isFamilyHead,
+      isFamilyHead: this.selectedUserData.isFamilyHead == true ? "true" : "false",
 
     })
 
@@ -663,6 +663,16 @@ export class LandingPageComponent implements OnInit {
         this.orgDetails = this.orgs[i].details;
       }
     }
+  }
+
+  onBtExport() {
+    // this.gridApi.exportDataAsExcel();
+    const params = {
+      columnGroups: true,
+      allColumns: true,
+      fileName: `users_list`,
+    };
+    this.gridApi.exportDataAsCsv(params);
   }
 
 
