@@ -299,16 +299,15 @@
                                                         </mat-form-field>
                                                 </div>
 
-                                                <!-- (change)="isFamilyHeadChange($event)" -->
-
                                                 <div class="row" style="color:gray">
                                                         <label id="example-radio-group-label" class="ml-3">Is Family
                                                                 Head? </label>
                                                         <mat-radio-group aria-label="Select an option"
-                                                                formControlName="isFamilyHead" >
-                                                                <mat-radio-button class="ml-1" [checked]=isFamilyHead value=true>Yes
+                                                                formControlName="isFamilyHead">
+                                                                <mat-radio-button class="ml-1" value="true">Yes
                                                                 </mat-radio-button>
-                                                                <mat-radio-button class="ml-1" [checked]=!isFamilyHead value=false>No</mat-radio-button>
+                                                                <mat-radio-button class="ml-1" value="false"
+                                                                        [checked]=true>No</mat-radio-button>
                                                         </mat-radio-group>
                                                 </div>
 

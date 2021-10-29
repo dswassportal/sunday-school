@@ -88,14 +88,12 @@ export class LandingPageComponent implements OnInit {
   formattedRoleEndDate: any;
   formattedRoleStrtDate: any;
   formattedDobDate: any;
-  isFamilyHead: boolean = true;
   dropdownSettingsEventLevel: any;
   dropdownSettingsEventExecutedBy: any;
   formattedRolesData: any = [];
   error = { validatePhoneNumber: true };
   constructor(private apiService: ApiService, private uiCommonUtils: uiCommonUtils,
-    private http: HttpClient, private formBuilder: FormBuilder, public router: Router) {
-     }
+    private http: HttpClient, private formBuilder: FormBuilder, public router: Router) { }
   // this.gridOptions = <GridOptions>{};
 
   agInit(params: any) {
@@ -395,21 +393,11 @@ export class LandingPageComponent implements OnInit {
 
     })
 
-   
-    //this.isFamilyHead = this.selectedUserData.isFamilyHead;
-    //console.log("this.isFamilyHead", this.isFamilyHead);
-    
-    //this.isFamilyHeadChange({value: this.selectedUserData.isFamilyHead});
-
     this.patchCountryState(this.selectedUserData.country);
 
     this.selectedUserRole = this.selectedUserData.roles;
 
   }
-
-  // isFamilyHeadChange(event: any){
-  //   console.log("event.value", event.value);
-  // }
 
   telInputObject(obj: any) {
     obj.intlTelInput('setNumber', this.selectedUserData.mobileNo);
