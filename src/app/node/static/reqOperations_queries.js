@@ -111,7 +111,7 @@ const assignMemberRoleToUsr = `insert into t_user_role_mapping (user_id, role_id
                                     WHERE family_id= $4 and family_member_id not in ($5) ;`; 
                                     
 const updateTUserForMember = `UPDATE t_user
-                            SET title=$1, first_name=$2, middle_name=$3, last_name=$4, updated_by=$5, updated_date=$6
+                            SET title=$1, first_name=$2, middle_name=$3, last_name=$4, updated_by=$5, updated_date=$6, user_name = $8
                             WHERE user_id= $7;`;            
                             
 const updateTPersonForMember = `UPDATE t_person
