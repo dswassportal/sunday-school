@@ -1402,7 +1402,7 @@ async function processUpdateUserRoles(userData, loggedInUser) {
                         //To update t_user Table
                         let tUserRes = await client.query(reqOpQueries.updateTUserForMember,
                             [details.title, details.firstName, details.middleName, details.lastName,
-                            userData.updatedBy, new Date().toUTCString(), details.userId]);
+                            userData.updatedBy, new Date().toUTCString(), details.userId, details.userName]);
                         if (tUserRes.rowCount > 0)
                             console.debug(` ${details.userId} member details has been updated(in t_user table)`);
 
