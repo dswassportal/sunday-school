@@ -130,40 +130,46 @@ export class EventRegistrationComponent implements OnInit {
         console.log("res.data.metaData.eventData", res.data.metaData.eventData);
 
         let scoreData: any = [];
-        for (let row of res.data.metaData.eventData) {
+        if(res.data.metaData.eventData){
+          for (let row of res.data.metaData.eventData) {
 
-          let index = scoreData.findIndex((item: any) => item.event_Id == row.event_Id);
-          console.log("index", index);
-          if (index <= 0) {
-            let json = {
-              "event_Id": row.event_Id,
-              "name": row.name,
-              "event_type": row.event_type,
-              "startDate": row.startDate,
-              "endDate": row.endDate,
-              "registrationStartDate": row.registrationStartDate,
-              "registrationEndDate": row.registrationEndDate,
-              "participantId": row.participantId,
-              "participantName": row.participantName,
-              "registrationId": row.registrationId,
-              "registrationStatus": row.registrationStatus,
-              "registeredBy": row.registeredBy,
-              "registeredOn": row.registeredOn,
-              "overallScore": row.category == "Sunday School Midterm Exam" || row.category == "Sunday School Final Exam" ? "Exam marks:" + ' ' + row.overallScore :
-                row.category == null ? ' ' : row.category + ': ' + row.overallScore,
-            }
-            scoreData.push(json);
-          }
-          if (index > 0) {
             let index = scoreData.findIndex((item: any) => item.event_Id == row.event_Id);
-            let existingCat = scoreData[index].overallScore;
-            let newCat = existingCat + ', ' + row.category + ': ' + row.overallScore;
-            scoreData[index].overallScore = newCat;
+            console.log("index", index);
+            if (index <= 0) {
+              let json = {
+                "event_Id": row.event_Id,
+                "name": row.name,
+                "event_type": row.event_type,
+                "startDate": row.startDate,
+                "endDate": row.endDate,
+                "registrationStartDate": row.registrationStartDate,
+                "registrationEndDate": row.registrationEndDate,
+                "participantId": row.participantId,
+                "participantName": row.participantName,
+                "registrationId": row.registrationId,
+                "registrationStatus": row.registrationStatus,
+                "registeredBy": row.registeredBy,
+                "registeredOn": row.registeredOn,
+                "overallScore": row.category == "Sunday School Midterm Exam" || row.category == "Sunday School Final Exam" ? "Exam marks:" + ' ' + row.overallScore :
+                  row.category == null ? ' ' : row.category + ': ' + row.overallScore,
+              }
+              scoreData.push(json);
+            }
+            if (index > 0) {
+              let index = scoreData.findIndex((item: any) => item.event_Id == row.event_Id);
+              let existingCat = scoreData[index].overallScore;
+              let newCat = existingCat + ', ' + row.category + ': ' + row.overallScore;
+              scoreData[index].overallScore = newCat;
+            }
           }
+          this.rowData = scoreData;
+        }
+        else{
+          this.rowData = [];
         }
 
         //this.rowData = res.data.metaData.eventData;
-        this.rowData = scoreData;
+       
       });
     }
     else {
