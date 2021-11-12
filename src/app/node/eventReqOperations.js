@@ -952,7 +952,7 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                     let index = respObj.findIndex((item) => item.catId == row.cat_id);
                     if (index < 0) {
                         let tempJObj = {};
-                        // if(row.org_id){
+                        if(row.org_id){
                             tempJObj = {
                                 catId: row.cat_id,
                                 categoryName: row.cat_name,
@@ -975,21 +975,21 @@ async function getSectionWiseData(loggedInUser, eventId, sectionCode, eventType,
                                 ]
                             }
                             respObj.push(tempJObj);
-                        // }
-                        // if(row.org_id == null){
-                        //     tempJObj = {
-                        //         catId: row.cat_id,
-                        //         categoryName: row.cat_name,
-                        //         catMapId: row.cat_map_id,
-                        //         regionsJudgesArray: [
-                        //             {
-                        //                 regions: '',
-                        //                 judges: ''
-                        //             }
-                        //         ]
-                        //     }
-                        //     respObj.push(tempJObj);
-                        // }
+                        }
+                        if(row.org_id == null){
+                            tempJObj = {
+                                catId: row.cat_id,
+                                categoryName: row.cat_name,
+                                catMapId: row.cat_map_id,
+                                regionsJudgesArray: [
+                                    {
+                                        regions: '',
+                                        judges: ''
+                                    }
+                                ]
+                            }
+                            respObj.push(tempJObj);
+                        }
                       
                        
                     } else {
