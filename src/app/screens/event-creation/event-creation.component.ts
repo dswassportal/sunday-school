@@ -1356,7 +1356,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    let payload: any = {
+    let payload : any = {
       "eventId": this.eventId,
       "name": this.eventsDataFormGroup.value.name,
       "eventType": this.eventType,
