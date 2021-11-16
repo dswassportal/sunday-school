@@ -1363,14 +1363,14 @@ export class EventCreationComponent implements OnInit {
       "eventCoordinator": eventCoordinator,
       "orgType": this.eventsDataFormGroup.value.orgType,
       "orgId": orgId,
-      "startDate": this.eventsDataFormGroup.value.startDate == "" ? null : this.eventsDataFormGroup.value.startDate,
-      //"startDate": this.formattedEventStartDate,
-      "endDate": this.eventsDataFormGroup.value.endDate == "" ? null : this.eventsDataFormGroup.value.endDate,
-      //"endDate": this.formattedEventEndDate,
-      "registrationStartDate": this.eventsDataFormGroup.value.registrationStartDate == "" ? null : this.eventsDataFormGroup.value.registrationStartDate,
-      //"registrationStartDate": this.formattedEventRegisrtationStartDate,
-      "registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate == "" ? null : this.eventsDataFormGroup.value.registrationEndDate,
-      //"registrationEndDate": this.formattedEventRegisrtationEndDate,
+      //"startDate": this.eventsDataFormGroup.value.startDate == "" ? null : this.eventsDataFormGroup.value.startDate,
+      "startDate": this.formattedEventStartDate == "" ? null : this.formattedEventStartDate,
+      //"endDate": this.eventsDataFormGroup.value.endDate == "" ? null : this.eventsDataFormGroup.value.endDate,
+      "endDate": this.formattedEventEndDate == "" ? null : this.formattedEventEndDate,
+      //"registrationStartDate": this.eventsDataFormGroup.value.registrationStartDate == "" ? null : this.eventsDataFormGroup.value.registrationStartDate,
+      "registrationStartDate": this.formattedEventRegisrtationStartDate == "" ? null :  this.formattedEventRegisrtationStartDate,
+      //"registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate == "" ? null : this.eventsDataFormGroup.value.registrationEndDate,
+      "registrationEndDate": this.formattedEventRegisrtationEndDate == "" ? null : this.formattedEventRegisrtationEndDate,
       "eventUrl": this.eventcode,
       "description": this.eventsDataFormGroup.value.description,
       "onUpdatePage": this.eventFormLabel,
@@ -1382,8 +1382,8 @@ export class EventCreationComponent implements OnInit {
     //create/update event for CWC for event_details section
     if (this.eventType == 'CWC' || this.eventType == 'Talent Competition' || this.eventType == 'Talent Show') {
       if (this.isSingleDayEvent == true) {
-        this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
-        //this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
+        //this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
         payload.endDate = this.eventsDataFormGroup.value.endDate;
       }
       payload.sectionCode = 'event_details';
@@ -1393,8 +1393,8 @@ export class EventCreationComponent implements OnInit {
 
     if (this.eventType == 'TTC' || this.eventType == 'Teachers Training') {
       if (this.isSingleDayEvent == true) {
-        this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
-        //this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
+        //this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
         payload.endDate = this.eventsDataFormGroup.value.endDate;
       }
       payload.sectionCode = 'event_details';
@@ -1404,8 +1404,8 @@ export class EventCreationComponent implements OnInit {
 
     if (this.eventType == 'Bible Reading' || this.eventType == 'Diploma Exam' || this.eventType == 'OVBS' || this.eventType == 'Sunday School Final Exam' || this.eventType == 'Sunday School Midterm Exam') {
       if (this.isSingleDayEvent == true) {
-        this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
-        //this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
+        //this.eventsDataFormGroup.value.endDate = this.eventsDataFormGroup.value.startDate;
+        this.eventsDataFormGroup.value.endDate = this.formattedEventStartDate
         payload.endDate = this.eventsDataFormGroup.value.endDate;
       }
       payload.sectionCode = 'event_details';
