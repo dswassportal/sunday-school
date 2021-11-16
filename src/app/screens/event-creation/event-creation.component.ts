@@ -1356,7 +1356,7 @@ export class EventCreationComponent implements OnInit {
     }
 
 
-    let payload: any = {
+    let payload : any = {
       "eventId": this.eventId,
       "name": this.eventsDataFormGroup.value.name,
       "eventType": this.eventType,
@@ -1364,13 +1364,13 @@ export class EventCreationComponent implements OnInit {
       "orgType": this.eventsDataFormGroup.value.orgType,
       "orgId": orgId,
       //"startDate": this.eventsDataFormGroup.value.startDate == "" ? null : this.eventsDataFormGroup.value.startDate,
-      "startDate": this.formattedEventStartDate == "" ? null : this.formattedEventStartDate,
+      "startDate": this.eventsDataFormGroup.value.startDate == "" ? null : this.formattedEventStartDate,
       //"endDate": this.eventsDataFormGroup.value.endDate == "" ? null : this.eventsDataFormGroup.value.endDate,
-      "endDate": this.formattedEventEndDate == "" ? null : this.formattedEventEndDate,
+      "endDate": this.eventsDataFormGroup.value.endDate == "" ? null : this.formattedEventEndDate,
       //"registrationStartDate": this.eventsDataFormGroup.value.registrationStartDate == "" ? null : this.eventsDataFormGroup.value.registrationStartDate,
-      "registrationStartDate": this.formattedEventRegisrtationStartDate == "" ? null :  this.formattedEventRegisrtationStartDate,
+      "registrationStartDate": this.eventsDataFormGroup.value.registrationStartDate == "" ? null :  this.formattedEventRegisrtationStartDate,
       //"registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate == "" ? null : this.eventsDataFormGroup.value.registrationEndDate,
-      "registrationEndDate": this.formattedEventRegisrtationEndDate == "" ? null : this.formattedEventRegisrtationEndDate,
+      "registrationEndDate": this.eventsDataFormGroup.value.registrationEndDate == "" ? null : this.formattedEventRegisrtationEndDate,
       "eventUrl": this.eventcode,
       "description": this.eventsDataFormGroup.value.description,
       "onUpdatePage": this.eventFormLabel,
