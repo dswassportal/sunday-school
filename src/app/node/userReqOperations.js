@@ -227,7 +227,6 @@ async function setStaffAssignment(staffData, loggedInUser) {
                 termDtlId: termDtlId
             },
             roles, staffData, client, loggedInUser);
-
         // Operate on Sub-Teachers Data            
         await assignRoleWiseGradeStaff({
             roleType: "substituteTeacher",
@@ -241,7 +240,6 @@ async function setStaffAssignment(staffData, loggedInUser) {
             },
             roles, staffData, client, loggedInUser);
 
-
         //to process principal and vice principal data
 
         await assignRoleWisePrincipalStaff({
@@ -254,7 +252,6 @@ async function setStaffAssignment(staffData, loggedInUser) {
                 ssEndDate: ssEndDate,
                 termDtlId: termDtlId
             }, roles, staffData, client, loggedInUser);
-
         await assignRoleWisePrincipalStaff({
             roleType: 'Sunday School Vice Principal',
             parenObj: 'vicePrincipal',
@@ -265,7 +262,6 @@ async function setStaffAssignment(staffData, loggedInUser) {
                 ssEndDate: ssEndDate,
                 termDtlId: termDtlId
             }, roles, staffData, client, loggedInUser);
-
 
         await client.query("COMMIT;");
 
@@ -370,12 +366,18 @@ async function assignRoleWiseGradeStaff(config, termData, roles, staffData, clie
 
     //console.log()
     //if (staffData.teacherGrades){
+    //console.log("staffData",staffData);
     for (let assObj of staffData[config["parentObj"]]) {
+        console.log("666", assObj);
+        console.log("999", assObj[config["roleType"]]);
         if (assObj[config["roleType"]]) {
             if (assObj[config["roleType"]].length > 0) {
                 let staffObj = assObj[config["roleType"]][0];
                 //  console.debug("Processing teacher : " + JSON.stringify(staffObj) + ' and school id is : ' + assObj.gradeId)
+                //console.log("staffObj.orgStaffAssId", staffObj);
+                //console.log("assObj", assObj);
                 if (!staffObj.orgStaffAssId) {
+                    console.log("999");
                     // To insert mapping into t_user_role_mapping
                     let roleInsRes = await client.query(queries.insertStaffRole,
                         [staffObj.staffId, roles['Sunday School Teacher'], termData.ssStartDate, termData.ssEndDate]);
@@ -393,7 +395,7 @@ async function assignRoleWiseGradeStaff(config, termData, roles, staffData, clie
                     //To checek wether the staff assignment exists or not for given grade, user, teacher type and with the term
                     let staffExistanceCheck = await client.query(queries.checkIsStaffAlreadyAssigned,
                         [assObj.gradeId, staffObj.staffId, roles['Sunday School Teacher'], false, config.isPrimary, termData.termDtlId]);
-
+                    console.log("staffExistanceCheck", staffExistanceCheck.rows);
                     if (staffExistanceCheck.rowCount > 0) {
                         existingOrgStaffIds.push(staffExistanceCheck.rows[0].org_staff_assignment_id)
                     } else {
@@ -439,7 +441,7 @@ async function doStaffMappingRoleCleanUp(client, loggedInUser, orgId, termDtlId,
         let teacherIds = [];
         assTeachersRes.rows.forEach(item => { if (item.user_id !== null) teacherIds.push(item.user_id) });
         let tempQuery = queries.deleteFromContextTbl.replace('$7', teacherIds.join(","));
-
+        console.log("teacherIds", teacherIds, loggedInUser, new Date().toUTCString(), orgId, roleId);
         let delRes = await client.query(tempQuery,
             [true, loggedInUser, new Date().toUTCString(), orgId, roleId, false]);
         console.debug(`${delRes.rowCount} user's roles has been marked deleted and ended in role context for ${orgId} org.`);
