@@ -6,7 +6,7 @@ const common = require('./dbCommonUtills');
 
 
 async function getEventDef(eventId, loggedInUserId, participantId, regMethod, eventCode) {
-    
+
     //if (!eventId || !loggedInUserId) throw "getEventDef::invalid query parameters recived in request.";
     let client = await dbConnections.getConnection();
 
@@ -14,15 +14,15 @@ async function getEventDef(eventId, loggedInUserId, participantId, regMethod, ev
         //Get event section config.
         let response = {};
         let temp = {};
-        if(eventCode){
-            if(eventCode != 'null'){
+        if (eventCode) {
+            if (eventCode != 'null') {
                 const getEventId = `select event_id from t_event te where event_url = '${eventCode}';`;
                 let result = await client.query(getEventId);
                 eventId = result.rows[0].event_id;
             }
         }
-       
-        
+
+
         let eveConfigRes = await client.query(queries.getEventSectionConfigByEveType, [eventId]);
         if (eveConfigRes.rowCount > 0)
             temp = eveConfigRes.rows[0].event_sec_config
@@ -69,8 +69,8 @@ async function getEventDefinationForIndivisualUser(client, eventId, participantI
     let response = {};
     let condition = ' ';
 
-    if(eventCode != 'null'){
-        condition =  ' And te.event_url = $3 ';  
+    if (eventCode != 'null') {
+        condition = ' And te.event_url = $3 ';
     }
 
     const getEventData = `select distinct te.event_id,
@@ -124,11 +124,11 @@ async function getEventDefinationForIndivisualUser(client, eventId, participantI
                             and teq.question_id = teqr.question_id
                         left join t_grade_group tgg on tgg.grade_group_id =  tepr.grade_group_id
                         where te.event_id = $1 ${condition} order by tec."sequence";`;
-    if(eventCode == 'null'){
-         result = await client.query(getEventData, [eventId, participantId]);
+    if (eventCode == 'null') {
+        result = await client.query(getEventData, [eventId, participantId]);
     }
-    else{
-         result = await client.query(getEventData, [eventId, participantId, eventCode]);
+    else {
+        result = await client.query(getEventData, [eventId, participantId, eventCode]);
     }
     if (result.rowCount > 0) {
         for (let row of result.rows) {
@@ -445,7 +445,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                 tempstudentsData = {};
             }
         }
-      
+
 
     }
     response.studentsData = studentsData;
@@ -482,7 +482,7 @@ async function bulkRegistration(client, loggedInUser, eventId) {
                     schoolId = row.school_id;
                 }
             }
-        }  
+        }
     }
 
 
@@ -528,7 +528,7 @@ async function eventRegistration(eventData, loggedInUser) {
                     [eventData.eventId, eventData.participantId, eventData.group,
                         false, loggedInUser, new Date().toUTCString(),
                         registrationId, eventData.eveVenueId, eventData.registrationStatus, eventData.role]);
-              
+
                 if (newRegRes.rowCount > 0) {
 
                     let participantRegId = newRegRes.rows[0].event_participant_registration_id;
@@ -550,17 +550,17 @@ async function eventRegistration(eventData, loggedInUser) {
 
                     // inserting question and their responses filled by the participant.  (t_event_question_response) 
                     if (eventData.questionnaire) {
-                        if(eventData.questionnaire[0].questionId){
+                        if (eventData.questionnaire[0].questionId) {
                             let insertQueRespValues = [];
-                        for (let question of eventData.questionnaire)
-                            insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, '${question.answer}', ${eventData.participantId}, '${new Date().toUTCString()}')`);
+                            for (let question of eventData.questionnaire)
+                                insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, '${question.answer}', ${eventData.participantId}, '${new Date().toUTCString()}')`);
 
-                        if (insertQueRespValues.length > 0) {
-                            let tempQuery = queries.insertRegQueResp.replace('$1', insertQueRespValues.join(','))
-                            let regQueRes = await client.query(tempQuery);
-                            if (regQueRes.rowCount > 0)
-                                console.debug(`for participant ${eventData.participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regQueRes.rows)}`);
-                        } 
+                            if (insertQueRespValues.length > 0) {
+                                let tempQuery = queries.insertRegQueResp.replace('$1', insertQueRespValues.join(','))
+                                let regQueRes = await client.query(tempQuery);
+                                if (regQueRes.rowCount > 0)
+                                    console.debug(`for participant ${eventData.participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regQueRes.rows)}`);
+                            }
                         }
                         else console.log("No questionnaire were found to process.");
                     }
@@ -636,13 +636,15 @@ async function eventRegistration(eventData, loggedInUser) {
 
                     let regIdString = eventPartiArr.join(',');
                     //To handle unselected teacher's bulk registration
-                  
-                    console.log("userIds For Cancel Registration", eventData.userIdsForCancelReg);
-                    let usersForCancelReg = eventData.userIdsForCancelReg.join(',');
-                    let tempQ1 = queries.cancelTTCRegistation.replace('$5', usersForCancelReg);
-                    let cancelBulkTTCRes = await client.query(tempQ1, [loggedInUser, new Date().toUTCString(), 'Canceled', eventData.eventId]);
-                    if (cancelBulkTTCRes.rowCount > 0)
-                        console.debug(`for event ${eventData.eventId}, canceled event_participant_registration_ids are: ${JSON.stringify(cancelBulkTTCRes.rows)}`);
+                    if (eventData.userIdsForCancelReg) {
+                        console.log("userIds For Cancel Registration", eventData.userIdsForCancelReg);
+                        let usersForCancelReg = eventData.userIdsForCancelReg.join(',');
+                        let tempQ1 = queries.cancelTTCRegistation.replace('$5', usersForCancelReg);
+                        let cancelBulkTTCRes = await client.query(tempQ1, [loggedInUser, new Date().toUTCString(), 'Canceled', eventData.eventId]);
+                        if (cancelBulkTTCRes.rowCount > 0)
+                            console.debug(`for event ${eventData.eventId}, canceled event_participant_registration_ids are: ${JSON.stringify(cancelBulkTTCRes.rows)}`);
+                    }
+
 
                     // to handele update of registration
                     let tempQ2 = queries.updateTTCRegistration.replace('$5', regIdString);
@@ -664,7 +666,7 @@ async function eventRegistration(eventData, loggedInUser) {
                 await client.query("COMMIT");
             }
 
-            
+
 
         }
         return {
