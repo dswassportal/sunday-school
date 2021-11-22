@@ -571,7 +571,10 @@ async function getuserRecords(userType, loggedInUser, eventId) {
 
         try {
             if (userType.toLowerCase() === 'sunday school principal' || userType.toLowerCase() === 'teacher') {
+                console.log("userType.toLowerCase()", userType.toLowerCase());
+                console.log("hierarchicalQry", hierarchicalQry);
 
+                
                 getuserRecords = `select distinct 
                                 vu.title,
                                 vu.first_name,
@@ -590,7 +593,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                                 vu.last_name,
                                 vu.role_name,
                                 vu.role_id,
-                                vu.user_id  from v_user vu where org_id in  (WITH recursive child_orgs 
+                                vu.user_id  from v_user vu where user_org_id in  (WITH recursive child_orgs 
                                     AS (
                                         SELECT org_id
                                         FROM   t_organization parent_org 
