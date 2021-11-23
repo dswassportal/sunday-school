@@ -85,6 +85,33 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                             and tecsm2.user_id = ${userId} and tecsm2.is_deleted != true
                                             left join t_participant_event_score tpes on tpes.event_cat_staff_map_id = tecsm2.event_cat_staff_map_id 
                                             and tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id;`;
+                    console.log("userId666", userId);
+                    res = await client.query(getPaticipantQuery);
+
+                    if (res.rows[0].participants == null) {
+                        console.log("It is evaluator");
+
+
+                        getPaticipantQuery = `select
+                                        tepr.event_participant_registration_id as "regId",
+                                        tepr.enrollment_id as "enrollmentId",                                              
+                                        tpes.score,
+                                        tpes.participant_event_score_id,
+                                        tepr.event_id,
+                                        te.event_type as "category"
+                                      
+                                    from t_event_participant_registration tepr
+                                    join t_event_evaluator tee on tee.event_id = tepr.event_id 
+                                    join t_user tu on tepr.user_id = tu.user_id 
+                                    and tepr.event_id = ${eventId}
+                                    and tepr.registration_status != 'Canceled'
+                                    and tepr.is_deleted = false
+                                    and tepr.has_attended = true                             
+                                    left join t_participant_event_score tpes on tpes.event_evaluator_id = tee.event_evaluator_id
+                                    join t_event te on te.event_id = tepr.event_id;`;
+
+                                    console.log("666");
+                    }
                 }
             }
         } else if (action == 'approve') {
@@ -191,10 +218,11 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
             return (errorHandling.handleDBError('connectionError'));
         }
         let result = await client.query(getPaticipantQuery);
+        //console.log("result", result.rows);
         return {
             data: {
                 status: 'success',
-                paticipants: result.rowCount > 0 ? result.rows[0].participants : []
+                paticipants: result.rowCount > 0 && result.rows[0].participants == undefined ? result.rows : result.rows[0].participants 
             }
         }
 

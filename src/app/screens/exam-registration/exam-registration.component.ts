@@ -175,10 +175,10 @@ export class ExamRegistrationComponent implements OnInit {
         }
       }
 
-      this.principalName = this.staffData.sundaySchools[0].principalName;
-      this.principalEmailId = this.staffData.sundaySchools[0].principalEmailId;
-      this.principalMobileNo = this.staffData.sundaySchools[0].principalMobileNo;
-      console.log("this.eventData.studentsData", this.eventData.studentsData);
+      //this.principalName = this.staffData.sundaySchools[0].principalName;
+      //this.principalEmailId = this.staffData.sundaySchools[0].principalEmailId;
+      //this.principalMobileNo = this.staffData.sundaySchools[0].principalMobileNo;
+      //console.log("this.eventData.studentsData", this.eventData.studentsData);
       const newArray = [...this.eventData.studentsData.reduce((map: any, obj: any) => map.set(obj.schoolGrade, obj), new Map()).values()];
       newArray.splice(0, 0 , {
         "schoolGrade": "All Grades"
