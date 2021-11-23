@@ -950,7 +950,7 @@ async function getEventData(userId, eventType) {
             getEventData = `select distinct 
                 te.event_id,
                 te."name",
-                te.event_type e, 
+                te.event_type, 
                 to_char(te.start_date , 'DD-MM-YYYY') start_date,
                 to_char(te.end_date , 'DD-MM-YYYY') end_date
                 from t_event_evaluator tee 
@@ -963,7 +963,7 @@ async function getEventData(userId, eventType) {
                 getEventData = ` select distinct 
                 te.event_id,
                 te."name",
-                te.event_type e, 
+                te.event_type, 
                 to_char(te.start_date , 'DD-MM-YYYY') start_date,
                 to_char(te.end_date , 'DD-MM-YYYY') end_date
                 from t_event_cat_staff_map tecsm 
