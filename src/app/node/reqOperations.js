@@ -574,7 +574,7 @@ async function getuserRecords(userType, loggedInUser, eventId) {
                 console.log("userType.toLowerCase()", userType.toLowerCase());
                 console.log("hierarchicalQry", hierarchicalQry);
 
-                
+
                 getuserRecords = `select distinct 
                                 vu.title,
                                 vu.first_name,
@@ -946,18 +946,34 @@ async function getEventData(userId, eventType) {
         }
         console.log(`Fetching event data for ${userId} user.`)
         if (eventType === 'for_judgement') {
-
-            getEventData = ` select distinct 
-                        te.event_id,
-                        te."name",
-                        te.event_type e, 
-                        to_char(te.start_date , 'DD-MM-YYYY') start_date,
-                        to_char(te.end_date , 'DD-MM-YYYY') end_date
+            // for evaluator
+            getEventData = `select distinct 
+                te.event_id,
+                te."name",
+                te.event_type e, 
+                to_char(te.start_date , 'DD-MM-YYYY') start_date,
+                to_char(te.end_date , 'DD-MM-YYYY') end_date
+                from t_event_evaluator tee 
+                join t_event te on te.event_id = tee.event_id 
+                where user_id = ${userId}
+                and te.is_deleted = false;`;
+            result = await client.query(getEventData);
+            if (result.rowCount == 0) {
+                 // for judge
+                getEventData = ` select distinct 
+                te.event_id,
+                te."name",
+                te.event_type e, 
+                to_char(te.start_date , 'DD-MM-YYYY') start_date,
+                to_char(te.end_date , 'DD-MM-YYYY') end_date
                 from t_event_cat_staff_map tecsm 
                 join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
                 join t_event te on te.event_id = tecsm.event_id 
-                    where user_id = ${userId}
-                    and te.is_deleted = false;`
+                where user_id = ${userId}
+                and te.is_deleted = false;`
+            }          
+
+            console.log("userId", userId);
             // and  tecm.is_attendance_submitted = true
         }
         if (eventType === 'review_pending') {
@@ -979,7 +995,7 @@ async function getEventData(userId, eventType) {
                             join t_event_category_map tecm on tecm.event_cat_map_id = tecsm.event_category_map_id 
                             where tecsm.is_score_submitted = false
                             order by te.end_date desc;`
-            
+
             // and event_start_date >= current_date
 
         }
@@ -1014,7 +1030,7 @@ async function getEventData(userId, eventType) {
             console.log("user_id", userId);
             res = await client.query(reqOpQueries.getAllRegisteredEventsAndScore, [userId]);
             if (res && res.rowCount == 0) {
-               res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [userId]);
+                res = await client.query(reqOpQueries.getAllregisteredEventsWithFamilyMemrs, [userId]);
             }
         } else if (eventType === 'attendance') {
             // and event_start_date >= current_date
