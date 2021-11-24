@@ -98,17 +98,18 @@ async function getParticipant(eventId, userId, action, judgeId, catId) {
                                         tpes.score,
                                         tpes.participant_event_score_id,
                                         tepr.event_id,
-                                        te.event_type as "category"
+                                        te.event_type as "category",
+                                        tee.is_score_submitted  as "isScoreSubmitted"
                                       
-                                    from t_event_participant_registration tepr
-                                    join t_event_evaluator tee on tee.event_id = tepr.event_id 
-                                    join t_user tu on tepr.user_id = tu.user_id 
-                                    and tepr.event_id = ${eventId}
-                                    and tepr.registration_status != 'Canceled'
-                                    and tepr.is_deleted = false
-                                    and tepr.has_attended = true                             
-                                    left join t_participant_event_score tpes on tpes.event_evaluator_id = tee.event_evaluator_id
-                                    join t_event te on te.event_id = tepr.event_id;`;
+                                        from t_event_participant_registration tepr
+                                        join t_event_evaluator tee on tee.event_id = tepr.event_id 
+                                        join t_user tu on tepr.user_id = tu.user_id 
+                                        and tepr.event_id = ${eventId}
+                                        and tepr.registration_status != 'Canceled'
+                                        and tepr.is_deleted = false
+                                        and tepr.has_attended = true
+                                        join t_event te on te.event_id = tepr.event_id
+                                        left join t_participant_event_score tpes on tpes.event_participant_registration_id = tepr.event_participant_registration_id`;
 
                                     console.log("666");
                     }

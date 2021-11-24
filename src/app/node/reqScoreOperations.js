@@ -145,10 +145,50 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
                     else throw `For Sunday School final Term Event ${score.eventId}, Pertaining Midterm exam event not found.`;
                 }
 
-             
 
-            } else {
 
+
+            }
+            else if (EveTypeResult.rows[0].event_type === 'TTC' || EveTypeResult.rows[0].event_type === 'Diploma Exam') {
+                console.log("TTC OR DIPLOMA EXAM");
+
+
+
+
+                deleteFromScoreTable = `delete from t_participant_event_score where participant_event_score_id in(	
+                                select 
+                                        tpes.participant_event_score_id 
+                                from t_event_evaluator tee
+                                    join  t_event_participant_registration tepr on tee.event_id = tepr.event_id 
+                                        and tee.event_id = ${score.eventId} and tee.user_id = ${score.judge} and tee.is_deleted = false
+                                left join t_participant_event_score tpes on tpes.event_evaluator_id = tee.event_evaluator_id
+                                    and tpes.is_deleted = false
+                                );`;
+
+
+
+                insertIntoScoreTable = `insert into t_participant_event_score (event_evaluator_id, score, created_by, created_date, event_participant_registration_id)
+                                
+                                                    select distinct tee.event_evaluator_id, tts.score, ${loggedInUser}, current_timestamp, tepr.event_participant_registration_id
+                                                    from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
+                                                                        
+                                                        join t_event_participant_registration tepr on tts.enrollment_id = tepr.enrollment_id 
+                                                        and tepr.registration_status = 'Registered'
+                                                        left join t_event_evaluator tee on tepr.event_id = tee.event_id 
+                                                        and tee.event_id = ${score.eventId} 
+                                                        and tee.user_id = ${score.judge} and tee.is_deleted = false`;
+
+                let deleteResult = await client.query(deleteFromScoreTable);
+                console.log('No. of rows deleted from t_participant_event_score are ', deleteResult.rowCount);
+                let insertedResult = await client.query(insertIntoScoreTable);
+                console.log('No. of rows inserted in t_participant_event_score are :: ', insertedResult.rowCount);
+
+
+
+
+            }
+            else {
+                console.log("Else CONDITION");
                 // Delete existing records if any
                 deleteFromScoreTable = `delete from t_participant_event_score where participant_event_score_id in (
                                         select tpes.participant_event_score_id  from t_temp_score tts join t_event_category tec on tec."name" = tts.event_category_name
@@ -179,15 +219,15 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
                 console.log('No. of rows inserted in t_participant_event_score are :: ', insertedResult.rowCount);
 
 
-                if(userScoreData.action === 'approve' && flag === false){
-                    if(EveTypeResult.rows[0].event_type === 'CWC' || EveTypeResult.rows[0].event_type === 'Talent Competition'){ 
+                if (userScoreData.action === 'approve' && flag === false) {
+                    if (EveTypeResult.rows[0].event_type === 'CWC' || EveTypeResult.rows[0].event_type === 'Talent Competition') {
                         flag = true;
                         await calculateScore(client, score.eventId, userScoreData.catId);
                         const setIsApproved = `update t_event_cat_staff_map set is_score_approved = true where event_category_map_id = ${userScoreData.catId} and is_deleted = false;`;
                         await client.query(setIsApproved);
                     }
                 }
-    
+
 
             }
 
@@ -198,7 +238,16 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
                                    where event_id = ${score.eventId} and user_id= ${score.judge};`;
 
                 await client.query(updateSubmittedStatus);
-                console.log(`${score.judge} user updated is_score_submitted for event id: ${score.eventId}`)
+                console.log(`${score.judge} user updated is_score_submitted for event id: ${score.eventId}`);
+
+
+                if (EveTypeResult.rows[0].event_type === 'TTC' || EveTypeResult.rows[0].event_type === 'Diploma Exam') {
+                    let updateSubmittedStatusForEvaluator = `update t_event_evaluator set is_score_submitted = true
+                                   where event_id = ${score.eventId} and user_id= ${loggedInUser};`;
+
+                    await client.query(updateSubmittedStatusForEvaluator);
+                    console.log(`${score.judge} user updated is_score_submitted for event id: ${score.eventId}`);
+                }
             }
 
             await client.query('DROP TABLE t_temp_score;');
@@ -207,7 +256,7 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
 
         }
 
-       
+
 
         return {
             data: {
@@ -362,7 +411,7 @@ async function getScoreByCategory(eventId, eventCategoryId, loggedInUser) {
         //                         join t_event_participant_registration tepr on tepr.event_id = tecm.event_id and tepr.event_id =  ${eventId}
         //                         join t_participant_event_reg_cat tperc on tperc.event_participant_registration_id = tepr.event_participant_registration_id
         //                             and tperc.event_category_id = tecm.event_cat_map_id  
-                                   
+
         //                          join t_participant_event_score tpes on tpes.participant_event_reg_cat_id = tperc.participant_event_reg_cat_id 
         //                         and tpes.event_cat_staff_map_id = tecsm.event_cat_staff_map_id 
         //                         join t_user tu on tu.user_id = tecsm.user_id
@@ -409,10 +458,10 @@ async function getScoreByCategory(eventId, eventCategoryId, loggedInUser) {
                                     FROM   child_orgs) 
                             join t_organization to2 on to2.org_id = tu2.org_id 
                             where tecm.event_id = ${eventId}  and tecm.event_cat_map_id = ${eventCategoryId} order by 1,2,3;`;
-                           
 
-                                //and tperc.has_attended = true  342
-                                //left 343
+
+        //and tperc.has_attended = true  342
+        //left 343
 
         let result = await client.query(eventQuery);
 
@@ -447,7 +496,7 @@ async function getScoreByCategory(eventId, eventCategoryId, loggedInUser) {
                 scores.push(score);
             }
 
-            
+
 
             //console.log(`Stringified JSON is : ` + JSON.stringify(scores))
 
