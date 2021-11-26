@@ -240,7 +240,51 @@ async function getEventCatsAndStaffById(eventId, loggedInUser) {
 
     let client = await dbConnections.getConnection();
     try {
-        let queryStmt = ` select         
+
+        getEventType = `select event_type from t_event where event_id = ${eventId};`;
+        let res = await client.query(getEventType);
+
+        if(res.rows[0].event_type == 'TTC'){
+            let queryStmt = `select 	        
+                                jsonb_agg(
+                                        distinct jsonb_build_object('categoryId', 1005,
+                                                                    'categoryName', 'TTC'  ) 		
+                                            ) catarr,
+                                jsonb_agg(
+                                        distinct jsonb_build_object('judgeId', tu.user_id,
+                                                                    'judgeName', concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) ) 		
+                                            ) judgearr 		                                    
+                                from t_event_participant_registration tepr 
+                                join t_event_evaluator tee on tee.event_id = tepr.event_id 
+                                join t_user tu on tee.user_id = tu.user_id 
+                                and tepr.event_id = ${eventId};`;
+                      
+            console.log("loggedInUser", loggedInUser);                        
+            result = await client.query(queryStmt);
+          
+        }
+        else if(res.rows[0].event_type == 'Diploma Exam'){
+            
+            let queryStmt = `  select 	        
+                                jsonb_agg(
+                                        distinct jsonb_build_object('categoryId', 1008,
+                                                                    'categoryName', 'Diploma Exam'  ) 		
+                                            ) catarr,
+                                jsonb_agg(
+                                        distinct jsonb_build_object('judgeId', tu.user_id,
+                                                                    'judgeName', concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ', tu.last_name) ) 		
+                                            ) judgearr 		                                    
+                                from t_event_participant_registration tepr 
+                                join t_event_evaluator tee on tee.event_id = tepr.event_id 
+                                join t_user tu on tee.user_id = tu.user_id 
+                                and tepr.event_id = ${eventId};`;
+
+            console.log("loggedInUser", loggedInUser);                                                                       
+            result = await client.query(queryStmt);
+        }
+        else{
+          
+            let queryStmt = ` select         
                                 jsonb_agg(
                                         distinct jsonb_build_object('categoryId', vep.event_cat_map_id,
                                                                     'categoryName', vep.event_category_name  ) 		
@@ -266,7 +310,11 @@ async function getEventCatsAndStaffById(eventId, loggedInUser) {
                                                     ON         c.org_id = child_org.parent_org_id ) SELECT *
                                     FROM   child_orgs);`;
 
-        let result = await client.query(queryStmt);
+                                    console.log("loggedInUser", loggedInUser);                                                                       
+                                    result = await client.query(queryStmt);
+        }
+        
+       console.log("result.rows[0]", result.rows[0]);
 
         return {
             data: {
