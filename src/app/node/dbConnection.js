@@ -1,7 +1,7 @@
 const { Client, Pool } = require('pg');
 var parse = require('pg-connection-string').parse;
 
-let devDB = 'postgres://udc156qrcu6ilv:p0e8afc0c4bbd2ebe84cb9d6a2f8e91c618737f4d299743e16b71e91652e1de26@ec2-52-23-45-5.compute-1.amazonaws.com:5432/d9dtt10i2gpng1' ;
+let devDB = 'postgres://oiccrclqexuacu:a13fa0f3a0b64d44c63c23c3fe7731556843127809c1360400dc3ae2cf228808@ec2-54-216-17-9.eu-west-1.compute.amazonaws.com:5432/de92g5782s2hn1' ;
 
 if (process.env.DATABASE_URL == undefined) {
     console.error(`DB connection string not found DATABASE_URL environment variable.`);
