@@ -959,7 +959,7 @@ async function getEventData(userId, eventType) {
                 and te.is_deleted = false;`;
             result = await client.query(getEventData);
             if (result.rowCount == 0) {
-                 // for judge
+                // for judge
                 getEventData = ` select distinct 
                 te.event_id,
                 te."name",
@@ -971,14 +971,37 @@ async function getEventData(userId, eventType) {
                 join t_event te on te.event_id = tecsm.event_id 
                 where user_id = ${userId}
                 and te.is_deleted = false;`
-            }          
+            }
 
             console.log("userId", userId);
             // and  tecm.is_attendance_submitted = true
         }
         if (eventType === 'review_pending') {
 
+
+            // for evaluator
             getEventData = `select distinct te.event_id,
+                                te."name",
+                                te.event_type,
+                                te.description,
+                                to_char(te.start_date, 'DD-MM-YYYY') start_date,
+                                to_char(te.end_date, 'DD-MM-YYYY') end_date,
+                            tee.is_score_submitted,
+                            registration_start_date,
+                            te.registration_end_date,
+                            te.end_date
+                            from t_event_organization teo              
+                            join t_event te on teo.event_id = te.event_id 
+                            join t_event_coordinator tec on tec.event_id = te.event_id and tec.user_id = ${userId}
+                            join t_event_evaluator tee on tee.event_id = te.event_id 
+                            and tee.is_score_approved = false
+                            order by te.end_date desc;`
+
+            result = await client.query(getEventData);
+
+            if (result.rowCount == 0) {
+                // for judge
+                getEventData = `select distinct te.event_id,
                                 te."name",
                                 te.event_type,
                                 te.description,
@@ -996,10 +1019,35 @@ async function getEventData(userId, eventType) {
                             where tecsm.is_score_submitted = false
                             order by te.end_date desc;`
 
-            // and event_start_date >= current_date
+                // and event_start_date >= current_date
+
+            }
 
         }
         if (eventType === 'approved') {
+
+            // for evaluator
+            getEventData = `select distinct te.event_id,
+                                te."name",
+                                te.event_type,
+                                te.description,
+                                to_char(te.start_date, 'DD-MM-YYYY') start_date,
+                                to_char(te.end_date, 'DD-MM-YYYY') end_date,
+                            tee.is_score_submitted,
+                            registration_start_date,
+                            te.registration_end_date,
+                            te.end_date
+                            from t_event_organization teo              
+                            join t_event te on teo.event_id = te.event_id 
+                            join t_event_coordinator tec on tec.event_id = te.event_id and tec.user_id = ${userId}
+                            join t_event_evaluator tee on tee.event_id = te.event_id 
+                            and tee.is_score_approved = true
+                            order by te.end_date desc;`
+
+            result = await client.query(getEventData);
+
+            if (result.rowCount == 0) {
+                // for judge
 
             getEventData = `select distinct te.event_id,
                                 te."name",
@@ -1019,6 +1067,7 @@ async function getEventData(userId, eventType) {
                             where tecsm.is_score_approved = true
                             order by te.end_date desc;`
             // and event_start_date >= current_date
+            }
 
         }
 

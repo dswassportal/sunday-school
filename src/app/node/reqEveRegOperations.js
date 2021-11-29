@@ -550,18 +550,20 @@ async function eventRegistration(eventData, loggedInUser) {
 
                     // inserting question and their responses filled by the participant.  (t_event_question_response) 
                     if (eventData.questionnaire) {
-                        if (eventData.questionnaire[0].questionId) {
-                            let insertQueRespValues = [];
-                            for (let question of eventData.questionnaire)
-                                insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, '${question.answer}', ${eventData.participantId}, '${new Date().toUTCString()}')`);
-
-                            if (insertQueRespValues.length > 0) {
-                                let tempQuery = queries.insertRegQueResp.replace('$1', insertQueRespValues.join(','))
-                                let regQueRes = await client.query(tempQuery);
-                                if (regQueRes.rowCount > 0)
-                                    console.debug(`for participant ${eventData.participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regQueRes.rows)}`);
+                        if(eventData.questionnaire.length != 0){
+                            if (eventData.questionnaire[0].questionId) {
+                                let insertQueRespValues = [];
+                                for (let question of eventData.questionnaire)
+                                    insertQueRespValues.push(`(${participantRegId}, ${question.questionId}, '${question.answer}', ${eventData.participantId}, '${new Date().toUTCString()}')`);
+    
+                                if (insertQueRespValues.length > 0) {
+                                    let tempQuery = queries.insertRegQueResp.replace('$1', insertQueRespValues.join(','))
+                                    let regQueRes = await client.query(tempQuery);
+                                    if (regQueRes.rowCount > 0)
+                                        console.debug(`for participant ${eventData.participantId} questions answers , participant_event_reg_cat_ids are : ${JSON.stringify(regQueRes.rows)}`);
+                                }
                             }
-                        }
+                        } 
                         else console.log("No questionnaire were found to process.");
                     }
                 }

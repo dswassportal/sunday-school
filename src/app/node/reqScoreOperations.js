@@ -184,6 +184,16 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
                 console.log('No. of rows inserted in t_participant_event_score are :: ', insertedResult.rowCount);
 
 
+                if (userScoreData.action === 'approve' && flag === false) {
+                    if (EveTypeResult.rows[0].event_type === 'TTC' || EveTypeResult.rows[0].event_type === 'Diploma Exam') {
+                        let updateSubmittedStatusForEvaluator = `update t_event_evaluator set is_score_approved = true
+                                   where event_id = ${score.eventId} and is_deleted = false;`;
+
+                        await client.query(updateSubmittedStatusForEvaluator);
+                        console.log(`${score.judge} user updated is_score_approved for event id: ${score.eventId}`);
+                        console.log("loggedInUser", loggedInUser);
+                    }
+                }
 
 
             }
@@ -422,7 +432,32 @@ async function getScoreByCategory(eventId, eventCategoryId, loggedInUser) {
 
 
 
-        const eventQuery = `select distinct  tecm.event_category_id
+
+        const eventQuery = ` select  
+                                distinct 
+                                tepr.enrollment_id
+                                ,tee.user_id staff_id
+                                --,concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ',tu.last_name) 
+                                ,tpes.score 
+                                ,concat(tu.title,'.',' ',tu.first_name,' ', tu.middle_name, ' ',tu.last_name) participant_name
+                                --,to2."name" parish_name
+                        from 
+                                                t_event_participant_registration tepr
+                                                            join t_event_evaluator tee on tee.event_id = tepr.event_id 
+                                                            join t_user tu on tepr.user_id = tu.user_id 
+                                                            and tepr.event_id = ${eventId}
+                                                            and tepr.registration_status != 'Canceled'
+                                                            and tepr.is_deleted = false
+                                                            and tepr.has_attended = true
+                                                            join t_event te on te.event_id = tepr.event_id
+                                                            left join t_participant_event_score tpes on tpes.event_participant_registration_id = tepr.event_participant_registration_id;`
+
+
+        let result = await client.query(eventQuery);
+
+
+        if (result.rowCount == 0) {
+            const eventQuery = `select distinct  tecm.event_category_id
                                 , tepr.enrollment_id
                                 , tecsm.user_id staff_id
                                 , concat(tu.title,'. ',tu.first_name,' ', tu.middle_name, ' ',tu.last_name) 
@@ -460,10 +495,11 @@ async function getScoreByCategory(eventId, eventCategoryId, loggedInUser) {
                             where tecm.event_id = ${eventId}  and tecm.event_cat_map_id = ${eventCategoryId} order by 1,2,3;`;
 
 
-        //and tperc.has_attended = true  342
-        //left 343
+            //and tperc.has_attended = true  342
+            //left 343
+            result = await client.query(eventQuery);
+        }
 
-        let result = await client.query(eventQuery);
 
         if (result && result.rowCount > 0) {
 
@@ -502,9 +538,16 @@ async function getScoreByCategory(eventId, eventCategoryId, loggedInUser) {
 
         }
 
-        const isScoreApproved = `select event_category_map_id, is_score_approved from t_event_cat_staff_map where event_category_map_id = ${eventCategoryId} and is_deleted = false;`;
-        let res = await client.query(isScoreApproved);
+        const isScoreApprovedForTTCDiploma = `select event_evaluator_id, is_score_approved from t_event_evaluator where event_id = ${eventId} and is_deleted = false;`;
+        let res = await client.query(isScoreApprovedForTTCDiploma);
         isApproved = res.rows[0].is_score_approved;
+
+        if (res.rowCount == 0) {
+            const isScoreApproved = `select event_category_map_id, is_score_approved from t_event_cat_staff_map where event_category_map_id = ${eventCategoryId} and is_deleted = false;`;
+            let res = await client.query(isScoreApproved);
+            isApproved = res.rows[0].is_score_approved;
+        }
+
 
         return ({
             data: {
