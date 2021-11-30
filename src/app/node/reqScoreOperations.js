@@ -186,6 +186,36 @@ async function persistParticipantScore(userScoreData, loggedInUser) {
 
                 if (userScoreData.action === 'approve' && flag === false) {
                     if (EveTypeResult.rows[0].event_type === 'TTC' || EveTypeResult.rows[0].event_type === 'Diploma Exam') {
+                        
+                        
+                        
+                        let deleteTTCAndDiplomaOverAllScore = `delete from t_participant_event_overall_score where event_participant_registration_id 
+                        	in (select event_participant_registration_id from t_event_participant_registration where event_id = ${score.eventId} );`;
+
+                        let insertTTCAndDiplomaOverAllScore = `	INSERT INTO t_participant_event_overall_score
+                                                        (overall_score, participant_event_reg_cat_id)
+                                                            select tpes2.participant_event_reg_cat_id, tepr.event_participant_registration_id, (tpes.score + tpes2.score) /2, ${loggedInUser} 
+                                                                    from t_event_participant_registration tepr 
+                                                                    join t_event_participant_registration tepr2 on tepr.user_id =  tepr2.user_id 
+                                                                        and  tepr.event_id = ${score.eventId} 
+                                                                        and tepr2.event_id = ${pertainingEvt.rows[0].event_id}
+                                                                    join t_participant_event_score tpes on tepr.event_participant_registration_id = tpes.event_participant_registration_id 
+                                                                    join t_participant_event_score tpes2 on tepr2.event_participant_registration_id = tpes2.event_participant_registration_id;`;
+
+
+                        let delRes = await client.query(deleteTTCAndDiplomaOverAllScore);
+                        console.debug(`for event ${score.eventId}, ${delRes.rowCount} records have been deleted.`);
+                        let insRes = await client.query(insertTTCAndDiplomaOverAllScore);
+                        console.debug(`for event ${score.eventId}, ${insRes.rowCount} new records have been inserted.`);
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         let updateSubmittedStatusForEvaluator = `update t_event_evaluator set is_score_approved = true
                                    where event_id = ${score.eventId} and is_deleted = false;`;
 
