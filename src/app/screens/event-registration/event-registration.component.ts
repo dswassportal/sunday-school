@@ -136,6 +136,9 @@ export class EventRegistrationComponent implements OnInit {
             let index = scoreData.findIndex((item: any) => item.event_Id == row.event_Id);
             console.log("index", index);
             if (index <= 0) {
+              if(row.overallScore == null){
+                row.overallScore = 'N/A';
+              }
               let json = {
                 "event_Id": row.event_Id,
                 "name": row.name,
@@ -150,8 +153,8 @@ export class EventRegistrationComponent implements OnInit {
                 "registrationStatus": row.registrationStatus,
                 "registeredBy": row.registeredBy,
                 "registeredOn": row.registeredOn,
-                "overallScore": row.category == "Sunday School Midterm Exam" || row.category == "Sunday School Final Exam" ? "Exam marks:" + ' ' + row.overallScore :
-                  row.category == null ? ' ' : row.category + ': ' + row.overallScore,
+                "overallScore": row.category == "Sunday School Midterm Exam" || row.category == "Sunday School Final Exam" ? "Exam marks:" + ' ' + row.overallScore :                
+                  row.category == null ? row.event_type + ' : ' + row.overallScore : row.category + ': ' + row.overallScore,
               }
               scoreData.push(json);
             }
