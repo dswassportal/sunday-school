@@ -100,7 +100,7 @@ export class ScoreComponent implements OnInit {
       if (respData.data.status === 'failed') {
         this.participantRowData = [];
         this.selectedEvtIsScrSubmted = true;
-        this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000);
+        this.uiCommonUtils.showSnackBar('No records found!', 'error', 3000);
         return;
       } else {
         this.participantRowData = respData.data.paticipants

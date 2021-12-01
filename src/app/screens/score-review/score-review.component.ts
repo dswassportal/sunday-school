@@ -269,7 +269,7 @@ export class ScoreReviewComponent implements OnInit {
       this.apiService.callPostService('postScore', payload).subscribe((response) => {
 
         if (response.data.status == 'failed') {
-          this.uiCommonUtils.showSnackBar('Something went wrong!', 'error', 3000)
+          this.uiCommonUtils.showSnackBar('Please fill marks of all the students!', 'error', 3000)
           return;
         } else {
           this.uiCommonUtils.showSnackBar('Score recorded successfully!', 'success', 3000)
