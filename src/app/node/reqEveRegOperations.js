@@ -119,6 +119,7 @@ async function getEventDefinationForIndivisualUser(client, eventId, participantI
                             and  tecm.event_cat_map_id = tperc.event_category_id 
                             and tperc.is_deleted != true
                         left join t_event_questionnaire teq on teq.event_id = $1
+                        and teq.is_deleted = false
                         left join t_event_question_response teqr 
                             on teqr.event_participant_registration_id = tepr.event_participant_registration_id 
                             and teq.question_id = teqr.question_id
